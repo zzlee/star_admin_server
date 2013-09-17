@@ -38,10 +38,10 @@ var workingPath = process.cwd();
 var mongoDbServerUrlObj = url.parse(systemConfig.HOST_MONGO_DB_SERVER_URL);
 var mongoDbServerPort;
 if ( mongoDbServerUrlObj.port  ){
-    mongoDbServerPort = mongoDbServerUrlObj.port;
+    mongoDbServerPort = Number(mongoDbServerUrlObj.port);
 }
 else {
-    mongoDbServerPort = '27017';
+    mongoDbServerPort = 27017;
 }
 var dbserver_config = new dbserver(mongoDbServerUrlObj.hostname, mongoDbServerPort, {auto_reconnect: true, native_parser: true} );
 var fmdb = new Db('feltmeng', dbserver_config, {});
@@ -63,6 +63,11 @@ var logger = new(winston.Logger)({
     ]
     
 });  
+
+//var logger = {
+//        info: function(){},
+//        error: function(){}
+//}
 
 global.logger = logger;  
   
