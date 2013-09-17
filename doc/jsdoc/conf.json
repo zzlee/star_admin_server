@@ -1,0 +1,26 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "include": [ 
+                     "schedule_mgr.js", 
+                     "scala/index.js", 
+                     "service_mgr.js", 
+                     "restful_api/api_miix_admin.js", 
+                     "restful_api/api_miix_service.js",
+                     "restful_api/api_miix.js",
+                     "miix_content_mgr.js" 
+                     ],
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "plugins": [],
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false,
+        "default": {
+            "outputSourceFiles": true
+        }
+    }
+}

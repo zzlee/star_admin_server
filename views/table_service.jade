@@ -1,0 +1,36 @@
+﻿
+form#mainform(action='')
+    table#product-table.tablesorter(cellspacing='0')
+      thead
+        tr
+           th(width='29%') facebook帳號
+           th(width='13%') 問題編號
+           th(width='13%') 問題類型
+           th(width='14%') 手機版本
+           th(width='18%') 時間
+           th(width='14%') 狀態
+           th(width='12%') 備註
+      tbody#product-tbody
+            if(serviceQuestionList)
+                 each service, i in serviceQuestionList
+                      tr(id='#{service._id}')
+                          td #{service.fb_userName}
+                          td #{service.no}
+                          td
+                             if(service.genre == 'account')
+                                 label.label-account 帳號
+                             if(service.genre == 'sign_in')
+                                 label.label-login 登入
+                             if(service.genre == 'publish')
+                                 label.label-publish 發佈
+                             if(service.genre == 'others')
+                                 label.label-others 其他
+                          td #{service.phoneVersion}
+                          td #{service.questionTime}
+                          td
+                             if(service.reply == false)
+                                 label.label-unreply 未回覆
+                             if(service.reply == true)
+                                 label.label-reply 回覆
+                          td #{service.remarks}
+                            textarea#service._idRemarks(name='#{service._id}', cols='', rows='')

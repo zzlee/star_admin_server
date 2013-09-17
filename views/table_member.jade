@@ -1,0 +1,47 @@
+﻿
+form#mainform(action='')
+    table#product-table(border='0', width='99%', cellpadding='0', cellspacing='0')
+        tr
+          th.table-header-repeat.line-left.minwidth-1(width='58')
+            a(href='') FB名稱
+          th.table-header-repeat.line-left(width='192')
+            a(href='') Email
+          th.table-header-repeat.line-left(width='150')
+            a(href='') 手機
+          th.table-header-repeat.line-left(width='160')
+            a(href='') 已製作影片數
+          th.table-header-repeat.line-left(width='160')
+            a(href='') DOOH刊登次數
+          th.table-header-repeat.line-left(width='180')
+            a(href='') 影片觀看總次數
+          th.table-header-repeat.line-left(width='140')
+            a(href='') FB讚總數
+          th.table-header-repeat.line-left(width='140')
+            a(href='') FB留言總數
+          th.table-header-repeat.line-left(width='140')
+            a(href='') FB分享總數
+        
+        if(memberList)
+            each member, i in memberList
+                if i%2
+                    tr
+                      td #{member.fb.userName}
+                      td #{member.email}
+                      td #{member.mobilePhoneNumber}
+                      td #{member.miixMovieCount}
+                      td #{member.doohPlayCount}
+                      td #{member.movieViewedCount}
+                      td #{member.fbLikeCount}
+                      td #{member.fbCommentCount}
+                      td #{member.fbShareCount}
+                else
+                    tr.alternate-row
+                      td #{member.fb.userName}
+                      td #{member.email}
+                      td #{member.mobilePhoneNumber}
+                      td #{member.miixMovieCount}
+                      td #{member.doohPlayCount}
+                      td #{member.movieViewedCount}
+                      td #{member.fbLikeCount}
+                      td #{member.fbCommentCount}
+                      td #{member.fbShareCount}

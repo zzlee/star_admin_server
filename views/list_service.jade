@@ -1,0 +1,13 @@
+﻿
+form#messageform(action='')
+        .module_content
+            if(serviceQuestionList)
+                each service, i in serviceQuestionList
+                    .message
+                      p #{service.question}
+                      p #{service.fb_userName} #{service.questionTime}
+                    .reply
+                      p #{service.answer}
+                      if(service.answerTime)
+                         p admin #{service.answerTime}
+

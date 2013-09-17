@@ -1,0 +1,36 @@
+﻿
+form#mainform(action='')
+    table#product-table(border='0', width='100%', cellpadding='0', cellspacing='0')
+        tr
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 影片編號
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 觀看次數
+          th.table-header-repeat.line-left.minwidth-1(width='75')
+            a(href='') FB讚次數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') FB留言數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') FB分享次數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') 會員名稱
+
+        if(storyMovieList)
+            each movie, i in storyMovieList
+                if i%2
+                    tr
+                      td #{movie.movieNo}
+                      td #{movie.movieViewedCount}
+                      td #{movie.fbLikeCount}
+                      td #{movie.fbCommentCount}
+                      td #{movie.fbShareCount}
+                      td #{movie.movieMaker}
+
+                else
+                    tr.alternate-row
+                      td #{movie.movieNo}
+                      td #{movie.movieViewedCount}
+                      td #{movie.fbLikeCount}
+                      td #{movie.fbCommentCount}
+                      td #{movie.fbShareCount}
+                      td #{movie.movieMaker}

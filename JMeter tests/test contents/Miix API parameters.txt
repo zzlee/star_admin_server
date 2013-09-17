@@ -1,0 +1,37 @@
+POST /miix/videos/user_content_files
+
+body: Object
+croppedArea_height: "0.3424853184499044"
+croppedArea_width: "0.8118170511405144"
+croppedArea_x: "0.06825496490093208"
+croppedArea_y: "0.3523855995116581"
+fileObjectID: "greeting_photo"
+obj_OriginalHeight: "722"
+obj_OriginalWidth: "1280"
+osVersion: "iOS_6.1.3"
+projectID: "greeting-512da133989cfc2403000005-20130627T082257388Z"
+
+
+POST /miix/videos/user_content_description
+
+
+customizableObjects: "[{"ID":"greeting_photo","format":"image","content":"cdv_photo_014.jpg"}]"
+ownerID: "512da133989cfc2403000005"
+ownerFbUserID: "100004619173955"
+projectID: "greeting-512da133989cfc2403000005-20130627T082257388Z"
+templateID: "greeting"
+timeStamp: "2013-06-27T08:24:11.249Z"
+userName: "512da133989cfc2403000005"
+
+
+{"customizableObjects":"[{ID:\"greeting_photo\",format:\"image\",content:\"cdv_photo_014.jpg\"}]","ownerID":"{\"_id\":\"512da133989cfc2403000005\",\"fb_userID\":\"100004619173955\",\"fb_name\":\"Gance Zhu\"}","projectID":"test-User_1-201306178053748-1","templateID":"greeting","userName":"512da133989cfc2403000005"}
+
+
+
+POST /miix/videos/miix_videos
+
+body: Object
+_id: "512da133989cfc2403000005"
+pid: "greeting-512da133989cfc2403000005-20130627T082806433Z"
+timestamp: "1372321734988"
+userID: "100004619173955"

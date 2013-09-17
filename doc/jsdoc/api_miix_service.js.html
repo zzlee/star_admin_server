@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: restful_api/api_miix_service.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: restful_api/api_miix_service.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>
+exports.init = function() {
+
+    /**
+     * RESTful APIs for back-end administration of Miix services
+     * @namespace miix_service
+     */
+
+    //miix_service
+
+    /**
+     * Get the questions of a specific member&lt;br>
+     * 
+     * &lt;h5>Path parameters&lt;/h5>
+     * &lt;ul>
+     * &lt;li>memberId: Member ID (_id with hex string)
+     * &lt;/ul>
+     * 
+     * &lt;h5>Query parameters&lt;/h5>
+     * None
+     * 
+     * &lt;h5>Request body&lt;/h5>
+     * None
+     * 
+     * &lt;h5>Response body&lt;/h5>
+     * An array of objects containing the following members:
+     * &lt;ul>
+     * &lt;li>_id: member ID (_id of 24 character hex string)
+     * &lt;li>ugcReferenceNo: reference number for this UGC
+     * &lt;li>genre: string indicating the question genre. It is of one of the following values: "acount", "publish", or "sign_in"
+     * &lt;li>question: an object containing the following members:
+     *     &lt;ul>
+     *     &lt;li>description: the description of the question
+     *     &lt;li>date: its issue date (the number of milliseconds since midnight Jan 1, 1970)
+     *     &lt;/ul>
+     * &lt;li>answer: an object containing the following members:
+     *     &lt;ul>
+     *     &lt;li>description: the description of the answer
+     *     &lt;li>date: its issue date (the number of milliseconds since midnight Jan 1, 1970)
+     *     &lt;/ul>
+     * &lt;/ul>
+     * For example, &lt;br>
+     * [{_id: '51d837f6830459c42d000023', ugcReferenceNo: 234, genre: 'acount', question:{description:'我忘記了我FB帳號的密碼', date: 1371862000000}, answer:{description:'請至Facebook官網(www.facebook.com)新設定', date: 1371962000000} } &lt;br>
+     *  {_id: '51d837f6830459c42d000023', ugcReferenceNo: 256, genre: 'sign_in', question:{description:'我的帳號登不進去', date: 1371862000000}, answer:{description:'請確認您有出現faceboo授權頁面嗎', date: 1371892000000} }, &lt;br>                 
+     *  {_id: '51d837f6830459c42d000023', ugcReferenceNo: 314, genre: 'others', question:{description:'我無法通迥認證', date: 1471862000000}, answer:{description:'請確認您有收到認證簡訊', date: 1471962000000} }];                   
+     *
+     * @name GET /miix_service/:memberId/questions
+     * @memberof miix_service
+     */
+    app.get('/miix_service/:member_id/questions', routes.authorizationHandler.checkAuth, routes.service.getCustomerServiceItems_get_cb);
+
+    //== DEPRECATED ==
+    app.get('/members/:member_id/questions', routes.authorizationHandler.checkAuth, function(req, res){
+        console.log('[GET %s]', req.path);
+        console.log('req.params.member_id=%s',req.params.member_id);
+        console.log('req.route.path=%s',req.route.path);
+        
+        var result = [{_id: '51d837f6830459c42d000023', ugcReferenceNo: 234, genre: 'acount', question:{description:'我忘記了我FB帳號的密碼', date: 1371862000000}, answer:{description:'請至Facebook官網(www.facebook.com)新設定', date: 1371962000000} },
+                      {_id: '51d837f6830459c42d000023', ugcReferenceNo: 256, genre: 'login', question:{description:'我的帳號登不進去', date: 1371862000000}, answer:{description:'請確認您有出現faceboo授權頁面嗎', date: 1371892000000} },
+                      {_id: '51d837f6830459c42d000023', ugcReferenceNo: 314, genre: 'verification', question:{description:'我無法通迥認證', date: 1471862000000}, answer:{description:'請確認您有收到認證簡訊', date: 1471962000000} }];
+        
+        res.send(200, result);
+    });
+
+    /**
+     * Create the questions of a specific member&lt;br>
+     * &lt;h5>Path Parameters&lt;/h5>
+     * &lt;ul>
+     * &lt;li>memberId: Member ID (_id with hex string)
+     * &lt;/ul>
+     * &lt;h5>Query Parameters&lt;/h5>
+     * &lt;ul>
+     * &lt;li>phoneVersion:
+     * &lt;li>question:
+     * &lt;li>genre:
+     * &lt;/ul>
+     * &lt;h5>Request body&lt;/h5>
+     * None
+     * &lt;h5>Response body&lt;/h5>
+     * The callback function called when the result is created :
+     *     &lt;ul>
+     *     &lt;li>err: error message if any error happens
+     *     &lt;li>result: ok    
+     *     &lt;/ul>
+     *
+     * @name POST /miix_service/:member_id/questions
+     * @memberof miix_service
+     */
+    app.post('/miix_service/:member_id/questions', routes.service.createCustomerServiceItems_get_cb);
+
+    //== DEPRECATED ==
+    app.post('/members/:member_id/questions', function(req, res){
+        
+    });
+
+    /**
+     * Update the CustomerServiceItem field to Feltmeng DB&lt;br>
+     * &lt;h5>Path Parameters&lt;/h5>
+     * None
+     * 
+     * &lt;h5>Query Parameters&lt;/h5>
+     * None
+     * 
+     * &lt;h5>Request body&lt;/h5>
+     * &lt;ul>
+     * &lt;li>_id: Customer service ID (_id with hex string)
+     * &lt;li>answer: The answer that admin response.
+     * &lt;li>vjson: The json that you want to update  CustomerServiceItem field.
+     * &lt;/ul>
+     * &lt;/ul>
+     * For example, &lt;br>
+     * _id : '51ef918ac852e4a80800000c'&lt;br>
+     * answer : 'The problem will solve in next version'&lt;br>
+     * vjson :{&lt;br>
+     *         answerTime: new Date(),&lt;br>
+     *         reply: true&lt;br>
+     *        }; &lt;br>
+     * &lt;h5>Response body&lt;/h5>
+     * A message of status :
+     * &lt;ul>
+     * &lt;li>err: error message if any error happens
+     * &lt;li>success: ok
+     * &lt;/ul>
+     *
+     * @name PUT /miix_service/questions
+     * @memberof miix_service
+     */
+    app.put('/miix_service/questions', routes.service.updateCustomerServiceItems_get_cb);
+
+    /**
+     * Get the html of miix_service&lt;br>
+     * 
+     * &lt;h5>Path parameters&lt;/h5>
+     * None
+     * 
+     * &lt;h5>Query parameters&lt;/h5>
+     * None
+     * 
+     * &lt;h5>Request body&lt;/h5>
+     * None
+     * 
+     * &lt;h5>Response body&lt;/h5>
+     * None
+     *
+     * @name GET /miix_service
+     * @memberof miix_service
+     */
+    app.get('/miix_service', routes.service.get_cb);
+
+    /**
+     * Get the customer service item of a specific condition or field&lt;br>
+     * 
+     * &lt;h5>Path parameters&lt;/h5>
+     * &lt;ul>
+     * &lt;li>memberId: Member ID (_id with hex string)
+     * &lt;/ul>
+     * 
+     * &lt;h5>Query parameters&lt;/h5>
+     * &lt;ul>
+     * &lt;li>condition:The condition of customer question.(ex: fb_userName = "Kaiser")
+     * &lt;li>field: The field of customer question.(ex: fb_id, no, ownerId..etc)
+     * &lt;li>type: The type of jade. (table or list) The type default is message if type is null.
+     * &lt;/ul>
+     * 
+     * &lt;h5>Request body&lt;/h5>
+     * None
+     * 
+     * &lt;h5>Response body&lt;/h5>
+     * 
+     * &lt;ul>
+     * &lt;li>err: Error message if any error happens
+     * &lt;li>result: A message of admin that response answer.
+     *
+     * @name GET /miix_service/customer_service_items
+     * @memberof miix_service
+     */
+    app.get('/miix_service/customer_service_items', routes.service.getCustomerServiceItems_get_cb);
+
+
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="miix.html">miix</a></li><li><a href="miix_admin.html">miix_admin</a></li><li><a href="miix_service.html">miix_service</a></li></ul><h3>Mixins</h3><ul><li><a href="miixContentMgr.html">miixContentMgr</a></li><li><a href="scalaMgr.html">scalaMgr</a></li><li><a href="scheduleMgr.html">scheduleMgr</a></li><li><a href="serviceMgr.html">serviceMgr</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0-dev</a> on Fri Sep 06 2013 12:28:15 GMT+0800 (TST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

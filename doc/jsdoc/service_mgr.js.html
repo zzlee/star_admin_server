@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: service_mgr.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: service_mgr.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/**
+ * @fileoverview Implementation of serviceMgr
+ */
+
+var db = require('./db.js');
+var async = require('async');
+
+var customerServiceItemModel = db.getDocModel("customerServiceItem");
+var memberModel = db.getDocModel("member");
+
+/**
+ * The manager who handles the customer service
+ *
+ * @mixin
+ */
+var serviceMgr = {};
+
+/**
+ * add new customer question to feltmeng db.&lt;br>
+ * &lt;br>
+ * @param {String} fb_id The ID of the FB.
+ * 
+ * @param {String} question The user have some question about our product.
+ * 
+ * @param {Function} cb The callback function called when the question add to DB.&lt;br>
+ *     The function signature is cb(err, status) :
+ *     &lt;ul>
+ *     &lt;li>status: A string specifying status which the question of the user is added to the DB 
+ *             after adding.      
+ *     &lt;li>err: error message if any error happens
+ *     &lt;/ul>
+ */
+serviceMgr.createCustomerServiceItem = function(vjson, cb ){
+
+    var condition = { 'ownerId._id': vjson.ownerId._id };
+    var customerServiceItemNO;
+    customerServiceItemModel.count(condition, function(err, result){
+        if(!err){
+            customerServiceItemNO = result + 1;
+            db.listOfdocModels( memberModel, {_id: vjson.ownerId._id}, null, null, function(err, result){
+                if(!err){
+                    newVjson = {
+                            ownerId: {_id: vjson.ownerId._id},
+                            genre: vjson.genre,
+                            phoneVersion: vjson.phoneVersion,
+                            question: vjson.question,
+                            fb_userName: result[0].fb.userName,
+                            fb_id: result[0].fb.userID,
+                            no: customerServiceItemNO
+                    };
+                    db.createAdoc(customerServiceItemModel , newVjson, function(err,result){
+                        cb(err, result); 
+                    });
+                }
+                else cb(err, result); 
+            });
+
+        }else cb(err, result); 
+    });
+    
+
+    
+};
+
+/**
+ * update field to feltmeng db.&lt;br>
+ * &lt;br>
+ * @param {String} fb_id The ID of the FB.
+ * 
+ * @param {Number} no The no. whose question are to be added.
+ * 
+ * @param {Object} vjson DB field's value likes genre='account'.  
+ * 
+ * @param {Function} cb The callback function called when the value update to DB.&lt;br>
+ *     The function signature is cb(err, status) :
+ *     &lt;ul>
+ *     &lt;li>status: A string specifying status which the field is updated to the DB 
+ *             after updating. 
+ *     &lt;li>err: error message if any error happens
+ *     &lt;/ul>
+ */
+serviceMgr.updateCustomerServiceItem = function(_id, vjson, cb ){
+    
+    db.updateAdoc(customerServiceItemModel,_id, vjson, function(err, result){
+        cb(err, result); 
+    });
+    
+};
+
+/**
+ * get customer question and answer from feltmeng db.&lt;br>
+ * &lt;br>
+ * @param {String} fb_id The ID of the FB.
+ * 
+ * @param {Number} no The no. whose question are to be added.
+ * 
+ * @param {Function} cb The callback function called when get customer question from DB.&lt;br>
+ *     The function signature is cb(err, result) :
+ *     &lt;ul>
+ *     &lt;li>result:customer question and answser from DB
+ *     &lt;li>err: error message if any error happens
+ *     &lt;/ul>
+ */
+serviceMgr.getCustomerServiceItem= function(condition, field, pageLimit, pageSkip, cb ){
+    
+  //TODO pagination
+//    db.listOfdocModels( customerServiceItemModel, condition, field, {sort :'no', limit: pageLimit , skip: pageSkip}, function(err, result){
+    db.listOfdocModels( customerServiceItemModel, condition, field, {sort :{'questionTime':-1}}, function(err, result){
+        cb(err, result); 
+    });
+    
+};
+
+/**
+ * get customer service list from feltmeng db.&lt;br>
+ * &lt;br>
+ * @param {String} fb_id The ID of the FB.(null will select all customer question)
+ * 
+ * @param {Function} cb The callback function called when get customer question list from DB.&lt;br>
+ *     The function signature is cb(err, result) :
+ *     &lt;ul>
+ *     &lt;li>result:customer service list from DB
+ *     &lt;li>err: error message if any error happens
+ *     &lt;/ul>
+ */
+serviceMgr.getCustomerServiceList = function(fb_id, cb ){
+    
+};
+
+//TODO admin and message count
+
+
+module.exports = serviceMgr;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="miix.html">miix</a></li><li><a href="miix_admin.html">miix_admin</a></li><li><a href="miix_service.html">miix_service</a></li></ul><h3>Mixins</h3><ul><li><a href="miixContentMgr.html">miixContentMgr</a></li><li><a href="scalaMgr.html">scalaMgr</a></li><li><a href="scheduleMgr.html">scheduleMgr</a></li><li><a href="serviceMgr.html">serviceMgr</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0-dev</a> on Fri Sep 06 2013 12:28:15 GMT+0800 (TST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

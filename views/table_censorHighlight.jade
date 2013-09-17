@@ -1,0 +1,85 @@
+﻿
+form#mainform(action='')
+
+    table#product-table(border='0', width='100%', cellpadding='0', cellspacing='0')
+        tr
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 主題類別
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 影片編號
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 上傳素材(文)
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 上傳素材(圖)
+          th.table-header-repeat.line-left.minwidth-1(width='75')
+            a(href='') facebook
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') facebook 照片
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 已刊登次數
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 審核結果
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 精彩刊登
+
+        if(ugcCensorMovieList)
+            each ugcCensor, i in ugcCensorMovieList
+                if i%2
+                    tr
+                      td 
+                         if(ugcCensor.contentGenre == 'miix_it')
+                             label.label_video 合成影片
+                         if(ugcCensor.contentGenre == 'cultural_and_creative')
+                             label.label_design 文創
+                         if(ugcCensor.contentGenre == 'mood')
+                             label.label_mood 心情
+                         if(ugcCensor.contentGenre == 'check_in')
+                             label.label_checkin 打卡
+                      td #{ugcCensor.ugcCensorNo}
+                      td #{ugcCensor.userContent}
+                      if(ugcCensor.userPhotoUrl == 'No Photo')
+                       td     
+                      else 
+                       td
+                         img(src='#{ugcCensor.userPhotoUrl}', alt='', width='208')
+                      td #{ugcCensor.fb_userName}
+                      td
+                        img(src='#{ugcCensor.fbPictureUrl}', alt='', width='100')
+                      td #{ugcCensor.doohPlayedTimes}
+                      td #{ugcCensor.rating}
+                      td 
+                        if(ugcCensor.highlight == true)					  
+                          input#ugcCensor.ugcCensorNoHL(type='checkbox', value='#{ugcCensor.highlight}', name='#{ugcCensor.ugcCensorNo}', checked)
+                        else
+                          input#ugcCensor.ugcCensorNoHL(type='checkbox', value='#{ugcCensor.highlight}', name='#{ugcCensor.ugcCensorNo}')
+
+
+                else
+                    tr.alternate-row
+                      td
+                         if(ugcCensor.contentGenre == 'miix_it')
+                             label.label_video 合成影片
+                         if(ugcCensor.contentGenre == 'cultural_and_creative')
+                             label.label_design 文創
+                         if(ugcCensor.contentGenre == 'mood')
+                             label.label_mood 心情
+                         if(ugcCensor.contentGenre == 'check_in')
+                             label.label_checkin 打卡
+                      td #{ugcCensor.ugcCensorNo}
+                      td #{ugcCensor.userContent}
+                      if(ugcCensor.userPhotoUrl == 'No Photo')
+                       td      
+                      else 
+                       td
+                         img(src='#{ugcCensor.userPhotoUrl}', alt='', width='208')
+                      td #{ugcCensor.fb_userName}
+                      td
+                        img(src='#{ugcCensor.fbPictureUrl}', alt='', width='100')
+                      td #{ugcCensor.doohPlayedTimes}
+                      td #{ugcCensor.rating}
+                      td 
+                        if(ugcCensor.highlight == true)					  
+                          input#ugcCensor.ugcCensorNoHL(type='checkbox', value='#{ugcCensor.highlight}', name='#{ugcCensor.ugcCensorNo}', checked)
+                        else
+                          input#ugcCensor.ugcCensorNoHL(type='checkbox', value='#{ugcCensor.highlight}', name='#{ugcCensor.ugcCensorNo}')
+

@@ -1,0 +1,54 @@
+﻿
+form#mainform(action='')
+    table#product-table(border='0', width='100%', cellpadding='0', cellspacing='0')
+        tr
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            序號
+          th.table-header-repeat.line-left.minwidth-1(width='232')
+            a(href='') 素材照片
+          th.table-header-repeat.line-left.minwidth-1(width='75')
+            a(href='') 影片編號
+          th.table-header-repeat.line-left(width='100')
+            a(href='') 播放時段
+          th.table-header-repeat.line-left(width='70')
+            a(href='') 讚次數
+          th.table-header-repeat.line-left(width='70')
+            a(href='') 留言數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') 會員名稱
+          th.table-header-repeat.line-left(width='100')
+            a(href='') 投稿次數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') 刊登次數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') 已做影片
+
+        if(playList)
+            each play, i in playList
+                if i%2
+                    tr
+                      td #{i+1}
+                      td
+                        img(src="../images/shopping/pic.jpg", alt='', width='208')
+                      td #{play.no}
+                      td None
+                      td None
+                      td None
+                      td #{play.ownerId.userID}
+                      td None
+                      td None
+                      td None
+
+                else
+                    tr.alternate-row
+                      td #{i+1}
+                      td
+                        img(src="../images/shopping/pic.jpg", alt='', width='208')
+                      td #{play.no}
+                      td None
+                      td None
+                      td None
+                      td #{play.ownerId.userID}
+                      td None
+                      td None
+                      td None

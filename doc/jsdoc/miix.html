@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Namespace: miix</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Namespace: miix</h1>
+    
+    
+
+
+
+<section>
+    
+<header>
+    <h2>
+    miix
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description">RESTful APIs for Miix clientss</div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line3">line 3</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Members</h3>
+        
+        <dl>
+            
+<dt>
+    <h4 class="name" id="GET /miix/members/:memberId/live_contents"><span class="type-signature">&lt;static> </span>GET /miix/members/:memberId/live_contents<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Get a list of latest live content items (a.k.a. "Miix Story" or "Story MV") of a specific member , sorted by creating time (the newest at beginning)<br><h5>Path parameters</h5><ul><li>memberId: Member ID (_id of 24 character hex string)</ul><h5>Query parameters</h5><ul><li>limit: the number of UGC items to return</ul><h5>Request body</h5>None<h5>Response body</h5>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line188">line 188</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="GET /miix/members/:memberId/ugcs"><span class="type-signature">&lt;static> </span>GET /miix/members/:memberId/ugcs<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Get a list of latest UGCs of a specific member , sorted by creating time (the newest at beginning)<br><h5>Path parameters</h5><ul><li>memberId: Member ID (_id of 24 character hex string)</ul><h5>Query parameters</h5><ul><li>limit: the number of UGC items to return</ul><h5>Request body</h5>None<h5>Response body</h5>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line150">line 150</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="GET /miix/ugc_hightlights"><span class="type-signature">&lt;static> </span>GET /miix/ugc_hightlights<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Get a list of latest UGC highlights, sorted by creating time (the newest at beginning)<br><h5>Path parameters</h5>None<h5>Query parameters</h5><ul><li>limit: the number of UGC items to return</ul><h5>Request body</h5>None<h5>Response body</h5>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line128">line 128</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="POST /miix/image_ugcs/:ugcProjectId/user_content_descriptions"><span class="type-signature">&lt;static> </span>POST /miix/image_ugcs/:ugcProjectId/user_content_descriptions<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Create an user content description of a specific image UGC<br><h5>Path parameters</h5><ul><li>ugcProjectId: the project ID of the UGC</ul><h5>Query parameters</h5>None<h5>Request body</h5>(to be elaborated later)<h5>Response body</h5>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line52">line 52</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="POST /miix/ugcs/:ugcProjectId/user_content_files"><span class="type-signature">&lt;static> </span>POST /miix/ugcs/:ugcProjectId/user_content_files<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Upload/add an user content file of a specific video or image UGC<br><h5>Path parameters</h5><ul><li>ugcProjectId: the project ID of the UGC</ul><h5>Query parameters</h5>None<h5>Request body</h5>(to be elaborated later)<h5>Response body</h5>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line6">line 6</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="POST /miix/video_ugcs/:ugcProjectId/user_content_descriptions"><span class="type-signature">&lt;static> </span>POST /miix/video_ugcs/:ugcProjectId/user_content_descriptions<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Create an user content description of a specific video UGC<br><h5>Path parameters</h5><ul><li>ugcProjectId: the project ID of the UGC</ul><h5>Query parameters</h5>None<h5>Request body</h5>(to be elaborated later)<h5>Response body</h5>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line31">line 31</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="PUT /miix/base64_image_ugcs/:ugcProjectId"><span class="type-signature">&lt;static> </span>PUT /miix/base64_image_ugcs/:ugcProjectId<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Upload a base64 image UGC of a specific project ID. The uploaded image data will be save as a PNG file.<br><br>The base64 image is often generated by calling toDataURL() of HTML5 Canvas. It normally needs to do the following process before sending to this API:<br>yourCanvas.toDataURL('image/png').replace('image/octet-stream');<h5>Path parameters</h5><ul><li>ugcProjectId: the project ID of the UGC</ul><h5>Query parameters</h5>None<h5>Request body</h5>(to be elaborated later)<h5>Response body</h5>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line101">line 101</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="PUT /miix/fb_ugcs/:ugcProjectId"><span class="type-signature">&lt;static> </span>PUT /miix/fb_ugcs/:ugcProjectId<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Create a FB post id UGC of a specific project ID<br><h5>Path parameters</h5><ul><li>ugcProjectId: the project ID of the UGC</ul><h5>Query parameters</h5>None<h5>Request body</h5><ul><li>fb_postId: the ID of the fb post id</ul><h5>Response body</h5>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line209">line 209</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="PUT /miix/video_ugcs/:ugcProjectId"><span class="type-signature">&lt;static> </span>PUT /miix/video_ugcs/:ugcProjectId<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Create a video UGC of a specific project ID<br><h5>Path parameters</h5><ul><li>ugcProjectId: the project ID of the UGC</ul><h5>Query parameters</h5>None<h5>Request body</h5>(to be elaborated later)<h5>Response body</h5>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api_miix.js.html">restful_api/api_miix.js</a>, <a href="api_miix.js.html#line75">line 75</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="miix.html">miix</a></li><li><a href="miix_admin.html">miix_admin</a></li><li><a href="miix_service.html">miix_service</a></li></ul><h3>Mixins</h3><ul><li><a href="miixContentMgr.html">miixContentMgr</a></li><li><a href="scalaMgr.html">scalaMgr</a></li><li><a href="scheduleMgr.html">scheduleMgr</a></li><li><a href="serviceMgr.html">serviceMgr</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0-dev</a> on Fri Sep 06 2013 12:28:15 GMT+0800 (TST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

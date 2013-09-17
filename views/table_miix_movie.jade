@@ -1,0 +1,64 @@
+﻿
+form#mainform(action='')
+    table#product-table(border='0', width='100%', cellpadding='0', cellspacing='0')
+        tr
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 素材照片
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 影片編號
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 觀看次數
+          th.table-header-repeat.line-left.minwidth-1(width='75')
+            a(href='') FB讚次數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') FB留言數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') FB分享次數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') 會員名稱
+          th.table-header-repeat.line-left(width='100')
+            a(href='') 投稿次數
+          th.table-header-repeat.line-left(width='100')
+            a(href='') DOOH刊登次數
+          th.table-header-repeat.line-left(width='200')
+            a(href='') 播放時間
+
+        if(miixMovieList)
+            each movie, i in miixMovieList
+                if i%2
+                    tr
+                      if(movie.userContentType == 'text')
+                         td #{movie.userPhotoUrl}     
+                      else 
+                         td
+                             img(src='#{movie.userPhotoUrl}', alt='', width='208')
+                      td #{movie.movieNo}
+                      td #{movie.movieViewedCount}
+                      td #{movie.fbLikeCount}
+                      td #{movie.fbCommentCount}
+                      td #{movie.fbShareCount}
+                      td #{movie.movieMaker}
+                      td #{movie.applyDoohPlayCount}
+                      td #{movie.doohPlayCount}
+                      td 
+                        each date in movie.timesOfPlaying
+                          p #{date}
+
+                else
+                    tr.alternate-row
+                      if(movie.userContentType == 'text')
+                         td #{movie.userPhotoUrl}     
+                      else 
+                         td
+                             img(src='#{movie.userPhotoUrl}', alt='', width='208')
+                      td #{movie.movieNo}
+                      td #{movie.movieViewedCount}
+                      td #{movie.fbLikeCount}
+                      td #{movie.fbCommentCount}
+                      td #{movie.fbShareCount}
+                      td #{movie.movieMaker}
+                      td #{movie.applyDoohPlayCount}
+                      td #{movie.doohPlayCount}
+                      td 
+                        each date in movie.timesOfPlaying
+                          p #{date}

@@ -1,0 +1,203 @@
+﻿
+form#mainform(action='')
+
+    #condition-inner
+      label 查詢影片
+      input(class='ugcSearchBtn', type='text' ,name='ugcSearchText' ,onfocus='this.value=\'\'')
+      input#ugcSearchBtn(type='button', class='ugcSearch', value='搜尋')
+      br
+      label
+      | 篩選條件
+      input#ugcSearchNoRatingBtn(type='button', value='尚未審核')
+      input#ugcSearchRatingBtn(type='button', value='已經審核')
+      input#ugcSearchAllBtn(type='button', value='All')
+      | and / or
+      label 投件時間
+      input(class='ugcSearchDateBtn', type='text', name='timeStart', onfocus='this.value=\'\'')
+      | 到
+      input(class='ugcSearchDateBtn', type='text', name='timeEnd', onfocus='this.value=\'\'')
+      input#ugcSearchDateBtn(type='button', class='ugcSearchDate', value='送出')
+    
+
+    table#product-table(border='0', width='100%', cellpadding='0', cellspacing='0')
+        tr
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 主題類別
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 影片編號
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 上傳素材(文)
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 上傳素材(圖)
+          th.table-header-repeat.line-left.minwidth-1(width='75')
+            a(href='') facebook
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') facebook 照片
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 已刊登次數
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 審核
+          th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') 本次必登
+
+        if(ugcCensorMovieList)
+            each ugcCensor, i in ugcCensorMovieList
+                if i%2
+                    tr
+                      td 
+                         if(ugcCensor.contentGenre == 'miix_it')
+                             label.label_video 合成影片
+                         if(ugcCensor.contentGenre == 'cultural_and_creative')
+                             label.label_design 文創
+                         if(ugcCensor.contentGenre == 'mood')
+                             label.label_mood 心情
+                         if(ugcCensor.contentGenre == 'check_in')
+                             label.label_checkin 打卡
+                      td #{ugcCensor.ugcCensorNo}
+                      td #{ugcCensor.userContent}
+                      if(ugcCensor.userPhotoUrl == 'No Photo')
+                       td     
+                      else 
+                       td
+                         img(src='#{ugcCensor.userPhotoUrl}', alt='', width='208')
+                      td #{ugcCensor.fb_userName}
+                      td
+                        img(src='#{ugcCensor.fbPictureUrl}', alt='', width='100')
+                      td #{ugcCensor.doohPlayedTimes}
+                      td
+                         #checkboxGroup
+                           if(ugcCensor.rating == 'A')
+                             input#ugcCensor.ugcCensorNoa(type='radio', value='A', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   A
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNoa(type='radio', value='A', name='#{ugcCensor.ugcCensorNo}')
+                             |   A
+                             br
+                           if(ugcCensor.rating == 'B')
+                             input#ugcCensor.ugcCensorNob(type='radio', value='B', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   B
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNob(type='radio', value='B', name='#{ugcCensor.ugcCensorNo}')
+                             |   B
+                             br
+                           if(ugcCensor.rating == 'C')
+                             input#ugcCensor.ugcCensorNoc(type='radio', value='C', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   C
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNoc(type='radio', value='C', name='#{ugcCensor.ugcCensorNo}')
+                             |   C
+                             br
+                           if(ugcCensor.rating == 'D')
+                             input#ugcCensor.ugcCensorNod(type='radio', value='D', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   D
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNod(type='radio', value='D', name='#{ugcCensor.ugcCensorNo}')
+                             |   D
+                             br
+                           if(ugcCensor.rating == 'E')
+                             input#ugcCensor.ugcCensorNoe(type='radio', value='E', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   E
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNoe(type='radio', value='E', name='#{ugcCensor.ugcCensorNo}')
+                             |   E
+                             br
+                           if(ugcCensor.rating == 'F')
+                             input#ugcCensor.ugcCensorNof(type='radio', value='F', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   F
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNof(type='radio', value='F', name='#{ugcCensor.ugcCensorNo}')
+                             |   F
+                             br
+                         .clear
+                      td
+                        if(ugcCensor.mustPlay == true)					  
+                          input#ugcCensor.ugcCensorNoMP(type='checkbox', value='#{ugcCensor.mustPlay}', name='#{ugcCensor.ugcCensorNo}', checked)
+                        else
+                          input#ugcCensor.ugcCensorNoMP(type='checkbox', value='#{ugcCensor.mustPlay}', name='#{ugcCensor.ugcCensorNo}')
+
+
+                else
+                    tr.alternate-row
+                      td
+                         if(ugcCensor.contentGenre == 'miix_it')
+                             label.label_video 合成影片
+                         if(ugcCensor.contentGenre == 'cultural_and_creative')
+                             label.label_design 文創
+                         if(ugcCensor.contentGenre == 'mood')
+                             label.label_mood 心情
+                         if(ugcCensor.contentGenre == 'check_in')
+                             label.label_checkin 打卡
+                      td #{ugcCensor.ugcCensorNo}
+                      td #{ugcCensor.userContent}
+                      if(ugcCensor.userPhotoUrl == 'No Photo')
+                       td      
+                      else 
+                       td
+                         img(src='#{ugcCensor.userPhotoUrl}', alt='', width='208')
+                      td #{ugcCensor.fb_userName}
+                      td
+                        img(src='#{ugcCensor.fbPictureUrl}', alt='', width='100')
+                      td #{ugcCensor.doohPlayedTimes}
+                      td
+                         #checkboxGroup
+                           if(ugcCensor.rating == 'A')
+                             input#ugcCensor.ugcCensorNoa(type='radio', value='A', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   A
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNoa(type='radio', value='A', name='#{ugcCensor.ugcCensorNo}')
+                             |   A
+                             br
+                           if(ugcCensor.rating == 'B')
+                             input#ugcCensor.ugcCensorNob(type='radio', value='B', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   B
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNob(type='radio', value='B', name='#{ugcCensor.ugcCensorNo}')
+                             |   B
+                             br
+                           if(ugcCensor.rating == 'C')
+                             input#ugcCensor.ugcCensorNoc(type='radio', value='C', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   C
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNoc(type='radio', value='C', name='#{ugcCensor.ugcCensorNo}')
+                             |   C
+                             br
+                           if(ugcCensor.rating == 'D')
+                             input#ugcCensor.ugcCensorNod(type='radio', value='D', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   D
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNod(type='radio', value='D', name='#{ugcCensor.ugcCensorNo}')
+                             |   D
+                             br
+                           if(ugcCensor.rating == 'E')
+                             input#ugcCensor.ugcCensorNoe(type='radio', value='E', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   E
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNoe(type='radio', value='E', name='#{ugcCensor.ugcCensorNo}')
+                             |   E
+                             br
+                           if(ugcCensor.rating == 'F')
+                             input#ugcCensor.ugcCensorNof(type='radio', value='F', name='#{ugcCensor.ugcCensorNo}' , checked)
+                             |   F
+                             br
+                           else
+                             input#ugcCensor.ugcCensorNof(type='radio', value='F', name='#{ugcCensor.ugcCensorNo}')
+                             |   F
+                             br
+                         .clear
+                      td 
+                        if(ugcCensor.mustPlay == true)					  
+                          input#ugcCensor.ugcCensorNoMP(type='checkbox', value='#{ugcCensor.mustPlay}', name='#{ugcCensor.ugcCensorNo}', checked)
+                        else
+                          input#ugcCensor.ugcCensorNoMP(type='checkbox', value='#{ugcCensor.mustPlay}', name='#{ugcCensor.ugcCensorNo}')
+
