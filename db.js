@@ -370,7 +370,7 @@ FM.DB = (function(){
             
         function connectDB(){
                 try{
-                    mongoose.connect('mongodb://'+systemConfig.MONGO_DB_SERVER_ADDRESS+':27017/'+DB);
+                    mongoose.connect(systemConfig.HOST_MONGO_DB_SERVER_URL+'/'+DB);
                     return mongoose.connection;
                 }catch(err){
                     logger.info('Connect DB failed: '+err);

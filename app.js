@@ -20,6 +20,7 @@ var dbserver = require('mongodb').Server;
 var mongoStore = require('connect-mongodb');
 var fs = require('fs');
 var path = require('path');
+var url = require('url');
 var winston = require('winston');
 var async = require('async');
 
@@ -33,7 +34,16 @@ var ugcSerialNoMgr = require('./ugc_serial_no_mgr.js');
 var app = express();
 
 var workingPath = process.cwd();
-var dbserver_config = new dbserver(systemConfig.MONGO_DB_SERVER_ADDRESS, 27017, {auto_reconnect: true, native_parser: true} );
+
+var mongoDbServerUrlObj = url.parse(systemConfig.HOST_MONGO_DB_SERVER_URL);
+var mongoDbServerPort;
+if ( mongoDbServerUrlObj.port  ){
+    mongoDbServerPort = mongoDbServerUrlObj.port;
+}
+else {
+    mongoDbServerPort = '27017';
+}
+var dbserver_config = new dbserver(mongoDbServerUrlObj.hostname, mongoDbServerPort, {auto_reconnect: true, native_parser: true} );
 var fmdb = new Db('feltmeng', dbserver_config, {});
 
 
@@ -45,10 +55,10 @@ if (!fs.existsSync(logDir) ){
 require('winston-mongodb').MongoDB;
 var logger = new(winston.Logger)({
     transports: [ 
-        new winston.transports.MongoDB({host:systemConfig.MONGO_DB_SERVER_ADDRESS, db: 'feltmeng', level: 'info'}),
+        new winston.transports.MongoDB({host:mongoDbServerUrlObj.hostname, db: 'feltmeng', level: 'info'}),
         new winston.transports.File({ filename: './log/winston.log'})   
     ],
-    exceptionHandlers: [new winston.transports.MongoDB({host:systemConfig.MONGO_DB_SERVER_ADDRESS, db: 'feltmeng', level: 'info'}),
+    exceptionHandlers: [new winston.transports.MongoDB({host:mongoDbServerUrlObj.hostname, db: 'feltmeng', level: 'info'}),
                     new winston.transports.File({filename: './log/exceptions.log'})
     ]
     
@@ -56,11 +66,6 @@ var logger = new(winston.Logger)({
 
 global.logger = logger;  
   
-var userProjectDir = path.join(workingPath,'public/contents/user_project');
-if (!fs.existsSync(userProjectDir) ){
-    fs.mkdirSync(userProjectDir);
-}
-
 var tempDir = path.join(workingPath,'public/contents/temp');
 if (!fs.existsSync(tempDir) ){
     fs.mkdirSync(tempDir);
