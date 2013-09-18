@@ -52,7 +52,7 @@ var programPlanningPattern =(function(){
             return programSequence[i];
         },
         
-        reset: function(){
+        resetIndex: function(){
             i = -1;
         },
         
@@ -591,14 +591,18 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         getAvailableTimeIntervals(intervalOfPlanningDoohProgrames,function(err, result){
             //debugger;
             if (!err){
-                
                 //TODO: check if these available time intervals cover existing planned program time slots. If yes, maked the UGCs contained in these program time slots "must-play" and delete these program time slots.
                 
                 //generate program time slot documents (in programTimeSlot collection) according to available intervals and corresponding cycle durations
                 var availableTimeIntervals = result;
                 //console.log("availableTimeIntervals=");
                 //console.dir(availableTimeIntervals);
-                logger.info('availableTimeIntervals='+JSON.stringify(availableTimeIntervals));
+                //TODO: debug getAvailableTimeIntervals(). Some availableTimeIntervals are wrong; it was just lucky that these bad intervals are now filtered out  
+                logger.info('Executed getAvailableTimeIntervals() availableTimeIntervals='+JSON.stringify(availableTimeIntervals));
+                for (var i in availableTimeIntervals) {
+                    logger.info('    interval.start='+new Date(Number(availableTimeIntervals[i].interval.start))+'  interval.end='+new Date(Number(availableTimeIntervals[i].interval.end))+'  cycleDuration='+ availableTimeIntervals[i].cycleDuration);
+                }
+                
                 var iteratorGenerateTimeSlot = function(anAvailableTimeInterval, interationDone_cb){
                     //add time slots in this available time interval
                     var timeToAddTimeSlot = anAvailableTimeInterval.interval.start;
@@ -661,6 +665,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         
     };  //end of generateTimeSlot()
     
+    programPlanningPattern.resetIndex();
     if (programSequence){
         programPlanningPattern.set(programSequence);
     }
@@ -674,7 +679,6 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                     sortedUgcList = _sortedUgcList;
                     //console.log('sortedUgcList=');
                     //console.dir(sortedUgcList);
-                    //TODO: check why the follwoing logs did not appear in winston logs
                     logger.info('[scheduleMgr] censorMgr.getUGCListLite() returns: sortedUgcList=');
                     for (var i=0;i<sortedUgcList.length; i++){
                         logger.info( '{ no:'+sortedUgcList[i].no+', contentGenre:'+sortedUgcList[i].contentGenre+', genre:'+sortedUgcList[i].genre+', fileExtension:'+sortedUgcList[i].fileExtension+' }' );
@@ -712,7 +716,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
             for (var k=0;k<genresToRemove.length;k++){
                 programPlanningPattern.remove(genresToRemove[k]);
             }
-            
+            logger.info("programSequence="+ JSON.stringify(programPlanningPattern.getProgramSequence()) );
             
             callback(null);
         },
@@ -727,7 +731,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                     callback("Fail to generate time slots: "+err_2);
                 }
             });
-        }, /**/
+        }, 
         function(callback){
             //put UGCs into programe time slots
             putUgcIntoTimeSlots(function(err_3, result){
