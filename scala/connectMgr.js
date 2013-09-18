@@ -11,8 +11,10 @@ var connect = (function() {
 
     return {
         init : function( adapter, option ){
-            adapter.post('/ContentManager/api/rest/auth/login', { "username" : option.username, "password" : option.password }, function(err, req, res, obj){
-                tokenListener.emit('login', { adapter : adapter, token : obj.token });
+            adapter.post('/ContentManager/api/rest/auth/login', { "username" : option.username, "password" : option.password, "rememberMe" : true }, function(err, req, res, obj){
+                adapter.headers.token = obj.token;
+                adapter.headers.apiLicenseToken = obj.apiLicenseToken;
+                tokenListener.emit('login', { adapter : adapter, token : obj.token, apiLicenseToken : obj.apiLicenseToken });
             });
         },
         request : function( auth ) {

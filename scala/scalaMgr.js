@@ -87,6 +87,11 @@ function scalaMgr( url, account ){
                 check_cb(true);
         });
     };
+    var isExistedOfPlaylist = function(search, isExisted_cb){
+        contractor.playlist.list({ fields: 'id', search: search }, function(err, res){
+            (res.count > 0)?isExisted_cb({ exist: true, id: res.list[0].id }):isExisted_cb({ exist: false, id: null });
+        });
+    };
     
     /**
      * List timeslots from server.
@@ -148,13 +153,21 @@ function scalaMgr( url, account ){
      * @param {Object} playTime The playTime is program play to DOOH in specific time.
      * @param {Function} reportStatus_cb Report media id and playlistItem id in playlist.
      */
-    var setItemToPlaylist = function( file, playTime, reportStatus_cb ){
+    var setItemToPlaylist = function( option, reportStatus_cb ){
         
         var limit = 0;
         
+        var file = option.file,
+            playTime = option.playTime;
+        var playlistName = '';
+        if(typeof(option.playlist) === 'undefined')
+            playlistName = 'OnDaScreen';
+        else
+            (typeof(option.playlist.name) === 'undefined')?playlistName = 'OnDaScreen':playlistName = option.playlist.name;
+        
         var setting = {
             media: { name: file.name },
-            playlist: { name: 'OnDaScreen' },
+            playlist: { name: playlistName },
             playTime: { start: playTime.start, end: playTime.end, duration: playTime.duration }
         };
         
@@ -192,13 +205,21 @@ function scalaMgr( url, account ){
      * Add web page in timeslot to server.
      *
      */
-    var setWebpageToPlaylist = function( webpage, playTime, reportStatus_cb ){
+    var setWebpageToPlaylist = function( option, reportStatus_cb ){
     
         var limit = 0;
         
+        var webpage = option.webpage,
+            playTime = option.playTime;
+        var playlistName = '';
+        if(typeof(option.playlist) === 'undefined')
+            playlistName = 'OnDaScreen';
+        else
+            (typeof(option.playlist.name) === 'undefined')?playlistName = 'OnDaScreen':playlistName = option.playlist.name;
+        
         var setting = {
             media: { name: webpage.name },
-            playlist: { name: 'OnDaScreen' },
+            playlist: { name: playlistName },
             playTime: { start: playTime.start, end: playTime.end, duration: playTime.duration }
         };
         
@@ -264,7 +285,7 @@ function scalaMgr( url, account ){
             });
         };
         
-        async.parallel([
+        async.series([
             function(step1){
                 //step.1 - get media info
                 contractor.media.list({search: setting.media.name}, function(err, res){ 
@@ -277,12 +298,18 @@ function scalaMgr( url, account ){
                 });
             },
             function(step2){
-                //step.2 - get playlist info
-                contractor.playlist.list({fields: 'id', search: setting.playlist.name}, function(err, res){ 
-                    if(typeof(res.list) === 'undefined')
-                        step2('NO_PLAYLIST_INFO', null);
+                //step.2 - get playlist info and if not have playlist then create one.
+                isExistedOfPlaylist(setting.playlist.name, function(status){
+                    if(!status.exist) {
+                        contractor.playlist.create({ name: setting.playlist.name }, function(err, res){
+                            isExistedOfPlaylist(setting.playlist.name, function(status){
+                                setting.playlist.id = status.id;
+                                step2(null, 'done');
+                            });
+                        });
+                    }
                     else {
-                        setting.playlist.id = res.list[0].id;
+                        setting.playlist.id = status.id;
                         step2(null, 'done');
                     }
                 });
@@ -375,7 +402,7 @@ function scalaMgr( url, account ){
         
         var target, expired;
         
-        if(typeof(validExpired_cb) === 'undefined')
+        if(typeof(option) === 'function')
         {
             validExpired_cb = option;
             target = { search: 'OnDaScreen' };
@@ -461,7 +488,7 @@ function scalaMgr( url, account ){
      */
     var pushEvent = function( option, reportPush_cb ){
         //if(!pushFlag) console.log(pushFlag);
-        async.parallel([
+        async.series([
             function(callback){
                 contractor.playlist.list( { sort: 'id', fields: 'id,name,playlistItems', search: option.playlist.search }, function(err, playlist){
                     callback(null, playlist);
@@ -473,6 +500,15 @@ function scalaMgr( url, account ){
                 });
             },
         ], function(err, result){
+            
+            if(typeof(result[0]) === 'undefined') {
+                reportPush_cb('no find "search" playlist');
+                return;
+            }
+            if(typeof(result[1]) === 'undefined') {
+                reportPush_cb('no find "play" playlist');
+                return;
+            }
             
             var pushSubplaylist = { subplaylist: { id: result[1].list[0].id, name: result[1].list[0].name } };
             

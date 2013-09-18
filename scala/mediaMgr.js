@@ -64,6 +64,11 @@ var media = (function() {
                 create_cb(null, 'OK');
             });
         },
+        remove : function( option, remove_cb ) {
+            adapter.del('/ContentManager/api/rest/media/' + option.media.id + '?token=' + token, function(err, req, res) {
+                remove_cb(err, 'OK');
+            });
+        },
         register : function( auth ) {
             adapter = auth.adapter;
             token = auth.token;
@@ -104,6 +109,9 @@ var media = (function() {
                 else status_cb(err, null);
             } );
         },
+        remove : function( option, remove_cb ){
+            _private.remove( option, remove_cb );
+        }
     };
 }());
  

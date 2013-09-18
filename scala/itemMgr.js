@@ -9,7 +9,6 @@ var item = (function() {
             token = auth.token;
         },
         addItem : function( option, addItem_cb ) {
-            //console.log(option.playlist.id, option.media.id);
             adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '/playlistItems/' + option.media.id + '?token=' + token, {}, function(err, req, res, obj){
                 addItem_cb(err, obj);
             });

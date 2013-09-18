@@ -1,7 +1,7 @@
 
 var playlist = (function() {
     
-    var adapter, token;
+    var adapter, token, apiLicenseToken;
     
     var itemSchema = {
         "id": '', //*// playlist_id
@@ -79,8 +79,9 @@ var playlist = (function() {
     var _private = {
         list : function( option, list_cb ) {
             if( typeof(option) === 'function') list_cb = option;
-            var request = '/ContentManager/api/rest/playlists/all?token=' + token;
-            
+            //var request = '/ContentManager/api/rest/playlists/all?token=' + token;
+            var request = '/ContentManager/api/rest/playlists/all?';
+
             if(!option.limit) request += '&limit=0';
             else request += '&limit=' + option.limit;
             if(!option.offset) request += '&offset=0';
@@ -100,12 +101,29 @@ var playlist = (function() {
             adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token, option.playlist.content, function(err, req, res, obj) {
             });
         },*/
+        create : function( option, create_cb ) {
+            var playlist =
+            {
+                name: option.name,
+                description: (typeof(option.description) === 'undefined')?'create by feltmeng':option.description,
+                enableSmartPlaylist: false,
+                playlistType: "MEDIA_PLAYLIST"
+            };
+            adapter.post('/ContentManager/api/rest/playlists?token=' + token, playlist, function(err, req, res, obj) {
+                create_cb(err, 'OK');
+            });
+        },
         update : function( option, upadte_cb ) {
-            adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token, option.playlist.content, function(err, req, res, obj) {
+            adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token + '&apiLicenseToken=' + apiLicenseToken, option.playlist.content, function(err, req, res, obj) {
                 //assert.ifError(err);
                 //console.log('%d -> %j', res.statusCode, res.headers);
                 //console.log('%j', obj);
                 upadte_cb(obj);
+            });
+        },
+        remove : function( option, remove_cb ) {
+            adapter.del('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token, function(err, req, res) {
+                remove_cb(err, 'OK');
             });
         },
         settingPlaylistItem : function( option, settingPlaylistItem_cb ) {
@@ -159,6 +177,7 @@ var playlist = (function() {
         register : function( auth ) {
             adapter = auth.adapter;
             token = auth.token;
+            apiLicenseToken = auth.apiLicenseToken;
         },
         jump: function(){
             console.log( "jumping" );
@@ -202,8 +221,14 @@ var playlist = (function() {
         pushSubplaylist : function( subplaylistSetting, pushSubplaylist_cb ){
             _private.settingSubPlaylist( subplaylistSetting, pushSubplaylist_cb );
         },
+        create : function( option, create_cb ) {
+            _private.create( option, create_cb );
+        },
         update : function( option, upadte_cb ) {
             _private.update( option, upadte_cb );
+        },
+        remove : function( option, remove_cb ){
+            _private.remove( option, remove_cb );
         },
         updateOneProgram : function( option, report_cb ){
             

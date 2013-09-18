@@ -242,7 +242,7 @@ var uploadToAwsS3 = function(awsS3_cb){
             projectFolder = filetype[0].split('\\');
             s3Path = '/user_project/' + projectFolder[projectFolder.length-1] + '/' + projectFolder[projectFolder.length-1] + '.' + filetype[filetype.length-1];
             awsS3List.push('https://s3.amazonaws.com/miix_content' + s3Path);
-            awsS3.uploadToAwsS3(fileList[i], s3Path, '', function(err,result){
+            awsS3.uploadToAwsS3(fileList[i], s3Path, 'image/jpeg', function(err,result){
                 if (!err){
                     logger.info('Live content image was successfully uploaded to S3 '+s3Path);
                 }
