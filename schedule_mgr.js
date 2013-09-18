@@ -80,23 +80,23 @@ var programPlanningPattern =(function(){
 
 var paddingContent =(function(){ 
     var PADDING_CONTENT_TABLE = { //specify the media name of each padding content store on Scala's Content Manager
-            miix_it: [//{name: "ondascreen_padding-miix_it-start"},
-                      {name: "Jeff_start"},
+            miix_it: [{name: "ondascreen_padding-miix_it-start"},
+                      //{name: "Jeff_start"},
                       {name: "ondascreen_padding-miix_it-end.jpg"}],
-            cultural_and_creative: [//{name: "ondascreen_padding-cultural_and_creative-start"},
-                                    {name: "Jeff_start"},
+            cultural_and_creative: [{name: "ondascreen_padding-cultural_and_creative-start"},
+                                    //{name: "Jeff_start"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-end.jpg"}
                                     ],
-            mood: [//{name: "ondascreen_padding-wish-start"},
-                   {name: "Jeff_start"},
+            mood: [{name: "ondascreen_padding-wish-start"},
+                   //{name: "Jeff_start"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-end.jpg"}
                    ],
-            check_in: [//{name: "ondascreen_padding-check_in-start"},
-                       {name: "Jeff_start"},
+            check_in: [{name: "ondascreen_padding-check_in-start"},
+                       //{name: "Jeff_start"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-end.jpg"}
@@ -900,7 +900,7 @@ scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, c
  *     if successful, err returns null; if failed, err returns the error message.
  */
 scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
-
+    var arrayOfsessionId = sessionId.split('-');
     async.waterfall([
         function(cb1){
             //query the programs of this specific session
@@ -914,207 +914,214 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                 }                             
             });
         },
-//        function(programs, cb2){
-//        
-//            //post each users to Facbook
-//            var postPreview = function(aProgram, postPreview_cb){
-//                
-//                var access_token, message, link;
-//                var fb_name, play_time;
-//                
-//                async.waterfall([
-//                    function(ugcSearch){
-//                        ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ ugcSearch(null, ugc); });
-//                    },
-//                    function(ugc, memberSearch){
-//                        memberModel.find({'fb.userID': ugc[0].ownerId.userID}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
-//                    },
-//                ], function(err, res){
-//                    access_token = res.member[0].fb.auth.accessToken;
-//                    fb_name = res.member[0].fb.userName;
-//                    var start = new Date(aProgram.timeslot.start);
-//                    var end = new Date(aProgram.timeslot.end);
-//                    if(start.getHours()>12)
-//                        play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes()+'~'+(end.getHours()-12)+':'+end.getMinutes();
-//                    else
-//                        play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes()+'~'+end.getHours()+':'+end.getMinutes();
-//                    //message = fb_name + '的試鏡編號：' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！\n' + '上大螢幕APP(連結到FB粉絲團)特此預告。';
-//                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-//                    var shareOption =
-//                    {
-//                        name: "上大螢幕", 
-//                        img_url: 'https://lh5.googleusercontent.com/-fpFqpP6pBoI/UihA_MSQaAI/AAAAAAAAAIU/b6FlwLNWBu0/s0/fb.png',
-//                        link: "https://www.facebook.com/OnDaScreen?directed_target_id=0",
-//                        description: "你可以將你的創作，發表在小巨蛋台北天幕LED！"
-//                    };
-//
-//                    async.parallel([
-//                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
-//                        function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(err, res){ postFB_cb(err, res); });}
-//                    ], function(err, res){
-//                        //(err)?console.log(err):console.dir(res);
-//                        postPreview_cb(err, res);
-//                    });
-//                });
-//
-//            };
-//
-//            //push each programs to Scala
-//            var iteratorPushAProgram = function(aProgram, callbackIterator){
-//                
-//                if (aProgram.contentType == "file" ) {
-//                    
-//                    async.waterfall([
-//                        function(callback){
-//                            //download contents from S3 or get from local
-//                            //var fileName;
-//                            if (aProgram.type == "UGC"){
-//                               if((aProgram.content.fileExtension == 'png')||(aProgram.content.fileExtension == 'jpg')){
-//                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
-//                                    //TODO: make sure that target directory exists
-//                                    var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);
-//                                }
-//                                else{
-//                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension; 
-//                                    //TODO: make sure that target directory exists
-//                                    if(typeof(aProgram.content.fileExtension) === 'undefined') {
-//                                        //aProgram.content.fileExtension = '.mp4';
-//                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.mp4';
-//                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.mp4');
-//                                    }
-//                                    else {
-//                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension;
-//                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+aProgram.content.fileExtension);                                        
-//                                    }
-//                                }
-//                                awsS3.downloadFromAwsS3(targetLocalPath, s3Path, function(errS3,resultS3){
-//                                    if (!errS3){
-//                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
-//                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
-//                                        callback(null, targetLocalPath, aProgram.timeslot);
-//                                    }
-//                                    else{
-//                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
-//                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
-//                                        callback('Failed to download from S3 '+s3Path+' :'+errS3, null, null);
-//                                    }
-//                                    
-//                                });
-//                                //add fb push
-//                                postPreview(aProgram, function(err, res){
-//                                    if(err)
-//                                        logger.info('Post FB message is Error: ' + err);
-//                                    else
-//                                        logger.info('Post FB message is Success: ' + res);
-//                                });
-//                            }
-//                            else {
-//                                var paddingFilePath = path.join(workingPath, 'public', aProgram.content.dir, aProgram.content.file);
-//                                callback(null, paddingFilePath, aProgram.timeslot);
-//                            }
-//    
-//                        }, 
-//                        function(fileToPlay, timeslot, callback){
-//                            //debugger;
-//                            //push content to Scala
-//                            var file = {
-//                                    name : path.basename(fileToPlay),
-//                                    path : path.dirname(fileToPlay),
-//                                    savepath : ''
-//                                };
-//                            var playTime = {
-//                                    start: timeslot.start,
-//                                    end: timeslot.end,
-//                                    duration: timeslot.playDuration/1000  //sec    
-//                            };
-//                            scalaMgr.setItemToPlaylist( file, playTime, function(errScala, resultScala){
-//                                if (!errScala){
-//                                    logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-//                                    //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-//                                    callback(null, fileToPlay);
-//                                }
-//                                else{
-//                                    logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-//                                    //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-//                                    callback('Failed to push content to Scala :'+errScala, null);
-//                                }
-//                            });
-//                            
-//                            //callback(null, fileToPlay);
-//                        },
-//                        function(filePlayed, callback){
-//                            //TODO: delete downloaded contents from local drive
-//                            callback(null,'done');
-//                        }, 
-//                    ], function (errWaterfall, resultWaterfall) {
-//                        // result now equals 'done' 
-//                        callbackIterator(errWaterfall);
-//                    });
-//                    
-//                }
-//                else if (aProgram.contentType == "web_page" ){
-//                    //contentType is "web_page"
-//                    
-//                    if (aProgram.content.uri){
-//                        
-//                        var web = { name: aProgram.content.name , uri: aProgram.content.uri };
-//                        var playTime = {
-//                                start: aProgram.timeslot.start,
-//                                end: aProgram.timeslot.end,
-//                                duration: aProgram.timeslot.playDuration/1000  //sec    
-//                        };
-//                        scalaMgr.setWebpageToPlaylist( web, playTime, function(errScala, resultScala){
-//                            if (!errScala){
-//                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
-//                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
-//                                callbackIterator(null);
-//                            }
-//                            else{
-//                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + web.uri );
-//                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + web.uri );
-//                                callbackIterator('Failed to push content to Scala :'+errScala);
-//                            }
-//                        });
-//                    }
-//                    
-//                    //callbackIterator(null);
-//                }
-//                else {
-//                    //contentType is "media_item"
-//                    if (aProgram.content.name){
-//                        var setting = {
-//                            media: { name: aProgram.content.name },
-//                            //playlist:{ name: 'lastModified' },
-//                            playTime: { start: aProgram.timeslot.start, end: aProgram.timeslot.end, duration: aProgram.timeslot.playDuration/1000 }
-//                        };
-//                        
-//                        scalaMgr.pushMediaToPlaylist(setting, function(errScala, res){
-//                            if (!errScala){
-//                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
-//                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
-//                                callbackIterator(null);
-//                            }
-//                            else{
-//                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
-//                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
-//                                callbackIterator('Failed to push content to Scala :'+errScala);
-//                            }
-//                        });
-//                        
-//                    }
-//                }
-//                
-//            };
-//            async.eachSeries(programs, iteratorPushAProgram, function(errEachSeries){
-//                cb2(errEachSeries, programs);
-//            });
-//            
-//
-//        },
+        function(programs, cb2){
+            
+        
+            
+            var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
+                
+                var access_token, message, link;
+                var fb_name, play_time;
+                
+                async.waterfall([
+                    function(ugcSearch){
+                        ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ ugcSearch(null, ugc); });
+                    },
+                    function(ugc, memberSearch){
+                        memberModel.find({'fb.userID': ugc[0].ownerId.userID}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
+                    },
+                ], function(err, res){
+                    access_token = res.member[0].fb.auth.accessToken;
+                    fb_name = res.member[0].fb.userName;
+                    var start = new Date(aProgram.timeslot.start);
+                    var end = new Date(aProgram.timeslot.end);
+                    if(start.getHours()>12)
+                        play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes()+'~'+(end.getHours()-12)+':'+end.getMinutes();
+                    else
+                        play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes()+'~'+end.getHours()+':'+end.getMinutes();
+                    //message = fb_name + '的試鏡編號：' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！\n' + '上大螢幕APP(連結到FB粉絲團)特此預告。';
+                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                    var shareOption =
+                    {
+                        name: "上大螢幕", 
+                        img_url: 'https://lh5.googleusercontent.com/-fpFqpP6pBoI/UihA_MSQaAI/AAAAAAAAAIU/b6FlwLNWBu0/s0/fb.png',
+                        link: "https://www.facebook.com/OnDaScreen?directed_target_id=0",
+                        description: "你可以將你的創作，發表在小巨蛋台北天幕LED！"
+                    };
+
+                    async.parallel([
+                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
+                        function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(err, res){ postFB_cb(err, res); });}
+                    ], function(err, res){
+                        //(err)?console.log(err):console.dir(res);
+                        postPreview_cb(err, res);
+                    });
+                });
+
+            };
+
+            //push each programs to Scala
+            var iteratorPushAProgram = function(aProgram, callbackIterator){
+                
+                if (aProgram.contentType == "file" ) {
+                    
+                    async.waterfall([
+                        function(callback){
+                            //download contents from S3 or get from local
+                            //var fileName;
+                            if (aProgram.type == "UGC"){
+                               if((aProgram.content.fileExtension == 'png')||(aProgram.content.fileExtension == 'jpg')){
+                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
+                                    //TODO: make sure that target directory exists
+                                    var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);
+                                }
+                                else{
+                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension; 
+                                    //TODO: make sure that target directory exists
+                                    if(typeof(aProgram.content.fileExtension) === 'undefined') {
+                                        //aProgram.content.fileExtension = '.mp4';
+                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.mp4';
+                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.mp4');
+                                    }
+                                    else {
+                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension;
+                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+aProgram.content.fileExtension);                                        
+                                    }
+                                }
+                                awsS3.downloadFromAwsS3(targetLocalPath, s3Path, function(errS3,resultS3){
+                                    if (!errS3){
+                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
+                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
+                                        callback(null, targetLocalPath, aProgram.timeslot);
+                                    }
+                                    else{
+                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
+                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
+                                        callback('Failed to download from S3 '+s3Path+' :'+errS3, null, null);
+                                    }
+                                    
+                                });
+                                //add fb push
+                                postPreview(aProgram, function(err, res){
+                                    if(err)
+                                        logger.info('Post FB message is Error: ' + err);
+                                    else
+                                        logger.info('Post FB message is Success: ' + res);
+                                });
+                            }
+                            else {
+                                var paddingFilePath = path.join(workingPath, 'public', aProgram.content.dir, aProgram.content.file);
+                                callback(null, paddingFilePath, aProgram.timeslot);
+                            }
+    
+                        }, 
+                        function(fileToPlay, timeslot, callback){
+                            //debugger;
+                            //push content to Scala
+                            var option = 
+                            {
+                                playlist: { name: 'OnDaScreen'+'-'+arrayOfsessionId[2]+'-'+arrayOfsessionId[3]},
+                                playTime: {
+                                    start: timeslot.start,
+                                    end: timeslot.end,
+                                    duration: timeslot.playDuration/1000  //sec    
+                                },
+                                file: {
+                                    name : path.basename(fileToPlay),
+                                    path : path.dirname(fileToPlay),
+                                    savepath : ''
+                                }
+                            };
+                            scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
+                                if (!errScala){
+                                    logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                    //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                    callback(null, fileToPlay);
+                                }
+                                else{
+                                    logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                    //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                    callback('Failed to push content to Scala :'+errScala, null);
+                                }
+                            });
+                            
+                            //callback(null, fileToPlay);
+                        },
+                        function(filePlayed, callback){
+                            //TODO: delete downloaded contents from local drive
+                            callback(null,'done');
+                        }, 
+                    ], function (errWaterfall, resultWaterfall) {
+                        // result now equals 'done' 
+                        callbackIterator(errWaterfall);
+                    });
+                    
+                }
+                else if (aProgram.contentType == "web_page" ){
+                    //contentType is "web_page"
+                    
+                    if (aProgram.content.uri){
+                        
+                        var option = 
+                        {
+                            playlist: { name: 'OnDaScreen'+'-'+arrayOfsessionId[2]+'-'+arrayOfsessionId[3]},
+                            playTime: {
+                                start: aProgram.timeslot.start,
+                                end: aProgram.timeslot.end,
+                                duration: aProgram.timeslot.playDuration/1000  //sec    
+                            },
+                            webpage: { name: aProgram.content.name , uri: aProgram.content.uri }
+                        };
+                        scalaMgr.setWebpageToPlaylist(option, function(errScala, resultScala){
+                            if (!errScala){
+                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.uri );
+                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
+                                callbackIterator(null);
+                            }
+                            else{
+                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.uri );
+                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + web.uri );
+                                callbackIterator('Failed to push content to Scala :'+errScala);
+                            }
+                        });
+                    }
+                    
+                    //callbackIterator(null);
+                }
+                else {
+                    //contentType is "media_item"
+                    if (aProgram.content.name){
+                        var setting = {
+                            media: { name: aProgram.content.name },
+                            playlist:{ name: 'OnDaScreen'+'-'+arrayOfsessionId[2]+'-'+arrayOfsessionId[3]},
+                            playTime: { start: aProgram.timeslot.start, end: aProgram.timeslot.end, duration: aProgram.timeslot.playDuration/1000 }
+                        };
+                        
+                        scalaMgr.pushMediaToPlaylist(setting, function(errScala, res){
+                            if (!errScala){
+                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
+                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
+                                callbackIterator(null);
+                            }
+                            else{
+                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
+                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
+                                callbackIterator('Failed to push content to Scala :'+errScala);
+                            }
+                        });
+                        
+                    }
+                }
+                
+            };
+            async.eachSeries(programs, iteratorPushAProgram, function(errEachSeries){
+                cb2(errEachSeries, programs);
+            });
+            
+
+        },
         function(programs, cb3){
             // change the state of this programTimeslot doc
-            
-            
             var iteratorUpdateAProgramState = function(aProgram, callbackOfIteratorUpdateAProgramState){
                 //var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
                 db.updateAdoc(programTimeSlotModel, aProgram._id, {"state": "confirmed" }, function(errOfUpdateAdoc, result){
@@ -1127,18 +1134,10 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                 });
 
             };
-
             async.eachSeries(programs, iteratorUpdateAProgramState, function(errEachSeries){
                 cb3(errEachSeries);
             });
-            
-        }//,
-//        function(cb4){
-//            //Ask ScalaMgr to push content to player
-//            scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'}}, function(res){
-//                cb4(null, res);
-//            });
-//        }
+        }
     ], function (err, result) {
         if (pushed_cb) {
             pushed_cb(err);
@@ -1595,6 +1594,50 @@ var dateTransfer = function(date, cbOfDateTransfer){
     cbOfDateTransfer(tempDate);
 };
 
+var autoCheckProgramAndPushToPlayer = function(){
+    var option =
+    {
+            search: "OnDaScreen"
+    };
+    scalaMgr.validProgramExpired(option, function(err, res){
+        if(!err){
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
+        }else{
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
+        } 
+    });
+
+    var checkDateStart = new Date().getTime();
+    var checkDateEnd = checkDateStart + 60*60*1000;
+    sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
+        if(!result){
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+        }
+        else if(!result[0]){
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+        }
+        else if(!err){
+//          for(var idx in result){
+//          console.log(result[idx].intervalOfPlanningDoohProgrames.start);
+//          console.log(result[idx].intervalOfPlanningDoohProgrames.end);
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
+            scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}}, function(res){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
+            });
+//          }
+        }else{
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
+        }
+        //console.log(err, result);
+    });
+
+    setTimeout(autoCheckProgramAndPushToPlayer, 15*60*1000);
+
+};
+//delay time for scala connect
+setTimeout(autoCheckProgramAndPushToPlayer, 2000);
+
+//test
 //dateTransfer(1377144000000, function(result){
 //    console.log(result);
 // });

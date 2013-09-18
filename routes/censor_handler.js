@@ -10,11 +10,6 @@ var scheduleMgr = require("../schedule_mgr.js");
 var db = require('../db.js');
 var sessionItemModel = db.getDocModel("sessionItem");
 
-var sessionId = null;
-var originSequence = null;
-var doohId;
-var intervalOfSelectingUGC;
-var intervalOfPlanningDoohProgrames;
 
 /**
  * @param  request  {json}sort:{?}
@@ -107,18 +102,16 @@ FM.censorHandler.postProgramTimeSlotSession_cb = function(req, res){
     var doohId = req.params.doohId;
     var intervalOfSelectingUGCStart =  new Date(req.body.intervalOfSelectingUGC.start).getTime();
     var intervalOfSelectingUGCend =  new Date(req.body.intervalOfSelectingUGC.end).getTime();
-    intervalOfSelectingUGC = {start: intervalOfSelectingUGCStart, end: intervalOfSelectingUGCend};
+    var intervalOfSelectingUGC = {start: intervalOfSelectingUGCStart, end: intervalOfSelectingUGCend};
 
     var intervalOfPlanningDoohProgramesStart = new Date(req.body.intervalOfPlanningDoohProgrames.start).getTime();
     var intervalOfPlanningDoohProgramesEnd = new Date(req.body.intervalOfPlanningDoohProgrames.end).getTime();
-    intervalOfPlanningDoohProgrames = {start: intervalOfPlanningDoohProgramesStart, end: intervalOfPlanningDoohProgramesEnd};
+    var intervalOfPlanningDoohProgrames = {start: intervalOfPlanningDoohProgramesStart, end: intervalOfPlanningDoohProgramesEnd};
     
     var programSequence = req.body.programSequence;
-    originSequence = req.body.originSequence;
 
     scheduleMgr.createProgramList(doohId, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, req.session.admin_user.hexOfObjectID, function(err, result){
         if (!err){
-            sessionId = result.sessionId;
             res.send(200, {message: result.sessionId});
         }
         else{
@@ -170,6 +163,18 @@ FM.censorHandler.gettimeslots_get_cb = function(req, res){
 };
 
 FM.censorHandler.pushProgramsTo3rdPartyContentMgr_get_cb = function(req, res){
+    var sessionId = req.params.sessionId;
+    var doohId = req.params.doohId;
+    
+    var intervalOfSelectingUGCStart =  new Date(req.body.intervalOfSelectingUGC.start).getTime();
+    var intervalOfSelectingUGCend =  new Date(req.body.intervalOfSelectingUGC.end).getTime();
+    var intervalOfSelectingUGC = {start: intervalOfSelectingUGCStart, end: intervalOfSelectingUGCend};
+    
+    var intervalOfPlanningDoohProgramesStart = new Date(req.body.intervalOfPlanningDoohProgrames.start).getTime();
+    var intervalOfPlanningDoohProgramesEnd = new Date(req.body.intervalOfPlanningDoohProgrames.end).getTime();
+    var intervalOfPlanningDoohProgrames = {start: intervalOfPlanningDoohProgramesStart, end: intervalOfPlanningDoohProgramesEnd};
+    
+    var originSequence = req.body.originSequence;
 
     scheduleMgr.pushProgramsTo3rdPartyContentMgr(sessionId, function(err){
         if (!err){

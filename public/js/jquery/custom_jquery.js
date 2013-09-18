@@ -10,7 +10,12 @@ SDOMAIN = "/miix_admin/";
 var FM = {};    
 
 var conditions = {};
+var DEFAULT_DOOH = "taipeiarena";
 var sessionId = null;
+var originSequence = null;
+var doohId = DEFAULT_DOOH;
+var intervalOfSelectingUGC = null;
+var intervalOfPlanningDoohProgrames = null;
 
 
 //PageList object implementation
@@ -134,8 +139,8 @@ $(document).ready(function(){
     FM.miixPlayList = new PageList( 'miixMovieList', 5, '/miix_admin/miix_movies');
     FM.storyPlayList = new PageList( 'storyMovieList', 8, '/miix_admin/story_movies');
     FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
-    FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 5, '/miix_admin/doohs/taipeiarena/timeslots');
-    FM.historyList = new PageList( 'historyList', 5, '/miix_admin/sessions/ ');
+    FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 5, '/miix_admin/doohs/'+DEFAULT_DOOH+'/timeslots');
+    FM.historyList = new PageList( 'historyList', 10, '/miix_admin/sessions/ ');
     FM.highlightList = new PageList( 'highlightList', 5, '/miix_admin/highlight');
 
     FM.currentContent = FM.memberList;
@@ -225,7 +230,7 @@ $(document).ready(function(){
             $('#createProgramListBtn').click(function(){   
                 var flag = 0;
                 var inputSearchData = {};
-                var url = DOMAIN + "doohs/taipeiarena/program_timeslot_session";
+                var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/program_timeslot_session";
 
                 $('#condition-inner input[class="createProgramListBtn"]').each(function(i){
 
@@ -233,7 +238,7 @@ $(document).ready(function(){
 
                     if($(this).attr("name") == 'ugcSequenceText'){
                         
-                        var originSequence = $(this).attr("value");
+                        originSequence = $(this).attr("value");
                         var sequence = encodeURIComponent($(this).attr("value"));
                         
                         programSequenceStringToArr(sequence , function(err ,result){
@@ -251,7 +256,8 @@ $(document).ready(function(){
                     }
                     
                     if(inputSearchData.timeStart && inputSearchData.timeEnd && inputSearchData.playTimeStart && inputSearchData.playTimeEnd && inputSearchData.ugcSequenceText && programSequenceArr){
-                        
+                        intervalOfSelectingUGC = {start: inputSearchData.timeStart, end: inputSearchData.timeEnd};
+                        intervalOfPlanningDoohProgrames = {start: inputSearchData.playTimeStart, end: inputSearchData.playTimeEnd};
                         $.ajax({
                             url: url,
                             type: 'POST',
@@ -585,7 +591,7 @@ $(document).ready(function(){
             
             $('#ugcCensor.ugcCensorNoSetBtn').click(function(){
                 var flag = 0;
-                var url = DOMAIN + "doohs/taipeiarena/timeslots/sessionId";
+                var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/sessionId";
                 var programTimeSlotId = $(this).attr("name");
                 var ugcReferenceNo;
 
@@ -624,7 +630,7 @@ $(document).ready(function(){
 
             $('#ugcCensor.ugcCensorNoRemoveBtn').click(function(){
                 var flag = 0;
-                var url = DOMAIN + "doohs/taipeiarena/timeslots/sessionId";
+                var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/sessionId";
                 var programTimeSlotId = $(this).attr("name");
 
                 if(sessionId === null && flag == 0){
@@ -655,7 +661,7 @@ $(document).ready(function(){
 
             $('#pushProgramsBtn').click(function(){
                 var flag = 0;
-                var url = DOMAIN + "doohs/taipeiarena/ProgramsTo3rdPartyContentMgr/sessionId";
+                var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/ProgramsTo3rdPartyContentMgr/"+sessionId;
                 if(sessionId === null && flag == 0){
                     alert('Session Id not exist!!');
                     flag = 1; 
@@ -664,7 +670,11 @@ $(document).ready(function(){
                     $.ajax({
                         url: url,
                         type: 'PUT',
-                        data: {},
+                        data: {
+                        intervalOfSelectingUGC : intervalOfSelectingUGC,
+                        intervalOfPlanningDoohProgrames :intervalOfPlanningDoohProgrames,
+                        originSequence :originSequence
+                        },
                         success: function(response) {
                             if(response.message){
                                 console.log("[Response] message:" + response.message);

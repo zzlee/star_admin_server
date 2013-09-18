@@ -1,170 +1,112 @@
 
 var scala = require('./scalaMgr');
-var scalaMgr = scala( 'http://192.168.5.189:8080', { username: 'administrator', password: '53768608' } );
-
+//var scalaMgr = scala( 'http://192.168.5.189:8080', { username: 'administrator', password: '53768608' } );
+var scalaMgr = scala( 'http://www.feltmeng.idv.tw:8080', { username: 'administrator', password: '53768608' } );
+//var scalaMgr = scala( 'http://220.128.120.51:8080', { username: 'administrator', password: '28469434' } );
 var async = require('async');
 
 setTimeout(function(){
-
-    var option =
-    {
-        search: 'lastModified'
-    }
-    scalaMgr.validProgramExpired(option, function(err, res){
-        (err)?console.log(err):console.log(res);
-    });
-    /*
-    var option =
-    {
-        search: 'lastModified',
-        //expired: new Date().getTime()
-    };
-    var expired = new Date().getTime();
     
-    scalaMgr.contractor.playlist.list(option, function(err, res)
+    //ScalaMgr APIs : setItemToPlaylist()
+    /* var option = 
     {
-        //(err)?console.dir(err):console.dir(res);
-        if(err)
-        {
-            valid_cb(err, null);
-            return;
+        //playlist: { name: 'last' },
+        playTime: { start: '2013-07-21 12:30:00', end: '2013-07-22 17:50:00', duration: 35 },
+        file: {
+            name : 'test_0.avi',
+            path : 'C:\\tmp\\',
+            savepath : ''
         }
-        
-        var validPlaylistItems = function(playlist, valid_cb){
-
-            if(typeof(playlist.playlistItems) === 'undefined')
-            {
-                valid_cb(null, { message: 'no item.' });
-                return;
-            }
-            else
-            {
-                for(var i=0; i<playlist.playlistItems.length; i++)
-                {
-                    var programValidDate;
-                    if(playlist.playlistItems[i].useValidRange == false)
-                        continue;
-                    else if(playlist.playlistItems[i].timeSchedules.endTime == '24:00')
-                        programValidDate = new Date(playlist.playlistItems[i].endValidDate + ' 23:59:59').getTime();
-                    else
-                        programValidDate = new Date(playlist.playlistItems[i].endValidDate + ' ' + playlist.playlistItems[i].timeSchedules.endTime + ':00').getTime();
-                    if((typeof(programValidDate) !== 'undefined')&&(programValidDate < expired))
-                        playlist.playlistItems[i].deleteFlag = true;
-                }
-            }
-            
-            scalaMgr.contractor.playlist.update({
-                playlist: { id: playlist.id, content: playlist },
-            }, function(report){
-                valid_cb(null, report);
-            });
-        };
-        
-        var eventConsole = function(target, event){
-            event.push(function(callback){ validPlaylistItems(target, callback); });
-        };
-        
-        if(res.count == 0)
-            console.log('no playlist');
-        else
-        {
-            var execute = [];
-            for(var i=0; i<res.count; i++)
-            {
-                eventConsole(res.list[i], execute);
-            }
-            async.series(execute, function(err, res){
-                (err)?console.dir(err):console.dir(res);
-            });
-        }
-        
-    });
-    */
-    /*
-    var option = {
-        playlistItem: { id: 35 },
-        playlist: { name: 'lastModified' }
     };
-    
-    scalaMgr.pullPlaylistItem(option, function(err, res){
-        (err)?console.dir(err):console.dir(res);
-    });
-    */
-    /*
-    scalaMgr.contractor.playlist.list(function(err, res){
-        //(err)?console.dir(err):console.dir(res);
-    });
-    */
-    /*
-    var setting = {
-        media: { name: 'Maid' },
-        playlist:{ name: 'Audio' },
-        playTime: { start: '2013-08-27 10:00:00', end: '2013-08-27 22:00:00', duration: 50 }
-    };
-    
-    scalaMgr.pushMediaToPlaylist(setting, function(err, res){
-        (err)?console.dir(err):console.dir(res);
-        process.exit(1);
-    });
-    */
-    /*
-    scalaMgr.clearPlaylistItems(function(err, res){
+    scalaMgr.setItemToPlaylist( option, function(err, res){
         if(err)
             console.dir(err);
         else
             console.dir(res);
-    });
-    */
-    /*
-    var web = {
-        name: 'web_test',
-        uri: 'www.feltmeng.idv.tw'
-    };
+    } ); */
     
-    var playTime = {
-        start: '2013-07-22 18:00:00',
-        end: '2013-07-22 19:00:00',
-        duration: 50
-    };
     
-    scalaMgr.setWebpageToPlaylist(web, playTime, function(err, res){
-        (err)?console.dir(err):console.dir(res);
-    });
-    */
-    /*
-    var option = { 
+    //ScalaMgr APIs : validProgramExpired()
+    /* var option =
+    {
+        search: 'lastModified'
+    };
+    scalaMgr.validProgramExpired(option, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
+    
+    //ScalaMgr APIs : pullPlaylistItem()
+    /* var option = {
+        playlistItem: { id: 35 },
+        playlist: { name: 'lastModified' }
+    };    
+    scalaMgr.pullPlaylistItem(option, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
+    
+    //ScalaMgr APIs : pushMediaToPlaylist()
+    /* var setting = {
+        media: { name: 'Jeff' },
+        playlist:{ name: 'Audio' },
+        playTime: { start: '2013-08-27 10:00:00', end: '2013-08-27 22:00:00', duration: 50 }
+    };    
+    scalaMgr.pushMediaToPlaylist(setting, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
+    
+    //ScalaMgr APIs : clearPlaylistItems()
+    /* scalaMgr.clearPlaylistItems(function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
+    
+    //ScalaMgr APIs : setWebpageToPlaylist()
+    /* var option = 
+    {
+        //playlist: { name: 'last' },
+        playTime: { start: '2013-07-22 18:00:00', end: '2013-07-22 19:00:00', duration: 50 },
+        webpage: {
+            name: 'web_test',
+            uri: 'www.feltmeng.idv.tw'
+        }
+    };
+    scalaMgr.setWebpageToPlaylist(option, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
+    
+    //ScalaMgr APIs : removePlaylist()
+    /* var option =
+    {
+        search: 'OnDaScreen-'
+    };
+    scalaMgr.removePlaylist(option, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
+    
+    //ScalaMgr APIs : pushEvent()
+    /* var option = { 
         playlist: { search: 'lastModified', play: 'OnDaScreen' },
         player: { name: 'feltmeng' } 
     };
     scalaMgr.pushEvent( option, function(res){
         console.log(res);
-    });
-    */
-    /*
-    var file = {
-        name : 'test_1.avi',
-        path : 'C:\\tmp\\',
-        savepath : ''
-    };
-    */
-    //var web = { name: 'test_yahoo', uri: 'tw.yahoo.com' };
-    //var playTime = { start: '2013-08-28 10:00:00', end: '2013-08-28 22:00:00', duration: 50 };
-    /*
-    var option = {
-        media: { name: file.name, type: '' },
-        playlist: { name: 'tt01' },
-        playTime: { start: '2013-07-21 12:30:00', end: '2013-07-22 17:50:00', duration: 35 },
-    };
-    */
-    /*
-    scalaMgr.setItemToPlaylist( file, playTime, function(err, res){
-        console.log(res);
-    } );
-    */
-    /*
-    scalaMgr.contractor.playlist.updateOneProgram(option, function(err, res){
-        console.log(res);
-    });
-    */
-    
+    }); */
+        
 }, 1500);
