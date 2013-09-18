@@ -285,13 +285,23 @@ FM.facebookMgr = (function(){
       
                     // Handle any errors that occur
                     
-                    if (err) return console.error("Error occured: ", err);
+                    /* if (err) return console.error("Error occured: ", err);
                     body = JSON.parse(body);
                     if (body.error) return console.error("Error returned from facebook: ", body.error);
                     
                     var result = JSON.stringify(body);
                     if (cb){
                         cb(err, result);
+                    } */
+                    
+                    body = JSON.parse(body);
+                    if(err)
+                        cb(("Error occured: "+ err), null);
+                    else if(body.error)
+                        cb(("Error returned from facebook: "+ body.error), null);
+                    else {
+                        var result = JSON.stringify(body);
+                        cb(null, result);
                     }
                 });
             },
@@ -308,13 +318,23 @@ FM.facebookMgr = (function(){
       
                     // Handle any errors that occur
                     
-                    if (err) return console.error("Error occured: ", err);
+                    /* if (err) return console.error("Error occured: ", err);
                     body = JSON.parse(body);
                     if (body.error) return console.error("Error returned from facebook: ", body.error);
                     
                     var result = JSON.stringify(body);
                     if (cb){
                         cb(err, result);
+                    } */
+                    
+                    body = JSON.parse(body);
+                    if(err)
+                        cb(("Error occured: "+ err), null);
+                    else if(body.error)
+                        cb(("Error returned from facebook: "+ body.error), null);
+                    else {
+                        var result = JSON.stringify(body);
+                        cb(null, result);
                     }
                 });
             },
@@ -336,14 +356,15 @@ FM.facebookMgr = (function(){
                   
 					// Handle any errors that occur
 					
-					if (err) return console.error("Error occured: ", err);
-					body = JSON.parse(body);
-					if (body.error) return console.error("Error returned from facebook: ", body.error);
-					
-					var result = JSON.stringify(body);
-					if (cb){
-					    cb(err, result);
-					}
+                    body = JSON.parse(body);
+                    if(err)
+                        cb(("Error occured: "+ err), null);
+                    else if(body.error)
+                        cb(("Error returned from facebook: "+ body.error), null);
+                    else {
+                        var result = JSON.stringify(body);
+                        cb(null, result);
+                    }
                 });
             },
             
