@@ -125,6 +125,7 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
             }
         },
     ], function(err, type, res){
+    
         //step.final : clear temp file
         (type)?logger.info('UGC video push to AE server : ok!'):logger.info('UGC image cutting from video : ok!');
         //clear file
@@ -279,7 +280,7 @@ var updateToUGC = function(updateUGC_cb){
             simulate: doohPreviewList[i].doohPreviewUrl,
             play: awsS3List[i]
         };
-        postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
+        /* postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
             if(err)
                 logger.info('Post message and pictrue to user is Error: ' + err);
             else
@@ -289,6 +290,19 @@ var updateToUGC = function(updateUGC_cb){
                 //if(err) console.log(err);
                 //else console.log(result);
                 //if(!err) fmapi._fbPostUGCThenAdd(vjson);
+                i++;
+                (i < ownerList.length)?update():updateUGC_cb(null, 'done');
+            });
+        }); */
+        db.addUserLiveContent(vjson, function(err, result){
+            //if(err) console.log(err);
+            //else console.log(result);
+            //if(!err) fmapi._fbPostUGCThenAdd(vjson);
+            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
+                if(err)
+                    logger.info('Post message and pictrue to user is Error: ' + err);
+                else
+                    logger.info('Post message and pictrue to user is Success: ' + res);
                 i++;
                 (i < ownerList.length)?update():updateUGC_cb(null, 'done');
             });
@@ -394,28 +408,40 @@ var postMessageAndPicture = function(fb_id, photoUrl, postPicture_cb){
             /*function(simulate){
                 message = fb_name + '於' + playTime + '，登上台北天幕LED，上大螢幕APP特此感謝他精采的作品！\n' + 
                           '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                facebookMgr.postPhoto(access_token, message, photoUrl.simulate, albumId, simulate);
+                //facebookMgr.postPhoto(access_token, message, photoUrl.simulate, albumId, simulate);
+                facebookMgr.postMessageAndShare(access_token, message, { link: photoUrl.simulate }, function(err, res){
+                    (!err)?simulate(null, true):simulate(null, false);
+                });
             },*/
             function(preview){
                 var message = fb_name + '於' + playTime + '，登上台北天幕LED，，這是原始刊登素材，天幕尺寸：100公尺x16公尺。\n' + 
                           '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
                 //facebookMgr.postPhoto(access_token, message, photoUrl.preview, albumId, preview);
-                facebookMgr.postMessage(access_token, message, photoUrl.preview, preview);
+                facebookMgr.postMessageAndShare(access_token, message, { link: photoUrl.preview }, function(err, res){
+                    (!err)?preview(null, true):preview(null, false);
+                });
             },
             function(play){
                 var message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝他精采的作品！\n' + 
                           '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
                 //facebookMgr.postPhoto(access_token, message, photoUrl.play, albumId, play);
-                facebookMgr.postMessage(access_token, message, photoUrl.play, play);
+                facebookMgr.postMessageAndShare(access_token, message, { link: photoUrl.play }, function(err, res){
+                    (!err)?play(null, true):play(null, false);
+                });
             },
         ], function(err, res){
             //(err)?console.log(err):console.dir(res);
-            if(!err){
+            /* if(!err){
                 logger.info('post message to user on facebook, fb id is ' + fb_id);
                 pushPhotos_cb(null, 'done');
             }
             else
-                pushPhotos_cb(err, null);
+                pushPhotos_cb(err, null); */
+            
+            (err)?logger.info('post message to user on facebook is failed, fb id is ' + fb_id):'';
+            (res[0])?logger.info('post preview message to user on facebook is success, fb id is ' + fb_id):logger.info('post preview message to user on facebook is failed, fb id is ' + fb_id);
+            (res[1])?logger.info('post play message to user on facebook is success, fb id is ' + fb_id):logger.info('post play message to user on facebook is failed, fb id is ' + fb_id);
+            pushPhotos_cb(null, 'done');
         });
     };
     //
