@@ -999,17 +999,21 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         function(fileToPlay, timeslot, callback){
                             //debugger;
                             //push content to Scala
-                            var file = {
-                                    name : path.basename(fileToPlay),
-                                    path : path.dirname(fileToPlay),
-                                    savepath : ''
-                                };
-                            var playTime = {
+                            var option = 
+                            {
+                                playlist: { name: 'OnDaScreen'+'-'+timeslot.start+'-'+timeslot.end},
+                                playTime: {
                                     start: timeslot.start,
                                     end: timeslot.end,
                                     duration: timeslot.playDuration/1000  //sec    
+                                },
+                                file: {
+                                    name : path.basename(fileToPlay),
+                                    path : path.dirname(fileToPlay),
+                                    savepath : ''
+                                }
                             };
-                            scalaMgr.setItemToPlaylist( file, playTime, function(errScala, resultScala){
+                            scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
                                 if (!errScala){
                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
@@ -1039,20 +1043,24 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     
                     if (aProgram.content.uri){
                         
-                        var web = { name: aProgram.content.name , uri: aProgram.content.uri };
-                        var playTime = {
+                        var option = 
+                        {
+                            playlist: { name: 'OnDaScreen'+'-'+aProgram.timeslot.start+'-'+aProgram.timeslot.end },
+                            playTime: {
                                 start: aProgram.timeslot.start,
                                 end: aProgram.timeslot.end,
                                 duration: aProgram.timeslot.playDuration/1000  //sec    
+                            },
+                            webpage: { name: aProgram.content.name , uri: aProgram.content.uri }
                         };
-                        scalaMgr.setWebpageToPlaylist( web, playTime, function(errScala, resultScala){
+                        scalaMgr.setWebpageToPlaylist(option, function(errScala, resultScala){
                             if (!errScala){
-                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
+                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.uri );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
                                 callbackIterator(null);
                             }
                             else{
-                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + web.uri );
+                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.uri );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + web.uri );
                                 callbackIterator('Failed to push content to Scala :'+errScala);
                             }
@@ -1066,7 +1074,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     if (aProgram.content.name){
                         var setting = {
                             media: { name: aProgram.content.name },
-                            //playlist:{ name: 'lastModified' },
+                            playlist:{ name: 'OnDaScreen'+'-'+aProgram.timeslot.start+'-'+aProgram.timeslot.end },
                             playTime: { start: aProgram.timeslot.start, end: aProgram.timeslot.end, duration: aProgram.timeslot.playDuration/1000 }
                         };
                         
@@ -1560,6 +1568,50 @@ var dateTransfer = function(date, cbOfDateTransfer){
     cbOfDateTransfer(tempDate);
 };
 
+var autoCheckProgramAndPushToPlayer = function(){
+    var option =
+    {
+            search: "OnDaScreen"
+    };
+    scalaMgr.validProgramExpired(option, function(err, res){
+        if(!err){
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
+        }else{
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
+        } 
+    });
+
+    var checkDateStart = new Date().getTime();
+    var checkDateEnd = checkDateStart + 60*60*1000;
+    sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
+        if(!result){
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+        }
+        else if(!result[0]){
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+        }
+        else if(!err){
+//          for(var idx in result){
+//          console.log(result[idx].intervalOfPlanningDoohProgrames.start);
+//          console.log(result[idx].intervalOfPlanningDoohProgrames.end);
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
+            scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}}, function(res){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
+            });
+//          }
+        }else{
+            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
+        }
+        //console.log(err, result);
+    });
+
+    setTimeout(autoCheckProgramAndPushToPlayer, 15*60*1000);
+
+};
+//delay time for scala connect
+setTimeout(autoCheckProgramAndPushToPlayer, 2000);
+
+//test
 //dateTransfer(1377144000000, function(result){
 //    console.log(result);
 // });
