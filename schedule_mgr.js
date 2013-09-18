@@ -882,7 +882,7 @@ scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, c
  *     if successful, err returns null; if failed, err returns the error message.
  */
 scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
-
+    var arrayOfsessionId = sessionId.split('-');
     async.waterfall([
         function(cb1){
             //query the programs of this specific session
@@ -1001,7 +1001,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             //push content to Scala
                             var option = 
                             {
-                                playlist: { name: 'OnDaScreen'+'-'+timeslot.start+'-'+timeslot.end},
+                                playlist: { name: 'OnDaScreen'+'-'+arrayOfsessionId[2]+'-'+arrayOfsessionId[3]},
                                 playTime: {
                                     start: timeslot.start,
                                     end: timeslot.end,
@@ -1045,7 +1045,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         
                         var option = 
                         {
-                            playlist: { name: 'OnDaScreen'+'-'+aProgram.timeslot.start+'-'+aProgram.timeslot.end },
+                            playlist: { name: 'OnDaScreen'+'-'+arrayOfsessionId[2]+'-'+arrayOfsessionId[3]},
                             playTime: {
                                 start: aProgram.timeslot.start,
                                 end: aProgram.timeslot.end,
