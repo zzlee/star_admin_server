@@ -80,23 +80,23 @@ var programPlanningPattern =(function(){
 
 var paddingContent =(function(){ 
     var PADDING_CONTENT_TABLE = { //specify the media name of each padding content store on Scala's Content Manager
-            miix_it: [//{name: "ondascreen_padding-miix_it-start"},
-                      {name: "Jeff_start"},
+            miix_it: [{name: "ondascreen_padding-miix_it-start"},
+                      //{name: "Jeff_start"},
                       {name: "ondascreen_padding-miix_it-end.jpg"}],
-            cultural_and_creative: [//{name: "ondascreen_padding-cultural_and_creative-start"},
-                                    {name: "Jeff_start"},
+            cultural_and_creative: [{name: "ondascreen_padding-cultural_and_creative-start"},
+                                    //{name: "Jeff_start"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-end.jpg"}
                                     ],
-            mood: [//{name: "ondascreen_padding-wish-start"},
-                   {name: "Jeff_start"},
+            mood: [{name: "ondascreen_padding-wish-start"},
+                   //{name: "Jeff_start"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-end.jpg"}
                    ],
-            check_in: [//{name: "ondascreen_padding-check_in-start"},
-                       {name: "Jeff_start"},
+            check_in: [{name: "ondascreen_padding-check_in-start"},
+                       //{name: "Jeff_start"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-end.jpg"}
@@ -1074,7 +1074,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     if (aProgram.content.name){
                         var setting = {
                             media: { name: aProgram.content.name },
-                            playlist:{ name: 'OnDaScreen'+'-'+aProgram.timeslot.start+'-'+aProgram.timeslot.end },
+                            playlist:{ name: 'OnDaScreen'+'-'+arrayOfsessionId[2]+'-'+arrayOfsessionId[3]},
                             playTime: { start: aProgram.timeslot.start, end: aProgram.timeslot.end, duration: aProgram.timeslot.playDuration/1000 }
                         };
                         
@@ -1106,12 +1106,12 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             
             cb3(null);
         },
-        function(cb4){
+        // function(cb4){
             //Ask ScalaMgr to push content to player
-            scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'}}, function(res){
-                cb4(null, res);
-            });
-        }
+            // scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'}}, function(res){
+               // cb4(null, res);
+            // });
+        // }
     ], function (err, result) {
         if (pushed_cb) {
             pushed_cb(err);
