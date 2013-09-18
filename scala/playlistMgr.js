@@ -123,7 +123,7 @@ var playlist = (function() {
         },
         remove : function( option, remove_cb ) {
             adapter.del('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token, function(err, req, res) {
-                remove_cb(err, 'OK');
+                remove_cb(err, 'done');
             });
         },
         settingPlaylistItem : function( option, settingPlaylistItem_cb ) {

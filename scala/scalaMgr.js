@@ -476,6 +476,40 @@ function scalaMgr( url, account ){
     };
     
     /**
+     * Remove Playlist
+     *
+     */
+    var removePlaylist = function( option, remove_cb ){
+    
+        var eventConsole = function(target, event){
+            event.push(function(callback){ 
+                contractor.playlist.remove({ playlist: { id: target } }, callback);
+            });
+        };
+        async.series([
+            function(list_cb){
+                contractor.playlist.list({ fields: 'id', search: option.search }, function(err, playlist){
+                    list_cb(err, playlist);
+                });
+            },
+        ], function(err, res){
+            var playlist = res[0];
+            if(playlist.count == 0)
+                remove_cb(err, 'no find playlist');
+            else {
+                var execute = [];
+                for(var i=0; i<playlist.count; i++)
+                {
+                    eventConsole(playlist.list[i].id, execute);
+                }
+                async.series(execute, function(err, res){
+                    (err)?remove_cb(err, null):remove_cb(null, 'done');
+                });
+            }
+        });
+    };
+    
+    /**
      * Push event list to all playlist in server.
      * 
      * @param {object} option Input setting of playlist, subplaylist and player.
@@ -501,11 +535,11 @@ function scalaMgr( url, account ){
             },
         ], function(err, result){
             
-            if(typeof(result[0]) === 'undefined') {
+            if((typeof(result[0]) === 'undefined') || (result[0].count == 0)) {
                 reportPush_cb('no find "search" playlist');
                 return;
             }
-            if(typeof(result[1]) === 'undefined') {
+            if((typeof(result[1]) === 'undefined') || (result[1].count == 0)) {
                 reportPush_cb('no find "play" playlist');
                 return;
             }
@@ -552,6 +586,7 @@ function scalaMgr( url, account ){
         pullPlaylistItem: pullPlaylistItem,
         clearPlaylistItems: clearPlaylistItems,
         validProgramExpired: validProgramExpired,
+        removePlaylist: removePlaylist,
         contractor: contractor,   //test
     };
 }

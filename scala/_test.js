@@ -1,11 +1,11 @@
 
 var scala = require('./scalaMgr');
-var scalaMgr = scala( 'http://192.168.5.189:8080', { username: 'administrator', password: '53768608' } );
+//var scalaMgr = scala( 'http://192.168.5.189:8080', { username: 'administrator', password: '53768608' } );
+var scalaMgr = scala( 'http://www.feltmeng.idv.tw:8080', { username: 'administrator', password: '53768608' } );
 //var scalaMgr = scala( 'http://220.128.120.51:8080', { username: 'administrator', password: '28469434' } );
 var async = require('async');
 
 setTimeout(function(){
-    
     
     //ScalaMgr APIs : setItemToPlaylist()
     /* var option = 
@@ -82,6 +82,18 @@ setTimeout(function(){
         }
     };
     scalaMgr.setWebpageToPlaylist(option, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
+    
+    //ScalaMgr APIs : removePlaylist()
+    /* var option =
+    {
+        search: 'OnDaScreen-'
+    };
+    scalaMgr.removePlaylist(option, function(err, res){
         if(err)
             console.dir(err);
         else
