@@ -41,6 +41,7 @@ FM.DB = (function(){
                 //file
                 //web_page
                 //media_item: the media item that has already stored in Media of Scala's Content Manager
+            programTimeSlotState = 'not_confirmed confirmed'.split(' '),
             
             videoStatus = 'good soso bad waiting none'.split(' '), //DEPRECATE, keep for reference
             videoGenre = 'miix miix_street miix_story'.split(' '); //DEPRECATE, keep for reference 
@@ -199,6 +200,8 @@ FM.DB = (function(){
             //status: {type: String, enum: programTimeSlotStatus}
             type: {type: String, enum: programTimeSlotType}, //UGC or padding contnet
             session: {type: String}, //The id indicating the session of creating program time slot
+            planner: {type: String}, //The id of planner who plans this session of creating program timeslots
+            state: {type: String, enum: programTimeSlotState, default: 'not_confirmed'}, //The state of the program timeslot
             contentGenre: {type: String, enum: ugcContentGenre}  //miix_it, cultural_and_creative, mood, or check_in
         }); 
         

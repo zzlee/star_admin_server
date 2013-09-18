@@ -52,7 +52,7 @@ FM.admin.login_get_cb = function(req, res){
             if(result){
                 FM_LOG("[Login Success!]");
                 req.session.admin_user = {
-                    oid: result._id,
+                    hexOfObjectID: result._id.toHexString(),
                     id: req.query.id
                 };
                 

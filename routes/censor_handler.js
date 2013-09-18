@@ -116,7 +116,7 @@ FM.censorHandler.postProgramTimeSlotSession_cb = function(req, res){
     var programSequence = req.body.programSequence;
     originSequence = req.body.originSequence;
 
-    scheduleMgr.createProgramList(doohId, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, function(err, result){
+    scheduleMgr.createProgramList(doohId, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, req.session.admin_user.hexOfObjectID, function(err, result){
         if (!err){
             sessionId = result.sessionId;
             res.send(200, {message: result.sessionId});
