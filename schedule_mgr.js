@@ -1212,7 +1212,7 @@ scheduleMgr.updateProgramList = function(dooh, intervalToUpdate, updated_cb ){
  *     
  */
 scheduleMgr.setUgcToProgram = function( programTimeSlotId, ugcReferenceNo, set_cb ){
-    ugcModel.findOne({ 'no': ugcReferenceNo }, '_id contentGenre', function (err1, ugc) {
+    ugcModel.findOne({ 'no': ugcReferenceNo }, '_id genre contentGenre projectId fileExtension no ownerId mustPlay', function (err1, ugc) {
         if (!err1){
             var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
             var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded"
