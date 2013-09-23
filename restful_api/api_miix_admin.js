@@ -305,37 +305,37 @@ exports.init = function() {
     
     app.get('/miix_admin/dooh/:doohId/liveContent', function(req, res){
          liveContentList =[{
-                timeslot: [
-                           {start: 1379512800000, 
-                               end: 1379513400000,
-                               liveContentNo: 50,
-                               liveTime: 1379888568199,
-                               url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'},
-                               {start: 1379512800000,
-                                   end: 1379513400000,
-                                   liveContentNo: 50,
-                                   liveTime: 1379888568199,
-                                   url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'}
-                               ],
-                no: 1999,
-                userRawContent:{content:'https://s3.amazonaws.com/miix_content/user_project/mood-512de6f7989cfc240300000e-20130923T054355125Z/user_data/_cdv_photo_001.jpg'}
+			        LiveContent: [
+			                       {
+			                       liveContentNo: 50,
+			                       liveTime: 1379888568199,
+			                       url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'},
+			                       {
+			                       liveContentNo: 51,
+			                       liveTime: 1379888568199,
+			                       url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'}
+			                     ],
+			        start: 1379512800000, 
+			        end: 1379513400000,
+			        no: 1999,
+			        userRawContent:{content:'https://s3.amazonaws.com/miix_content/user_project/mood-512de6f7989cfc240300000e-20130923T054355125Z/user_data/_cdv_photo_001.jpg'}
         },
         {
-            timeslot: [
-                       {start: 1379512800000, 
-                           end: 1379513400000,
-                           liveContentNo: 50,
-                           liveTime: 1379888568199,
-                           url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'},
-                           {start: 1379512800000,
-                               end: 1379513400000,
-                               liveContentNo: 50,
-                               liveTime: 1379888568199,
-                               url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'}
-                           ],
-            no: 2000,
-            userRawContent:{content:'https://s3.amazonaws.com/miix_content/user_project/mood-512de6f7989cfc240300000e-20130923T054355125Z/user_data/_cdv_photo_001.jpg'}
-    }
+		        	LiveContent: [
+		                           {
+		                           liveContentNo: 52,
+		                           liveTime: 1379888568199,
+		                           url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'},
+		                           {
+		                               liveContentNo: 53,
+		                               liveTime: 1379888568199,
+		                               url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'}
+		                          ],
+		            start: 1379512800000, 
+		            end: 1379513400000,
+		            no: 2000,
+		            userRawContent:{content:'https://s3.amazonaws.com/miix_content/user_project/mood-512de6f7989cfc240300000e-20130923T054355125Z/user_data/_cdv_photo_001.jpg'}
+        }
         ];
         res.send(200, liveContentList);
     });

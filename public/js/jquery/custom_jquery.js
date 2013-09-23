@@ -167,8 +167,20 @@ $(document).ready(function(){
                               	});
 	
 	var tbody=$("<tbody>");
+	var title_tr=$("<tr>");
+	var title_td=$("<td>").html("title");
+		//title_td1.html("aaa");
+	var title_td2=$("<td>").html("aaa");
+	var title_td3=$("<td>").html("bbb");
+	
+	title_tr.append(title_td);
+	title_tr.append(title_td2);
+	title_tr.append(title_td3);
+
+	
 	form.append(table);
 	table.append(tbody);
+	tbody.append(title_tr);
 	
 	for(var i=0;i<res.length;i++){
 		
@@ -178,9 +190,19 @@ if(i%2==0){
 	var tr=$("<tr>").attr({class:""});
 }
 
+var s3img=$("<img>").attr({src:res[i].userRawContent.content});
+
 var td_1=$("<td>").html("1");
-var td_2=$("<td>").html("2");
-var td_3=$("<td>").html("3");
+var td_2=$("<td>").html(res[i].no);
+var td_3=$("<td>").html(s3img);
+
+
+/*var post_live_time=new Date(parseInt(FmMobile.liveTime));
+var post_year=post_live_time.getFullYear();
+var post_month=post_live_time.getMonth()+1;
+var post_date=post_live_time.getDate();
+var post_hours=post_live_time.getHours();*/
+
 
 
 tbody.append(tr);
