@@ -25,6 +25,7 @@ var recordTime = '';
 var savePath = '';
 var fileList = [];
 var ownerList = [];
+var projectIdList = [];
 var awsS3List = [];
 var doohPreviewList = [];
     
@@ -135,6 +136,7 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
         };
         fileList = [];
         ownerList = [];
+        projectIdList = [];
         awsS3List = [];
         doohPreviewList = [];
     });
@@ -223,6 +225,7 @@ var imageNaming = function(ugcInfo, naming_cb){
     var name = '';
     ugcModel.find({"_id": ugcInfo.content._id}).exec(function (_err, result) {
         ownerList.push(result[0].ownerId);
+        projectIdList.push(result[0].projectId);
         doohPreviewList.push({ doohPreviewUrl: result[0].doohPreviewUrl, url: result[0].url.s3 });
         name = ugcInfo.contentGenre + '-' + 
                result[0].ownerId._id + '-' + 
@@ -272,6 +275,7 @@ var updateToUGC = function(updateUGC_cb){
             'url': { 's3': awsS3List[i], 'longPhoto': doohPreviewList[i].url },
             'genre': 'miix_image_live_photo',
             'projectId': projectId[0],
+            'sourceId': projectIdList[i],
             'liveTime': parseInt(recordTime)
         };
         var photoUrl = 
@@ -382,6 +386,7 @@ var updateVideoToUGC = function(programInterval, updateVideoToUGC_cb){
                 'url': { 's3': awsS3List[0]},
                 'genre': 'miix_story',
                 'projectId': projectId[0],
+                'sourceId': projectIdList[i],
                 'liveTime': parseInt(recordTime)
             };
             db.addUserLiveContent(vjson, function(err, result){
