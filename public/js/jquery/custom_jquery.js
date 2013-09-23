@@ -19,7 +19,7 @@ var intervalOfPlanningDoohProgrames = null;
 
 
 //PageList object implementation
-function PageList( listType, rowsPerPage, urlToGetListContent){
+function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction){
     var _this = this;
     this.currentPage = 1;
     this.rowsPerPage = rowsPerPage;
@@ -27,6 +27,7 @@ function PageList( listType, rowsPerPage, urlToGetListContent){
     this.totalPageNumber = 1;
     this.listType = listType;
     this.extraParameters = null;
+    this.drawPageFunction = drawPageFunction;
     $.get('/miix_admin/list_size', {listType: listType, token: localStorage.token}, function(res){
         if (!res.err){
             var listSize = res.size;
@@ -34,6 +35,7 @@ function PageList( listType, rowsPerPage, urlToGetListContent){
             $('#totalPage').html(FM.currentContent.totalPageNumber);
         }
     });
+    
 }; 
 
 PageList.prototype.setExtraParameters = function(extraParameters){
@@ -46,10 +48,15 @@ PageList.prototype.showPageContent = function(Page,condition){
         if(res.message){
             console.log("[Response] message:" + res.message);
         }else{
-            _this.currentPage = Page;
-            $('#table-content').html(res);
-            $('#pageNoInput').attr('value',_this.currentPage);
-            $('input#rowsPerPage').attr('value', _this.rowsPerPage);
+            if (!this.drawPageFunction){
+                _this.currentPage = Page;
+                $('#table-content').html(res);
+                $('#pageNoInput').attr('value',_this.currentPage);
+                $('input#rowsPerPage').attr('value', _this.rowsPerPage);
+            }
+            else { //drawPageFunction exists
+                this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
+            }
         }
     });
 
