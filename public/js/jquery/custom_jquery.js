@@ -47,21 +47,24 @@ PageList.prototype.showPageContent = function(Page,condition){
     $.get(this.urlToGetListContent, {skip: (Page-1)*this.rowsPerPage, limit: this.rowsPerPage, token:localStorage.token, condition:conditions, extraParameters: JSON.stringify(this.extraParameters)}, function(res){
         if(res.message){
             console.log("[Response] message:" + res.message);
+            
         }else{
-            if (!this.drawPageFunction){
+            if (!_this.drawPageFunction){
                 _this.currentPage = Page;
                 $('#table-content').html(res);
                 $('#pageNoInput').attr('value',_this.currentPage);
                 $('input#rowsPerPage').attr('value', _this.rowsPerPage);
             }
             else { //drawPageFunction exists
-                this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
+			console.log(res);
+                _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
             }
         }
     });
 
     $.get('/miix_admin/list_size', {listType: this.listType, token: localStorage.token}, function(res){
         if (!res.err){
+		//console.log(res);
             var listSize = res.size;
             _this.totalPageNumber = Math.ceil(res.size/_this.rowsPerPage); 
             $('#totalPage').html(FM.currentContent.totalPageNumber);
@@ -140,7 +143,7 @@ $(document).ready(function(){
 
 });
 
-//Main Page 
+//Main P age 
 $(document).ready(function(){
     FM.memberList = new PageList( 'memberList', 8, '/miix_admin/members');
     FM.miixPlayList = new PageList( 'miixMovieList', 5, '/miix_admin/miix_movies');
@@ -149,6 +152,50 @@ $(document).ready(function(){
     FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 5, '/miix_admin/doohs/'+DEFAULT_DOOH+'/timeslots');
     FM.historyList = new PageList( 'historyList', 10, '/miix_admin/sessions/ ');
     FM.highlightList = new PageList( 'highlightList', 5, '/miix_admin/highlight');
+	FM.live_check = new PageList( 'live_check', 5,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',function(res){
+	console.log('');
+	console.dir(res);
+	//alert(res);
+	$('#table-content').html("");
+	var form=$("<form>");
+	$('#table-content').append(form);
+	var table=$("<table>").attr({id:"hello",
+                                 width:"100%",
+                                 border:"0",
+                                 cellpadding:"0",
+                                 cellspacing:"0"
+                              	});
+	
+	var tbody=$("<tbody>");
+	form.append(table);
+	table.append(tbody);
+	
+	for(var i=0;i<res.length;i++){
+		
+if(i%2==0){
+	var tr=$("<tr>").attr({class:"live_alternate-row"});
+}else{
+	var tr=$("<tr>").attr({class:""});
+}
+
+var td_1=$("<td>").html("1");
+var td_2=$("<td>").html("2");
+var td_3=$("<td>").html("3");
+
+
+tbody.append(tr);
+tr.append(td_1);
+tr.append(td_2);
+tr.append(td_3);
+
+// table.html("test");
+
+//form.append(table);
+	}
+	
+	
+	
+	});
 
     FM.currentContent = FM.memberList;
 
@@ -225,6 +272,38 @@ $(document).ready(function(){
         $('#table-content-header').html('');
 
     });
+	
+	
+	
+	 $('#live_check').click(function(){
+        //conditions = {};
+		
+		/*var table=$("<table>").attr({id:"hello",
+		                             width:"100%"});
+		var tbody=$("<tbody>");
+		var tr=$("<tr>").attr({class:"alternate-row"});
+		var td_1=$("<td>").html("1");
+		var td_2=$("<td>").html("2");
+		var td_3=$("<td>").html("3");
+		
+		table.append(tbody);
+		tbody.append(tr);
+		tr.append(td_1);
+		tr.append(td_2);
+		tr.append(td_3);
+		
+		//table.html("test");
+        $('#table-content').html(table);*/
+        
+		$('#main_menu ul[class="current"]').attr("class", "select");
+        $('#live_check').attr("class", "current");
+
+        FM.currentContent = FM.live_check;
+        FM.currentContent.showCurrentPageContent();
+        $('#table-content-header').html('');
+
+    });
+	
 
     $('#UGCPlayListBtn').click(function(){
         $('#main_menu ul[class="current"]').attr("class", "select");
