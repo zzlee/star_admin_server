@@ -302,14 +302,16 @@ var updateToUGC = function(updateUGC_cb){
             //if(err) console.log(err);
             //else console.log(result);
             //if(!err) fmapi._fbPostUGCThenAdd(vjson);
-            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
-                if(err)
-                    logger.info('Post message and pictrue to user is Error: ' + err);
-                else
-                    logger.info('Post message and pictrue to user is Success: ' + res);
-                i++;
-                (i < ownerList.length)?update():updateUGC_cb(null, 'done');
-            });
+//            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
+//                if(err)
+//                    logger.info('Post message and pictrue to user is Error: ' + err);
+//                else
+//                    logger.info('Post message and pictrue to user is Success: ' + res);
+//                i++;
+//                (i < ownerList.length)?update():updateUGC_cb(null, 'done');
+//            });
+            i++;
+            (i < ownerList.length)?update():updateUGC_cb(null, 'done');
         });
     };
     update();
