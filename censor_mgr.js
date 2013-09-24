@@ -395,7 +395,6 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
                     limit = pageLimit;
                 else 
                     limit = result.length;
-                console.log('limit'+limit);
                 if(limit > 0){
                 async.eachSeries(result, mappingLiveContentList, function(err0){
                     if (!err0) {
@@ -434,7 +433,7 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
 };//getLiveContentList end
 
 censorMgr.updateLiveContents = function(liveContent_Id, vjson, cb){
-    // console.dir(vjson);
+    
     FMDB.updateAdoc(userLiveContentModel, liveContent_Id, vjson, function(err, result){
         if(err) {
             logger.error('[updateLiveContents_updateAdoc]', err);
@@ -449,7 +448,6 @@ censorMgr.updateLiveContents = function(liveContent_Id, vjson, cb){
 };
 
 censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcCensorNo, postPicture_cb){
-    console.log(type);
     
     var access_token;
     var fb_name, playTime, start, link;
@@ -518,7 +516,6 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
              message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
                 '下次您登上大螢幕，您的作品會成為必播主打。造成不變請見諒。\n';
         }
-        console.log(message+message);
         async.waterfall([
             function(push_cb){
                 pushMgr.sendMessageToDeviceByMemberId(member[0]._id, message, function(err, res){
