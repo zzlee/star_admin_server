@@ -196,9 +196,18 @@ if(i%2==0){
 	var tr=$("<tr>").attr({class:""});
 }
 
+if(res[i].liveContent[0]){
 var s3img=$("<img>").attr({src:res[i].liveContent[0].url.longPhoto,
 	                       width:"400",
 	                       height:"150"});
+}else{
+
+var s3img=$("<div>").attr({
+	                       width:"400",
+	                       height:"150"}).html("live content 尚未產生喔~");
+}
+
+
 
 
 
@@ -276,7 +285,10 @@ for(var j=0;j<res[i].liveContent.length;j++){
         name:"yo",
         value:res[i].liveContent[j].ownerId.userID,
         "s3url":res[i].liveContent[j].url.s3,
+		"longPic":res[i].liveContent[j].url.longPhoto,
         "_id":res[i].liveContent[j]._id,
+		"liveTime":res[i].liveContent[j].liveTime,
+		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"correct"});
 	var boxInput3 = $("<input>").attr({type:"radio",
 		id:"boxCheckLive",
@@ -284,7 +296,10 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		name:"yo",
         value:res[i].liveContent[j].ownerId.userID,
         "s3url":res[i].liveContent[j].url.s3,
+		"longPic":res[i].liveContent[j].url.longPhoto,
         "_id":res[i].liveContent[j]._id,
+		"liveTime":res[i].liveContent[j].liveTime,
+		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"incorrect"});
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput);
@@ -329,17 +344,36 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	    	var userID=$(this).attr("value");
 	    	var s3Url=$(this).attr("s3url");
 	    	var picType=$(this).attr("_type");
+			var longPic=$(this).attr("longPic");
+			var liveTime=$(this).attr("liveTime");
+			var ugcCensorNo=$(this).attr("ugcCensorNo");
 	    	
 	    	console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
 	    	
-	    	var url=DOMAIN+'miix_admin/dooh/:doohId/liveContent';
+	    	var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
 	    	$.ajax({
                 url: url,
                 type: 'PUT',
                 data: {liveContent_Id:_id,
                 	   userID:userID,
                 	   photoUrl:s3Url,
-                	   type:picType},
+                	   vjson:{state: picType}},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
+			
+			var url=DOMAIN+"fbItem/"+userID;
+	    	$.ajax({
+                url: url,
+                type: 'POST',
+                data: {s3Url: s3Url,
+                	   longPic: longPic,
+                	   type: picType,
+					   liveTime: liveTime,
+					   ugcCensorNo: ugcCensorNo},
                 success: function(response) {
                     if(response.message){
                         console.log("[Response] message:" + response.message);
@@ -369,23 +403,42 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	    	var userID=$(this).attr("value");
 	    	var s3Url=$(this).attr("s3url");
 	    	var picType=$(this).attr("_type");
+			var longPic=$(this).attr("longPic");
+			var liveTime=$(this).attr("liveTime");
+			var ugcCensorNo=$(this).attr("ugcCensorNo");
 	    	
 	    	console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
 	    	
-	    	var url=DOMAIN+'miix_admin/dooh/:doohId/liveContent';
+	    	var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
 	    	$.ajax({
                 url: url,
                 type: 'PUT',
                 data: {liveContent_Id:_id,
                 	   userID:userID,
                 	   photoUrl:s3Url,
-                	   type:picType},
+                	   vjson:{state: picType}},
                 success: function(response) {
                     if(response.message){
                         console.log("[Response] message:" + response.message);
                     }
                 }
             });
+	    	
+	          var url=DOMAIN+"fbItem/"+userID;
+	            $.ajax({
+	                url: url,
+	                type: 'POST',
+	                data: {s3Url: s3Url,
+	                       longPic: longPic,
+	                       type: picType,
+	                       liveTime: liveTime,
+	                       ugcCensorNo: ugcCensorNo},
+	                success: function(response) {
+	                    if(response.message){
+	                        console.log("[Response] message:" + response.message);
+	                    }
+	                }
+	            });
 	    	
 	    	
 	    });

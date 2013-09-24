@@ -337,7 +337,7 @@ FM.censorHandler.getLiveContentList_get_cb = function(req, res){
 
 FM.censorHandler.updateLiveContents_get_cb = function(req, res){
 
-    var liveContent_Id =  req.body._id;
+    var liveContent_Id =  req.body.liveContent_Id;
     var vjson = req.body.vjson;
 
     censorMgr.updateLiveContents(liveContent_Id, vjson, function(err, result){
@@ -351,11 +351,16 @@ FM.censorHandler.updateLiveContents_get_cb = function(req, res){
     
 };
 FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
-    
+
     var fb_Id =  req.params.fbId;
-    var photoUrl = req.body.photoUrl;
-    
-  censorMgr.postMessageAndPicture(fb_Id, photoUrl, type, function(err, result){
+    var photoUrl = {preview: req.body.longPic,
+					play:req.body.s3Url
+                    };
+    var type = req.body.type;
+	var liveTime = req.body.liveTime;
+    var ugcCensorNo = req.body.ugcCensorNo;
+	
+  censorMgr.postMessageAndPicture(fb_Id, photoUrl, type, liveTime, ugcCensorNo, function(err, result){
   if (!err){
       res.send(200, {message: result});
   }
