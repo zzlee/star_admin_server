@@ -170,7 +170,7 @@ $(document).ready(function(){
 	
 	var tbody=$("<tbody>");
 	var title_tr=$("<tr>");
-	var title_td=$("<td>").html("播放時間");
+	var title_td=$("<td>").attr({class:"table-header-repeat line-left minwidth-1"}).html("播放時間");
 		//title_td1.html("aaa");
 	var title_td2=$("<td>").html("影片編號");
 	var title_td3=$("<td>").html("原始ugc");
@@ -266,24 +266,35 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	var boxForm = $("<form>").attr({style:"display: inline-block;vertical-align:400%"});
 	var boxInput = $("<input>").attr({type:"radio",
 		                              name:"yo",
-		                              value:"ha"});
+		                              value:"ha",
+		                              checked:"checked"});
 	var boxInput2 = $("<input>").attr({type:"radio",
+		id:"boxCheckLive",
+		class:"good",
         name:"yo",
-        value:"ha"});
+        value:res[i].liveContent[j].ownerId.userID,
+        "s3url":res[i].liveContent[j].url.s3,
+        "_id":res[i].liveContent[j]._id,
+        "_type":"correct"});
 	var boxInput3 = $("<input>").attr({type:"radio",
-        name:"yo",
-        value:"ha"});
+		id:"boxCheckLive",
+        class:"bad",
+		name:"yo",
+        value:res[i].liveContent[j].ownerId.userID,
+        "s3url":res[i].liveContent[j].url.s3,
+        "_id":res[i].liveContent[j]._id,
+        "_type":"incorrect"});
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput);
-	boxForm.append("b1");
+	boxForm.append("default");
 	boxForm.append("<br>");
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput2);
-	boxForm.append("b2");
+	boxForm.append("正確");
 	boxForm.append("<br>");
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput3);
-	boxForm.append("b3");
+	boxForm.append("失敗");
 	/* ends of radio box */
 	tr_4.prepend(sp);
 	tr.append(tr_4);
@@ -296,6 +307,112 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	}
 	
 	
+	  $("#boxCheckLive.good").click(function(){
+		  //alert("g");
+		  
+		  
+		  var forComfirm=confirm("你按下的是 ***正確***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
+		  if (forComfirm==true)
+		    {
+		  // alert("good");
+		    }
+		  else
+		    {
+		   //alert("><");
+		   return false;
+		    }
+		  
+		  
+	    	var _id=$(this).attr("_id");
+	    	var userID=$(this).attr("value");
+	    	var s3Url=$(this).attr("s3url");
+	    	var picType=$(this).attr("_type");
+	    	
+	    	console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
+	    	
+	    	var url=DOMAIN+'miix_admin/dooh/:doohId/liveContent';
+	    	$.ajax({
+                url: url,
+                type: 'PUT',
+                data: {liveContent_Id:_id,
+                	   userID:userID,
+                	   photoUrl:s3Url,
+                	   type:picType},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
+	    	
+	    });
+	  $("#boxCheckLive.bad").click(function(){
+		  // alert("b");
+		  
+		  
+		 
+		  var forComfirm=confirm("你按下的是 ***失敗***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
+		  if (forComfirm==true)
+		    {
+		   //alert("good");
+		    }
+		  else
+		    {
+		   //alert("><");
+		  return false;
+		    }
+		  
+		  
+	    	var _id=$(this).attr("_id");
+	    	var userID=$(this).attr("value");
+	    	var s3Url=$(this).attr("s3url");
+	    	var picType=$(this).attr("_type");
+	    	
+	    	console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
+	    	
+	    	var url=DOMAIN+'miix_admin/dooh/:doohId/liveContent';
+	    	$.ajax({
+                url: url,
+                type: 'PUT',
+                data: {liveContent_Id:_id,
+                	   userID:userID,
+                	   photoUrl:s3Url,
+                	   type:picType},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
+	    	
+	    	
+	    });
+	  
+	  $.get('/miix_admin/table_censorHistoryList_head.html', function(res){
+          $('#table-content-header').html(res);
+         // $('#table-content').html('');
+
+          $('#createHistoryProgramListBtn').click(function(){
+        	 // $('#table-content').html('');
+              var flag = 0;
+              var inputSearchData = {};
+
+              $('#condition-inner input[class="createHistoryProgramListBtn"]').each(function(i){
+
+                  inputSearchData[$(this).attr("name")] = $(this).attr("value");
+                  if($(this).attr("value") == "" && flag == 0){
+                      alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00');
+                      flag = 1; 
+                  }else{
+                      conditions = inputSearchData;
+                  }
+              });
+              FM.currentContent = FM.live_check;
+              FM.currentContent.showCurrentPageContent();   
+
+          });
+	  });
+	  
 	
 	});
 
@@ -554,6 +671,9 @@ for(var j=0;j<res[i].liveContent.length;j++){
 
     });
     
+    
+  
+    
     // Ajax ---------------------------------------------------------------------    
     $(document).ajaxComplete(function(event,request, settings) {
 
@@ -653,6 +773,9 @@ for(var j=0;j<res[i].liveContent.length;j++){
             /**
              * checkbox
              */
+            
+            
+            
             $('#ugcCensor.ugcCensorNoa').click(function(){
                 var url = DOMAIN + "user_content_attribute";
                 var no = $(this).attr("name");
