@@ -179,7 +179,7 @@ var cuttingImageFromVideo = function(option, action, cuttingImage_cb){
 };
 
 var actionSetting = function(programList, action_setting_cb){
-    //[contentGenre]-[ownerId._id]-[time stamp]
+    //[contentGenre]-[ownerId._id]-[time stamp]-[record time]
     var part = 0,
         ugcList = [],
         action = [];
@@ -188,7 +188,8 @@ var actionSetting = function(programList, action_setting_cb){
             ugcList.push(result[0]);
             naming_cb( program.contentGenre + '-' + 
                        result[0].ownerId._id + '-' + 
-                       program.timeStamp + '.jpg' );
+                       program.timeStamp + '-' +
+                       recordTime + '.jpg' );
         });
     };    
     var setting = function(program){
