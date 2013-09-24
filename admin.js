@@ -17,7 +17,7 @@ FM.ADMIN = (function(){
          */
             isValid: function(condition, cb){
                
-                var field = {"_id": 1};
+                var field = {"_id": 1, "role": 1};
                 FMDB.getValueOf(admin, condition, field, cb);
             },
             

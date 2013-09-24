@@ -30,8 +30,8 @@ FM.admin.get_cb = function(req, res){
     */
     FM_LOG("[admin.get_cb]");
     //res.render('login');
-    var loginHtml = path.join(workingPath, 'public/admin_login.html');
-    var mainAdminPageHtml = path.join(workingPath, 'public/admin_frame.html');
+    var loginHtml = path.join(workingPath, 'public/miix_admin/admin_login.html');
+    var mainAdminPageHtml = path.join(workingPath, 'public/miix_admin/admin_frame.html');
     
     if (!req.session.admin_user) {
         res.sendfile(loginHtml);
@@ -43,22 +43,28 @@ FM.admin.get_cb = function(req, res){
 
 
 FM.admin.login_get_cb = function(req, res){
+    var role;
     
     //FM_LOG("[admin.login] " + JSON.stringify(req.query));
     if(req.query.id && req.query.password){
-    
+        debugger;
         admin_mgr.isValid(req.query, function(err, result){
             if(err) logger.error("[admin.login_get_cb] ", err);
             if(result){
                 FM_LOG("[Login Success!]");
                 req.session.admin_user = {
                     hexOfObjectID: result._id.toHexString(),
-                    id: req.query.id
+                    id: req.query.id,
+                    role: result.role
                 };
                 
+                var _result = JSON.parse(JSON.stringify( result ));
+
                 tokenMgr.getToken(req.query.id, function(_err, _token){
                     if (!err){
-                        res.send(200, {token: _token});
+                        var resObj = {token: _token, role: _result.role};
+
+                        res.send(200, resObj);
                     }
                     else {
                         res.send(401, {message: _err});

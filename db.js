@@ -317,6 +317,7 @@ FM.DB = (function(){
             fb_postId: [{
                 postId: String,
             }],
+            sourceId: {type: String},   //UGC projectId
         }); //  UserLiveContent collection
 		
         /****************** End of DB Schema ******************/
