@@ -297,5 +297,78 @@ FM.censorHandler.getHighlightUGCList_get_cb = function(req,res){
 
 };
 
+FM.censorHandler.getLiveContentList_get_cb = function(req, res){
+    
+    var condition;
+    var sort;
+    var limit;
+    var skip;
+    //default
+    condition = {
+            "type": "UGC",
+            "timeslot.start": {$gte: (new Date("1911/1/1 00:00:00")).getTime(), $lt: (new Date("9999/12/31 12:59:59")).getTime()},
+            "state": "confirmed"
+    };
+    sort = {
+    		"timeslot.start":-1,
+            "content.no":-1
+    };
+    if(req.query.condition)   
+        condition = {
+            "type": "UGC",
+            "timeslot.start": {$gte: (new Date(req.query.condition.playtimeStart)).getTime(), $lt: (new Date(req.query.condition.playtimeEnd)).getTime()},
+            "state": "confirmed"
+    };
+    if(req.query.sort) 
+        sort = req.query.sort;
+
+    limit = req.query.limit;
+    skip = req.query.skip;
+    censorMgr.getLiveContentList(condition, sort, limit, skip, function(err, liveContentList){
+        if (!err){
+            res.send(200, liveContentList);
+        }
+        else{
+            res.send(400, {error: err});
+        }
+    });
+
+};
+
+FM.censorHandler.updateLiveContents_get_cb = function(req, res){
+
+    var liveContent_Id =  req.body.liveContent_Id;
+    var vjson = req.body.vjson;
+
+    censorMgr.updateLiveContents(liveContent_Id, vjson, function(err, result){
+            if (!err){
+                res.send(200, {message: result});
+            }
+            else{
+                res.send(400, {error: err});
+            }
+        });
+    
+};
+FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
+
+    var fb_Id =  req.params.fbId;
+    var photoUrl = {preview: req.body.longPic,
+					play:req.body.s3Url
+                    };
+    var type = req.body.type;
+	var liveTime = req.body.liveTime;
+    var ugcCensorNo = req.body.ugcCensorNo;
+	
+  censorMgr.postMessageAndPicture(fb_Id, photoUrl, type, liveTime, ugcCensorNo, function(err, result){
+  if (!err){
+      res.send(200, {message: result});
+  }
+  else{
+      res.send(400, {error: err});
+  }
+});
+
+};
 
 module.exports = FM.censorHandler;

@@ -357,6 +357,13 @@ a:hover.icon-5	{
 #product-table tr.alternate-row	{
 	background: #ececec;
 	}
+	
+.live_alternate-row	{
+	background: #ececec;
+	}
+	
+	
+	
 td.options-width	{
 	padding: 0 0 0 10px;
 	width: 210px;

@@ -7,8 +7,12 @@ var FMDB = require('./db.js');
 var UGC_mgr = require('./UGC.js');
 var sheculeMgr = require('./schedule_mgr.js');
 var member_mgr = require('./member.js');
+var pushMgr = require('./push_mgr.js');
 
 var UGCs = FMDB.getDocModel("ugc");
+var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
+var userLiveContentModel = FMDB.getDocModel("userLiveContent");
+var memberModel = FMDB.getDocModel("member");
 
 sheculeMgr.init(censorMgr);
 
@@ -377,4 +381,199 @@ censorMgr.getPlayList = function(programList, updateUGC, cb){
 };
 
 
+censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb){
+
+    if (pageLimit) {
+        FMDB.listOfdocModels( programTimeSlotModel, condition, null, {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
+            if(err) {
+                logger.error('[censorMgr.getLiveContentList.listOfdocModels] err=', err);
+                cb(err, null);
+            }
+            if(result){
+                // console.log(result);
+                if(pageSkip < result.length && pageLimit < result.length)
+                    limit = pageLimit;
+                else 
+                    limit = result.length;
+                if(limit > 0){
+                async.eachSeries(result, mappingLiveContentList, function(err0){
+                    if (!err0) {
+                        cb(err, liveContentList);
+                    }
+                    else{
+                        logger.error('[censorMgr.getLiveContentList.mappingLiveContentList] err=',err0);
+                    }
+                });
+                }else
+                    cb(err, liveContentList);
+            }
+        });
+    }
+        var liveContentList = [];
+
+        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, arr) {
+            arr.push({
+                ugcCensorNo: ugcCensorNo,
+                liveContent: liveContent,
+                start: start,
+                end: end,
+                
+            });
+        };  
+        var mappingLiveContentList = function(data, cbOfMappingLiveContentList){
+            userLiveContentModel.find({'liveTime': {$gte: data.timeslot.start, $lt: data.timeslot.end}, "sourceId": data.content.projectId}).exec(function(err, result){
+                if(!err){
+                    LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, liveContentList);
+                    cbOfMappingLiveContentList(null); 
+                }else{
+                    cbOfMappingLiveContentList(err); 
+                }
+            });
+        };
+};//getLiveContentList end
+
+censorMgr.updateLiveContents = function(liveContent_Id, vjson, cb){
+    
+    FMDB.updateAdoc(userLiveContentModel, liveContent_Id, vjson, function(err, result){
+        if(err) {
+            logger.error('[updateLiveContents_updateAdoc]', err);
+            cb(err,null);
+        }
+        if(result){
+            cb(null,'successful');
+            logger.info('[updateLiveContents_updateAdoc] successful', liveContent_Id);
+          //console.log('updateAdoc_result'+result);
+        }
+    });
+};
+
+censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcCensorNo, postPicture_cb){
+    
+    var access_token;
+    var fb_name, playTime, start, link;
+    
+    var pushPhotosToUser = function(albumId, pushPhotos_cb){
+        async.series([
+            /*function(simulate){
+                message = fb_name + '於' + playTime + '，登上台北天幕LED，上大螢幕APP特此感謝他精采的作品！\n' + 
+                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
+                //facebookMgr.postPhoto(access_token, message, photoUrl.simulate, albumId, simulate);
+                facebookMgr.postMessageAndShare(access_token, message, { link: photoUrl.simulate }, function(err, res){
+                    (!err)?simulate(null, true):simulate(null, false);
+                });
+            },*/
+            function(preview){
+                var message = fb_name + '於' + playTime + '，登上台北天幕LED，，這是原始刊登素材，天幕尺寸：100公尺x16公尺。\n' + 
+                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
+                //facebookMgr.postPhoto(access_token, message, photoUrl.preview, albumId, preview);
+                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.preview }, function(err, res){
+                    (!err)?preview(null, true):preview(null, false);
+                });
+            },
+            function(play){
+                var message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝他精采的作品！\n' + 
+                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
+                //facebookMgr.postPhoto(access_token, message, photoUrl.play, albumId, play);
+                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.play }, function(err, res){
+                    (!err)?play(null, true):play(null, false);
+                });
+            },
+        ], function(err, res){
+            //(err)?console.log(err):console.dir(res);
+            /* if(!err){
+                logger.info('post message to user on facebook, fb id is ' + fb_id);
+                pushPhotos_cb(null, 'done');
+            }
+            else
+                pushPhotos_cb(err, null); */
+            
+            (err)?logger.info('post message to user on facebook is failed, fb id is ' + fb_id):'';
+            (res[0])?logger.info('post preview message to user on facebook is success, fb id is ' + fb_id):logger.info('post preview message to user on facebook is failed, fb id is ' + fb_id);
+            (res[1])?logger.info('post play message to user on facebook is success, fb id is ' + fb_id):logger.info('post play message to user on facebook is failed, fb id is ' + fb_id);
+            pushPhotos_cb(null, 'done');
+        });
+    };
+    //
+    async.waterfall([
+        function(memberSearch){
+            memberModel.find({'fb.userID': fb_id}).exec(memberSearch);
+        },
+    ], function(err, member){
+        access_token = member[0].fb.auth.accessToken;
+        fb_name = member[0].fb.userName;
+        start = new Date(parseInt(liveTime));
+        if(start.getHours()>12)
+            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes();
+        else
+            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes();
+        
+        var album_name = '實況記錄：' + start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日' + '登上台北天幕LED';
+        var album_message = '';
+        if(type == 'correct'){
+         message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
+                      '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
+        }else{
+             message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                '下次您登上大螢幕，您的作品會成為必播主打。造成不變請見諒。\n';
+        }
+        async.waterfall([
+            function(push_cb){
+                pushMgr.sendMessageToDeviceByMemberId(member[0]._id, message, function(err, res){
+                    logger.info('push played notification to user, member id is ' + member[0]._id);
+                    push_cb(err, res);
+                });
+            }
+        ], function(err, res){
+            /*facebookMgr.createAlbum(access_token, album_name, album_message, function(err, res){
+                logger.info('create fb album for user, member id is ' + member[0]._id);
+                pushPhotosToUser(JSON.parse(res).id, postPicture_cb);
+            });*/
+            if(type == 'correct'){
+            pushPhotosToUser('', postPicture_cb);
+            }else
+                postPicture_cb(null, 'done');
+            //postPicture_cb(err, res);
+        });
+        
+    });
+};
+
 module.exports = censorMgr;
+
+
+//test
+//var condition;
+//var sort;
+//var limit=10;
+//var skip=0;
+////default
+//condition = {
+//        "type": "UGC",
+//        "timeslot.start": {$gte: 1379952000000, $lt: 1380124800000},
+//        "state": "confirmed"
+//};
+//sort = {
+//        "content.no":-1,
+//        "timeslot.start":-1
+//};
+//
+//censorMgr.getLiveContentList(condition, sort, limit, skip, function(err, LiveContentList){
+//    console.log('--'+err, LiveContentList);
+//    if (!err){
+//        
+////        res.render( 'table_censorHighlight', {ugcCensorMovieList: UGCList} );
+//    }
+//    else{
+////        res.send(400, {error: err});
+//    }
+//});
+//var vjson = {state :"correct"}
+//censorMgr.updateLiveContents("5240b669ffb7f85c03000016", vjson, function(err, result){
+//console.log('--'+err, result);
+//});
+//var photoUrl ={preview:"https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-5226ff08ff6e3af835000009-20130918T090124154Z/cultural_and_creative-5226ff08ff6e3af835000009-20130918T090124154Z.png",
+//        play:"https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-5226ff08ff6e3af835000009-1379972400000-005/cultural_and_creative-5226ff08ff6e3af835000009-1379972400000-005.jpg"
+//        }
+//censorMgr.postMessageAndPicture("100006588456341", photoUrl, "not_checked", 1379972574135, function(err, result){
+//console.log('--'+err, result);
+//});
