@@ -297,5 +297,44 @@ FM.censorHandler.getHighlightUGCList_get_cb = function(req,res){
 
 };
 
+FM.censorHandler.getLiveContentList_get_cb = function(req, res){
+    
+    var condition;
+    var sort;
+    var limit;
+    var skip;
+    //default
+    condition = {
+            "type": "UGC",
+            "timeslot.start": {$gte: 1379952000000, $lt: 1380124800000},
+            "state": "confirmed"
+    };
+    sort = {
+    		"timeslot.start":-1,
+            "content.no":-1
+    };
+    
+    if(req.query.condition)   
+        condition = req.query.condition;
+    if(req.query.sort) 
+        sort = req.query.sort;
+
+    limit = req.query.limit;
+    skip = req.query.skip;
+//    console.log('condition');
+//    console.dir(condition);
+//    console.log('sort');
+//    console.dir(sort);
+//    console.log('limit'+limit, 'skip'+skip);
+    censorMgr.getLiveContentList(condition, sort, limit, skip, function(err, liveContentList){
+        if (!err){
+            res.send(200, liveContentList);
+        }
+        else{
+            res.send(400, {error: err});
+        }
+    });
+
+};
 
 module.exports = FM.censorHandler;

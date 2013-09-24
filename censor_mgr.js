@@ -9,6 +9,8 @@ var sheculeMgr = require('./schedule_mgr.js');
 var member_mgr = require('./member.js');
 
 var UGCs = FMDB.getDocModel("ugc");
+var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
+var userLiveContentModel = FMDB.getDocModel("userLiveContent");
 
 sheculeMgr.init(censorMgr);
 
@@ -377,4 +379,102 @@ censorMgr.getPlayList = function(programList, updateUGC, cb){
 };
 
 
+censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb){
+    var start;
+    var end;
+
+    if(condition.start && condition.end){
+        condition = {
+                "type": "UGC",
+                "timeslot.start": {$gte: condition.start, $lt: condition.end},
+                "state": "confirmed"
+        };
+    }
+//    if ( pageLimit && pageSkip ) {
+    console.log('condition');
+    console.dir(condition);
+    console.log('sort');
+    console.dir(sort);
+    console.log('limit'+pageLimit, 'skip'+pageSkip);
+        FMDB.listOfdocModels( programTimeSlotModel, condition, null, {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
+            if(err) {
+                logger.error('[censorMgr.getLiveContentList.listOfdocModels] err=', err);
+                cb(err, null);
+            }
+            if(result){
+
+                if(pageSkip < result.length && pageLimit < result.length)
+                    limit = pageLimit;
+                else 
+                    limit = result.length;
+                console.log('limit'+limit);
+                if(limit > 0){
+                async.eachSeries(result, mappingLiveContentList, function(err0){
+                    if (!err0) {
+                        console.log(liveContentList);
+                        cb(err, liveContentList);
+                    }
+                    else{
+                        logger.error('[censorMgr.getLiveContentList.mappingLiveContentList] err=',err0);
+                    }
+                });
+                }else
+                    cb(err, liveContentList);
+            }
+        });
+ 
+//    }
+        var liveContentList = [];
+
+        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, userRawContent, arr) {
+            arr.push({
+                ugcCensorNo: ugcCensorNo,
+                liveContent: liveContent,
+                start: start,
+                end: end,
+                userRawContent:userRawContent
+                
+            });
+        };  
+        var mappingLiveContentList = function(data, cbOfMappingLiveContentList){
+            userLiveContentModel.find({'liveTime': {$gte: data.timeslot.start, $lt: data.timeslot.end}, "sourceId": data.content.projectId}).exec(function(err, result){
+                if(!err){
+                    LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, 'no data', liveContentList);
+                    cbOfMappingLiveContentList(null); 
+                }else{
+                    cbOfMappingLiveContentList(err); 
+                }
+            });
+        };
+};//getLiveContentList end
+
+
 module.exports = censorMgr;
+
+
+//test
+//var condition;
+//var sort;
+//var limit=10;
+//var skip=0;
+////default
+//condition = {
+//        "type": "UGC",
+//        "timeslot.start": {$gte: 1379952000000, $lt: 1380124800000},
+//        "state": "confirmed"
+//};
+//sort = {
+//        "content.no":-1,
+//        "timeslot.start":-1
+//};
+//
+//censorMgr.getLiveContentList(condition, sort, limit, skip, function(err, LiveContentList){
+//    console.log('--'+err, LiveContentList);
+//    if (!err){
+//        
+////        res.render( 'table_censorHighlight', {ugcCensorMovieList: UGCList} );
+//    }
+//    else{
+////        res.send(400, {error: err});
+//    }
+//});

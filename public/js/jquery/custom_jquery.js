@@ -154,7 +154,7 @@ $(document).ready(function(){
     FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 5, '/miix_admin/doohs/'+DEFAULT_DOOH+'/timeslots');
     FM.historyList = new PageList( 'historyList', 10, '/miix_admin/sessions/ ');
     FM.highlightList = new PageList( 'highlightList', 5, '/miix_admin/highlight');
-	FM.live_check = new PageList( 'live_check',1,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',function(res){
+	FM.live_check = new PageList( 'live_check',10,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',function(res){
 	console.log('');
 	console.dir(res);
 	//alert(res);
@@ -194,7 +194,9 @@ if(i%2==0){
 	var tr=$("<tr>").attr({class:""});
 }
 
-var s3img=$("<img>").attr({src:res[i].userRawContent.content});
+var s3img=$("<img>").attr({src:res[i].liveContent[0].url.longPhoto,
+	                       width:"400",
+	                       height:"150"});
 
 
 
@@ -216,7 +218,7 @@ var timeString_start_end=post_year_end+"/"+post_month_end+"/"+post_date_end+"  "
 
 
 var td_1=$("<td>").html("start："+timeString_start+"<br>"+"end："+timeString_start_end);
-var td_2=$("<td>").html(res[i].no);
+var td_2=$("<td>").html(res[i].ugcCensorNo);
 var td_3=$("<td>").html(s3img);
 
 
@@ -235,9 +237,9 @@ tr.append(td_3);
 //tr.append(td_4);
 // table.html("test");
 
-for(var j=0;j<res[i].LiveContent.length;j++){
+for(var j=0;j<res[i].liveContent.length;j++){
 	//alert("a");
-	var live_img=$("<img>").attr({src:res[i].LiveContent[j].url,
+	var live_img=$("<img>").attr({src:res[i].liveContent[0].url.s3,
 		                           width:"400",
 		                           height:"200"});
 	var tr_4=$("<tr>").html(live_img);
@@ -245,7 +247,7 @@ for(var j=0;j<res[i].LiveContent.length;j++){
 	
 	
 	
-	var post_live_time=new Date(parseInt(res[i].LiveContent[j].liveTime));
+	var post_live_time=new Date(parseInt(res[i].liveContent[j].liveTime));
 	var post_year=post_live_time.getFullYear();
 	var post_month=post_live_time.getMonth()+1;
 	var post_date=post_live_time.getDate();
@@ -255,7 +257,7 @@ for(var j=0;j<res[i].LiveContent.length;j++){
 	
 	
 	
-	var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].LiveContent[j].liveContentNo+"  		│   "+timeString);
+	var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].liveContent[j].no+"  		│   "+timeString);
 	//var td_4=$("<td>").html("aa");
 	//tr.append(td_4);
 	
