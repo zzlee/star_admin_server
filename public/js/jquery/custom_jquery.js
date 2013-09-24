@@ -58,6 +58,8 @@ PageList.prototype.showPageContent = function(Page,condition){
             else { //drawPageFunction exists
 			console.log(res);
                 _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
+                $('#pageNoInput').attr('value',_this.currentPage);
+                $('input#rowsPerPage').attr('value', _this.rowsPerPage);
             }
         }
     });
@@ -152,7 +154,7 @@ $(document).ready(function(){
     FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 5, '/miix_admin/doohs/'+DEFAULT_DOOH+'/timeslots');
     FM.historyList = new PageList( 'historyList', 10, '/miix_admin/sessions/ ');
     FM.highlightList = new PageList( 'highlightList', 5, '/miix_admin/highlight');
-	FM.live_check = new PageList( 'live_check', 5,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',function(res){
+	FM.live_check = new PageList( 'live_check',1,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',function(res){
 	console.log('');
 	console.dir(res);
 	//alert(res);
@@ -168,14 +170,16 @@ $(document).ready(function(){
 	
 	var tbody=$("<tbody>");
 	var title_tr=$("<tr>");
-	var title_td=$("<td>").html("title");
+	var title_td=$("<td>").html("播放時間");
 		//title_td1.html("aaa");
-	var title_td2=$("<td>").html("aaa");
-	var title_td3=$("<td>").html("bbb");
+	var title_td2=$("<td>").html("影片編號");
+	var title_td3=$("<td>").html("原始ugc");
+	var title_td4=$("<td>").html("live UGC (live number / time / image / radio box)");
 	
 	title_tr.append(title_td);
 	title_tr.append(title_td2);
 	title_tr.append(title_td3);
+	title_tr.append(title_td4);
 
 	
 	form.append(table);
@@ -192,16 +196,35 @@ if(i%2==0){
 
 var s3img=$("<img>").attr({src:res[i].userRawContent.content});
 
-var td_1=$("<td>").html("1");
+
+
+var post_live_time_start=new Date(parseInt(res[i].start));
+var post_year_start=post_live_time_start.getFullYear();
+var post_month_start=post_live_time_start.getMonth()+1;
+var post_date_start=post_live_time_start.getDate();
+var post_hours_start=post_live_time_start.getHours();
+var post_minutes_start=post_live_time_start.getMinutes();
+var timeString_start=post_year_start+"/"+post_month_start+"/"+post_date_start+"  "+post_hours_start+":"+post_minutes_start;
+
+var post_live_time_end=new Date(parseInt(res[i].end));
+var post_year_end=post_live_time_end.getFullYear();
+var post_month_end=post_live_time_end.getMonth()+1;
+var post_date_end=post_live_time_end.getDate();
+var post_hours_end=post_live_time_end.getHours();
+var post_minutes_end=post_live_time_end.getMinutes();
+var timeString_start_end=post_year_end+"/"+post_month_end+"/"+post_date_end+"  "+post_hours_end+":"+post_minutes_end;
+
+
+var td_1=$("<td>").html("start："+timeString_start+"<br>"+"end："+timeString_start_end);
 var td_2=$("<td>").html(res[i].no);
 var td_3=$("<td>").html(s3img);
 
 
-/*var post_live_time=new Date(parseInt(FmMobile.liveTime));
-var post_year=post_live_time.getFullYear();
-var post_month=post_live_time.getMonth()+1;
-var post_date=post_live_time.getDate();
-var post_hours=post_live_time.getHours();*/
+var td_4=$("<td>").html("hi");
+
+
+
+
 
 
 
@@ -209,8 +232,63 @@ tbody.append(tr);
 tr.append(td_1);
 tr.append(td_2);
 tr.append(td_3);
-
+//tr.append(td_4);
 // table.html("test");
+
+for(var j=0;j<res[i].LiveContent.length;j++){
+	//alert("a");
+	var live_img=$("<img>").attr({src:res[i].LiveContent[j].url,
+		                           width:"400",
+		                           height:"200"});
+	var tr_4=$("<tr>").html(live_img);
+	
+	
+	
+	
+	var post_live_time=new Date(parseInt(res[i].LiveContent[j].liveTime));
+	var post_year=post_live_time.getFullYear();
+	var post_month=post_live_time.getMonth()+1;
+	var post_date=post_live_time.getDate();
+	var post_hours=post_live_time.getHours();
+	var post_minutes=post_live_time.getMinutes();
+	var timeString=post_year+"/"+post_month+"/"+post_date+"  "+post_hours+":"+post_minutes;
+	
+	
+	
+	var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].LiveContent[j].liveContentNo+"  		│   "+timeString);
+	//var td_4=$("<td>").html("aa");
+	//tr.append(td_4);
+	
+	/* radio box  */
+	
+	var boxForm = $("<form>").attr({style:"display: inline-block;vertical-align:400%"});
+	var boxInput = $("<input>").attr({type:"radio",
+		                              name:"yo",
+		                              value:"ha"});
+	var boxInput2 = $("<input>").attr({type:"radio",
+        name:"yo",
+        value:"ha"});
+	var boxInput3 = $("<input>").attr({type:"radio",
+        name:"yo",
+        value:"ha"});
+	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	boxForm.append(boxInput);
+	boxForm.append("b1");
+	boxForm.append("<br>");
+	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	boxForm.append(boxInput2);
+	boxForm.append("b2");
+	boxForm.append("<br>");
+	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	boxForm.append(boxInput3);
+	boxForm.append("b3");
+	/* ends of radio box */
+	tr_4.prepend(sp);
+	tr.append(tr_4);
+	//tr.append(boxForm);
+	boxForm.appendTo(tr_4)
+	tr.append("<br>");
+}
 
 //form.append(table);
 	}
