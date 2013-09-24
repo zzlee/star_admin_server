@@ -337,6 +337,7 @@ exports.init = function() {
 //        res.send(200, liveContentList)
 //    });
     
-//    app.put('/miix_admin/dooh/:doohId/liveContent', routes.censorHandler.updateLiveContentList_get_cb);
-
+    app.put('/miix_admin/dooh/:doohId/liveContent', routes.censorHandler.updateLiveContents_get_cb);
+    
+    app.post('/miix_admin/fbItem/:fbId', routes.censorHandler.updateLiveContents_get_cb);
 };

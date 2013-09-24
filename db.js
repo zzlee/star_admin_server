@@ -42,6 +42,7 @@ FM.DB = (function(){
                 //web_page
                 //media_item: the media item that has already stored in Media of Scala's Content Manager
             programTimeSlotState = 'not_confirmed confirmed'.split(' '),
+            liveContentState = 'not_checked correct incorrect'.split(' '),
             
             videoStatus = 'good soso bad waiting none'.split(' '), //DEPRECATE, keep for reference
             videoGenre = 'miix miix_street miix_story'.split(' '); //DEPRECATE, keep for reference 
@@ -317,6 +318,8 @@ FM.DB = (function(){
             fb_postId: [{
                 postId: String,
             }],
+            sourceId: {type: String},   //UGC projectId
+            state: {type: String, enum: liveContentState, default: 'not_checked'}
         }); //  UserLiveContent collection
 		
         /****************** End of DB Schema ******************/

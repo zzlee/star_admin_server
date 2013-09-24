@@ -3,15 +3,15 @@ form#mainform(action='')
     table#product-table(border='0', width='99%', cellpadding='0', cellspacing='0')
         tr
           th.table-header-repeat.line-left(width='192')
-            a(href='') 播放時間
+            a(href='') 截稿時間
           th.table-header-repeat.line-left(width='192')
-            a(href='') 排定時間
+            a(href='') 播放時間
           th.table-header-repeat.line-left(width='150')
             a(href='') 播放清單順序
           th.table-header-repeat.line-left(width='160')
             a(href='') 上傳Scala時間
           th.table-header-repeat.line-left(width='160')
-            a(href='') 修改排定播放清單
+            a(href='') 播放清單
         
         if(historyList)
             each history, i in historyList
@@ -22,7 +22,7 @@ form#mainform(action='')
                       td #{history.programSequence}
                       td #{history.pushProgramsTime}
                       td
-                         input#history._idSetBtn(type='button', value='編輯', name='#{[history.sessionId, history.intervalOfSelectingUGCStart, history.intervalOfSelectingUGCEnd, history.intervalOfPlanningDoohProgramesStart, history.intervalOfPlanningDoohProgramesEnd, history.programSequence]}')
+                         input#history._idSetBtn(type='button', value='檢視', name='#{[history.sessionId, history.intervalOfSelectingUGCStart, history.intervalOfSelectingUGCEnd, history.intervalOfPlanningDoohProgramesStart, history.intervalOfPlanningDoohProgramesEnd, history.programSequence]}')
 
                 else
                     tr.alternate-row
@@ -31,4 +31,4 @@ form#mainform(action='')
                       td #{history.programSequence}
                       td #{history.pushProgramsTime}
                       td
-                         input#history._idSetBtn(type='button', value='編輯', name='#{[history.sessionId, history.intervalOfSelectingUGCStart, history.intervalOfSelectingUGCEnd, history.intervalOfPlanningDoohProgramesStart, history.intervalOfPlanningDoohProgramesEnd, history.programSequence]}')
+                         input#history._idSetBtn(type='button', value='檢視', name='#{[history.sessionId, history.intervalOfSelectingUGCStart, history.intervalOfSelectingUGCEnd, history.intervalOfPlanningDoohProgramesStart, history.intervalOfPlanningDoohProgramesEnd, history.programSequence]}')
