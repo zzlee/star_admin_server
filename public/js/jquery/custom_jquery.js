@@ -19,7 +19,7 @@ var intervalOfPlanningDoohProgrames = null;
 
 
 //PageList object implementation
-function PageList( listType, rowsPerPage, urlToGetListContent){
+function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction){
     var _this = this;
     this.currentPage = 1;
     this.rowsPerPage = rowsPerPage;
@@ -27,6 +27,7 @@ function PageList( listType, rowsPerPage, urlToGetListContent){
     this.totalPageNumber = 1;
     this.listType = listType;
     this.extraParameters = null;
+    this.drawPageFunction = drawPageFunction;
     $.get('/miix_admin/list_size', {listType: listType, token: localStorage.token}, function(res){
         if (!res.err){
             var listSize = res.size;
@@ -34,6 +35,7 @@ function PageList( listType, rowsPerPage, urlToGetListContent){
             $('#totalPage').html(FM.currentContent.totalPageNumber);
         }
     });
+    
 }; 
 
 PageList.prototype.setExtraParameters = function(extraParameters){
@@ -46,10 +48,15 @@ PageList.prototype.showPageContent = function(Page,condition){
         if(res.message){
             console.log("[Response] message:" + res.message);
         }else{
-            _this.currentPage = Page;
-            $('#table-content').html(res);
-            $('#pageNoInput').attr('value',_this.currentPage);
-            $('input#rowsPerPage').attr('value', _this.rowsPerPage);
+            if (!this.drawPageFunction){
+                _this.currentPage = Page;
+                $('#table-content').html(res);
+                $('#pageNoInput').attr('value',_this.currentPage);
+                $('input#rowsPerPage').attr('value', _this.rowsPerPage);
+            }
+            else { //drawPageFunction exists
+                this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
+            }
         }
     });
 
@@ -111,9 +118,10 @@ $(document).ready(function(){
         console.log("Input: " + JSON.stringify(inputData) );
         if(inputData.id && inputData.password){
             $.get(url, inputData, function(res, textStatus){
-                if(res.token){
-                    location.reload();
+                if(res.token && res.role){
                     localStorage.token = res.token;
+                    localStorage.role = res.role;
+                    location.reload();
                 }
                 else{
                     console.log("[Response of Login] message:" + res.message);
@@ -126,6 +134,7 @@ $(document).ready(function(){
     $("#logoutBtn").click(function(){
         $.get(DOMAIN + "logout", function(res){
             delete localStorage.token;
+            delete localStorage.role;
             location.reload();
         });
     });
@@ -143,7 +152,9 @@ $(document).ready(function(){
     FM.historyList = new PageList( 'historyList', 10, '/miix_admin/sessions/ ');
     FM.highlightList = new PageList( 'highlightList', 5, '/miix_admin/highlight');
 
-    FM.currentContent = FM.memberList;
+    
+    
+    
 
     $('#memberListBtn').click(function(){
         $('#main_menu ul[class="current"]').attr("class", "select");
@@ -226,7 +237,7 @@ $(document).ready(function(){
         $.get('/miix_admin/table_censorPlayList_head.html', function(res){
             $('#table-content-header').html(res);
             $('#table-content').html('');
-            
+                        
             $('#createProgramListBtn').click(function(){   
                 var flag = 0;
                 var inputSearchData = {};
@@ -373,6 +384,20 @@ $(document).ready(function(){
         var censorCheck = settings.url.substring(0,22);
         var historyCheck = settings.url.substring(0,20);
         var highlightCheck = settings.url.substring(0,21);
+        
+        //== access control ==
+        if ( localStorage.role == "SUPER_ADMINISTRATOR" ) {
+            $('#createProgramListBtn').show();
+            //$('#ugcCensor').show();
+            $("input[id='ugcCensor']").show();
+            $('#pushProgramsBtn').show();
+        }
+        else if ( localStorage.role == "OPERATOR" ) {
+            $('#createProgramListBtn').hide();
+            $("input[id='ugcCensor']").hide();
+            $('#pushProgramsBtn').hide();
+        }
+
 
         /**
          * UGCList
@@ -838,7 +863,28 @@ $(document).ready(function(){
     });
 
 
-    $('#memberListBtn').click();
+    //== access control ==
+    if ( localStorage.role == "SUPER_ADMINISTRATOR" ) {
+        $('#memberList').show();
+        $('#miixPlayList').show();
+        $('#storyPlayList').show();
+        $('#UGCList').show();
+        $('#highlightList').show();
+        FM.currentContent = FM.memberList;
+        $('#memberListBtn').click();
+
+    }
+    else if ( localStorage.role == "OPERATOR" ) {
+        $('#memberList').hide();
+        $('#miixPlayList').hide();
+        $('#storyPlayList').hide();
+        $('#UGCList').hide();
+        $('#highlightList').hide();
+        FM.currentContent = FM.historyList;
+        $('#historyListBtn').click();
+
+    }
+    
 
 
 });
