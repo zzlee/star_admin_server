@@ -255,7 +255,7 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	var linkS3=$("<a>").attr({href:res[i].liveContent[0].url.s3,
 		                      target:"_blank"});
 	var live_img=$("<img>").attr({src:res[i].liveContent[0].url.s3,
-		                           width:"350",
+		                           width:"330",
 		                           height:"200"});
 	
 	linkS3.append(live_img);
