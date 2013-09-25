@@ -303,6 +303,48 @@ exports.init = function() {
      */
     app.get('/miix_admin/highlight', routes.censorHandler.getHighlightUGCList_get_cb);
     
+<<<<<<< HEAD
+    app.get('/miix_admin/dooh/:doohId/liveContent', function(req, res){
+         liveContentList =[{
+			        LiveContent: [
+			                       {
+			                       liveContentNo: 50,
+			                       liveTime: 1379888568199,
+			                       url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'},
+			                       {
+			                       liveContentNo: 51,
+			                       liveTime: 1379888568199,
+			                       url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'},
+			                       {
+			                       liveContentNo: 52,
+			                       liveTime: 1379888568199,
+			                       url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'}
+			                     ],
+			        start: 1379512800000, 
+			        end: 1379513400000,
+			        no: 1999,
+			        userRawContent:{content:'https://s3.amazonaws.com/miix_content/user_project/mood-512de6f7989cfc240300000e-20130923T054355125Z/user_data/_cdv_photo_001.jpg'}
+        },
+        {
+		        	LiveContent: [
+		                           {
+		                           liveContentNo: 52,
+		                           liveTime: 1379888568199,
+		                           url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'},
+		                           {
+		                               liveContentNo: 53,
+		                               liveTime: 1379888568199,
+		                               url: 'https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005/cultural_and_creative-51d38ca086fa21440a000002-1379888400000-005.jpg'}
+		                          ],
+		            start: 1379512800000, 
+		            end: 1379513400000,
+		            no: 2000,
+		            userRawContent:{content:'https://s3.amazonaws.com/miix_content/user_project/mood-512de6f7989cfc240300000e-20130923T054355125Z/user_data/_cdv_photo_001.jpg'}
+        }
+        ];
+        res.send(200, liveContentList);
+    });
+=======
     app.get('/miix_admin/dooh/:doohId/liveContent', routes.censorHandler.getLiveContentList_get_cb);
 //    app.get('/miix_admin/dooh/:doohId/liveContent', function(req, res){
 //        var liveContentList =[{
@@ -337,7 +379,7 @@ exports.init = function() {
 //        res.send(200, liveContentList)
 //    });
     
-    app.put('/miix_admin/dooh/:doohId/liveContent', routes.censorHandler.updateLiveContents_get_cb);
-    
-    app.post('/miix_admin/fbItem/:fbId', routes.censorHandler.postMessageAndPicture_get_cb);
+//    app.put('/miix_admin/dooh/:doohId/liveContent', routes.censorHandler.updateLiveContentList_get_cb);
+>>>>>>> origin/kaiser_censor
+
 };
