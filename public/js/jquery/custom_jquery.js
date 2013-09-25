@@ -172,11 +172,11 @@ $(document).ready(function(){
 	
 	var tbody=$("<tbody>");
 	var title_tr=$("<tr>");
-	var title_td=$("<td>").attr({class:"table-header-repeat line-left minwidth-1"}).html("播放時間");
+	var title_td=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>播放時間</a>");
 		//title_td1.html("aaa");
-	var title_td2=$("<td>").html("影片編號");
-	var title_td3=$("<td>").html("原始ugc");
-	var title_td4=$("<td>").html("live UGC (live number / time / image / radio box)");
+	var title_td2=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>影片編號</a>");
+	var title_td3=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>原使UGC</a>");
+	var title_td4=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>live UGC (live number / time / image / radio box)</a>");
 	
 	title_tr.append(title_td);
 	title_tr.append(title_td2);
@@ -208,6 +208,8 @@ var s3img=$("<div>").attr({
 }
 
 
+var s3imgLink=$("<a>").attr({href:res[i].liveContent[0].url.longPhoto,
+	                         target:"_blank"}).append(s3img);
 
 
 
@@ -229,8 +231,8 @@ var timeString_start_end=post_year_end+"/"+post_month_end+"/"+post_date_end+"  "
 
 
 var td_1=$("<td>").html("start："+timeString_start+"<br>"+"end："+timeString_start_end);
-var td_2=$("<td>").html(res[i].ugcCensorNo);
-var td_3=$("<td>").html(s3img);
+var td_2=$("<td>").attr({align:"center"}).html("<b>"+res[i].ugcCensorNo+"</b>");
+var td_3=$("<td>").html(s3imgLink);
 
 
 var td_4=$("<td>").html("hi");
@@ -250,10 +252,14 @@ tr.append(td_3);
 
 for(var j=0;j<res[i].liveContent.length;j++){
 	//alert("a");
+	var linkS3=$("<a>").attr({href:res[i].liveContent[0].url.s3,
+		                      target:"_blank"});
 	var live_img=$("<img>").attr({src:res[i].liveContent[0].url.s3,
-		                           width:"400",
+		                           width:"350",
 		                           height:"200"});
-	var tr_4=$("<tr>").html(live_img);
+	
+	linkS3.append(live_img);
+	var tr_4=$("<tr>").html(linkS3);
 	
 	
 	
@@ -301,6 +307,60 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"liveTime":res[i].liveContent[j].liveTime,
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"incorrect"});
+	
+	
+if(res[i].liveContent[j].state=="correct"){
+	boxInput2.attr({checked:"checked"});
+	
+	boxInput2.hide();
+	boxInput3.hide();
+	boxInput.hide();
+	
+	
+	
+	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	boxForm.append(boxInput);
+	boxForm.append("");
+	boxForm.append("<br>");
+	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	boxForm.append(boxInput2);
+	boxForm.append("<b style='color:blue'>成功(done)<b>");
+	boxForm.append("<br>");
+	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	boxForm.append(boxInput3);
+	boxForm.append("");
+	/* ends of radio box */
+	tr_4.prepend(sp);
+	tr.append(tr_4);
+	//tr.append(boxForm);
+	boxForm.appendTo(tr_4)
+	tr.append("<br>");
+}else if(res[i].liveContent[j].state=="incorrect"){
+	boxInput3.attr({checked:"checked"});
+	boxInput2.hide();
+	boxInput3.hide();
+	boxInput.hide();
+	
+	
+	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	boxForm.append(boxInput);
+	boxForm.append("");
+	boxForm.append("<br>");
+	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	boxForm.append(boxInput2);
+	boxForm.append("");
+	boxForm.append("<br>");
+	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	boxForm.append(boxInput3);
+	boxForm.append("<b style='color:red'>失敗(done)<b>");
+	/* ends of radio box */
+	tr_4.prepend(sp);
+	tr.append(tr_4);
+	//tr.append(boxForm);
+	boxForm.appendTo(tr_4)
+	tr.append("<br>");
+	
+}else{
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput);
 	boxForm.append("default");
@@ -318,6 +378,12 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	//tr.append(boxForm);
 	boxForm.appendTo(tr_4)
 	tr.append("<br>");
+}
+	
+	
+
+
+
 }
 
 //form.append(table);
