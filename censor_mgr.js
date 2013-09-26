@@ -320,7 +320,7 @@ censorMgr.getPlayList = function(programList, updateUGC, cb){
     var next = 0;
     var playList = [];
 
-    var playListInfo = function(no, userRawContent, title, doohPlayedTimes, rating, contentGenre, mustPlay, timeslot, timeStamp, dooh, programTimeSlotId, projectId, ownerId, arr) {
+    var playListInfo = function(no, userRawContent, title, doohPlayedTimes, rating, contentGenre, mustPlay, timeslot, timeStamp, dooh, programTimeSlotId, projectId, ownerId, url, arr) {
         arr.push({
             no: no,
             userRawContent: userRawContent,
@@ -334,7 +334,8 @@ censorMgr.getPlayList = function(programList, updateUGC, cb){
             dooh: dooh,
             programTimeSlotId: programTimeSlotId,
             projectId: projectId,
-            ownerId:ownerId
+            ownerId:ownerId,
+            url:url
         });
     };    
 
@@ -346,19 +347,20 @@ censorMgr.getPlayList = function(programList, updateUGC, cb){
                 data[next].content._id = updateUGC.newUGCId;
         }
 
-        FMDB.listOfdocModels( UGCs, {_id: data[next].content._id},'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent', null, function(err, result){
+        FMDB.listOfdocModels( UGCs, {_id: data[next].content._id},'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent url', null, function(err, result){
             if(err) {
                 logger.error('[censorMgr_db.listOfUGCs]', err);
             }
             if(result !== null){
                 if(next == limit - 1) {
-                    playListInfo(result[0].no, result[0].userRawContent, result[0].title, result[0].doohPlayedTimes, result[0].rating, result[0].contentGenre, result[0].mustPlay, data[next].timeslot, data[next].timeStamp, data[next].dooh, data[next]._id, result[0].projectId, result[0].ownerId, playList);
+                    playListInfo(result[0].no, result[0].userRawContent, result[0].title, result[0].doohPlayedTimes, result[0].rating, result[0].contentGenre, result[0].mustPlay, data[next].timeslot, data[next].timeStamp, data[next].dooh, data[next]._id, result[0].projectId, result[0].ownerId, result[0].url, playList);
                     set_cb(null, 'ok'); 
                     next = 0;
+                    console.log(playList);
                     playList = [];
                 }
                 else{
-                    playListInfo(result[0].no, result[0].userRawContent, result[0].title, result[0].doohPlayedTimes, result[0].rating, result[0].contentGenre, result[0].mustPlay, data[next].timeslot, data[next].timeStamp, data[next].dooh, data[next]._id,result[0].projectId, result[0].ownerId, playList);
+                    playListInfo(result[0].no, result[0].userRawContent, result[0].title, result[0].doohPlayedTimes, result[0].rating, result[0].contentGenre, result[0].mustPlay, data[next].timeslot, data[next].timeStamp, data[next].dooh, data[next]._id,result[0].projectId, result[0].ownerId, result[0].url, playList);
                     next += 1;
                     mappingPlayList(data, updateUGC, set_cb);
                 }
