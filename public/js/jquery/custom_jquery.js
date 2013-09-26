@@ -31,6 +31,7 @@ function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction)
     $.get('/miix_admin/list_size', {listType: listType, token: localStorage.token}, function(res){
         if (!res.err){
             var listSize = res.size;
+           
             _this.totalPageNumber = Math.ceil(res.size/_this.rowsPerPage); 
             $('#totalPage').html(FM.currentContent.totalPageNumber);
         }
@@ -58,6 +59,7 @@ PageList.prototype.showPageContent = function(Page,condition){
             else { //drawPageFunction exists
 			console.log(res);
                 _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
+                console.log(_this.currentPage);
                 $('#pageNoInput').attr('value',_this.currentPage);
                 $('input#rowsPerPage').attr('value', _this.rowsPerPage);
             }
@@ -1265,6 +1267,8 @@ if(res[i].liveContent[j].state=="correct"){
                 pageNo = FM.currentContent.totalPageNumber;
             }
             FM.currentContent.showPageContent(pageNo);
+            FM.currentContent.currentPage=pageNo;
+            $("#pageNoInput").attr('value',pageNo);
         }
         else{
             $("#pageNoInput").attr('value', FM.currentContent.currentPage);
