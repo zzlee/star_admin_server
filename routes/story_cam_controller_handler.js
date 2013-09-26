@@ -254,7 +254,7 @@ var updateLiveContent = function(programList, list, update_cb){
             var ugc = result[0];
             var liveContentId = livePhotoUrl.split('/');
             liveContentId = liveContentId[liveContentId.length-1].split('.')[0];
-            var vjson =
+            var livejson =
             {
                 "ownerId": { '_id': ugc.ownerId._id, 
                              'fbUserId': ugc.ownerId.userID,
@@ -265,7 +265,8 @@ var updateLiveContent = function(programList, list, update_cb){
                 'sourceId': ugc.projectId,
                 'liveTime': parseInt(recordTime)
             };
-            schema_cb(vjson);
+            var ugcjson = ugc;
+            schema_cb(livejson, ugcjson);
         });
     };
     var update = function(program){
@@ -274,8 +275,19 @@ var updateLiveContent = function(programList, list, update_cb){
             (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
         }
         else{
-            schema(program, list.awsS3[count], function(data){
-                db.addUserLiveContent(data, function(err, result){
+            schema(program, list.awsS3[count], function(live, ugc){
+                async.series([
+                    function(createLive_cb){
+                        db.addUserLiveContent(live, function(err, result){
+                            (err)?createLive_cb(null, err):createLive_cb(null, result);
+                        });
+                    },
+                    function(updateUGC_cb){
+                        ugcModel.findByIdAndUpdate(ugc._id, { 'doohPlayedTimes': ugc.doohPlayedTimes + 1 }, function(err, result){
+                            (err)?updateUGC_cb(null, err):updateUGC_cb(null, result);
+                        });
+                    },
+                ], function(err, res){
                     count++;
                     part++;
                     (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
@@ -342,16 +354,14 @@ var updateToUGC = function(updateUGC_cb){
             //if(err) console.log(err);
             //else console.log(result);
             //if(!err) fmapi._fbPostUGCThenAdd(vjson);
-//            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
-//                if(err)
-//                    logger.info('Post message and pictrue to user is Error: ' + err);
-//                else
-//                    logger.info('Post message and pictrue to user is Success: ' + res);
-//                i++;
-//                (i < ownerList.length)?update():updateUGC_cb(null, 'done');
-//            });
-            i++;
-            (i < ownerList.length)?update():updateUGC_cb(null, 'done');
+            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
+                if(err)
+                    logger.info('Post message and pictrue to user is Error: ' + err);
+                else
+                    logger.info('Post message and pictrue to user is Success: ' + res);
+                i++;
+                (i < ownerList.length)?update():updateUGC_cb(null, 'done');
+            });
         });
     };
     update();
