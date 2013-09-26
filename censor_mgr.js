@@ -518,7 +518,7 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
                       '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
         }else{
              message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
-                '下次您登上大螢幕，您的作品會成為必播主打。造成不變請見諒。\n';
+                '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
         }
         async.waterfall([
             function(push_cb){
