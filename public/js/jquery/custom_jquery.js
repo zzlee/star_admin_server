@@ -207,9 +207,10 @@ var s3img=$("<div>").attr({
 	                       height:"150"}).html("live content 尚未產生喔~");
 }
 
-
+if(res[i].liveContent[0]){
 var s3imgLink=$("<a>").attr({href:res[i].liveContent[0].url.longPhoto,
 	                         target:"_blank"}).append(s3img);
+}
 
 
 
