@@ -11,14 +11,8 @@ form#mainform(action='')
             a(href='') 影片編號
           th.table-header-repeat.line-left.minwidth-1(width='86')
             a(href='') 主題類別
-          th.table-header-repeat.line-left.minwidth-1(width='86')
-            a(href='') 上傳素材(文)
-          th.table-header-repeat.line-left.minwidth-1(width='81')
-            a(href='') 上傳素材(圖)
-          th.table-header-repeat.line-left.minwidth-1(width='62')
-            a(href='') facebook
-          th.table-header-repeat.line-left.minwidth-1(width='78')
-            a(href='') facebook照片
+          th.table-header-repeat.line-left.minwidth-1(width='700')
+            a(href='') longs3  
           th.table-header-repeat.line-left.minwidth-1(width='69')
             a(href='') 審核結果
           th.table-header-repeat.line-left.minwidth-1(width='120')
@@ -45,15 +39,9 @@ form#mainform(action='')
                              label.label_mood 心情
                          if(PlayList.contentGenre == 'check_in')
                              label.label_checkin 打卡
-                      td #{PlayList.userContent}
-                      if(PlayList.userPhotoUrl == 'No Photo')
-                       td     
-                      else 
-                       td
-                         img(src='#{PlayList.userPhotoUrl}', alt='', width='208')
-                      td #{PlayList.fb_userName}
                       td
-                        img(src='#{PlayList.fbPictureUrl}', alt='', width='100')
+                        a(href='#{PlayList.url.s3}',target='_blank')
+                         img(src='#{PlayList.url.s3}', alt='', width='700')
                       td #{PlayList.rating}
                       td
                         input#ugcCensor.ugcCensorNoRemoveBtn(type='button', value='刪除且自動替補', name='#{PlayList.programTimeSlotId}')
@@ -77,15 +65,9 @@ form#mainform(action='')
                              label.label_mood 心情
                          if(PlayList.contentGenre == 'check_in')
                              label.label_checkin 打卡
-                      td #{PlayList.userContent}
-                      if(PlayList.userPhotoUrl == 'No Photo')
-                       td     
-                      else 
-                       td
-                         img(src='#{PlayList.userPhotoUrl}', alt='', width='208')
-                      td #{PlayList.fb_userName}
                       td
-                        img(src='#{PlayList.fbPictureUrl}', alt='', width='100')
+                        a(href='#{PlayList.url.s3}',target='_blank')
+                         img(src='#{PlayList.url.s3}', alt='', width='700')
                       td #{PlayList.rating}
                       td
                         input#ugcCensor.ugcCensorNoRemoveBtn(type='button', value='刪除且自動替補', name='#{PlayList.programTimeSlotId}')

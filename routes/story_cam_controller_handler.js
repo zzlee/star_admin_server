@@ -15,6 +15,7 @@ var async = require('async');
 var awsS3 = require('../aws_s3.js');
 var facebookMgr = require('../facebook_mgr.js');
 var pushMgr = require('../push_mgr.js');
+var gm = require('gm');
 var db = require('../db.js');
 var UGCDB = require(process.cwd()+'/ugc.js');
 var programTimeSlotModel = db.getDocModel("programTimeSlot");
@@ -54,6 +55,8 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
             ugc: '',
             file: '',
             awsS3: '',
+            highlight: '',  //highlight only.
+            highlightAwsS3: '',  //highlight only.
         };
         //console.dir(option);
         async.waterfall([
@@ -69,6 +72,20 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
                     cuttingImage_cb(null);
                 }); 
             },
+            // For highlight only : start
+            function(highlight_cb){
+                getHighlightPhoto(list.file, function(err, highlightPath){
+                    list.highlight = highlightPath;
+                    highlight_cb(null);
+                });
+            },
+            function(highlightAwsS3_cb){
+                uploadHighlightPhotoToAwsS3(list.highlight, function(err, highlightS3Path){
+                    list.highlightAwsS3 = highlightS3Path;
+                    highlightAwsS3_cb(null);
+                });
+            },
+            // For highlight only : end
             function(uploadAwsS3_cb){
                 uploadToAwsS3(list.file, function(err, s3Path){
                     list.awsS3 = s3Path;
@@ -82,7 +99,10 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
             },
         ], function(err, res){
             //clear
-            clearMemory(option.filePath, list.file, function(status){
+            // clearMemory(option.filePath, list.file, function(status){
+                // livePhoto_cb(null, status);
+            // });
+            clearMemoryAndHighlight(option.filePath, list.file, list.highlight, function(status){
                 livePhoto_cb(null, status);
             });
         });
@@ -220,6 +240,74 @@ var actionSetting = function(programList, action_setting_cb){
     setting(programList.list[part]);
 };
 
+// Highlight page only : start
+var getHighlightPhoto = function(fileset, highlight_cb){
+    
+    var part = 0;
+    var highlightList = [];
+    
+    var photoResize = function(filepath){
+        var hightlightName = filepath.replace(__dirname + '\\', '').split('.');
+        var target = path.join(__dirname, hightlightName[0]+'-highlight.'+hightlightName[1]);
+        gm( filepath )
+        .resize(1920, 713, "!")
+        .write(target, function (err) {
+            // if (!err) {
+                // console.log('Resize done');
+            // }
+            // else {
+                // console.log('err='+err);
+            // }
+            highlightList.push(target);
+            // (err)?highlight_cb(err, null):highlight_cb(null, 'Resize done');
+            part++;
+            (part != fileset.length)?photoResize(fileset[part]):highlight_cb(null, highlightList);
+        });
+    };
+    photoResize(fileset[part]);
+};
+
+var uploadHighlightPhotoToAwsS3 = function(fileset, awsS3_cb){
+
+    var part = 0;
+    var awsS3List = [];
+    
+    var upload = function(file){
+        var filetype = file.replace(__dirname + '\\', '').split('.');
+        if((filetype[filetype.length-1] == 'jpg')||(filetype[filetype.length-1] == 'png')){
+            var projectFolder = filetype[0].split('\\');
+            var s3Path = '/user_project/' + filetype[0] + '/' + filetype[0] + '.' + filetype[filetype.length-1];
+            awsS3List.push('https://s3.amazonaws.com/miix_content' + s3Path);
+            awsS3.uploadToAwsS3(file, s3Path, 'image/jpeg', function(err,result){
+                if (!err)
+                    logger.info('Live content image was successfully uploaded to S3 '+s3Path);
+                else
+                    logger.info('Live content image failed to be uploaded to S3 '+s3Path);
+                part++;
+                (part != fileset.length)?upload(fileset[part]):awsS3_cb(null, awsS3List);
+            });
+        }
+    };
+    upload(fileset[part]);
+};
+
+var clearMemoryAndHighlight = function(rawFile, file, highlight, clear_cb){
+    fs.unlink(rawFile);
+    if(typeof(file) === 'function') {
+        clear_cb = file;
+        clear_cb('done');
+    }
+    else {
+        for(var i=0; i<file.length; i++){
+            fs.unlink(file[i]);
+            fs.unlink(highlight[i]);
+        };
+        clear_cb('done');
+    }
+};
+
+// Highlight page only : end
+
 var uploadToAwsS3 = function(fileset, awsS3_cb){
 
     var part = 0;
@@ -249,23 +337,26 @@ var updateLiveContent = function(programList, list, update_cb){
     var part = 0,
         count = 0;
     
-    var schema = function(program, livePhotoUrl, schema_cb){
+    // var schema = function(program, livePhotoUrl, schema_cb){
+    var schema = function(program, livePhotoUrl, highlightPhotoUrl, schema_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var ugc = result[0];
             var liveContentId = livePhotoUrl.split('/');
             liveContentId = liveContentId[liveContentId.length-1].split('.')[0];
-            var vjson =
+            var livejson =
             {
                 "ownerId": { '_id': ugc.ownerId._id, 
                              'fbUserId': ugc.ownerId.userID,
                              'userID': ugc.ownerId.userID },
-                'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3 },
+                // 'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3 },
+                'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3, 'highlight': highlightPhotoUrl },
                 'genre': 'miix_image_live_photo',
                 'projectId': liveContentId,
                 'sourceId': ugc.projectId,
                 'liveTime': parseInt(recordTime)
             };
-            schema_cb(vjson);
+            var ugcjson = ugc;
+            schema_cb(livejson, ugcjson);
         });
     };
     var update = function(program){
@@ -274,8 +365,20 @@ var updateLiveContent = function(programList, list, update_cb){
             (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
         }
         else{
-            schema(program, list.awsS3[count], function(data){
-                db.addUserLiveContent(data, function(err, result){
+            // schema(program, list.awsS3[count], function(live, ugc){
+            schema(program, list.awsS3[count], list.highlightAwsS3[count], function(live, ugc){
+                async.series([
+                    function(createLive_cb){
+                        db.addUserLiveContent(live, function(err, result){
+                            (err)?createLive_cb(null, err):createLive_cb(null, result);
+                        });
+                    },
+                    function(updateUGC_cb){
+                        ugcModel.findByIdAndUpdate(ugc._id, { 'doohPlayedTimes': ugc.doohPlayedTimes + 1 }, function(err, result){
+                            (err)?updateUGC_cb(null, err):updateUGC_cb(null, result);
+                        });
+                    },
+                ], function(err, res){
                     count++;
                     part++;
                     (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
@@ -342,16 +445,14 @@ var updateToUGC = function(updateUGC_cb){
             //if(err) console.log(err);
             //else console.log(result);
             //if(!err) fmapi._fbPostUGCThenAdd(vjson);
-//            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
-//                if(err)
-//                    logger.info('Post message and pictrue to user is Error: ' + err);
-//                else
-//                    logger.info('Post message and pictrue to user is Success: ' + res);
-//                i++;
-//                (i < ownerList.length)?update():updateUGC_cb(null, 'done');
-//            });
-            i++;
-            (i < ownerList.length)?update():updateUGC_cb(null, 'done');
+            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
+                if(err)
+                    logger.info('Post message and pictrue to user is Error: ' + err);
+                else
+                    logger.info('Post message and pictrue to user is Success: ' + res);
+                i++;
+                (i < ownerList.length)?update():updateUGC_cb(null, 'done');
+            });
         });
     };
     update();

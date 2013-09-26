@@ -305,7 +305,7 @@ FM.DB = (function(){
         var UserLiveContentSchema = new Schema({
             title: {type: String},
             description: {type: String},
-            url: { youtube: String, tudou: String, s3: String , longPhoto: String},  //  Youtube, Tudou
+            url: { youtube: String, tudou: String, s3: String , longPhoto: String, highlight: String},  //  Youtube, Tudou  //highlight: for highlight only.
             ownerId: { _id:ObjectID, userID: String, fbUserId: String }, //userID is used to be owner's fb id, and is now DEPRECATED in Miix 2.0
             projectId: {type: String},  // project ID which is unique to each AE rendering
             createdOn: {type: Date, default: Date.now},
