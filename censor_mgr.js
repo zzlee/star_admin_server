@@ -356,7 +356,7 @@ censorMgr.getPlayList = function(programList, updateUGC, cb){
                     playListInfo(result[0].no, result[0].userRawContent, result[0].title, result[0].doohPlayedTimes, result[0].rating, result[0].contentGenre, result[0].mustPlay, data[next].timeslot, data[next].timeStamp, data[next].dooh, data[next]._id, result[0].projectId, result[0].ownerId, result[0].url, playList);
                     set_cb(null, 'ok'); 
                     next = 0;
-                    console.log(playList);
+                    // console.log(playList);
                     playList = [];
                 }
                 else{
