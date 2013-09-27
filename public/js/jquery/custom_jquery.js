@@ -59,7 +59,7 @@ PageList.prototype.showPageContent = function(Page,condition){
             else { //drawPageFunction exists
 			console.log(res);
                 _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
-                console.log(_this.currentPage);
+                // console.log(_this.currentPage);
                 $('#pageNoInput').attr('value',_this.currentPage);
                 $('input#rowsPerPage').attr('value', _this.rowsPerPage);
             }

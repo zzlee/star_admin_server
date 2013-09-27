@@ -53,7 +53,7 @@ var player = (function() {
         },
         findPlayerIdByName : function( playerName, playerId_cb ) {
             _private.list( { fields : 'id', search : playerName }, function( playerInfo ){
-                if( playerInfo.list[0].id ) playerId_cb( null, playerInfo.list[0].id );
+                if( playerInfo.count > 0 ) playerId_cb( null, playerInfo.list[0].id );
                 else playerId_cb( 'NOT_FOUND_PLAYER', null );
             } );
         },
