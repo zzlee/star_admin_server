@@ -16,7 +16,7 @@ var FM = { service: {} };
 FM.service.get_cb = function(req, res){
 
     FM_LOG("[service.get_cb]");
-    var loginHtml = path.join(workingPath, 'public/admin_login.html');
+    var loginHtml = path.join(workingPath, 'public/miix_admin/admin_login.html');
     var mainAdminPageHtml = path.join(workingPath, 'public/service_frame.html');
 
     if (!req.session.admin_user) {

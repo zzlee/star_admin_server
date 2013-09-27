@@ -121,7 +121,6 @@ FM.ADMINCACHE = (function(){
 
         var member_mgr = require('./member.js');
         var UGC_mgr = require('./ugc.js');
-        var miix_content_mgr = require('./miix_content_mgr.js');
         
         var miixPlayListInfos = FMDB.getDocModel("miixPlayListInfo");
         var UGCs = FMDB.getDocModel("ugc");
