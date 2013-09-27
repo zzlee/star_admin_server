@@ -705,7 +705,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
             programTimeSlotModel.find({ "state": "not_confirmed", "planner": planner }).remove().exec(function (errOfRomove) {
                 
                 if (!errOfRomove) {
-                    console.log('"not_confirmed" programs are successfully removed!');
+                    // console.log('"not_confirmed" programs are successfully removed!');
                     callback(null);
                 }
                 else {
@@ -1509,7 +1509,7 @@ scheduleMgr.getSessionList = function(interval, pageLimit, pageSkip, got_cb ){
     };
     
     var query = sessionItemModel.find({ "intervalOfSelectingUGC.start": {$gte:interval.start}, "intervalOfSelectingUGC.end":{$lt:interval.end}})
-                        .sort({timeStamp:1});
+                        .sort({pushProgramsTime:-1});
     
     if (pageLimit!==null){
         query = query.limit(pageLimit);

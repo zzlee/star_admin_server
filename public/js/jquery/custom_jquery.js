@@ -687,6 +687,7 @@ if(res[i].liveContent[j].state=="correct"){
                     }
                     
                     if(inputSearchData.timeStart && inputSearchData.timeEnd && inputSearchData.playTimeStart && inputSearchData.playTimeEnd && inputSearchData.ugcSequenceText && programSequenceArr){
+						$('#table-content').html('<br> <br>自動配對中，請稍候....');
                         intervalOfSelectingUGC = {start: inputSearchData.timeStart, end: inputSearchData.timeEnd};
                         intervalOfPlanningDoohProgrames = {start: inputSearchData.playTimeStart, end: inputSearchData.playTimeEnd};
                         $.ajax({
@@ -695,7 +696,7 @@ if(res[i].liveContent[j].state=="correct"){
                             data: {intervalOfSelectingUGC:{start:inputSearchData.timeStart, end:inputSearchData.timeEnd}, intervalOfPlanningDoohProgrames:{start:inputSearchData.playTimeStart, end:inputSearchData.playTimeEnd}, programSequence:programSequenceArr, originSequence:originSequence},
                             success: function(response) {
                                 if(response.message){
-								    $('#table-content').html('<br> <br>自動配對中，請稍候....');
+								    $('#table-content').html('<br> <br>資料產生中，請稍候....');
                                     console.log("[Response] message:" + JSON.stringify(response.message));
                                     sessionId = response.message;
                                     $('#main_menu ul[class="current"]').attr("class", "select");
