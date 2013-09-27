@@ -1298,6 +1298,7 @@ if(res[i].liveContent[j].state=="correct"){
         $('#storyPlayList').show();
         $('#UGCList').show();
         $('#highlightList').show();
+        $('#live_check').show();
         FM.currentContent = FM.memberList;
         $('#memberListBtn').click();
 
@@ -1308,6 +1309,7 @@ if(res[i].liveContent[j].state=="correct"){
         $('#storyPlayList').hide();
         $('#UGCList').hide();
         $('#highlightList').hide();
+        $('#live_check').hide();
         FM.currentContent = FM.historyList;
         $('#historyListBtn').click();
 
