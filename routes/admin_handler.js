@@ -155,7 +155,6 @@ FM.admin.storyPlayList_get_cb = function(req, res){
 
 //GZ
 FM.admin.listSize_get_cb = function(req, res){
-
     if (req.query.listType == 'memberList'){
         member_mgr.getMemberCount(function(err, count) {
             res.send({err: err, size: count});
@@ -173,21 +172,30 @@ FM.admin.listSize_get_cb = function(req, res){
     }
     else if (req.query.listType == 'ugcCensorMovieList'){
         UGC_mgr.getUGCCountWithGenre('miix', function(err, count) {
+        	console.log("count:"+count);
             res.send({err: err, size: count});
         });
     }
     else if (req.query.listType == 'ugcCensorPlayList'){
         UGC_mgr.getUGCCountWithGenre('miix', function(err, count) {
+        	console.log("count:"+count);
             res.send({err: err, size: count});
         });
     }
     else if (req.query.listType == 'historyList'){
-        UGC_mgr.getUGCCountWithGenre('miix', function(err, count) {
-            res.send({err: err, size: count});
+        UGC_mgr.getSessionItemCount(function(err, count) {
+        	res.send({err: err, size: count});
         });
     }
     else if (req.query.listType == 'live_check'){
-        UGC_mgr.getUGCCountWithGenre('miix_image', function(err, count) {
+        UGC_mgr.getUGCCountWithpts(function(err, count) {
+        	//console.log("count:"+count);
+            res.send({err: err, size: count});
+        });
+    }
+    else if (req.query.listType == 'highlightList'){
+        UGC_mgr.getUGCCountWithpts(function(err, count) {
+        	console.log("count:"+count);
             res.send({err: err, size: count});
         });
     }
