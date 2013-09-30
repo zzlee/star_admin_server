@@ -155,7 +155,6 @@ FM.admin.storyPlayList_get_cb = function(req, res){
 
 //GZ
 FM.admin.listSize_get_cb = function(req, res){
-
     if (req.query.listType == 'memberList'){
         member_mgr.getMemberCount(function(err, count) {
             res.send({err: err, size: count});
@@ -171,8 +170,13 @@ FM.admin.listSize_get_cb = function(req, res){
             res.send({err: err, size: count});
         });
     }
-    else if (req.query.listType == 'ugcCensorMovieList'){
-        UGC_mgr.getUGCCountWithGenre('miix', function(err, count) {
+    else if (req.query.listType == 'highlightList'){ //精彩刊登
+        UGC_mgr.getHighlightCount(function(err, count) {
+            res.send({err: err, size: count});
+        });
+    }
+    else if (req.query.listType == 'ugcCensorMovieList'){ //審查名單
+        UGC_mgr.getUGCCountBy3Condition(function(err, count) {
             res.send({err: err, size: count});
         });
     }
@@ -181,16 +185,17 @@ FM.admin.listSize_get_cb = function(req, res){
             res.send({err: err, size: count});
         });
     }
-    else if (req.query.listType == 'historyList'){
-        UGC_mgr.getUGCCountWithGenre('miix', function(err, count) {
+    else if (req.query.listType == 'historyList'){ //歷史紀錄
+        UGC_mgr.getSessionItemCount(function(err, count) {
+        	res.send({err: err, size: count});
+        });
+    }
+    else if (req.query.listType == 'live_check'){ //live check
+        UGC_mgr.getUGCCountWithpts(function(err, count) {
             res.send({err: err, size: count});
         });
     }
-    else if (req.query.listType == 'live_check'){
-        UGC_mgr.getUGCCountWithGenre('miix_image', function(err, count) {
-            res.send({err: err, size: count});
-        });
-    }
+   
     else {
         res.send(400, {error: "Parameters are not correct"});
     }

@@ -22,8 +22,8 @@ form#mainform(action='')
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 精彩刊登
 
-        if(ugcCensorMovieList)
-            each ugcCensor, i in ugcCensorMovieList
+        if(highlightList)
+            each ugcCensor, i in highlightList
                 if i%2
                     tr
                       td 
