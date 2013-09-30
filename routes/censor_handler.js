@@ -350,6 +350,7 @@ FM.censorHandler.updateLiveContents_get_cb = function(req, res){
         });
     
 };
+
 FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
 
     var fb_Id =  req.params.fbId;
@@ -369,6 +370,22 @@ FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
   }
 });
 
+};
+
+FM.censorHandler.updateProgramTimeSlot_get_cb = function(req, res){
+
+    var programTimeSlot_Id =  req.body.programTimeSlot_Id;
+    var vjson = req.body.vjson;
+
+    censorMgr.updateProgramTimeSlots(programTimeSlot_Id, vjson, function(err, result){
+            if (!err){
+                res.send(200, {message: result});
+            }
+            else{
+                res.send(400, {error: err});
+            }
+        });
+    
 };
 
 module.exports = FM.censorHandler;

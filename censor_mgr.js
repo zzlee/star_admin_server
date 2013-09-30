@@ -542,6 +542,21 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
     });
 };
 
+censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
+    
+    FMDB.updateAdoc(programTimeSlotModel, programTimeSlot_Id, vjson, function(err, result){
+        if(err) {
+            logger.error('[updateProgramTimeSlots_updateAdoc] error', err);
+            cb(err,null);
+        }
+        if(result){
+            cb(null,'successful');
+            logger.info('[updateProgramTimeSlots_updateAdoc] successful', liveContent_Id);
+//          console.log('updateAdoc_result'+result);
+        }
+    });
+};
+
 module.exports = censorMgr;
 
 
