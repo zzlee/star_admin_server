@@ -559,7 +559,6 @@ FM.ADMINCACHE = (function(){
                     FMDB.listOfdocModels( storyPlayListInfos,null,'projectId movieNo movieViewed_count fbLike_count fbComment_count fbShare_count movieMaker createdOn', {sort:{'createdOn':-1},limit: _limit, skip: _skip}, function(err, result){
                         if(err) logger.error('[db.listOfMemebers]', err);
                         if(result){
-
                             if(_skip < result.length && result.length >= _limit)
                                 limit = _limit;
                             else 

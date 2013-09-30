@@ -872,9 +872,9 @@ scheduleMgr.getProgramList = function(dooh, interval, pageLimit, pageSkip , upda
  *     </ul>
  */
 scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, cbOfGetProgramListBySession ){
-    var query = programTimeSlotModel.find({ "session": sessionId, "type": "UGC"}).sort({timeStamp:1});
-
-    if (pageLimit!==null){
+    var query = programTimeSlotModel.find({ "session": sessionId, "type": "UGC"}).sort({timeStamp:1}) ;
+    
+ if (pageLimit!==null){
         query = query.limit(pageLimit);
     }
     
@@ -887,9 +887,24 @@ scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, c
             cbOfGetProgramListBySession(_err, result);
         }
     });
-    
 };
 
+/*
+scheduleMgr.getProgramListBySession_test = function(sessionId,cbOfGetProgramListBySession2 ){
+    var query2 = programTimeSlotModel.count({ "session": sessionId, "type": "UGC"});
+    
+
+    
+   
+    
+    query2.exec(function (_err, result) {
+    	//console.log(result);
+        if (cbOfGetProgramListBySession2) {
+            cbOfGetProgramListBySession2(_err, result);
+        }
+    });
+};
+*/
 /**
  * Push programs (of a specific session) to the 3rd-party content manager.<br>
  * <br>
