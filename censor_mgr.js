@@ -415,19 +415,21 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
     }
         var liveContentList = [];
 
-        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, arr) {
+        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, fbUserId, programTimeSlot_id, arr) {
             arr.push({
                 ugcCensorNo: ugcCensorNo,
                 liveContent: liveContent,
                 start: start,
                 end: end,
-                
+                liveState: liveState,
+                fbUserId: fbUserId,
+                programTimeSlot_id: programTimeSlot_id
             });
         };  
         var mappingLiveContentList = function(data, cbOfMappingLiveContentList){
             userLiveContentModel.find({'liveTime': {$gte: data.timeslot.start, $lt: data.timeslot.end}, "sourceId": data.content.projectId}).exec(function(err, result){
                 if(!err){
-                    LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, liveContentList);
+                    LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.content.ownerId.fbUserId, data._id, liveContentList);
                     cbOfMappingLiveContentList(null); 
                 }else{
                     cbOfMappingLiveContentList(err); 
@@ -551,7 +553,7 @@ censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
         }
         if(result){
             cb(null,'successful');
-            logger.info('[updateProgramTimeSlots_updateAdoc] successful', liveContent_Id);
+            logger.info('[updateProgramTimeSlots_updateAdoc] successful', programTimeSlot_Id);
 //          console.log('updateAdoc_result'+result);
         }
     });

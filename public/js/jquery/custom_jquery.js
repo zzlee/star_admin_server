@@ -180,6 +180,9 @@ $(document).ready(function(){
 	var title_td3=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>原使UGC</a>");
 	var title_td4=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>live UGC (live number / time / image / radio box)</a>");
 	
+	
+	
+	
 	title_tr.append(title_td);
 	title_tr.append(title_td2);
 	title_tr.append(title_td3);
@@ -233,7 +236,7 @@ var post_minutes_end=post_live_time_end.getMinutes();
 var timeString_start_end=post_year_end+"/"+post_month_end+"/"+post_date_end+"  "+post_hours_end+":"+post_minutes_end;
 
 
-var td_1=$("<td>").html("start："+timeString_start+"<br>"+"end："+timeString_start_end);
+var td_1=$("<td>").html("start："+timeString_start+"<br>"+"end："+timeString_start_end+"<br><br>");
 var td_2=$("<td>").attr({align:"center"}).html("<b>"+res[i].ugcCensorNo+"</b>");
 var td_3=$("<td>").html(s3imgLink);
 
@@ -241,13 +244,43 @@ var td_3=$("<td>").html(s3imgLink);
 var td_4=$("<td>").html("hi");
 
 
+var FailboxForm = $("<form>").attr({style:"display: inline-block;vertical-align:400%"});
+
+var FailboxInput = $("<input>").attr({
+		 type:"radio",
+         id:"failbox",
+         class:"bad",
+         "fbUserId":res[i].fbUserId,
+         "programTimeSlot_id":res[i].programTimeSlot_id,
+         "ugcCensorNo":res[i].ugcCensorNo,
+         "liveState":res[i].liveState
+         
+		                             });
+
+
+                                     
 
 
 
 
+
+FailboxForm.append(FailboxInput);
+
+
+//---------  'fail' checkbox  click--------------
+
+if(res[i].liveState=="incorrect"){
+	FailboxInput.hide();
+	FailboxForm.append("<b style='color:red'>失敗(done)<b>");
+
+}else{
+	FailboxForm.append("失敗")
+}
+//----------------end 'fail' checkbox  click-----
 
 tbody.append(tr);
 tr.append(td_1);
+FailboxForm.appendTo(td_1);
 tr.append(td_2);
 tr.append(td_3);
 //tr.append(td_4);
@@ -299,6 +332,7 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"liveTime":res[i].liveContent[j].liveTime,
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"correct"});
+	
 	var boxInput3 = $("<input>").attr({type:"radio",
 		id:"boxCheckLive",
         class:"bad",
@@ -310,6 +344,7 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"liveTime":res[i].liveContent[j].liveTime,
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"incorrect"});
+	
 	
 	
 if(res[i].liveContent[j].state=="correct"){
@@ -393,6 +428,62 @@ if(res[i].liveContent[j].state=="correct"){
 	}
 	
 	
+	//-------------for fail-----
+	 $("#failbox.bad").click(function(){
+		  //alert("g");
+		  
+		  
+		  var forComfirm=confirm("你按下的是 ***正確***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
+		  if (forComfirm==true)
+		    {
+		  // alert("good");
+		    }
+		  else
+		    {
+		   //alert("><");
+		   return false;
+		    }
+		  
+		  
+	    	var _id=$(this).attr("programTimeSlot_id");
+	    	var liveState="incorrect";
+			var ugcCensorNo=$(this).attr("ugcCensorNo");
+			 var fbUserId=$(this).attr("fbUserId");
+	    	
+	    	console.log("programTimeSlot_id:"+_id+"\nfbUserId:"+fbUserId+"\nliveState:"+liveState);
+	    	
+	    	var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+	    	$.ajax({
+               url: url,
+               type: 'PUT',
+               data: {programTimeSlot_Id:_id,
+            	   fbUserId:fbUserId,
+            	   vjson:{liveState: liveState}
+               	 },
+               success: function(response) {
+                   if(response.message){
+                       console.log("[Response] message:" + response.message);
+                   }
+               }
+           });
+			
+			var url=DOMAIN+"fbItem/"+fbUserId;
+	    	$.ajax({
+               url: url,
+               type: 'POST',
+               data: {
+            	   vjson:{liveState: liveState},
+					   ugcCensorNo: ugcCensorNo},
+               success: function(response) {
+                   if(response.message){
+                       console.log("[Response] message:" + response.message);
+                   }
+               }
+           });
+	    	
+	    });
+	//--------------------
+	
 	  $("#boxCheckLive.good").click(function(){
 		  //alert("g");
 		  
@@ -442,7 +533,8 @@ if(res[i].liveContent[j].state=="correct"){
                 	   longPic: longPic,
                 	   type: picType,
 					   liveTime: liveTime,
-					   ugcCensorNo: ugcCensorNo},
+					   ugcCensorNo: ugcCensorNo,
+					   liveContent_Id:_id},
                 success: function(response) {
                     if(response.message){
                         console.log("[Response] message:" + response.message);
