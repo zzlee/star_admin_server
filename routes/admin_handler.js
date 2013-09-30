@@ -170,35 +170,32 @@ FM.admin.listSize_get_cb = function(req, res){
             res.send({err: err, size: count});
         });
     }
-    else if (req.query.listType == 'ugcCensorMovieList'){
-        UGC_mgr.getUGCCountWithGenre('miix', function(err, count) {
-        	console.log("count:"+count);
+    else if (req.query.listType == 'highlightList'){ //精彩刊登
+        UGC_mgr.getHighlightCount(function(err, count) {
+            res.send({err: err, size: count});
+        });
+    }
+    else if (req.query.listType == 'ugcCensorMovieList'){ //審查名單
+        UGC_mgr.getUGCCountBy3Condition(function(err, count) {
             res.send({err: err, size: count});
         });
     }
     else if (req.query.listType == 'ugcCensorPlayList'){
         UGC_mgr.getUGCCountWithGenre('miix', function(err, count) {
-        	console.log("count:"+count);
             res.send({err: err, size: count});
         });
     }
-    else if (req.query.listType == 'historyList'){
+    else if (req.query.listType == 'historyList'){ //歷史紀錄
         UGC_mgr.getSessionItemCount(function(err, count) {
         	res.send({err: err, size: count});
         });
     }
-    else if (req.query.listType == 'live_check'){
+    else if (req.query.listType == 'live_check'){ //live check
         UGC_mgr.getUGCCountWithpts(function(err, count) {
-        	//console.log("count:"+count);
             res.send({err: err, size: count});
         });
     }
-    else if (req.query.listType == 'highlightList'){
-        UGC_mgr.getUGCCountWithpts(function(err, count) {
-        	console.log("count:"+count);
-            res.send({err: err, size: count});
-        });
-    }
+   
     else {
         res.send(400, {error: "Parameters are not correct"});
     }

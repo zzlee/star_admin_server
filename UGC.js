@@ -271,15 +271,28 @@ FM.UGC = (function(){
 			},
 			
 			//------ count right page number by Joy---------
-			getUGCCountWithpts: function(cb){
+			getUGCCountWithpts: function(cb){ //for live check
 				var condition = { "type": "UGC",
            			            "state": "confirmed"};
 				pts.count(condition, cb);
 			},
 			
-			getSessionItemCount: function(cb){
+			getSessionItemCount: function(cb){ //for 歷史紀錄
 				var condition = { };
 				sessionItems.count(condition, cb);
+			},
+			
+			getHighlightCount: function(cb){ //for 精彩刊登
+				var condition = {'doohPlayedTimes':{$gte : 1} };
+				UGCs.count(condition, cb);
+			},
+			getUGCCountBy3Condition: function(cb){ //for 審查名單
+				var condition = {
+						'no':{ $exists: true},
+			            'ownerId':{ $exists: true},
+			            'projectId':{ $exists: true}
+				};
+				UGCs.count(condition, cb);
 			},
 			//------  end------------
             _GZ_test: function(){
