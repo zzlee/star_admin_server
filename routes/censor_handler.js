@@ -140,7 +140,7 @@ FM.censorHandler.gettimeslots_get_cb = function(req, res){
         debugger;
         if (!err){
             if (programList.length > 0){
-                getPlayList(programList , updateUGC, function(errGetPlayList, result){
+                censorMgr.getPlayList(programList , updateUGC, function(errGetPlayList, result){
                     if (!errGetPlayList){
                         res.render( 'table_censorPlayList', {ugcCensorPlayList: result} );
                     }
