@@ -360,8 +360,9 @@ FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
     var type = req.body.type;
 	var liveTime = req.body.liveTime;
     var ugcCensorNo = req.body.ugcCensorNo;
+    var liveContent_Id = req.body.liveContent_Id;
 	
-  censorMgr.postMessageAndPicture(fb_Id, photoUrl, type, liveTime, ugcCensorNo, function(err, result){
+  censorMgr.postMessageAndPicture(fb_Id, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id, function(err, result){
   if (!err){
       res.send(200, {message: result});
   }
