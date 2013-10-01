@@ -472,11 +472,12 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
                 var message = fb_name + '於' + playTime + '，登上台北天幕LED，這是原始刊登素材，天幕尺寸：100公尺x16公尺。\n' + 
                           '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
                 //facebookMgr.postPhoto(access_token, message, photoUrl.preview, albumId, preview);
-                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.preview }, function(err, res){
+                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.preview }, function(err, resOfPostMessageAndShare){
+                    var fbObj = JSON.parse(resOfPostMessageAndShare);
                     if(!err){
-                        putFbPostIdLiveContentsBy_id(liveContent_Id, res.id, function(err, result){
+                        putFbPostIdLiveContentsBy_id(liveContent_Id, fbObj.id, function(err, result){
                             if(!err){
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+res.id);  
+                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+resOfPostMessageAndShare.id);  
                               }else
                                 logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]err="+err);    
                         });
@@ -490,11 +491,12 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
                 var message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝他精采的作品！\n' + 
                           '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
                 //facebookMgr.postPhoto(access_token, message, photoUrl.play, albumId, play);
-                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.play }, function(err, res){
+                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.play }, function(err, resOfPostMessageAndShare){
+                    var fbObj = JSON.parse(resOfPostMessageAndShare);
                     if(!err){
-                        putFbPostIdLiveContentsBy_id(liveContent_Id, res.id, function(err, result){
+                        putFbPostIdLiveContentsBy_id(liveContent_Id, fbObj.id, function(err, result){
                             if(!err){
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+res.id);  
+                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+resOfPostMessageAndShare.id);  
                               }else
                                 logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]err="+err);    
                         });
@@ -503,7 +505,7 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
                         play(null, false);
                     }
                 });
-            },
+            }
         ], function(err, res){
             //(err)?console.log(err):console.dir(res);
             /* if(!err){
