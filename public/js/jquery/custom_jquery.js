@@ -374,6 +374,8 @@ if(res[i].liveContent[j].state=="correct"){
 	boxForm.appendTo(tr_4)
 	tr.append("<br>");
 }else if(res[i].liveContent[j].state=="incorrect"){
+	
+	//--------------- deprecated --------------
 	boxInput3.attr({checked:"checked"});
 	boxInput2.hide();
 	boxInput3.hide();
@@ -397,7 +399,7 @@ if(res[i].liveContent[j].state=="correct"){
 	//tr.append(boxForm);
 	boxForm.appendTo(tr_4)
 	tr.append("<br>");
-	
+	//---------------------------------------------
 }else{
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput);
@@ -406,10 +408,10 @@ if(res[i].liveContent[j].state=="correct"){
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput2);
 	boxForm.append("正確");
-	boxForm.append("<br>");
-	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-	boxForm.append(boxInput3);
-	boxForm.append("失敗");
+	//boxForm.append("<br>");
+	//boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	//boxForm.append(boxInput3);
+	//boxForm.append("失敗");
 	/* ends of radio box */
 	tr_4.prepend(sp);
 	tr.append(tr_4);
@@ -433,7 +435,7 @@ if(res[i].liveContent[j].state=="correct"){
 		  //alert("g");
 		  
 		  
-		  var forComfirm=confirm("你按下的是 ***正確***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
+		  var forComfirm=confirm("你按下的是 ***失敗***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
 		  if (forComfirm==true)
 		    {
 		  // alert("good");
