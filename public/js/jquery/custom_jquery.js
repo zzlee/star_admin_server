@@ -59,7 +59,7 @@ PageList.prototype.showPageContent = function(Page,condition){
             else { //drawPageFunction exists
 			console.log(res);
                 _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
-                console.log(_this.currentPage);
+                // console.log(_this.currentPage);
                 $('#pageNoInput').attr('value',_this.currentPage);
                 $('input#rowsPerPage').attr('value', _this.rowsPerPage);
             }
@@ -154,7 +154,7 @@ $(document).ready(function(){
     FM.memberList = new PageList( 'memberList', 8, '/miix_admin/members');
     FM.miixPlayList = new PageList( 'miixMovieList', 5, '/miix_admin/miix_movies');
     FM.storyPlayList = new PageList( 'storyMovieList', 8, '/miix_admin/story_movies');
-    FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+    FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor'); 
     FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 5, '/miix_admin/doohs/'+DEFAULT_DOOH+'/timeslots');
     FM.historyList = new PageList( 'historyList', 10, '/miix_admin/sessions/ ');
     FM.highlightList = new PageList( 'highlightList', 5, '/miix_admin/highlight');
@@ -177,8 +177,11 @@ $(document).ready(function(){
 	var title_td=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>播放時間</a>");
 		//title_td1.html("aaa");
 	var title_td2=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>影片編號</a>");
-	var title_td3=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>原使UGC</a>");
+	var title_td3=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>原始UGC</a>");
 	var title_td4=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>live UGC (live number / time / image / radio box)</a>");
+	
+	
+	
 	
 	title_tr.append(title_td);
 	title_tr.append(title_td2);
@@ -209,9 +212,10 @@ var s3img=$("<div>").attr({
 	                       height:"150"}).html("live content 尚未產生喔~");
 }
 
-
+if(res[i].liveContent[0]){
 var s3imgLink=$("<a>").attr({href:res[i].liveContent[0].url.longPhoto,
 	                         target:"_blank"}).append(s3img);
+}
 
 
 
@@ -232,7 +236,7 @@ var post_minutes_end=post_live_time_end.getMinutes();
 var timeString_start_end=post_year_end+"/"+post_month_end+"/"+post_date_end+"  "+post_hours_end+":"+post_minutes_end;
 
 
-var td_1=$("<td>").html("start："+timeString_start+"<br>"+"end："+timeString_start_end);
+var td_1=$("<td>").html("start："+timeString_start+"<br>"+"end："+timeString_start_end+"<br><br>");
 var td_2=$("<td>").attr({align:"center"}).html("<b>"+res[i].ugcCensorNo+"</b>");
 var td_3=$("<td>").html(s3imgLink);
 
@@ -240,13 +244,43 @@ var td_3=$("<td>").html(s3imgLink);
 var td_4=$("<td>").html("hi");
 
 
+var FailboxForm = $("<form>").attr({style:"display: inline-block;vertical-align:400%"});
+
+var FailboxInput = $("<input>").attr({
+		 type:"radio",
+         id:"failbox",
+         class:"bad",
+         "fbUserId":res[i].fbUserId,
+         "programTimeSlot_id":res[i].programTimeSlot_id,
+         "ugcCensorNo":res[i].ugcCensorNo,
+         "liveState":res[i].liveState
+         
+		                             });
+
+
+                                     
 
 
 
 
+
+FailboxForm.append(FailboxInput);
+
+
+//---------  'fail' checkbox  click--------------
+
+if(res[i].liveState=="incorrect"){
+	FailboxInput.hide();
+	FailboxForm.append("<b style='color:red'>失敗(done)<b>");
+
+}else{
+	FailboxForm.append("失敗")
+}
+//----------------end 'fail' checkbox  click-----
 
 tbody.append(tr);
 tr.append(td_1);
+FailboxForm.appendTo(td_1);
 tr.append(td_2);
 tr.append(td_3);
 //tr.append(td_4);
@@ -298,6 +332,7 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"liveTime":res[i].liveContent[j].liveTime,
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"correct"});
+	
 	var boxInput3 = $("<input>").attr({type:"radio",
 		id:"boxCheckLive",
         class:"bad",
@@ -309,6 +344,7 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"liveTime":res[i].liveContent[j].liveTime,
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"incorrect"});
+	
 	
 	
 if(res[i].liveContent[j].state=="correct"){
@@ -338,6 +374,8 @@ if(res[i].liveContent[j].state=="correct"){
 	boxForm.appendTo(tr_4)
 	tr.append("<br>");
 }else if(res[i].liveContent[j].state=="incorrect"){
+	
+	//--------------- deprecated --------------
 	boxInput3.attr({checked:"checked"});
 	boxInput2.hide();
 	boxInput3.hide();
@@ -361,7 +399,7 @@ if(res[i].liveContent[j].state=="correct"){
 	//tr.append(boxForm);
 	boxForm.appendTo(tr_4)
 	tr.append("<br>");
-	
+	//---------------------------------------------
 }else{
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput);
@@ -370,10 +408,10 @@ if(res[i].liveContent[j].state=="correct"){
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput2);
 	boxForm.append("正確");
-	boxForm.append("<br>");
-	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-	boxForm.append(boxInput3);
-	boxForm.append("失敗");
+	//boxForm.append("<br>");
+	//boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	//boxForm.append(boxInput3);
+	//boxForm.append("失敗");
 	/* ends of radio box */
 	tr_4.prepend(sp);
 	tr.append(tr_4);
@@ -391,6 +429,62 @@ if(res[i].liveContent[j].state=="correct"){
 //form.append(table);
 	}
 	
+	
+	//-------------for fail-----
+	 $("#failbox.bad").click(function(){
+		  //alert("g");
+		  
+		  
+		  var forComfirm=confirm("你按下的是 ***失敗***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
+		  if (forComfirm==true)
+		    {
+		  // alert("good");
+		    }
+		  else
+		    {
+		   //alert("><");
+		   return false;
+		    }
+		  
+		  
+	    	var _id=$(this).attr("programTimeSlot_id");
+	    	var liveState="incorrect";
+			var ugcCensorNo=$(this).attr("ugcCensorNo");
+			 var fbUserId=$(this).attr("fbUserId");
+	    	
+	    	console.log("programTimeSlot_id:"+_id+"\nfbUserId:"+fbUserId+"\nliveState:"+liveState);
+	    	
+	    	var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+	    	$.ajax({
+               url: url,
+               type: 'PUT',
+               data: {programTimeSlot_Id:_id,
+            	   fbUserId:fbUserId,
+            	   vjson:{liveState: liveState}
+               	 },
+               success: function(response) {
+                   if(response.message){
+                       console.log("[Response] message:" + response.message);
+                   }
+               }
+           });
+			
+			var url=DOMAIN+"fbItem/"+fbUserId;
+	    	$.ajax({
+               url: url,
+               type: 'POST',
+               data: {
+            	   vjson:{liveState: liveState},
+					   ugcCensorNo: ugcCensorNo},
+               success: function(response) {
+                   if(response.message){
+                       console.log("[Response] message:" + response.message);
+                   }
+               }
+           });
+	    	
+	    });
+	//--------------------
 	
 	  $("#boxCheckLive.good").click(function(){
 		  //alert("g");
@@ -441,7 +535,8 @@ if(res[i].liveContent[j].state=="correct"){
                 	   longPic: longPic,
                 	   type: picType,
 					   liveTime: liveTime,
-					   ugcCensorNo: ugcCensorNo},
+					   ugcCensorNo: ugcCensorNo,
+					   liveContent_Id:_id},
                 success: function(response) {
                     if(response.message){
                         console.log("[Response] message:" + response.message);
@@ -686,6 +781,7 @@ if(res[i].liveContent[j].state=="correct"){
                     }
                     
                     if(inputSearchData.timeStart && inputSearchData.timeEnd && inputSearchData.playTimeStart && inputSearchData.playTimeEnd && inputSearchData.ugcSequenceText && programSequenceArr){
+						$('#table-content').html('<br> <br>自動配對中，請稍候....');
                         intervalOfSelectingUGC = {start: inputSearchData.timeStart, end: inputSearchData.timeEnd};
                         intervalOfPlanningDoohProgrames = {start: inputSearchData.playTimeStart, end: inputSearchData.playTimeEnd};
                         $.ajax({
@@ -694,7 +790,7 @@ if(res[i].liveContent[j].state=="correct"){
                             data: {intervalOfSelectingUGC:{start:inputSearchData.timeStart, end:inputSearchData.timeEnd}, intervalOfPlanningDoohProgrames:{start:inputSearchData.playTimeStart, end:inputSearchData.playTimeEnd}, programSequence:programSequenceArr, originSequence:originSequence},
                             success: function(response) {
                                 if(response.message){
-								    $('#table-content').html('<br> <br>自動配對中，請稍候....');
+								    $('#table-content').html('<br> <br>資料產生中，請稍候....');
                                     console.log("[Response] message:" + JSON.stringify(response.message));
                                     sessionId = response.message;
                                     $('#main_menu ul[class="current"]').attr("class", "select");
@@ -1297,6 +1393,7 @@ if(res[i].liveContent[j].state=="correct"){
         $('#storyPlayList').show();
         $('#UGCList').show();
         $('#highlightList').show();
+        $('#live_check').show();
         FM.currentContent = FM.memberList;
         $('#memberListBtn').click();
 
@@ -1307,6 +1404,7 @@ if(res[i].liveContent[j].state=="correct"){
         $('#storyPlayList').hide();
         $('#UGCList').hide();
         $('#highlightList').hide();
+        $('#live_check').hide();
         FM.currentContent = FM.historyList;
         $('#historyListBtn').click();
 

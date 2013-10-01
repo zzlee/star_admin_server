@@ -45,19 +45,39 @@ FM.pushMgr = (function() {
 		// Apple Push Notification Service.
 		function APN(deviceToken, msg) {
 		    var apns = require('apn');
-		    var options = {
-		            cert: './apns/apns-dev-cert.pem',  			/* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
-		            certData: null,                   			/* String or Buffer containing certificate data, if supplied uses this instead of cert file path */
-		            key:  './apns/apns-dev-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
-		            keyData: null,                    			/* String or Buffer containing key data, as certData */
-		            passphrase: null,                 			/* A passphrase for the Key file */
-		            ca: null,                         			/* String or Buffer of CA data to use for the TLS connection */
-		            gateway: 'gateway.sandbox.push.apple.com',	/* gateway address 'Sand-box' - gateway.sandbox.push.apple.com */ /* Product- gateway.push.apple.com */
-		            port: 2195,                   				/* gateway port */
-		            enhanced: true,               				/* enable enhanced format */
-		            errorCallback: pushErrorCallback,	/* Callback when error occurs function(err,notification) */
-		            cacheLength: 100              				/* Number of notifications to cache for error purposes */
-		    };
+		    var options;
+		    
+		    if (systemConfig.USE_PRODUCT_PEM){
+                options = {
+                        cert: './apns-prod/apns-prod-cert.pem',           /* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
+                        certData: null,                             /* String or Buffer containing certificate data, if supplied uses this instead of cert file path */
+                        key:  './apns-prod/apns-prod-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
+                        keyData: null,                              /* String or Buffer containing key data, as certData */
+                        passphrase: null,                           /* A passphrase for the Key file */
+                        ca: null,                                   /* String or Buffer of CA data to use for the TLS connection */
+                        gateway: 'gateway.push.apple.com',  /* gateway address 'Sand-box' - gateway.sandbox.push.apple.com */ /* Product- gateway.push.apple.com */
+                        port: 2195,                                 /* gateway port */
+                        enhanced: true,                             /* enable enhanced format */
+                        errorCallback: pushErrorCallback,   /* Callback when error occurs function(err,notification) */
+                        cacheLength: 100                            /* Number of notifications to cache for error purposes */
+                };
+		    }
+		    else { //use the PEM for development
+                options = {
+                        cert: './apns/apns-dev-cert.pem',           /* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
+                        certData: null,                             /* String or Buffer containing certificate data, if supplied uses this instead of cert file path */
+                        key:  './apns/apns-dev-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
+                        keyData: null,                              /* String or Buffer containing key data, as certData */
+                        passphrase: null,                           /* A passphrase for the Key file */
+                        ca: null,                                   /* String or Buffer of CA data to use for the TLS connection */
+                        gateway: 'gateway.sandbox.push.apple.com',  /* gateway address 'Sand-box' - gateway.sandbox.push.apple.com */ /* Product- gateway.push.apple.com */
+                        port: 2195,                                 /* gateway port */
+                        enhanced: true,                             /* enable enhanced format */
+                        errorCallback: pushErrorCallback,   /* Callback when error occurs function(err,notification) */
+                        cacheLength: 100                            /* Number of notifications to cache for error purposes */
+                };
+
+		    }
 
 			var apnsConnection = new apns.Connection(options);
 			var device = new apns.Device(deviceToken);

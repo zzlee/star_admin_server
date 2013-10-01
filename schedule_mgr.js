@@ -12,7 +12,7 @@ var awsS3 = require('./aws_s3.js');
 var db = require('./db.js');
 //var scalaMgr = (require('./scala/scalaMgr.js'))( 'http://server-pc:8080', { username: 'administrator', password: '53768608' } );
 var scalaMgr = (require('./scala/scalaMgr.js'))( systemConfig.HOST_SCALA_URL , { username: systemConfig.HOST_SCALA_USER_NAME, password: systemConfig.HOST_SCALA_PASSWORD } );
-
+var scalaPlayerName = systemConfig.HOST_SCALA_PLAYER_NAME;
 //var scalaMgr = require('./scala/scalaMgr.js')();
 
 var programTimeSlotModel = db.getDocModel("programTimeSlot");
@@ -705,7 +705,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
             programTimeSlotModel.find({ "state": "not_confirmed", "planner": planner }).remove().exec(function (errOfRomove) {
                 
                 if (!errOfRomove) {
-                    console.log('"not_confirmed" programs are successfully removed!');
+                    // console.log('"not_confirmed" programs are successfully removed!');
                     callback(null);
                 }
                 else {
@@ -872,9 +872,9 @@ scheduleMgr.getProgramList = function(dooh, interval, pageLimit, pageSkip , upda
  *     </ul>
  */
 scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, cbOfGetProgramListBySession ){
-    var query = programTimeSlotModel.find({ "session": sessionId, "type": "UGC"}).sort({timeStamp:1});
-
-    if (pageLimit!==null){
+    var query = programTimeSlotModel.find({ "session": sessionId, "type": "UGC"}).sort({timeStamp:1}) ;
+    
+ if (pageLimit!==null){
         query = query.limit(pageLimit);
     }
     
@@ -887,9 +887,24 @@ scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, c
             cbOfGetProgramListBySession(_err, result);
         }
     });
-    
 };
 
+/*
+scheduleMgr.getProgramListBySession_test = function(sessionId,cbOfGetProgramListBySession2 ){
+    var query2 = programTimeSlotModel.count({ "session": sessionId, "type": "UGC"});
+    
+
+    
+   
+    
+    query2.exec(function (_err, result) {
+    	//console.log(result);
+        if (cbOfGetProgramListBySession2) {
+            cbOfGetProgramListBySession2(_err, result);
+        }
+    });
+};
+*/
 /**
  * Push programs (of a specific session) to the 3rd-party content manager.<br>
  * <br>
@@ -935,6 +950,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     fb_name = res.member[0].fb.userName;
                     var start = new Date(aProgram.timeslot.start);
                     var end = new Date(aProgram.timeslot.end);
+                    var ugcProjectId = res.ugc[0].projectId;
                     if(start.getHours()>12)
                         play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes()+'~'+(end.getHours()-12)+':'+end.getMinutes();
                     else
@@ -951,7 +967,21 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
 
                     async.parallel([
                         function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
-                        function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(err, res){ postFB_cb(err, res); });}
+                        function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(errOfPostMessageAndShare, resOfPostMessageAndShare){
+                            if(resOfPostMessageAndShare){
+                                var fbObj = JSON.parse(resOfPostMessageAndShare);
+                                putFbPostIdUgcs(ugcProjectId, fbObj.id, function(err, result){
+                                    if(!err){
+                                        logger.error("[pushProgramsTo3rdPartyContentMgr.putFbPostIdUgcs]res="+"no:"+aProgram.content.no+"fbPostId"+resOfPostMessageAndShare.id);  
+                                    }else{
+
+                                        logger.error("[pushProgramsTo3rdPartyContentMgr.putFbPostIdUgcs]err="+err);
+                                    }
+                                });
+                            }
+                            postFB_cb(err, res);
+                            });
+                        }
                     ], function(err, res){
                         //(err)?console.log(err):console.dir(res);
                         postPreview_cb(err, res);
@@ -1509,7 +1539,7 @@ scheduleMgr.getSessionList = function(interval, pageLimit, pageSkip, got_cb ){
     };
     
     var query = sessionItemModel.find({ "intervalOfSelectingUGC.start": {$gte:interval.start}, "intervalOfSelectingUGC.end":{$lt:interval.end}})
-                        .sort({timeStamp:1});
+                        .sort({pushProgramsTime:-1});
     
     if (pageLimit!==null){
         query = query.limit(pageLimit);
@@ -1595,47 +1625,93 @@ var dateTransfer = function(date, cbOfDateTransfer){
 };
 
 var autoCheckProgramAndPushToPlayer = function(){
-    var option =
-    {
-            search: "OnDaScreen"
-    };
-    scalaMgr.validProgramExpired(option, function(err, res){
-        if(!err){
-            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
-        }else{
-            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
-        } 
-    });
-
-    var checkDateStart = new Date().getTime();
-    var checkDateEnd = checkDateStart + 60*60*1000;
-    sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
-        if(!result){
-            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-        }
-        else if(!result[0]){
-            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-        }
-        else if(!err){
-//          for(var idx in result){
-//          console.log(result[idx].intervalOfPlanningDoohProgrames.start);
-//          console.log(result[idx].intervalOfPlanningDoohProgrames.end);
-            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
-            scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}}, function(res){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
+    async.series([
+            function(callback1){
+                var option =
+                {
+                        search: "OnDaScreen"
+                };
+                scalaMgr.validProgramExpired(option, function(err, res){
+                    if(!err){
+                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
+                    }else{
+                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
+                    }
+                    callback1(null);
+                });
+            },
+            function(callback2){
+                var checkDateStart = new Date().getTime();
+                var checkDateEnd = checkDateStart + 60*60*1000;
+                sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
+                    if(!result){
+                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+                    }
+                    else if(!result[0]){
+                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+                    }
+                    else if(!err){
+                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
+                        scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}, player: {name: scalaPlayerName}}, function(res){
+                            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
+                            
+                        });
+                    }else{
+                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
+                    }
+                    callback2(null);
+                    //console.log(err, result);
+                });
+            }
+            ],
+            function(err, results){
+                    setTimeout(autoCheckProgramAndPushToPlayer, 15*60*1000);
             });
-//          }
-        }else{
-            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
-        }
-        //console.log(err, result);
-    });
-
-    setTimeout(autoCheckProgramAndPushToPlayer, 15*60*1000);
 
 };
 //delay time for scala connect
 setTimeout(autoCheckProgramAndPushToPlayer, 2000);
+
+var putFbPostIdUgcs = function(ugcProjectID, fbPostId, cbOfPutFbPostIdUgcs){
+    
+    async.waterfall([
+        function(callback){
+            ugcModel.find({ "projectId": ugcProjectID}).sort({"createdOn":-1}).exec(function (err, ugcObj) {
+                if (!err)
+                    callback(null, ugcObj);
+                else
+                    callback("Fail to retrieve UGC Obj from DB: "+err, ugcObj);
+            });
+            
+        },
+        function(ugcObj, callback){
+            var vjson;
+            var arr = [];
+            
+            if(ugcObj[0].fb_postId[0]){
+              ugcObj[0].fb_postId.push({'postId': fbPostId});
+              vjson = {"fb_postId" :ugcObj[0].fb_postId};
+            }else{
+                arr = [{'postId': fbPostId}];
+                vjson = {"fb_postId" : arr};
+            }
+            
+            db.updateAdoc(ugcModel, ugcObj[0]._id, vjson, function(errOfUpdateUGC, resOfUpdateUGC){
+                if (!errOfUpdateUGC){
+                    callback(null, resOfUpdateUGC);
+                }else
+                    callback("Fail to update UGC Obj from DB: "+errOfUpdateUGC, resOfUpdateUGC);
+            });
+            
+        }
+    ],
+    function(err, result){
+        if (cbOfPutFbPostIdUgcs){
+            cbOfPutFbPostIdUgcs(err, result);
+        } 
+    });
+};
+
 
 //test
 //dateTransfer(1377144000000, function(result){
@@ -1644,6 +1720,10 @@ setTimeout(autoCheckProgramAndPushToPlayer, 2000);
 
 //scheduleMgr.getSessionList({start:(new Date("2013/5/5 7:30:20")).getTime(), end:(new Date("2013/8/30 8:30:20")).getTime()}, null, null, function(err, result){
 //    console.log(err, result);
+//});
+
+//putFbPostIdUgcs("cultural_and_creative-5226ff08ff6e3af835000009-20130916T072829495Z", "100006588456341_1403540869875515", function(err, result){
+//console.log('--'+err, result);
 //});
 
 module.exports = scheduleMgr;

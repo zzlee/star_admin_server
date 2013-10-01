@@ -3,7 +3,6 @@ var DEBUG = true,
 FM_LOG = (DEBUG) ? function(str){ logger.info( typeof(str)==='string' ? str : JSON.stringify(str) ); } : function(str){} ;
 
 var FM = { censorHandler: {} };
-
 var censorMgr = require("../censor_mgr.js");
 var apis = require("../routes/api.js");
 var scheduleMgr = require("../schedule_mgr.js");
@@ -37,7 +36,7 @@ var sessionItemModel = db.getDocModel("sessionItem");
  *                       rating(Range A~E),
  *                       doohPlayedTimes}
  */
-FM.censorHandler.getUGCList_get_cb = function(req,res){
+FM.censorHandler.getUGCList_get_cb = function(req,res){ //審查名單
     
     var condition;
     var sort;
@@ -159,6 +158,7 @@ FM.censorHandler.gettimeslots_get_cb = function(req, res){
           res.send(400, {error: err});
         }
     });
+   
 
 };
 
@@ -288,7 +288,7 @@ FM.censorHandler.getHighlightUGCList_get_cb = function(req,res){
 
     censorMgr.getUGCList(condition, sort, limit, skip, function(err, UGCList){
         if (!err){
-            res.render( 'table_censorHighlight', {ugcCensorMovieList: UGCList} );
+            res.render( 'table_censorHighlight', {highlightList: UGCList} );
         }
         else{
             res.send(400, {error: err});
@@ -350,6 +350,7 @@ FM.censorHandler.updateLiveContents_get_cb = function(req, res){
         });
     
 };
+
 FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
 
     var fb_Id =  req.params.fbId;
@@ -359,8 +360,9 @@ FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
     var type = req.body.type;
 	var liveTime = req.body.liveTime;
     var ugcCensorNo = req.body.ugcCensorNo;
+    var liveContent_Id = req.body.liveContent_Id;
 	
-  censorMgr.postMessageAndPicture(fb_Id, photoUrl, type, liveTime, ugcCensorNo, function(err, result){
+  censorMgr.postMessageAndPicture(fb_Id, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id, function(err, result){
   if (!err){
       res.send(200, {message: result});
   }
@@ -369,6 +371,22 @@ FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
   }
 });
 
+};
+
+FM.censorHandler.updateProgramTimeSlot_get_cb = function(req, res){
+
+    var programTimeSlot_Id =  req.body.programTimeSlot_Id;
+    var vjson = req.body.vjson;
+
+    censorMgr.updateProgramTimeSlots(programTimeSlot_Id, vjson, function(err, result){
+            if (!err){
+                res.send(200, {message: result});
+            }
+            else{
+                res.send(400, {error: err});
+            }
+        });
+    
 };
 
 module.exports = FM.censorHandler;

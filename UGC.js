@@ -15,6 +15,11 @@ FM.UGC = (function(){
             fbMgr = require('./facebook_mgr.js'),
 		    ugcSerialNoMgr = require('./ugc_serial_no_mgr.js'),
 			UGCs = FMDB.getDocModel("ugc");
+		/* count right number by joy */
+		pts = FMDB.getDocModel("programTimeSlot"); //for live check
+		sessionItems = FMDB.getDocModel("sessionItem"); //for 歷史紀錄
+		
+		/* end ------- */
         
         return {
         /*
@@ -264,7 +269,32 @@ FM.UGC = (function(){
 				var condition = { 'genre': UGCGenre };
 				UGCs.count(condition, cb);
 			},
-            
+			
+			//------ count right page number by Joy---------
+			getUGCCountWithpts: function(cb){ //for live check
+				var condition = { "type": "UGC",
+           			            "state": "confirmed"};
+				pts.count(condition, cb);
+			},
+			
+			getSessionItemCount: function(cb){ //for 歷史紀錄
+				var condition = { };
+				sessionItems.count(condition, cb);
+			},
+			
+			getHighlightCount: function(cb){ //for 精彩刊登
+				var condition = {'doohPlayedTimes':{$gte : 1} };
+				UGCs.count(condition, cb);
+			},
+			getUGCCountBy3Condition: function(cb){ //for 審查名單
+				var condition = {
+						'no':{ $exists: true},
+			            'ownerId':{ $exists: true},
+			            'projectId':{ $exists: true}
+				};
+				UGCs.count(condition, cb);
+			},
+			//------  end------------
             _GZ_test: function(){
                 /*
                 this.getVideoCountWithGenre('miix_story', function(err, count) {
