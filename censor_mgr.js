@@ -451,7 +451,7 @@ censorMgr.updateLiveContents = function(liveContent_Id, vjson, cb){
     });
 };
 
-censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcCensorNo, postPicture_cb){
+censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id, postPicture_cb){
     
     var access_token;
     var fb_name, playTime, start, link;
@@ -471,7 +471,17 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
                           '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
                 //facebookMgr.postPhoto(access_token, message, photoUrl.preview, albumId, preview);
                 fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.preview }, function(err, res){
-                    (!err)?preview(null, true):preview(null, false);
+                    if(!err){
+                        putFbPostIdLiveContentsBy_id(liveContent_Id, res.id, function(err, result){
+                            if(!err){
+                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+res.id);  
+                              }else
+                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]err="+err);    
+                        });
+                        preview(null, true);
+                    }else{
+                        preview(null, false);
+                    }
                 });
             },
             function(play){
@@ -479,7 +489,17 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
                           '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
                 //facebookMgr.postPhoto(access_token, message, photoUrl.play, albumId, play);
                 fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.play }, function(err, res){
-                    (!err)?play(null, true):play(null, false);
+                    if(!err){
+                        putFbPostIdLiveContentsBy_id(liveContent_Id, res.id, function(err, result){
+                            if(!err){
+                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+res.id);  
+                              }else
+                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]err="+err);    
+                        });
+                        play(null, true);
+                    }else{
+                        play(null, false);
+                    }
                 });
             },
         ], function(err, res){
@@ -557,6 +577,47 @@ censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
     });
 };
 
+var putFbPostIdLiveContentsBy_id = function(liveContent_id, fbPostId, cbOfPutFbPostIdLiveContents){
+    var userLiveContentModel = FMDB.getDocModel("userLiveContent");
+    
+    async.waterfall([
+        function(callback){
+            userLiveContentModel.find({ "_id": liveContent_id}).sort({"createdOn":-1}).exec(function (err, userLiveContentObj) {
+                if (!err)
+                    callback(null, userLiveContentObj);
+                else
+                    callback("Fail to retrieve UGC Obj from DB: "+err, userLiveContentObj);
+            });
+            
+        },
+        function(userLiveContentObj, callback){
+            var vjson;
+            var arr = [];
+            
+            if(userLiveContentObj[0].fb_postId[0]){
+                userLiveContentObj[0].fb_postId.push({'postId': fbPostId});
+              vjson = {"fb_postId" :userLiveContentObj[0].fb_postId};
+            }else{
+                arr = [{'postId': fbPostId}];
+                vjson = {"fb_postId" : arr};
+            }
+            
+            FMDB.updateAdoc(userLiveContentModel, liveContent_id, vjson, function(errOfUpdateUserLiveContent, resOfUpdateUserLiveContent){
+                if (!errOfUpdateUserLiveContent){
+                    callback(null, resOfUpdateUserLiveContent);
+                }else
+                    callback("Fail to update liveContent Obj from DB: "+errOfUpdateUserLiveContent, resOfUpdateUserLiveContent);
+            });
+            
+        }
+    ],
+    function(err, result){
+        if (cbOfPutFbPostIdLiveContents){
+            cbOfPutFbPostIdLiveContents(err, result);
+        } 
+    });
+};
+
 module.exports = censorMgr;
 
 
@@ -594,5 +655,9 @@ module.exports = censorMgr;
 //        play:"https://s3.amazonaws.com/miix_content/user_project/cultural_and_creative-5226ff08ff6e3af835000009-1379972400000-005/cultural_and_creative-5226ff08ff6e3af835000009-1379972400000-005.jpg"
 //        }
 //censorMgr.postMessageAndPicture("100006588456341", photoUrl, "not_checked", 1379972574135, function(err, result){
+//console.log('--'+err, result);
+//});
+
+//putFbPostIdLiveContentsBy_id("5243681811974bd80d00002e", "100006588456341_1403499093213026", function(err, result){
 //console.log('--'+err, result);
 //});
