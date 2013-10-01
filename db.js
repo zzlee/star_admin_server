@@ -203,7 +203,8 @@ FM.DB = (function(){
             session: {type: String}, //The id indicating the session of creating program time slot
             planner: {type: String}, //The id of planner who plans this session of creating program timeslots
             state: {type: String, enum: programTimeSlotState, default: 'not_confirmed'}, //The state of the program timeslot
-            contentGenre: {type: String, enum: ugcContentGenre}  //miix_it, cultural_and_creative, mood, or check_in
+            contentGenre: {type: String, enum: ugcContentGenre},  //miix_it, cultural_and_creative, mood, or check_in
+            liveState: {type: String, enum: liveContentState, default: 'not_checked'}
         }); 
         
         var CandidateUgcCacheSchema = new Schema({
