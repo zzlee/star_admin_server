@@ -113,30 +113,35 @@ function scalaMgr( url, account ){
             date : new Date(oneday),
         };
         contractor.schedule.findTimeslots(option, function(list){
-            for(var i=0; i < list.timeslots.length; i++){
-                if(list.timeslots[i].playlist.name.match(/FM/i)) {
-                    checkWeekday(option.date.getDay(), list.timeslots[i].weekdays, function(status){
-                        var timeslotDeadline;
-                        if((typeof(list.timeslots[i].endDate) === 'undefined'))
-                            timeslotDeadline = new Date(option.date.getTime() + 86399000);
-                        else if((list.timeslots[i].endTime == '24:00:00'))
-                            timeslotDeadline = new Date(list.timeslots[i].endDate + ' 23:59:59');
-                        else 
-                            timeslotDeadline = new Date(list.timeslots[i].endDate + ' ' + list.timeslots[i].endTime);
-                        //console.log(list.timeslots[i].endDate);
-                        if((option.date.getTime() <= timeslotDeadline.getTime()) && (status == 'OK')){
-                            result.push({
-                                //playlist: list.timeslots[i].playlist.name,
-                                interval: {
-                                    start: timeToInt(oneday, list.timeslots[i].startTime),
-                                    end: timeToInt(oneday, list.timeslots[i].endTime)
-                                },
-                                cycleDuration: durationToNumber(list.timeslots[i].playlist.prettifyDuration.replace('(','').replace(')','').split(' - '))
-                            });
-                        }
-                    });
+            if(typeof(list.timeslots) === 'undefined') {
+                timeslot_cb('no find timeslot', null);
+            }
+            else {
+                for(var i=0; i < list.timeslots.length; i++){
+                    if(list.timeslots[i].playlist.name.match(/FM/i)) {
+                        checkWeekday(option.date.getDay(), list.timeslots[i].weekdays, function(status){
+                            var timeslotDeadline;
+                            if((typeof(list.timeslots[i].endDate) === 'undefined'))
+                                timeslotDeadline = new Date(option.date.getTime() + 86399000);
+                            else if((list.timeslots[i].endTime == '24:00:00'))
+                                timeslotDeadline = new Date(list.timeslots[i].endDate + ' 23:59:59');
+                            else 
+                                timeslotDeadline = new Date(list.timeslots[i].endDate + ' ' + list.timeslots[i].endTime);
+                            //console.log(list.timeslots[i].endDate);
+                            if((option.date.getTime() <= timeslotDeadline.getTime()) && (status == 'OK')){
+                                result.push({
+                                    //playlist: list.timeslots[i].playlist.name,
+                                    interval: {
+                                        start: timeToInt(oneday, list.timeslots[i].startTime),
+                                        end: timeToInt(oneday, list.timeslots[i].endTime)
+                                    },
+                                    cycleDuration: durationToNumber(list.timeslots[i].playlist.prettifyDuration.replace('(','').replace(')','').split(' - '))
+                                });
+                            }
+                        });
+                    }
+                    if(i == list.timeslots.length-1) timeslot_cb(null, result);
                 }
-                if(i == list.timeslots.length-1) timeslot_cb(null, result);
             }
         });
         
@@ -535,11 +540,11 @@ function scalaMgr( url, account ){
             },
         ], function(err, result){
             
-            if((typeof(result[0]) === 'undefined') || (result[0].count == 0)) {
+            if((typeof(result[0]) === 'undefined') || (result[0].count == 0) || (typeof(result[0]).list[0] === 'undefined')) {
                 reportPush_cb('no find "search" playlist');
                 return;
             }
-            if((typeof(result[1]) === 'undefined') || (result[1].count == 0)) {
+            if((typeof(result[1]) === 'undefined') || (result[1].count == 0) || (typeof(result[1]).list[0] === 'undefined')) {
                 reportPush_cb('no find "play" playlist');
                 return;
             }
