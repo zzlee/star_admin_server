@@ -141,9 +141,10 @@ var mappingUGCList = function(data, set_cb){
     limit = data.length;
 
     var toDo = function(err, result){
+        if(!data[next]) return;
         var userPhotoUrl = 'No Photo';
         var description = null;
-
+        
         if(data[next].timeslot){
             timeslotDateStart = new Date(data[next].timeslot.start).toString().substring(0,25);
             timeslotDateEnd = new Date(data[next].timeslot.end).toString().substring(0,25);
@@ -191,7 +192,9 @@ var mappingUGCList = function(data, set_cb){
     };//toDo End ******
 
     //async
-    if(data[next] !== null){
+    if(!data[next]){
+        return;
+    }
         async.parallel([
                         function(callback){
                             getUserContent(data[next].ownerId.userID,function(err, result){
@@ -214,7 +217,7 @@ var mappingUGCList = function(data, set_cb){
 
                         }
                         ], toDo);
-    }
+    
 
 };
 /**

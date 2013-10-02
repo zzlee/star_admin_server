@@ -1624,49 +1624,55 @@ var dateTransfer = function(date, cbOfDateTransfer){
     cbOfDateTransfer(tempDate);
 };
 
+var flag = 0;
 var autoCheckProgramAndPushToPlayer = function(){
-    async.series([
-            function(callback1){
-                var option =
-                {
-                        search: "OnDaScreen"
-                };
-                scalaMgr.validProgramExpired(option, function(err, res){
-                    if(!err){
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
-                    }else{
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
-                    }
-                    callback1(null);
-                });
-            },
-            function(callback2){
-                var checkDateStart = new Date().getTime();
-                var checkDateEnd = checkDateStart + 60*60*1000;
-                sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
-                    if(!result){
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-                    }
-                    else if(!result[0]){
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-                    }
-                    else if(!err){
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
-                        scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}, player: {name: scalaPlayerName}}, function(res){
-                            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
-                            
-                        });
-                    }else{
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
-                    }
-                    callback2(null);
-                    //console.log(err, result);
-                });
+
+    if(flag == 1){
+        //validProgramExpired
+        var option =
+        {
+                search: "OnDaScreen"
+        };
+        scalaMgr.validProgramExpired(option, function(err, res){
+            if(!err){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
+            }else{
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
             }
-            ],
-            function(err, results){
-                    setTimeout(autoCheckProgramAndPushToPlayer, 15*60*1000);
-            });
+        });
+    }
+    else if(flag === 0){
+        //pushEvent
+        var checkDateStart = new Date().getTime();
+        var checkDateEnd = checkDateStart + 20*60*1000;
+        sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
+            if(!result){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+            }
+            else if(!result[0]){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+            }
+            else if(!err){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
+                scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}, player: {name: scalaPlayerName}}, function(res){
+                    logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
+
+                });
+            }else{
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
+            }
+            //console.log(err, result);
+        });
+    }
+    //flag contorl
+    if(flag === 0)
+        flag = 1;
+    else
+        flag = 0;
+		
+//    console.log('flag'+flag);
+    setTimeout(autoCheckProgramAndPushToPlayer, 10*60*1000);
+
 
 };
 //delay time for scala connect
