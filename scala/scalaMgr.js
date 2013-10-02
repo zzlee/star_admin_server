@@ -540,46 +540,72 @@ function scalaMgr( url, account ){
             },
         ], function(err, result){
             
-            if((typeof(result[0]) === 'undefined') || (result[0].count == 0) || 
-               (typeof(result[0].list[0]) === 'undefined') || (typeof(result[0].list) === 'undefined')) {
-                reportPush_cb('no find "search" playlist');
-                return;
-            }
-            if((typeof(result[1]) === 'undefined') || (result[1].count == 0) || 
-               (typeof(result[1].list[0]) === 'undefined') || (typeof(result[1].list) === 'undefined')) {
-                reportPush_cb('no find "play" playlist');
-                return;
-            }
+            var detectFlag = 0;
+            var detectType = ['search', 'play'];
             
-            var pushSubplaylist = { subplaylist: { id: result[1].list[0].id, name: result[1].list[0].name } };
+            // if((typeof(result[0]) === 'undefined') || (result[0].count == 0) || 
+               // (typeof(result[0].list[0]) === 'undefined') || (typeof(result[0].list) === 'undefined')) {
+                // reportPush_cb('no find "search" playlist');
+                // return;
+            // }
+            // if((typeof(result[1]) === 'undefined') || (result[1].count == 0) || 
+               // (typeof(result[1].list[0]) === 'undefined') || (typeof(result[1].list) === 'undefined')) {
+                // reportPush_cb('no find "play" playlist');
+                // return;
+            // }
             
-            for(var i=0; i<result[0].count; i++){
-                pushSubplaylist.id = result[0].list[i].id;
-                pushSubplaylist.name = result[0].list[i].name;
+            var pushTrigger = function(){
                 
-                if(!result[0].list[i].playlistItems){
-                    contractor.playlist.pushSubplaylist(pushSubplaylist, function(err, res){});
-                }
-                else {
-                    for(var j=0; j<result[0].list[i].playlistItems.length; j++){
-                        if(result[0].list[i].playlistItems[j].subplaylist)
-                            if(result[0].list[i].playlistItems[j].subplaylist.name == pushSubplaylist.subplaylist.name)
-                                break;
-                        if(j == result[0].list[i].playlistItems.length-1)
-                            contractor.playlist.pushSubplaylist(pushSubplaylist, function(err, res){});
+                var pushSubplaylist = { subplaylist: { id: result[1].list[0].id, name: result[1].list[0].name } };
+                
+                for(var i=0; i<result[0].count; i++){
+                    pushSubplaylist.id = result[0].list[i].id;
+                    pushSubplaylist.name = result[0].list[i].name;
+                    
+                    if(!result[0].list[i].playlistItems){
+                        contractor.playlist.pushSubplaylist(pushSubplaylist, function(err, res){});
+                    }
+                    else {
+                        for(var j=0; j<result[0].list[i].playlistItems.length; j++){
+                            if(result[0].list[i].playlistItems[j].subplaylist)
+                                if(result[0].list[i].playlistItems[j].subplaylist.name == pushSubplaylist.subplaylist.name)
+                                    break;
+                            if(j == result[0].list[i].playlistItems.length-1)
+                                contractor.playlist.pushSubplaylist(pushSubplaylist, function(err, res){});
+                        }
+                    }
+                    
+                    if(i == result[0].count-1) {
+                        if(!option.player) playerName = 'feltmeng';
+                        else playerName = option.player.name;
+                        contractor.player.findPlayerIdByName(playerName, function(err, playerId){
+                            contractor.player.pushProgram({"ids": [playerId]}, function(res){
+                                reportPush_cb(res);
+                            });
+                        });
                     }
                 }
-                
-                if(i == result[0].count-1) {
-                    if(!option.player) playerName = 'feltmeng';
-                    else playerName = option.player.name;
-                    contractor.player.findPlayerIdByName(playerName, function(err, playerId){
-                        contractor.player.pushProgram({"ids": [playerId]}, function(res){
-                            reportPush_cb(res);
-                        });
-                    });
+            };
+            
+            var detect = function(target, type){
+                if((typeof(target) === 'undefined')) {
+                    reportPush_cb('no find "' + type + '" playlist: no result array');
+                    return;
                 }
-            }
+                else if((typeof(target.list) === 'undefined')) {
+                    reportPush_cb('no find "' + type + '" playlist: no playlist');
+                    return;
+                }
+                else if((typeof(target.list[0]) === 'undefined')) {
+                    reportPush_cb('no find "' + type + '" playlist: no playlist to array');
+                    return;
+                }
+                else {
+                    detectFlag++;
+                    (detectFlag != 2)?detect(result[detectFlag], detectType[detectFlag]):pushTrigger();
+                }
+            };
+            detect(result[detectFlag], detectType[detectFlag]);
             
         });
     };
