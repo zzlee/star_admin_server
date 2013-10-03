@@ -136,8 +136,8 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
             var shareOption = { link: link };
             //facebookMgr.postMessageAndShare(access_token, message, shareOption, postStory_cb);
             async.parallel([
-                function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member._id, message, push_cb);},
-                function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, postFB_cb);}
+                function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member._id, message, push_cb);}//,
+                //function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, postFB_cb);}
             ], function(err, res){
                 //(err)?console.log(err):console.dir(res);
                 postStory_cb(err, res);

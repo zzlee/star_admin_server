@@ -560,7 +560,8 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
                 pushPhotosToUser(JSON.parse(res).id, postPicture_cb);
             });*/
             if(type == 'correct'){
-            pushPhotosToUser('', postPicture_cb);
+			//stop post to fb!!
+            //pushPhotosToUser('', postPicture_cb);
             }else
                 postPicture_cb(null, 'done');
             //postPicture_cb(err, res);

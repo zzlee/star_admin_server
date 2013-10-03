@@ -966,8 +966,8 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     };
 
                     async.parallel([
-                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
-                        function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(errOfPostMessageAndShare, resOfPostMessageAndShare){
+                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });}//,
+/*                         function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(errOfPostMessageAndShare, resOfPostMessageAndShare){
                             if(resOfPostMessageAndShare){
                                 var fbObj = JSON.parse(resOfPostMessageAndShare);
                                 putFbPostIdUgcs(ugcProjectId, fbObj.id, function(err, result){
@@ -981,7 +981,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             }
                             postFB_cb(err, res);
                             });
-                        }
+                        } */
                     ], function(err, res){
                         //(err)?console.log(err):console.dir(res);
                         postPreview_cb(err, res);
