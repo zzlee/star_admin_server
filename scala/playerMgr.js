@@ -2,6 +2,7 @@
 var player = (function() {
     
     var adapter, token;
+    var connectMgr = require('./connectMgr.js');
     
     var _private = {
         register : function( auth ) {
@@ -22,30 +23,37 @@ var player = (function() {
             if(option.search) request += '&search=' + option.search;
             if(option.filters) request += '&filters=' + option.filters;
             
-            adapter.get(request, function(err, req, res, obj) {
-                list_cb(obj);
+            connectMgr.checkCollision(function(status){
+                adapter.get(request, function(err, req, res, obj) {
+                    list_cb(obj);
+                });
             });
         },
         storage : function( option, uuid_cb ) {
-            adapter.post('/ContentManager/api/rest/storage?token=' + token, option, function(err, req, res, obj) {
-                uuid_cb(obj);
+            connectMgr.checkCollision(function(status){
+                adapter.post('/ContentManager/api/rest/storage?token=' + token, option, function(err, req, res, obj) {
+                    uuid_cb(obj);
+                });
             });
         },
         generatePlan: function( uuid, plan_cb ){
-            adapter.get('/ContentManager/api/rest/players/' + uuid + '/generatePlan?token=' + token, function(err, req, res, obj) {
-                //console.log('%d -> %j', res.statusCode, res.headers);
-                plan_cb('done');
+            connectMgr.checkCollision(function(status){
+                adapter.get('/ContentManager/api/rest/players/' + uuid + '/generatePlan?token=' + token, function(err, req, res, obj) {
+                    //console.log('%d -> %j', res.statusCode, res.headers);
+                    plan_cb('done');
+                });
             });
-        }
+        },
+        reserved : function() {}
     };
 
     return {
     
         init : function(){
             var self = this;
-            require('./connectMgr.js').request(function( auth ){
+            connectMgr.request(function( auth ){
                 _private.register( auth );
-                return self;
+                // return self;
             });
         },
         list : function( option, list_cb ) {
@@ -67,6 +75,4 @@ var player = (function() {
     };
 }());
 
-
-// Outputs: "current value: 10" and "running"
 module.exports = player;

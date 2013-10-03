@@ -2,6 +2,7 @@
 var schedule = (function() {
     
     var adapter, token;
+    var connectMgr = require('./connectMgr.js');
     //var weekdays = [ 'SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY' ];
     var weekdays = {
         'SUNDAY' : 0, 
@@ -21,26 +22,26 @@ var schedule = (function() {
     var _private = {
         list : function( option, list_cb ){
             var playDate = new Date(option.date);
-            adapter.get('/ContentManager/api/rest/channels/' + option.channel.id + '/frames/' + option.channel.frames + '/timeslots?year=' + playDate.getFullYear() + '&week=' + playDate.getWeek() + '&token=' + token, function(err, req, res, obj){
-                list_cb(obj);
+            connectMgr.checkCollision(function(status){
+                adapter.get('/ContentManager/api/rest/channels/' + option.channel.id + '/frames/' + option.channel.frames + '/timeslots?year=' + playDate.getFullYear() + '&week=' + playDate.getWeek() + '&token=' + token, function(err, req, res, obj){
+                    list_cb(obj);
+                });
             });
         },
         register : function( auth ) {
             adapter = auth.adapter;
             token = auth.token;
         },
-        jump: function(){
-            console.log( "jumping" );
-        }
+        reserved : function() {}
     };
 
     return {
     
         init : function(){
             var self = this;
-            require('./connectMgr.js').request(function( auth ){
+            connectMgr.request(function( auth ){
                 _private.register( auth );
-                return self;
+                // return self;
             });
         },
         findTimeslots : function( option, timeslots_cb ) {
@@ -61,6 +62,4 @@ var schedule = (function() {
     };
 }());
 
-
-// Outputs: "current value: 10" and "running"
 module.exports = schedule;

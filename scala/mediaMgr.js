@@ -2,39 +2,44 @@
 var media = (function() {
 
     var adapter, token;
+    var connectMgr = require('./connectMgr.js');
     var rest = require('restler');
     var fs = require('fs');
 
     var _private = {
         init : function( file, init_cb ) {
-            adapter.post('/ContentManager/api/rest/fileupload/init?token=' + token, {
-                filename: file.name,
-                filepath: file.savepath,
-                //uploadType: file.type
-            }, function( err, req, res, obj ){
-                init_cb( obj.uuid );
+            connectMgr.checkCollision(function(status){
+                adapter.post('/ContentManager/api/rest/fileupload/init?token=' + token, {
+                    filename: file.name,
+                    filepath: file.savepath,
+                    //uploadType: file.type
+                }, function( err, req, res, obj ){
+                    init_cb( obj.uuid );
+                });
             });
         },
         upload : function( file, upload_cb ) {
+            
             _private.init( file, function( uuid ){
                 var connect = adapter.url.href + 'ContentManager/api/rest/fileupload/part/' + uuid + '/0';
                 fs.readFile( file.path + '\\' + file.name, function (err, data){
-                    rest.post(connect, {
-                        multipart: true,
-                        token: token,
-                        'Content-Length': new Buffer(data).length,
-                        data: {
-                            'token': token,
-                            'video[file]': rest.file( file.path + '\\' + file.name, null, data.length, null, '' )
-                        }
-                    }).on('complete', function(data) {
-                        //if(data.value == 'Done') upload_cb(null, 'OK');
-                        //else upload_cb('FILE_UPLOAD_FAILED', null);
-                        upload_cb(null, 'OK');
+                    connectMgr.checkCollision(function(status){
+                        rest.post(connect, {
+                            multipart: true,
+                            token: token,
+                            'Content-Length': new Buffer(data).length,
+                            data: {
+                                'token': token,
+                                'video[file]': rest.file( file.path + '\\' + file.name, null, data.length, null, '' )
+                            }
+                        }).on('complete', function(data) {
+                            // if(data.value == 'Done') upload_cb(null, 'OK');
+                            // else upload_cb('FILE_UPLOAD_FAILED', null);
+                            upload_cb(null, 'OK');
+                        });
                     });
-                } );
-            } );
-            
+                });
+            });
         },
         list : function( option, list_cb ) {
             if( typeof(option) == 'function') list_cb = option;
@@ -50,8 +55,10 @@ var media = (function() {
             if(option.search) request += '&search=' + option.search;
             if(option.filters) request += '&filters=' + option.filters;
             
-            adapter.get(request, function(err, req, res, obj) {
-                list_cb(err, obj);
+            connectMgr.checkCollision(function(status){
+                adapter.get(request, function(err, req, res, obj) {
+                    list_cb(err, obj);
+                });
             });
         },
         create: function( option, create_cb ){
@@ -60,31 +67,33 @@ var media = (function() {
                 uri: option.uri,
                 mediaType: 'HTML'
             };
-            adapter.post('/ContentManager/api/rest/media?token=' + token, webpage, function(err, req, res, obj) {
-                create_cb(null, 'OK');
+            connectMgr.checkCollision(function(status){
+                adapter.post('/ContentManager/api/rest/media?token=' + token, webpage, function(err, req, res, obj) {
+                    create_cb(null, 'OK');
+                });
             });
         },
         remove : function( option, remove_cb ) {
-            adapter.del('/ContentManager/api/rest/media/' + option.media.id + '?token=' + token, function(err, req, res) {
-                remove_cb(err, 'OK');
+            connectMgr.checkCollision(function(status){
+                adapter.del('/ContentManager/api/rest/media/' + option.media.id + '?token=' + token, function(err, req, res) {
+                    remove_cb(err, 'OK');
+                });
             });
         },
         register : function( auth ) {
             adapter = auth.adapter;
             token = auth.token;
         },
-        jump: function(){
-            console.log( "jumping" );
-        }
+        reserved : function() {}
     };
 
     return {
     
         init : function(){
             var self = this;
-            require('./connectMgr.js').request(function( auth ){
+            connectMgr.request(function( auth ){
                 _private.register( auth );
-                return self;
+                // return self;
             });
         },
         fileupload : function( file, status_cb ) {
@@ -114,7 +123,5 @@ var media = (function() {
         }
     };
 }());
- 
- 
-// Outputs: "current value: 10" and "running"
+
 module.exports = media;

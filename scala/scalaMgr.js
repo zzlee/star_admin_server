@@ -543,17 +543,6 @@ function scalaMgr( url, account ){
             var detectFlag = 0;
             var detectType = ['search', 'play'];
             
-            // if((typeof(result[0]) === 'undefined') || (result[0].count == 0) || 
-               // (typeof(result[0].list[0]) === 'undefined') || (typeof(result[0].list) === 'undefined')) {
-                // reportPush_cb('no find "search" playlist');
-                // return;
-            // }
-            // if((typeof(result[1]) === 'undefined') || (result[1].count == 0) || 
-               // (typeof(result[1].list[0]) === 'undefined') || (typeof(result[1].list) === 'undefined')) {
-                // reportPush_cb('no find "play" playlist');
-                // return;
-            // }
-            
             var pushTrigger = function(){
                 
                 var pushSubplaylist = { subplaylist: { id: result[1].list[0].id, name: result[1].list[0].name } };

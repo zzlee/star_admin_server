@@ -1,11 +1,19 @@
 
 var scala = require('./scalaMgr');
-//var scalaMgr = scala( 'http://192.168.5.189:8080', { username: 'administrator', password: '53768608' } );
-var scalaMgr = scala( 'http://www.feltmeng.idv.tw:8080', { username: 'administrator', password: '53768608' } );
+var scalaMgr = scala( 'http://192.168.5.189:8080', { username: 'administrator', password: '53768608' } );
+// var scalaMgr = scala( 'http://www.feltmeng.idv.tw:8080', { username: 'administrator', password: '53768608' } );
 //var scalaMgr = scala( 'http://220.128.120.51:8080', { username: 'administrator', password: '28469434' } );
-var async = require('async');
 
 setTimeout(function(){
+    
+    //ScalaMgr APIs : listTimeslot()
+    /* var oneday = '2013/10/03 10:00:00';
+    scalaMgr.listTimeslot( oneday, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    } ); */
     
     //ScalaMgr APIs : setItemToPlaylist()
     /* var option = 
@@ -24,7 +32,6 @@ setTimeout(function(){
         else
             console.dir(res);
     } ); */
-    
     
     //ScalaMgr APIs : validProgramExpired()
     /* var option =
@@ -109,4 +116,4 @@ setTimeout(function(){
         console.log(res);
     }); */
         
-}, 1500);
+}, 2000);
