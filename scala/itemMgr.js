@@ -10,7 +10,7 @@ var item = (function() {
             token = auth.token;
         },
         addItem : function( option, addItem_cb ) {
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('channel.addItem', function(status){
                 adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '/playlistItems/' + option.media.id + '?token=' + token, {}, function(err, req, res, obj){
                     addItem_cb(err, obj);
                 });

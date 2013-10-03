@@ -8,7 +8,7 @@ var media = (function() {
 
     var _private = {
         init : function( file, init_cb ) {
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('media.init', function(status){
                 adapter.post('/ContentManager/api/rest/fileupload/init?token=' + token, {
                     filename: file.name,
                     filepath: file.savepath,
@@ -23,7 +23,7 @@ var media = (function() {
             _private.init( file, function( uuid ){
                 var connect = adapter.url.href + 'ContentManager/api/rest/fileupload/part/' + uuid + '/0';
                 fs.readFile( file.path + '\\' + file.name, function (err, data){
-                    connectMgr.checkCollision(function(status){
+                    connectMgr.checkCollision('media.upload', function(status){
                         rest.post(connect, {
                             multipart: true,
                             token: token,
@@ -55,7 +55,7 @@ var media = (function() {
             if(option.search) request += '&search=' + option.search;
             if(option.filters) request += '&filters=' + option.filters;
             
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('media.list', function(status){
                 adapter.get(request, function(err, req, res, obj) {
                     list_cb(err, obj);
                 });
@@ -67,14 +67,14 @@ var media = (function() {
                 uri: option.uri,
                 mediaType: 'HTML'
             };
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('media.create', function(status){
                 adapter.post('/ContentManager/api/rest/media?token=' + token, webpage, function(err, req, res, obj) {
                     create_cb(null, 'OK');
                 });
             });
         },
         remove : function( option, remove_cb ) {
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('media.remove', function(status){
                 adapter.del('/ContentManager/api/rest/media/' + option.media.id + '?token=' + token, function(err, req, res) {
                     remove_cb(err, 'OK');
                 });

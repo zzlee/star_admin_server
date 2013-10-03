@@ -7,7 +7,7 @@ var channel = (function() {
     var _private = {
         list : function( option, list_cb ) {
             if( typeof(option) == 'function') { list_cb = option; }
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('channel.list', function(status){
                 adapter.get('/ContentManager/api/rest/channels?limit=10&offset=0&sort=name&token=' + token, function(err, req, res, obj) {
                     list_cb(obj);
                 });

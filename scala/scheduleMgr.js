@@ -22,7 +22,7 @@ var schedule = (function() {
     var _private = {
         list : function( option, list_cb ){
             var playDate = new Date(option.date);
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('schedule.list', function(status){
                 adapter.get('/ContentManager/api/rest/channels/' + option.channel.id + '/frames/' + option.channel.frames + '/timeslots?year=' + playDate.getFullYear() + '&week=' + playDate.getWeek() + '&token=' + token, function(err, req, res, obj){
                     list_cb(obj);
                 });

@@ -23,21 +23,21 @@ var player = (function() {
             if(option.search) request += '&search=' + option.search;
             if(option.filters) request += '&filters=' + option.filters;
             
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('player.list', function(status){
                 adapter.get(request, function(err, req, res, obj) {
                     list_cb(obj);
                 });
             });
         },
         storage : function( option, uuid_cb ) {
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('player.storage', function(status){
                 adapter.post('/ContentManager/api/rest/storage?token=' + token, option, function(err, req, res, obj) {
                     uuid_cb(obj);
                 });
             });
         },
         generatePlan: function( uuid, plan_cb ){
-            connectMgr.checkCollision(function(status){
+            connectMgr.checkCollision('player.generatePlan', function(status){
                 adapter.get('/ContentManager/api/rest/players/' + uuid + '/generatePlan?token=' + token, function(err, req, res, obj) {
                     //console.log('%d -> %j', res.statusCode, res.headers);
                     plan_cb('done');

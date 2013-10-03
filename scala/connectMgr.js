@@ -11,10 +11,14 @@ var connect = (function() {
         ping : function( adapter ) {
             adapter.get('/ContentManager/api/rest/auth/ping?token=' + auth.token, function(err, req, res, obj){
                 // (err)?console.log('error!'):console.log('OK');
-                if(err)
+                if(err) {
+                    logger.info('re-login scala: get new access token');
                     connect.init( auth.adapter, account );
-                else
+                }
+                else {
+                    logger.info('scala access token is valid');
                     connect.validToken();
+                }
             });
         },
         collision : function() {},
@@ -43,11 +47,15 @@ var connect = (function() {
         request : function( auth ) {
             tokenListener.on('login', auth);
         },
-        checkCollision : function( collision_cb ) {
+        checkCollision : function( type, collision_cb ) {
+            if(typeof(type) === 'function')
+                collision_cb = type;
+                
             if(!collisionFlag)
                 collision_cb('OK');
             else {
                 // console.log('collision!!');
+                logger.info('scala collision detection: ' + type + 'collision occur!');
                 collisionListener.once('collision', function(status){
                     collision_cb('OK');
                 });
@@ -56,7 +64,7 @@ var connect = (function() {
         validToken : function() {
             setTimeout(function(){
                 _private.ping(auth.adapter);
-            }, 90 * 1000);
+            }, 20 * 1000);
         }
     };
 }());

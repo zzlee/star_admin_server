@@ -1,3 +1,16 @@
+//winston
+var winston = require('winston');
+var fs = require('fs');
+if(!fs.existsSync('./log')) fs.mkdirSync('log');
+
+var logger = new(winston.Logger)({
+	transports: [ 
+		new winston.transports.File({ filename: './log/winston.log'})	
+	],
+	exceptionHandlers: [new winston.transports.File({filename: './log/exceptions.log'})]	
+});  
+
+global.logger = logger; 
 
 var scala = require('./scalaMgr');
 var scalaMgr = scala( 'http://192.168.5.189:8080', { username: 'administrator', password: '53768608' } );
