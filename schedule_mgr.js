@@ -1633,6 +1633,7 @@ var autoCheckProgramAndPushToPlayer = function(){
         {
                 search: "OnDaScreen"
         };
+		logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] validProgramExpired start");
         scalaMgr.validProgramExpired(option, function(err, res){
             if(!err){
                 logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
@@ -1645,6 +1646,7 @@ var autoCheckProgramAndPushToPlayer = function(){
         //pushEvent
         var checkDateStart = new Date().getTime();
         var checkDateEnd = checkDateStart + 40*60*1000;
+		logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]find sessionItemModel in checkDateStart:"+checkDateStart+",checkDateEnd:"+checkDateEnd);
         sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
             if(!result){
                 logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
