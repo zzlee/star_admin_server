@@ -1,6 +1,7 @@
 
 var item = (function() {
     
+    var connectMgr = require('./connectMgr.js');
     var adapter, token;
     
     var _private = {
@@ -9,22 +10,22 @@ var item = (function() {
             token = auth.token;
         },
         addItem : function( option, addItem_cb ) {
-            adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '/playlistItems/' + option.media.id + '?token=' + token, {}, function(err, req, res, obj){
-                addItem_cb(err, obj);
+            connectMgr.checkCollision('channel.addItem', function(status){
+                adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '/playlistItems/' + option.media.id + '?token=' + token, {}, function(err, req, res, obj){
+                    addItem_cb(err, obj);
+                });
             });
         },
-        jump: function(){
-            console.log( "jumping" );
-        }
+        reserved : function() {}
     };
 
     return {
     
         init : function(){
             var self = this;
-            require('./connectMgr.js').request(function( auth ){
+            connectMgr.request(function( auth ){
                 _private.register( auth );
-                return self;
+                // return self;
             });
         },
         addItemToPlaylist : function( option, addItem_cb ){
@@ -33,6 +34,4 @@ var item = (function() {
     };
 }());
 
-
-// Outputs: "current value: 10" and "running"
 module.exports = item;

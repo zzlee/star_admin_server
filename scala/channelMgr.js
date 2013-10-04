@@ -2,30 +2,31 @@
 var channel = (function() {
     
     var adapter, token;
+    var connectMgr = require('./connectMgr.js');
     
     var _private = {
         list : function( option, list_cb ) {
             if( typeof(option) == 'function') { list_cb = option; }
-            adapter.get('/ContentManager/api/rest/channels?limit=10&offset=0&sort=name&token=' + token, function(err, req, res, obj) {
-                list_cb(obj);
+            connectMgr.checkCollision('channel.list', function(status){
+                adapter.get('/ContentManager/api/rest/channels?limit=10&offset=0&sort=name&token=' + token, function(err, req, res, obj) {
+                    list_cb(obj);
+                });
             });
         },
         register : function( auth ) {
             adapter = auth.adapter;
             token = auth.token;
         },
-        jump: function(){
-            console.log( "jumping" );
-        }
+        reserved : function() {}
     };
 
     return {
     
         init : function(){
             var self = this;
-            require('./connectMgr.js').request(function( auth ){
+            connectMgr.request(function( auth ){
                 _private.register( auth );
-                return self;
+                // return self;
             });
         },
         list : function( option, list_cb ) {
@@ -34,6 +35,4 @@ var channel = (function() {
     };
 }());
 
-
-// Outputs: "current value: 10" and "running"
 module.exports = channel;

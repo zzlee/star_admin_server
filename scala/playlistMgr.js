@@ -1,6 +1,7 @@
 
 var playlist = (function() {
     
+    var connectMgr = require('./connectMgr.js');
     var adapter, token, apiLicenseToken;
     
     var itemSchema = {
@@ -92,9 +93,11 @@ var playlist = (function() {
             if(option.search) request += '&search=' + option.search;
             if(option.filters) request += '&filters=' + option.filters;
             
-            //adapter.get('/ContentManager/api/rest/playlists/all?limit=' + option.limit + '&offset=' + option.offset + '&sort=' + option.sort + '&token=' + token, function(err, req, res, obj) {
-            adapter.get(request, function(err, req, res, obj) {
-                list_cb(err, obj);
+            connectMgr.checkCollision('playlist.list', function(status){
+                //adapter.get('/ContentManager/api/rest/playlists/all?limit=' + option.limit + '&offset=' + option.offset + '&sort=' + option.sort + '&token=' + token, function(err, req, res, obj) {
+                adapter.get(request, function(err, req, res, obj) {
+                    list_cb(err, obj);
+                });
             });
         },
         /*listAllAvailablePlaylistItems : function( option, upadte_cb ) {
@@ -109,21 +112,27 @@ var playlist = (function() {
                 enableSmartPlaylist: false,
                 playlistType: "MEDIA_PLAYLIST"
             };
-            adapter.post('/ContentManager/api/rest/playlists?token=' + token, playlist, function(err, req, res, obj) {
-                create_cb(err, 'OK');
+            connectMgr.checkCollision('playlist.create', function(status){
+                adapter.post('/ContentManager/api/rest/playlists?token=' + token, playlist, function(err, req, res, obj) {
+                    create_cb(err, 'OK');
+                });
             });
         },
         update : function( option, upadte_cb ) {
-            adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token + '&apiLicenseToken=' + apiLicenseToken, option.playlist.content, function(err, req, res, obj) {
-                //assert.ifError(err);
-                //console.log('%d -> %j', res.statusCode, res.headers);
-                //console.log('%j', obj);
-                upadte_cb(obj);
+            connectMgr.checkCollision('playlist.update', function(status){
+                adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token + '&apiLicenseToken=' + apiLicenseToken, option.playlist.content, function(err, req, res, obj) {
+                    //assert.ifError(err);
+                    //console.log('%d -> %j', res.statusCode, res.headers);
+                    //console.log('%j', obj);
+                    upadte_cb(obj);
+                });
             });
         },
         remove : function( option, remove_cb ) {
-            adapter.del('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token, function(err, req, res) {
-                remove_cb(err, 'done');
+            connectMgr.checkCollision('playlist.remove', function(status){
+                adapter.del('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token, function(err, req, res) {
+                    remove_cb(err, 'done');
+                });
             });
         },
         settingPlaylistItem : function( option, settingPlaylistItem_cb ) {
@@ -159,8 +168,10 @@ var playlist = (function() {
             itemSchema.playlistItems[0].timeSchedules[0].startTime = playStartTime;
             itemSchema.playlistItems[0].timeSchedules[0].endTime = playEndTime;
             
-            adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token, itemSchema, function(err, req, res, obj) {
-                settingPlaylistItem_cb(null, obj);
+            connectMgr.checkCollision('playlist.settingPlaylistItem', function(status){
+                adapter.put('/ContentManager/api/rest/playlists/' + option.playlist.id + '?token=' + token, itemSchema, function(err, req, res, obj) {
+                    settingPlaylistItem_cb(null, obj);
+                });
             });
         },
         settingSubPlaylist : function( option, settingSubPlaylist_cb ){
@@ -170,8 +181,10 @@ var playlist = (function() {
             subplaylistSchema.playlistItems[0].subplaylist.id = option.subplaylist.id;
             subplaylistSchema.playlistItems[0].subplaylist.name = option.subplaylist.name;
             
-            adapter.put('/ContentManager/api/rest/playlists/' + subplaylistSchema.id + '?token=' + token, subplaylistSchema, function(err, req, res, obj) {
-                settingSubPlaylist_cb(null, obj);
+            connectMgr.checkCollision('playlist.settingSubPlaylist', function(status){
+                adapter.put('/ContentManager/api/rest/playlists/' + subplaylistSchema.id + '?token=' + token, subplaylistSchema, function(err, req, res, obj) {
+                    settingSubPlaylist_cb(null, obj);
+                });
             });
         },
         register : function( auth ) {
@@ -179,18 +192,16 @@ var playlist = (function() {
             token = auth.token;
             apiLicenseToken = auth.apiLicenseToken;
         },
-        jump: function(){
-            console.log( "jumping" );
-        }
+        reserved : function() {}
     };
 
     return {
     
         init : function(){
             var self = this;
-            require('./connectMgr.js').request(function( auth ){
+            connectMgr.request(function( auth ){
                 _private.register( auth );
-                return self;
+                // return self;
             });
         },
         list : function( option, list_cb ) {
@@ -360,6 +371,4 @@ var playlist = (function() {
     };
 }());
 
-
-// Outputs: "current value: 10" and "running"
 module.exports = playlist;
