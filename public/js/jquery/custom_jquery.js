@@ -44,6 +44,7 @@ PageList.prototype.setExtraParameters = function(extraParameters){
 };
 
 PageList.prototype.showPageContent = function(Page,condition){
+    $('#table-content').html('Loading...');
     var _this = this;
     $.get(this.urlToGetListContent, {skip: (Page-1)*this.rowsPerPage, limit: this.rowsPerPage, token:localStorage.token, condition:conditions, extraParameters: JSON.stringify(this.extraParameters)}, function(res){
         if(res.message){
@@ -152,12 +153,12 @@ $(document).ready(function(){
 //Main P age 
 $(document).ready(function(){
     FM.memberList = new PageList( 'memberList', 8, '/miix_admin/members');
-    FM.miixPlayList = new PageList( 'miixMovieList', 5, '/miix_admin/miix_movies');
+    FM.miixPlayList = new PageList( 'miixMovieList', 10, '/miix_admin/miix_movies');
     FM.storyPlayList = new PageList( 'storyMovieList', 8, '/miix_admin/story_movies');
-    FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor'); 
-    FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 5, '/miix_admin/doohs/'+DEFAULT_DOOH+'/timeslots');
-    FM.historyList = new PageList( 'historyList', 10, '/miix_admin/sessions/ ');
-    FM.highlightList = new PageList( 'highlightList', 5, '/miix_admin/highlight');
+    FM.UGCList = new PageList( 'ugcCensorMovieList', 10, '/miix_admin/ugc_censor'); 
+    FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 10, '/miix_admin/doohs/'+DEFAULT_DOOH+'/timeslots');
+    FM.historyList = new PageList( 'historyList', 15, '/miix_admin/sessions/ ');
+    FM.highlightList = new PageList( 'highlightList', 10, '/miix_admin/highlight');
 	FM.live_check = new PageList( 'live_check',10,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',function(res){
 	console.log('');
 	console.dir(res);

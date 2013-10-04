@@ -1644,7 +1644,7 @@ var autoCheckProgramAndPushToPlayer = function(){
     else if(flag === 0){
         //pushEvent
         var checkDateStart = new Date().getTime();
-        var checkDateEnd = checkDateStart + 20*60*1000;
+        var checkDateEnd = checkDateStart + 40*60*1000;
         sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
             if(!result){
                 logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
@@ -1671,7 +1671,7 @@ var autoCheckProgramAndPushToPlayer = function(){
         flag = 0;
 		
 //    console.log('flag'+flag);
-    setTimeout(autoCheckProgramAndPushToPlayer, 10*60*1000);
+    setTimeout(autoCheckProgramAndPushToPlayer, 6*60*1000);
 
 
 };
