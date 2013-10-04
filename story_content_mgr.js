@@ -78,7 +78,7 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
     var ownerFbID = null;
     //var ownerFbName = null;
     var movieTitle = null;
-    var miixMovieFileExtension = ".flv";
+    var miixMovieFileExtension = "flv";
     
     var getUserIdAndName = function( finish_cb ){
         UGCDB.getOwnerIdByPid( miixMovieProjectID, function( err, _ownerStdID) {
