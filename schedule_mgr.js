@@ -1006,16 +1006,16 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                                     var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);
                                 }
                                 else{
-                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension; 
+                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
                                     //TODO: make sure that target directory exists
-                                    if(typeof(aProgram.content.fileExtension) === 'undefined') {
+                                    if(typeof(aProgram.content.fileExtension) === 'undefined') {  //TODO: find out the bug, and remove this check
                                         //aProgram.content.fileExtension = '.mp4';
                                         var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.mp4';
                                         var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.mp4');
                                     }
                                     else {
-                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension;
-                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+aProgram.content.fileExtension);                                        
+                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension;
+                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);                                        
                                     }
                                 }
                                 awsS3.downloadFromAwsS3(targetLocalPath, s3Path, function(errS3,resultS3){
