@@ -1232,7 +1232,7 @@ if(res[i].liveContent[j].state=="correct"){
                             $('#underPushingText').html('上傳失敗： '+textStatus+" "+errorThrown);
                         }
                     });
-                    $('#pushProgramsBtn').hide();
+                    $('#pushProgramsBtn').remove();
                     $('#table-content').append($('<p>').attr("id","underPushingText").html('上傳至播放系統中，請稍候....'));
                 }
             });            
