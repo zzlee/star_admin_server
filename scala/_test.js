@@ -120,6 +120,18 @@ setTimeout(function(){
             console.dir(res);
     }); */
     
+    //ScalaMgr APIs : clearMedia()
+    /* var option =
+    {
+        search: 'google'
+    };
+    scalaMgr.clearMedia( option, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
+    
     //ScalaMgr APIs : pushEvent()
     /* var option = { 
         playlist: { search: 'lastModified', play: 'OnDaScreen' },
