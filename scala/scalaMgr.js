@@ -515,6 +515,40 @@ function scalaMgr( url, account ){
     };
     
     /**
+     * Clear Media
+     *
+     */
+    var clearMedia = function( option, clear_cb ){
+        // contractor.media.list({ fields: 'id', search: option.search }, clear_cb);
+        var eventConsole = function(target, event){
+            event.push(function(callback){ 
+                contractor.media.remove({ media: { id: target } }, callback);
+            });
+        };
+        async.series([
+            function(list_cb){
+                contractor.media.list({ fields: 'id', search: option.search }, function(err, media){
+                    list_cb(err, media);
+                });
+            },
+        ], function(err, res){
+            var media = res[0];
+            if(media.count == 0)
+                clear_cb(err, 'no find media');
+            else {
+                var execute = [];
+                for(var i=0; i<media.count; i++)
+                {
+                    eventConsole(media.list[i].id, execute);
+                }
+                async.series(execute, function(err, res){
+                    (err)?clear_cb(err, null):clear_cb(null, 'done');
+                });
+            }
+        });
+    };
+    
+    /**
      * Push event list to all playlist in server.
      * 
      * @param {object} option Input setting of playlist, subplaylist and player.
@@ -609,6 +643,7 @@ function scalaMgr( url, account ){
         clearPlaylistItems: clearPlaylistItems,
         validProgramExpired: validProgramExpired,
         removePlaylist: removePlaylist,
+        clearMedia: clearMedia,
         contractor: contractor,   //test
     };
 }
