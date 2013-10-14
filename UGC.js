@@ -196,7 +196,13 @@ FM.UGC = (function(){
 			                                    if(err){
 			                                        callback(null, {totalComments: comments_count, totalLikes: likes_count, totalShares: shares_count});
 
-			                                    }else{
+			                                    }else if(!result){
+                                                    callback(null, {totalComments: comments_count, totalLikes: likes_count, totalShares: shares_count});
+                                                    
+                                                }else if(!result[0]){
+                                                    callback(null, {totalComments: comments_count, totalLikes: likes_count, totalShares: shares_count});
+                                                
+                                                }else{
 			                                        if (result) {
 //			                                            console.log('result'+result);
 			                                            for(var i in result){
