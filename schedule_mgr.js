@@ -966,7 +966,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     };
 
                     async.parallel([
-                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, res.member[0].app, function(err, res){ push_cb(null, res); });}//,
+                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });}//,
 /*                         function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(errOfPostMessageAndShare, resOfPostMessageAndShare){
                             if(resOfPostMessageAndShare){
                                 var fbObj = JSON.parse(resOfPostMessageAndShare);

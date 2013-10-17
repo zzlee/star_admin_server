@@ -43,6 +43,7 @@ FM.DB = (function(){
                 //media_item: the media item that has already stored in Media of Scala's Content Manager
             programTimeSlotState = 'not_confirmed confirmed'.split(' '),
             liveContentState = 'not_checked correct incorrect'.split(' '),
+            appGenre = 'ondascreen wowtaipeiarena'.split(' '),
             
             videoStatus = 'good soso bad waiting none'.split(' '), //DEPRECATE, keep for reference
             videoGenre = 'miix miix_street miix_story'.split(' '); //DEPRECATE, keep for reference 
@@ -78,7 +79,8 @@ FM.DB = (function(){
             activity_ids: {type: [ObjectID]},
             ugc_count: {type: Number, min: 0, default: 0},
             thumbnail: {type: String},    //  path/to/filename
-			doohTimes: {type: Number, min: 0, default: 0}
+			doohTimes: {type: Number, min: 0, default: 0},
+			app: {type: String, enum: appGenre, default: 'ondascreen'}
         }); //  members collection
         
       //DEPRECATED - keep for now for reference

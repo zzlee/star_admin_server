@@ -262,7 +262,7 @@ FM.api._fbPostUGCThenAdd = function(vjson){
                             for( var devicePlatform in result.deviceToken){
                                 if(result.deviceToken[devicePlatform] != 'undefined'){
                                 	var pushMgr = require("../push_mgr.js");
-                                	pushMgr.sendMessageToDevice(devicePlatform, result.deviceToken[devicePlatform], "您有一個新影片！");
+                                	pushMgr.sendMessageToDevice(devicePlatform, result.deviceToken[devicePlatform], result.app, "您有一個新影片！");
                                 }
                             }
                         }

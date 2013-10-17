@@ -178,13 +178,13 @@ var mappingUGCList = function(data, set_cb){
         
 
         if(next == limit - 1) {
-            UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight,data[next].url, UGCList);
+            UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight,data[next].url, UGCList);
             set_cb(null, 'ok'); 
             next = 0;
             UGCList = [];
         }
         else{
-            UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url,UGCList);
+            UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url,UGCList);
             next += 1;
             mappingUGCList(data, set_cb);
         }
@@ -196,18 +196,30 @@ var mappingUGCList = function(data, set_cb){
         return;
     }
         async.parallel([
-                        function(callback){
-                            getUserContent(data[next].ownerId.userID,function(err, result){
-                                if(err){
-                                    logger.error('[mappingUserProfilePicture_getUserContent]', err);
-                                    callback(err, null);
-                                }
-                                if(result){
-                                    callback(null, result);
-                                }
-                            });
-
-                        },
+                        //deprecated
+//                        function(callback){
+//                            memberModel.find({'_id': data[next].ownerId._id}).exec(function(err, member){
+//                                if(err){
+//                                    logger.error('[mappingUserProfilePicture_getUserContent]', err);
+//                                    callback(err, null);
+//                                }
+//                                if(member[0]){
+//                                    console.log(member);
+//                                    getUserContent(member[0].fb.userID, member[0].app, function(err, result){
+//                                        if(err){
+//                                            logger.error('[mappingUserProfilePicture_getUserContent]', err);
+//                                            callback(err, null);
+//                                        }
+//                                        if(result){
+//                                            callback(null, result);
+//                                        }
+//                                    });
+//                                }else
+//                                     callback(null, 'No User');
+//                                
+//                            });
+//
+//                        },
                         function(callback){
                             member_mgr.getUserNameAndID(data[next].ownerId._id, function(err, result){
                                 if(err) callback(err, null);
@@ -245,9 +257,9 @@ var getTimeslots = function(get_cb){
  *                       
  */
 
-var getUserContent = function(fb_id,get_cb){
+var getUserContent = function(fb_id, app, get_cb){
 
-    fb_handler.getUserProfilePicture(fb_id,function(err, result){
+    fb_handler.getUserProfilePicture(fb_id, app, function(err, result){
         if(err){
             get_cb(err,null);
         }
@@ -526,9 +538,25 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
     };
     //
     async.waterfall([
-        function(memberSearch){
-            memberModel.find({'fb.userID': fb_id}).exec(memberSearch);
-        },
+       function(callback){
+           console.log('liveContent_Id'+liveContent_Id);
+           userLiveContentModel.find({'_id': liveContent_Id}).exec(function (err, userLiveContentObj) {
+               if (!err)
+                   callback(null, userLiveContentObj);
+               else
+                   callback("Fail to retrieve userLiveContent Obj from DB: "+err, userLiveContentObj);
+           });
+           
+       },
+       function(userLiveContentObj, callback){
+           memberModel.find({'_id': userLiveContentObj[0].ownerId._id}).exec(function (err, memberSearch) {
+               console.dir(memberSearch);
+               if (!err)
+                   callback(null, memberSearch);
+               else
+                   callback("Fail to retrieve member Obj from DB: "+err, memberSearch);
+           });
+       },
     ], function(err, member){
         access_token = member[0].fb.auth.accessToken;
         fb_name = member[0].fb.userName;

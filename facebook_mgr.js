@@ -20,9 +20,16 @@ FM.facebookMgr = (function(){
 //    var app_access_token = "116813818475773|d9EXxXNwTt2eCbSkIWYs9dJv-N0", 
 //        app_id = "116813818475773",
 //        app_secret = "b8f94311a712b98531b292165884124a";
-        var app_access_token = "430008873778732|99f7c401c399ce8caaa90cc79a29f795", 
-        app_id = "430008873778732",
-        app_secret = "99f7c401c399ce8caaa90cc79a29f795";
+        
+        //for OnDaScreen        
+        var app_access_token_OnDaScreen = "430008873778732|99f7c401c399ce8caaa90cc79a29f795", 
+        app_id_OnDaScreen = "430008873778732",
+        app_secret_OnDaScreen = "99f7c401c399ce8caaa90cc79a29f795";
+        
+        // for WowTaipeiarena 
+        var app_access_token_WowTaipeiarena = "154438938098663|1ee57dc3fd8c7596781bbd1c986bf6b0", 
+        app_id_WowTaipeiarena = "154438938098663",
+        app_secret_WowTaipeiarena = "1ee57dc3fd8c7596781bbd1c986bf6b0";
   
     
     /** for feltmeng.idv.tw @ Local */
@@ -92,7 +99,7 @@ FM.facebookMgr = (function(){
             /*
              * REF: http://developers.facebook.com/docs/howtos/login/debugging-access-tokens/
              */
-            isTokenValid: function(user_token, cb){
+            isTokenValid: function(user_token, app, cb){
                 var qs = null;
                 var path = "/debug_token";
                 
@@ -100,8 +107,19 @@ FM.facebookMgr = (function(){
                     cb( {error: "access_token is necessary."}, null);
                     return;
                 }
-                    
-                qs = { 'input_token': user_token, 'access_token': app_access_token };
+//                if(app == "wowtaipeiarena"){    
+//                    qs = { 'input_token': user_token, 'access_token': app_access_token_WowTaipeiarena };
+//                }else{
+//                    qs = { 'input_token': user_token, 'access_token': app_access_token_OnDaScreen };
+//                }
+                switch(app){
+                case "wowtaipeiarena":
+                    qs = { 'input_token': user_token, 'access_token': app_access_token_WowTaipeiarena };
+                    break;
+                default:
+                    qs = { 'input_token': user_token, 'access_token': app_access_token_OnDaScreen };
+                    break;
+                }
 //                console.log('user_token='+user_token);
                     
                 request({
@@ -147,6 +165,22 @@ FM.facebookMgr = (function(){
                 FM_LOG("[ExtendToken]: ");
                 
                 var https = require('https');
+                switch(app){
+                case "wowtaipeiarena":
+                    var path = "/oauth/access_token?grant_type=fb_exchange_token"
+                        + "&client_id=" +  app_id
+                        + "&client_secret=" + app_secret
+                        + "&fb_exchange_token=" + accessToken
+                        + "&scope=email,read_stream,publish_stream";
+                    break;
+                default:
+                    var path = "/oauth/access_token?grant_type=fb_exchange_token"
+                        + "&client_id=" +  app_id_OnDaScreen
+                        + "&client_secret=" + app_secret_OnDaScreen
+                        + "&fb_exchange_token=" + accessToken
+                        + "&scope=email,read_stream,publish_stream";
+                    break;
+                }
                 var path = "/oauth/access_token?grant_type=fb_exchange_token"
                     + "&client_id=" +  app_id
                     + "&client_secret=" + app_secret
@@ -194,7 +228,7 @@ FM.facebookMgr = (function(){
             },
             
             
-            extendToken: function(accessToken, cb){
+            extendToken: function(accessToken, app, cb){
                 var qs = null;
                 var path = "/oauth/access_token?grant_type=fb_exchange_token";
                 
@@ -202,13 +236,24 @@ FM.facebookMgr = (function(){
                     cb( {error: "access_token is necessary."}, null);
                     return;
                 }
-                    
-                qs = { 
-                        'client_id': app_id
-                        , 'client_secret': app_secret
+                switch(app){
+                case "wowtaipeiarena":
+                    qs = { 
+                        'client_id': app_id_WowTaipeiarena
+                        , 'client_secret': app_secret_WowTaipeiarena
                         , 'fb_exchange_token': accessToken
                         , 'scope': 'email,read_stream,publish_stream'
                      };
+                    break;
+                default:
+                    qs = { 
+                        'client_id': app_id_OnDaScreen 
+                        , 'client_secret': app_secret_OnDaScreen
+                        , 'fb_exchange_token': accessToken
+                        , 'scope': 'email,read_stream,publish_stream'
+                     };
+                    break;
+                }    
                     
                 request({
                     method: 'POST',
@@ -285,23 +330,13 @@ FM.facebookMgr = (function(){
       
                     // Handle any errors that occur
                     
-                    /* if (err) return console.error("Error occured: ", err);
+                    if (err) return console.error("Error occured: ", err);
                     body = JSON.parse(body);
                     if (body.error) return console.error("Error returned from facebook: ", body.error);
                     
                     var result = JSON.stringify(body);
                     if (cb){
                         cb(err, result);
-                    } */
-                    
-                    body = JSON.parse(body);
-                    if(err)
-                        cb(("Error occured: "+ err), null);
-                    else if(body.error)
-                        cb(("Error returned from facebook: "+ body.error), null);
-                    else {
-                        var result = JSON.stringify(body);
-                        cb(null, result);
                     }
                 });
             },
@@ -318,23 +353,13 @@ FM.facebookMgr = (function(){
       
                     // Handle any errors that occur
                     
-                    /* if (err) return console.error("Error occured: ", err);
+                    if (err) return console.error("Error occured: ", err);
                     body = JSON.parse(body);
                     if (body.error) return console.error("Error returned from facebook: ", body.error);
                     
                     var result = JSON.stringify(body);
                     if (cb){
                         cb(err, result);
-                    } */
-                    
-                    body = JSON.parse(body);
-                    if(err)
-                        cb(("Error occured: "+ err), null);
-                    else if(body.error)
-                        cb(("Error returned from facebook: "+ body.error), null);
-                    else {
-                        var result = JSON.stringify(body);
-                        cb(null, result);
                     }
                 });
             },
@@ -356,19 +381,19 @@ FM.facebookMgr = (function(){
                   
 					// Handle any errors that occur
 					
-                    body = JSON.parse(body);
-                    if(err)
-                        cb(("Error occured: "+ err), null);
-                    else if(body.error)
-                        cb(("Error returned from facebook: "+ body.error), null);
-                    else {
-                        var result = JSON.stringify(body);
-                        cb(null, result);
-                    }
+					if (err) return console.error("Error occured: ", err);
+					body = JSON.parse(body);
+					if (body.error) return console.error("Error returned from facebook: ", body.error);
+					
+					var result = JSON.stringify(body);
+					if (cb){
+					    cb(err, result);
+					}
                 });
             },
             
             //TODO: need to verify
+            //deprecated
             postOnFeed: function(fb_id, message, cb){
                 if(!fb_id || !message){
                     cb( {error: "fb_id/message is necessary."}, null );
@@ -377,6 +402,7 @@ FM.facebookMgr = (function(){
                 
                 var path = "/"+ fb_id+"/feed";
                 var qs = { "access_token": app_access_token, "message": message };
+
                 
                 request({
                     method: 'POST',
@@ -396,10 +422,22 @@ FM.facebookMgr = (function(){
             },
             
           //kaiser
-            getUserProfilePicture: function(fb_id, cb){
+            getUserProfilePicture: function(fb_id, app, cb){
                 
                 var path = "/"+fb_id+"/?fields=picture&width=240&height=240";
-                var qs = { "access_token": app_access_token};
+//                if(app == "wowtaipeiarena"){    
+//                    var qs = { "access_token": app_access_token_WowTaipeiarena};
+//                }else{
+//                    var qs = { "access_token": app_access_token_OnDaScreen};
+//                }
+                switch(app){
+                case "wowtaipeiarena":
+                    var qs = { "access_token": app_access_token_WowTaipeiarena};
+                    break;
+                default:
+                    var qs = { "access_token": app_access_token_OnDaScreen};
+                break;
+                }
                 
                 request({
                     method: 'GET',

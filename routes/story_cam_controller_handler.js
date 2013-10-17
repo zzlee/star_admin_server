@@ -601,7 +601,7 @@ var postMessageAndPicture = function(_id, photoUrl, postPicture_cb){
         
         async.waterfall([
             function(push_cb){
-                pushMgr.sendMessageToDeviceByMemberId(member[0]._id, message, member[0].app, function(err, res){
+                pushMgr.sendMessageToDeviceByMemberId(member[0]._id, message, function(err, res){
                     logger.info('push played notification to user, member id is ' + member[0]._id);
                     push_cb(err, res);
                 });
