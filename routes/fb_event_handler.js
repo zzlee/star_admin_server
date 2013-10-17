@@ -9,6 +9,7 @@ var DEBUG = true,
     FM_LOG = (DEBUG) ? function(str){ logger.info( typeof(str)==='string' ? str : JSON.stringify(str)); } : function(str){} ;
 
 var facebookMgr = require('../facebook_mgr.js');
+// var canvasProcessMgr = require('../canvas_process_mgr.js');
 
 var fs = require('fs');
 var path = require('path');
@@ -26,7 +27,7 @@ FM.fb_event_handler.fbUploadImageByBase64 = function(req, res) {
         // console.log(err);
         var filepath = filename;
         facebookMgr.postPhotoFromLocal(myToken, filepath, function(err, res){
-            // (err)?console.dir(err):console.dir(res);
+            // (err)?console.dir('facebookMgr: ' + err):console.dir('facebookMgr: ' + res);
             fs.unlinkSync(filepath);
         });
     });

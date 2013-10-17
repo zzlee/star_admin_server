@@ -8,6 +8,7 @@ var UGC_mgr = require('./UGC.js');
 var sheculeMgr = require('./schedule_mgr.js');
 var member_mgr = require('./member.js');
 var pushMgr = require('./push_mgr.js');
+var canvasProcessMgr = require('./canvas_process_mgr.js');
 
 var UGCs = FMDB.getDocModel("ugc");
 var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
@@ -568,6 +569,40 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
         });
         
     });
+};
+
+/**
+ * Mark text on photo and post to facebook
+ *
+ */
+censorMgr.postTextOnPhoto = function(fb_id, photoUrl, liveTime, postTextOnPhoto_cb) {
+    
+    async.series([
+        function(memberSearch){
+            memberModel.find({'fb.userID': fb_id}).exec(memberSearch);
+        },
+    ], function(err, res){
+        var member = res[0];
+        access_token = member.fb.auth.accessToken;
+        fb_name = member.fb.userName;
+        start = new Date(parseInt(liveTime));
+        if(start.getHours()>12)
+            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes();
+        else
+            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes();
+            
+        var textContent = fb_name + ' 於' + playTime + '，登上台北小巨蛋天幕！';
+        
+        var option = {
+            accessToken: access_token,
+            source: photoUrl,
+            text: textContent
+        };
+        canvasProcessMgr.markTextAndIcon(option, function(err, res){
+            postTextOnPhoto_cb(err, res);
+        });
+    });
+    
 };
 
 censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
