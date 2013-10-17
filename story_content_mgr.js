@@ -116,7 +116,7 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
                 ugcModel.find({projectId: pid}).exec(ugcSearch);
             },
             function(ugc, memberSearch){
-                memberModel.find({'fb.userID': ugc[0].ownerId.userID}).exec(function(err, member){
+                memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){
                     memberSearch(err, {ugc: ugc[0], member: member[0]});
                 });
             }
@@ -136,7 +136,7 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
             var shareOption = { link: link };
             //facebookMgr.postMessageAndShare(access_token, message, shareOption, postStory_cb);
             async.parallel([
-                function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member._id, message, push_cb);}//,
+                function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member._id, message, res.member.app, push_cb);}//,
                 //function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, postFB_cb);}
             ], function(err, res){
                 //(err)?console.log(err):console.dir(res);

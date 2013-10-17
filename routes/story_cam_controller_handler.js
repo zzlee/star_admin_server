@@ -427,7 +427,7 @@ var updateToUGC = function(updateUGC_cb){
             simulate: doohPreviewList[i].doohPreviewUrl,
             play: awsS3List[i]
         };
-        /* postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
+        /* postMessageAndPicture(ownerList[i]._id, photoUrl, function(err, res){
             if(err)
                 logger.info('Post message and pictrue to user is Error: ' + err);
             else
@@ -445,7 +445,7 @@ var updateToUGC = function(updateUGC_cb){
             //if(err) console.log(err);
             //else console.log(result);
             //if(!err) fmapi._fbPostUGCThenAdd(vjson);
-            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
+            postMessageAndPicture(ownerList[i]._id, photoUrl, function(err, res){
                 if(err)
                     logger.info('Post message and pictrue to user is Error: ' + err);
                 else
@@ -534,7 +534,7 @@ var updateVideoToUGC = function(programInterval, updateVideoToUGC_cb){
     }
 };
 
-var postMessageAndPicture = function(fb_id, photoUrl, postPicture_cb){
+var postMessageAndPicture = function(_id, photoUrl, postPicture_cb){
     
     var access_token;
     var fb_name, playTime, start, link;
@@ -574,16 +574,16 @@ var postMessageAndPicture = function(fb_id, photoUrl, postPicture_cb){
             else
                 pushPhotos_cb(err, null); */
             
-            (err)?logger.info('post message to user on facebook is failed, fb id is ' + fb_id):'';
-            (res[0])?logger.info('post preview message to user on facebook is success, fb id is ' + fb_id):logger.info('post preview message to user on facebook is failed, fb id is ' + fb_id);
-            (res[1])?logger.info('post play message to user on facebook is success, fb id is ' + fb_id):logger.info('post play message to user on facebook is failed, fb id is ' + fb_id);
+            (err)?logger.info('post message to user on facebook is failed, member id is ' + _id):'';
+            (res[0])?logger.info('post preview message to user on facebook is success, member id is ' + _id):logger.info('post preview message to user on facebook is failed, member id is ' + _id);
+            (res[1])?logger.info('post play message to user on facebook is success, member id is ' + _id):logger.info('post play message to user on facebook is failed, member id is ' + _id);
             pushPhotos_cb(null, 'done');
         });
     };
     //
     async.waterfall([
         function(memberSearch){
-            memberModel.find({'fb.userID': fb_id}).exec(memberSearch);
+            memberModel.find({'_id': _id}).exec(memberSearch);
         },
     ], function(err, member){
         access_token = member[0].fb.auth.accessToken;
@@ -601,7 +601,7 @@ var postMessageAndPicture = function(fb_id, photoUrl, postPicture_cb){
         
         async.waterfall([
             function(push_cb){
-                pushMgr.sendMessageToDeviceByMemberId(member[0]._id, message, function(err, res){
+                pushMgr.sendMessageToDeviceByMemberId(member[0]._id, message, member[0].app, function(err, res){
                     logger.info('push played notification to user, member id is ' + member[0]._id);
                     push_cb(err, res);
                 });

@@ -943,7 +943,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ ugcSearch(null, ugc); });
                     },
                     function(ugc, memberSearch){
-                        memberModel.find({'fb.userID': ugc[0].ownerId.userID}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
+                        memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
                     },
                 ], function(err, res){
                     access_token = res.member[0].fb.auth.accessToken;
@@ -966,7 +966,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     };
 
                     async.parallel([
-                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });}//,
+                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, res.member[0].app, function(err, res){ push_cb(null, res); });}//,
 /*                         function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(errOfPostMessageAndShare, resOfPostMessageAndShare){
                             if(resOfPostMessageAndShare){
                                 var fbObj = JSON.parse(resOfPostMessageAndShare);
