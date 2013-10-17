@@ -5,6 +5,7 @@ exports.storyCamControllerHandler = require('./story_cam_controller_handler.js')
 exports.authorizationHandler = require('./authorization_handler.js');
 exports.doohHandler = require('./dooh_handler.js');
 exports.censorHandler = require('./censor_handler.js');
+exports.fbEventHandler = require("./fb_event_handler.js");
 exports.service = require('./service_handler.js');
 exports.admin = require("./admin_handler.js");
 exports.api = require("./api.js");

@@ -7,6 +7,7 @@ var DEBUG = true,
 FM.facebookMgr = (function(){
     var uInstance = null;
     var request = require("request");
+    var fs = require("fs");
     var fb_url = 'https://graph.facebook.com';
    /** for postMessage();*/
     // this token will expire in 1 hour,u should go to graph tool to get new one.  
@@ -270,7 +271,7 @@ FM.facebookMgr = (function(){
             
             //JF
             postPhoto : function(access_token, message, img_url, album_id, cb){
-                if(typeof(album_id) === 'undefined'){
+                if(typeof(album_id) === 'function'){
                     cb = album_id;
                     album_id = 'me';
                 }
@@ -366,6 +367,35 @@ FM.facebookMgr = (function(){
                         cb(null, result);
                     }
                 });
+            },
+            
+            postPhotoFromLocal : function(access_token, img_path, album_id, postPhotoFromLocal_cb){
+                
+                var url;
+                
+                if(typeof(album_id) === 'function') {
+                    postPhotoFromLocal_cb = album_id;
+                    album_id = 'me';
+                }
+
+                url = 'https://graph.facebook.com/' + album_id + '/photos?access_token=' + access_token;
+                
+                var r = request.post(url, function(err, resp, body){
+                    if (err) postPhotoFromLocal_cb("Error occured: " + err, null);
+                    // if (err) console.error("Error occured: ", err);
+                    body = JSON.parse(body);
+                    if (body.error) postPhotoFromLocal_cb("Error returned from facebook: " + body.error, null);
+                    // if (body.error) console.error("Error returned from facebook: ", body.error);
+                    
+                    var result = JSON.stringify(body);
+                    if (postPhotoFromLocal_cb){
+                        postPhotoFromLocal_cb(err, result);
+                    }
+                });
+                var form = r.form();
+                form.append('access_token', access_token);
+                form.append('source', fs.createReadStream(img_path));
+                
             },
             
             //TODO: need to verify
