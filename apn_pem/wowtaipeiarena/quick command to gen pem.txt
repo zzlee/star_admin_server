@@ -1,0 +1,18 @@
+--generate dev pem--
+
+openssl x509 -in aps_development.cer -inform der -out apns-dev-cert.pem
+openssl pkcs12 -nocerts -out apns-dev-key.pem -in feltmeng.p12
+openssl rsa -in apns-dev-key.pem -out apns-dev-key-noenc.pem
+
+openssl s_client -connect gateway.sandbox.push.apple.com:2195 -cert apns-dev-cert.pem -key apns-dev-key-noenc.pem
+
+
+--generate production pem--
+openssl x509 -in aps_production.cer -inform der -out apns-prod-cert.pem
+openssl pkcs12 -nocerts -out apns-prod-key.pem -in feltmeng.p12
+openssl rsa -in apns-prod-key.pem -out apns-prod-key-noenc.pem
+
+openssl s_client -connect gateway.push.apple.com:2195 -cert apns-prod-cert.pem -key apns-prod-key-noenc.pem
+
+
+
