@@ -28,7 +28,11 @@ FM.fb_event_handler.fbUploadImageByBase64 = function(req, res) {
         var filepath = filename;
         facebookMgr.postPhotoFromLocal(myToken, filepath, function(err, res){
             // (err)?console.dir('facebookMgr: ' + err):console.dir('facebookMgr: ' + res);
-            fs.unlinkSync(filepath);
+            if(err)
+                logger.info('Post FB Text on Photo is Status: ' + err);
+            else
+                logger.info('Post FB Text on Photo is Status: ' + res);
+            // fs.unlinkSync(filepath);
         });
     });
     res.set({

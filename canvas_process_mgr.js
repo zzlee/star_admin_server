@@ -68,7 +68,7 @@ module.exports = canvasProcessMgr;
 // === test === //
 /* 
 var option = {
-    accessToken: 'CAACMdh4LeZBcBAI67ZAiERvZCheAdJQnJhAFsHgrH86fCLcdwrVxxIeg3WNYDZBIAT5qZBwCpig0Iq9lNZAZAjoKKvFikIuSaFhfDQlIaSfaFvr21eFyMW5AyfmNrXeqfitALwgqyZAD4UKZBUGxJeZAkIywvBOH91AjAuvuB2H1m2FZBL1e7w97v6DrJb8FX58df0ZD',
+    accessToken: 'CAACMdh4LeZBcBADduK5QbYqTRnW1lymJqWmW5zMxtEHcfBPfVJ2rEwUj1Kd1iYF5ZAP2iNgZBa8LHzdgZCfRtNkQfxr4PqnfvIazc6mga0ZAZAG4L4KrBJhSVHtukQlB5NQV43xxr3ts1ZBqfxMTu06aeF2cKUTu2WX7qzjscUQjhjq93drZAZBOXj6rZBszZCTTr4ZD',
     // type: 'ondascreen',
     type: 'wowtaipeiarena',
     source: 'https://s3.amazonaws.com/miix_content/user_project/mood-5244fd13624cd3cc0900000d-1381962600000-005-1381962725770/mood-5244fd13624cd3cc0900000d-1381962600000-005-1381962725770.jpg',
@@ -81,11 +81,11 @@ canvasProcessMgr.markTextAndIcon(option, function(err, res){
  */
 /* 
 var option = {
-    accessToken: 'CAACMdh4LeZBcBAI67ZAiERvZCheAdJQnJhAFsHgrH86fCLcdwrVxxIeg3WNYDZBIAT5qZBwCpig0Iq9lNZAZAjoKKvFikIuSaFhfDQlIaSfaFvr21eFyMW5AyfmNrXeqfitALwgqyZAD4UKZBUGxJeZAkIywvBOH91AjAuvuB2H1m2FZBL1e7w97v6DrJb8FX58df0ZD',
+    accessToken: 'CAACMdh4LeZBcBADduK5QbYqTRnW1lymJqWmW5zMxtEHcfBPfVJ2rEwUj1Kd1iYF5ZAP2iNgZBa8LHzdgZCfRtNkQfxr4PqnfvIazc6mga0ZAZAG4L4KrBJhSVHtukQlB5NQV43xxr3ts1ZBqfxMTu06aeF2cKUTu2WX7qzjscUQjhjq93drZAZBOXj6rZBszZCTTr4ZD',
     // type: 'ondascreen',
     type: 'wowtaipeiarena',
     // source: 'https://s3.amazonaws.com/miix_content/user_project/mood-5244fd13624cd3cc0900000d-1381962600000-005-1381962725770/mood-5244fd13624cd3cc0900000d-1381962600000-005-1381962725770.jpg',
-    text: '哇！Jeff Chai即將2013年10月13日上午5:40~5:50之間，登上小巨蛋！'
+    text: '哇！Jeff Chai即將2013年10月12日上午5:40~5:50之間，登上小巨蛋！'
 };
 
 canvasProcessMgr.markTextToPreview(option, function(err, res){

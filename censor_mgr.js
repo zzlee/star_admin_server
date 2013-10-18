@@ -474,69 +474,6 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
     var access_token;
     var fb_name, playTime, start, link;
     
-    var pushPhotosToUser = function(albumId, pushPhotos_cb){
-        async.series([
-            /*function(simulate){
-                message = fb_name + '於' + playTime + '，登上台北天幕LED，上大螢幕APP特此感謝他精采的作品！\n' + 
-                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                //facebookMgr.postPhoto(access_token, message, photoUrl.simulate, albumId, simulate);
-                facebookMgr.postMessageAndShare(access_token, message, { link: photoUrl.simulate }, function(err, res){
-                    (!err)?simulate(null, true):simulate(null, false);
-                });
-            },*/
-            function(preview){
-                var message = fb_name + '於' + playTime + '，登上台北天幕LED，這是原始刊登素材，天幕尺寸：100公尺x16公尺。\n' + 
-                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                //facebookMgr.postPhoto(access_token, message, photoUrl.preview, albumId, preview);
-                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.preview }, function(err, resOfPostMessageAndShare){
-                    var fbObj = JSON.parse(resOfPostMessageAndShare);
-                    if(!err){
-                        putFbPostIdLiveContentsBy_id(liveContent_Id, fbObj.id, function(err, result){
-                            if(!err){
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+resOfPostMessageAndShare.id);  
-                              }else
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]err="+err);    
-                        });
-                        preview(null, true);
-                    }else{
-                        preview(null, false);
-                    }
-                });
-            },
-            function(play){
-                var message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝他精采的作品！\n' + 
-                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                //facebookMgr.postPhoto(access_token, message, photoUrl.play, albumId, play);
-                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.play }, function(err, resOfPostMessageAndShare){
-                    var fbObj = JSON.parse(resOfPostMessageAndShare);
-                    if(!err){
-                        putFbPostIdLiveContentsBy_id(liveContent_Id, fbObj.id, function(err, result){
-                            if(!err){
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+resOfPostMessageAndShare.id);  
-                              }else
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]err="+err);    
-                        });
-                        play(null, true);
-                    }else{
-                        play(null, false);
-                    }
-                });
-            }
-        ], function(err, res){
-            //(err)?console.log(err):console.dir(res);
-            /* if(!err){
-                logger.info('post message to user on facebook, fb id is ' + fb_id);
-                pushPhotos_cb(null, 'done');
-            }
-            else
-                pushPhotos_cb(err, null); */
-            
-            (err)?logger.info('post message to user on facebook is failed, fb id is ' + fb_id):'';
-            (res[0])?logger.info('post preview message to user on facebook is success, fb id is ' + fb_id):logger.info('post preview message to user on facebook is failed, fb id is ' + fb_id);
-            (res[1])?logger.info('post play message to user on facebook is success, fb id is ' + fb_id):logger.info('post play message to user on facebook is failed, fb id is ' + fb_id);
-            pushPhotos_cb(null, 'done');
-        });
-    };
     //
     async.waterfall([
        function(callback){
@@ -556,58 +493,8 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
                    callback("Fail to retrieve member Obj from DB: "+err, memberSearch);
            });
        },
-    ], function(err, member){
-        access_token = member[0].fb.auth.accessToken;
-        fb_name = member[0].fb.userName;
-        start = new Date(parseInt(liveTime));
-        if(start.getHours()>12)
-            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes();
-        else
-            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes();
-        
-        var album_name = '實況記錄：' + start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日' + '登上台北天幕LED';
-        var album_message = '';
-        if(type == 'correct'){
-         message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
-                      '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-        }else{
-             message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
-                '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
-        }
-        async.waterfall([
-            function(push_cb){
-                pushMgr.sendMessageToDeviceByMemberId(member[0]._id, message, function(err, res){
-                    logger.info('push played notification to user, member id is ' + member[0]._id);
-                    push_cb(err, res);
-                });
-            }
-        ], function(err, res){
-            /*facebookMgr.createAlbum(access_token, album_name, album_message, function(err, res){
-                logger.info('create fb album for user, member id is ' + member[0]._id);
-                pushPhotosToUser(JSON.parse(res).id, postPicture_cb);
-            });*/
-            if(type == 'correct'){
-			//stop post to fb!!
-            //pushPhotosToUser('', postPicture_cb);
-            }else
-                postPicture_cb(null, 'done');
-            //postPicture_cb(err, res);
-        });
-        
-    });
-};
-
-/**
- * Mark text on photo and post to facebook
- *
- */
-censorMgr.postTextOnPhoto = function(fb_id, photoUrl, liveTime, postTextOnPhoto_cb) {
-    
-    async.series([
-        function(memberSearch){
-            memberModel.find({'fb.userID': fb_id}).exec(memberSearch);
-        },
     ], function(err, res){
+        
         var member = res[0];
         access_token = member.fb.auth.accessToken;
         fb_name = member.fb.userName;
@@ -618,18 +505,44 @@ censorMgr.postTextOnPhoto = function(fb_id, photoUrl, liveTime, postTextOnPhoto_
             playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes();
             
         var textContent = fb_name + ' 於' + playTime + '，登上台北小巨蛋天幕！';
+
+        if(type == 'correct') {
+            message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
+                      '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
+        }
+        else {
+            message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                      '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
+        }
         
-        var option = {
-            accessToken: access_token,
-            source: photoUrl,
-            text: textContent
-        };
-        canvasProcessMgr.markTextAndIcon(option, function(err, res){
-            postTextOnPhoto_cb(err, res);
+        async.waterfall([
+            function(push_cb){
+                pushMgr.sendMessageToDeviceByMemberId(member._id, message, function(err, res){
+                    logger.info('push played notification to user, member id is ' + member._id);
+                    push_cb(err, res);
+                });
+            }
+        ], function(err, res){
+            if(type == 'correct'){
+                //stop post to fb!!
+                //pushPhotosToUser('', postPicture_cb);
+                var option = {
+                    accessToken: access_token,
+                    type: member.app,
+                    source: photoUrl,
+                    text: textContent
+                };
+                canvasProcessMgr.markTextAndIcon(option, postPicture_cb);
+            }
+            else {
+                postPicture_cb(null, 'done');
+                //postPicture_cb(err, res);
+            }
         });
+        
     });
-    
 };
+
 
 censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
     
