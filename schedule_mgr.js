@@ -943,7 +943,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ ugcSearch(null, ugc); });
                     },
                     function(ugc, memberSearch){
-                        memberModel.find({'fb.userID': ugc[0].ownerId.userID}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
+                        memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
                     },
                 ], function(err, res){
                     access_token = res.member[0].fb.auth.accessToken;

@@ -89,7 +89,7 @@ FM.ADMINCACHE = (function(){
                                         });
                                     },
                                     function(callback){
-                                        member_mgr.getTotalCommentsLikesSharesOnFB(data[next].fb.userID, function(err, result){
+                                        member_mgr.getTotalCommentsLikesSharesOnFB(data[next].fb.userID, data[next].app, function(err, result){
                                             if(err) callback(err, null);
                                             else callback(null, result);
                                         });

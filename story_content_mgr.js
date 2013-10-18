@@ -116,7 +116,7 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
                 ugcModel.find({projectId: pid}).exec(ugcSearch);
             },
             function(ugc, memberSearch){
-                memberModel.find({'fb.userID': ugc[0].ownerId.userID}).exec(function(err, member){
+                memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){
                     memberSearch(err, {ugc: ugc[0], member: member[0]});
                 });
             }

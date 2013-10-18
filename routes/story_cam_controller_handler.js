@@ -73,18 +73,18 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
                 }); 
             },
             // For highlight only : start
-            function(highlight_cb){
-                getHighlightPhoto(list.file, function(err, highlightPath){
-                    list.highlight = highlightPath;
-                    highlight_cb(null);
-                });
-            },
-            function(highlightAwsS3_cb){
-                uploadHighlightPhotoToAwsS3(list.highlight, function(err, highlightS3Path){
-                    list.highlightAwsS3 = highlightS3Path;
-                    highlightAwsS3_cb(null);
-                });
-            },
+//            function(highlight_cb){
+//                getHighlightPhoto(list.file, function(err, highlightPath){
+//                    list.highlight = highlightPath;
+//                    highlight_cb(null);
+//                });
+//            },
+//            function(highlightAwsS3_cb){
+//                uploadHighlightPhotoToAwsS3(list.highlight, function(err, highlightS3Path){
+//                    list.highlightAwsS3 = highlightS3Path;
+//                    highlightAwsS3_cb(null);
+//                });
+//            },
             // For highlight only : end
             function(uploadAwsS3_cb){
                 uploadToAwsS3(list.file, function(err, s3Path){
@@ -337,8 +337,8 @@ var updateLiveContent = function(programList, list, update_cb){
     var part = 0,
         count = 0;
     
-    // var schema = function(program, livePhotoUrl, schema_cb){
-    var schema = function(program, livePhotoUrl, highlightPhotoUrl, schema_cb){
+     var schema = function(program, livePhotoUrl, schema_cb){
+//    var schema = function(program, livePhotoUrl, highlightPhotoUrl, schema_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var ugc = result[0];
             var liveContentId = livePhotoUrl.split('/');
@@ -348,8 +348,8 @@ var updateLiveContent = function(programList, list, update_cb){
                 "ownerId": { '_id': ugc.ownerId._id, 
                              'fbUserId': ugc.ownerId.userID,
                              'userID': ugc.ownerId.userID },
-                // 'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3 },
-                'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3, 'highlight': highlightPhotoUrl },
+                 'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3 },
+//                'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3, 'highlight': highlightPhotoUrl },
                 'genre': 'miix_image_live_photo',
                 'projectId': liveContentId,
                 'sourceId': ugc.projectId,
@@ -365,8 +365,8 @@ var updateLiveContent = function(programList, list, update_cb){
             (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
         }
         else{
-            // schema(program, list.awsS3[count], function(live, ugc){
-            schema(program, list.awsS3[count], list.highlightAwsS3[count], function(live, ugc){
+             schema(program, list.awsS3[count], function(live, ugc){
+//            schema(program, list.awsS3[count], list.highlightAwsS3[count], function(live, ugc){
                 async.series([
                     function(createLive_cb){
                         db.addUserLiveContent(live, function(err, result){
@@ -427,7 +427,7 @@ var updateToUGC = function(updateUGC_cb){
             simulate: doohPreviewList[i].doohPreviewUrl,
             play: awsS3List[i]
         };
-        /* postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
+        /* postMessageAndPicture(ownerList[i]._id, photoUrl, function(err, res){
             if(err)
                 logger.info('Post message and pictrue to user is Error: ' + err);
             else
@@ -445,7 +445,7 @@ var updateToUGC = function(updateUGC_cb){
             //if(err) console.log(err);
             //else console.log(result);
             //if(!err) fmapi._fbPostUGCThenAdd(vjson);
-            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
+            postMessageAndPicture(ownerList[i]._id, photoUrl, function(err, res){
                 if(err)
                     logger.info('Post message and pictrue to user is Error: ' + err);
                 else
@@ -534,7 +534,7 @@ var updateVideoToUGC = function(programInterval, updateVideoToUGC_cb){
     }
 };
 
-var postMessageAndPicture = function(fb_id, photoUrl, postPicture_cb){
+var postMessageAndPicture = function(_id, photoUrl, postPicture_cb){
     
     var access_token;
     var fb_name, playTime, start, link;
@@ -574,16 +574,16 @@ var postMessageAndPicture = function(fb_id, photoUrl, postPicture_cb){
             else
                 pushPhotos_cb(err, null); */
             
-            (err)?logger.info('post message to user on facebook is failed, fb id is ' + fb_id):'';
-            (res[0])?logger.info('post preview message to user on facebook is success, fb id is ' + fb_id):logger.info('post preview message to user on facebook is failed, fb id is ' + fb_id);
-            (res[1])?logger.info('post play message to user on facebook is success, fb id is ' + fb_id):logger.info('post play message to user on facebook is failed, fb id is ' + fb_id);
+            (err)?logger.info('post message to user on facebook is failed, member id is ' + _id):'';
+            (res[0])?logger.info('post preview message to user on facebook is success, member id is ' + _id):logger.info('post preview message to user on facebook is failed, member id is ' + _id);
+            (res[1])?logger.info('post play message to user on facebook is success, member id is ' + _id):logger.info('post play message to user on facebook is failed, member id is ' + _id);
             pushPhotos_cb(null, 'done');
         });
     };
     //
     async.waterfall([
         function(memberSearch){
-            memberModel.find({'fb.userID': fb_id}).exec(memberSearch);
+            memberModel.find({'_id': _id}).exec(memberSearch);
         },
     ], function(err, member){
         access_token = member[0].fb.auth.accessToken;
