@@ -539,7 +539,6 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
     //
     async.waterfall([
        function(callback){
-           console.log('liveContent_Id'+liveContent_Id);
            userLiveContentModel.find({'_id': liveContent_Id}).exec(function (err, userLiveContentObj) {
                if (!err)
                    callback(null, userLiveContentObj);
@@ -550,7 +549,6 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
        },
        function(userLiveContentObj, callback){
            memberModel.find({'_id': userLiveContentObj[0].ownerId._id}).exec(function (err, memberSearch) {
-               console.dir(memberSearch);
                if (!err)
                    callback(null, memberSearch);
                else

@@ -73,18 +73,18 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
                 }); 
             },
             // For highlight only : start
-            function(highlight_cb){
-                getHighlightPhoto(list.file, function(err, highlightPath){
-                    list.highlight = highlightPath;
-                    highlight_cb(null);
-                });
-            },
-            function(highlightAwsS3_cb){
-                uploadHighlightPhotoToAwsS3(list.highlight, function(err, highlightS3Path){
-                    list.highlightAwsS3 = highlightS3Path;
-                    highlightAwsS3_cb(null);
-                });
-            },
+//            function(highlight_cb){
+//                getHighlightPhoto(list.file, function(err, highlightPath){
+//                    list.highlight = highlightPath;
+//                    highlight_cb(null);
+//                });
+//            },
+//            function(highlightAwsS3_cb){
+//                uploadHighlightPhotoToAwsS3(list.highlight, function(err, highlightS3Path){
+//                    list.highlightAwsS3 = highlightS3Path;
+//                    highlightAwsS3_cb(null);
+//                });
+//            },
             // For highlight only : end
             function(uploadAwsS3_cb){
                 uploadToAwsS3(list.file, function(err, s3Path){
@@ -337,8 +337,8 @@ var updateLiveContent = function(programList, list, update_cb){
     var part = 0,
         count = 0;
     
-    // var schema = function(program, livePhotoUrl, schema_cb){
-    var schema = function(program, livePhotoUrl, highlightPhotoUrl, schema_cb){
+     var schema = function(program, livePhotoUrl, schema_cb){
+//    var schema = function(program, livePhotoUrl, highlightPhotoUrl, schema_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var ugc = result[0];
             var liveContentId = livePhotoUrl.split('/');
@@ -348,8 +348,8 @@ var updateLiveContent = function(programList, list, update_cb){
                 "ownerId": { '_id': ugc.ownerId._id, 
                              'fbUserId': ugc.ownerId.userID,
                              'userID': ugc.ownerId.userID },
-                // 'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3 },
-                'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3, 'highlight': highlightPhotoUrl },
+                 'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3 },
+//                'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3, 'highlight': highlightPhotoUrl },
                 'genre': 'miix_image_live_photo',
                 'projectId': liveContentId,
                 'sourceId': ugc.projectId,
@@ -365,8 +365,8 @@ var updateLiveContent = function(programList, list, update_cb){
             (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
         }
         else{
-            // schema(program, list.awsS3[count], function(live, ugc){
-            schema(program, list.awsS3[count], list.highlightAwsS3[count], function(live, ugc){
+             schema(program, list.awsS3[count], function(live, ugc){
+//            schema(program, list.awsS3[count], list.highlightAwsS3[count], function(live, ugc){
                 async.series([
                     function(createLive_cb){
                         db.addUserLiveContent(live, function(err, result){
