@@ -529,7 +529,7 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
                 var option = {
                     accessToken: access_token,
                     type: member.app,
-                    source: photoUrl,
+                    source: photoUrl.play,
                     text: textContent
                 };
                 canvasProcessMgr.markTextAndIcon(option, postPicture_cb);

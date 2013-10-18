@@ -22,7 +22,7 @@ FM.fb_event_handler.fbUploadImageByBase64 = function(req, res) {
     var myToken = req.body.access_token;
     var base64Data = req.body.image.replace(/^data:image\/png;base64,/,"");
     // var filename = path.join(__dirname, "out.png");
-    var filename = "out.png";
+    var filename = new Date().getTime() + ".png";
     fs.writeFile(filename, base64Data, 'base64', function(err) {
         // console.log(err);
         var filepath = filename;
@@ -32,7 +32,7 @@ FM.fb_event_handler.fbUploadImageByBase64 = function(req, res) {
                 logger.info('Post FB Text on Photo is Status: ' + err);
             else
                 logger.info('Post FB Text on Photo is Status: ' + res);
-            // fs.unlinkSync(filepath);
+            fs.unlinkSync(filepath);
         });
     });
     res.set({
