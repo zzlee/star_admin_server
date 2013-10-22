@@ -13,9 +13,6 @@ var fs = require('fs'),
     request = require('request');
 var async = require('async');
 var awsS3 = require('../aws_s3.js');
-var facebookMgr = require('../facebook_mgr.js');
-var pushMgr = require('../push_mgr.js');
-var gm = require('gm');
 var db = require('../db.js');
 var UGCDB = require(process.cwd()+'/ugc.js');
 var programTimeSlotModel = db.getDocModel("programTimeSlot");
@@ -26,7 +23,7 @@ var recordTime = '';
     
 //POST /internal/story_cam_controller/available_story_movie
 FM.storyCamControllerHandler.availableStoryMovie_post_cb = function(req, res) {
-
+    
     if ( req.headers.miix_movie_project_id ) {
         storyContentMgr.generateStoryMV( req.headers.miix_movie_project_id, req.headers.record_time );
         res.send(200);
@@ -44,9 +41,39 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
     recordTime = req.params.playTime;
     
     var miix_story = function(option, liveVideo_cb){
-        //uploadVideoToAwsS3
-        //updateVideoToUGC
-        //send restful api: /internal/story_cam_controller/available_story_movie
+        
+        var list = {
+            ugc: '',
+            file: '',
+            awsS3: ''
+        };
+        async.waterfall([
+            function(uploadAwsS3_cb){
+                uploadVideoToAwsS3(option, function(err, s3Path){
+                    list.awsS3 = s3Path;
+                    uploadAwsS3_cb(null);
+                });
+            },
+            function(updateLiveVideoContent_cb){
+                updateLiveVideoContent(option.programInterval, list, function(err, res){
+                    updateLiveVideoContent_cb(null);
+                });
+            },
+            function(renderLive_cb){
+                var projectId = list.awsS3[0].split('/');
+                projectId = projectId[projectId.length-1].split('__')[0];
+                var url = 'http://127.0.0.1/internal/story_cam_controller/available_story_movie';
+                var headers = { 'miix_movie_project_id' : projectId, 'record_time' : recordTime };
+                request.post({ url: url, headers: headers }, function (e, r, body) {
+                    renderLive_cb(null, 'done');
+                });
+            },
+        ], function(err, res){
+            //clear
+            clearMemory(option.filePath, function(status){
+                liveVideo_cb(null, status);
+            });
+        });
     };
     
     var miix_image_live_photo = function(option, livePhoto_cb){
@@ -104,10 +131,12 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
             return;
         }
         else if(option.programInterval.count == 1)
-            miix_story(option, function(err, res){ /* no work */ });
+            miix_story(option, function(err, res){
+                logger.info('Live video content process is success: ' + recordTime);
+            });
         else
             miix_image_live_photo(option, function(err, status){ 
-                logger.info('Live content process is success: ' + recordTime);
+                logger.info('Live photo content process is success: ' + recordTime);
             });
     });
     
@@ -311,6 +340,90 @@ var clearMemory = function(rawFile, file, clear_cb){
         };
         clear_cb('done');
     }
+};
+
+var uploadVideoToAwsS3 = function(option, awsS3_cb){
+    
+    var source = option.filePath,
+        programInterval = option.programInterval;
+    var awsS3List = [];
+    
+    var upload = function(contentId){
+        ugcModel.find({"_id": contentId}).exec(function (_err, result) {
+            var name = result[0].projectId + '__story.avi';
+            var s3Path = '/user_project/' + result[0].projectId + '/' + name;
+            awsS3List.push('https://s3.amazonaws.com/miix_content' + s3Path);
+            awsS3.uploadToAwsS3(source, s3Path, 'video/x-msvideo', function(err,result){
+                if (!err){
+                    logger.info('Live content video was successfully uploaded to S3 '+s3Path);
+                    awsS3_cb(null, awsS3List);
+                }
+                else {
+                    logger.info('Live content video failed to be uploaded to S3 '+s3Path);
+                    awsS3_cb(null, awsS3List);
+                }
+            });
+        });
+    };
+    
+    for(var i=0; i<programInterval.list.length; i++){
+        if(programInterval.list[i].type == 'UGC')
+            upload(programInterval.list[i].content._id);
+    }
+};
+
+var updateLiveVideoContent = function(programList, list, update_cb){
+    
+    var part = 0,
+        count = 0;
+    
+    var schema = function(program, liveVideoUrl, schema_cb){
+        ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
+            var ugc = result[0];
+            var liveContentId = liveVideoUrl.split('/');
+            liveContentId = liveContentId[liveContentId.length-1].split('__')[0];
+            var livejson =
+            {
+                "ownerId": { '_id': ugc.ownerId._id, 
+                             'fbUserId': ugc.ownerId.userID,
+                             'userID': ugc.ownerId.userID },
+                'url': { 's3': liveVideoUrl },
+                'genre': 'miix_story_raw',
+                'projectId': liveContentId,
+                'sourceId': ugc.projectId,
+                'liveTime': parseInt(recordTime)
+            };
+            var ugcjson = ugc;
+            schema_cb(livejson, ugcjson);
+        });
+    };
+    var update = function(program){
+        if(program.type != 'UGC'){
+            part++;
+            (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
+        }
+        else{
+            schema(program, list.awsS3[count], function(live, ugc){
+                async.series([
+                    function(createLive_cb){
+                        db.addUserLiveContent(live, function(err, result){
+                            (err)?createLive_cb(null, err):createLive_cb(null, result);
+                        });
+                    },
+                    function(updateUGC_cb){
+                        ugcModel.findByIdAndUpdate(ugc._id, { 'doohPlayedTimes': ugc.doohPlayedTimes + 1 }, function(err, result){
+                            (err)?updateUGC_cb(null, err):updateUGC_cb(null, result);
+                        });
+                    },
+                ], function(err, res){
+                    count++;
+                    part++;
+                    (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
+                });
+            });
+        }
+    };
+    update(programList.list[part]);
 };
 
 module.exports = FM.storyCamControllerHandler;
