@@ -161,7 +161,7 @@ FM.admin.listSize_get_cb = function(req, res){
         });
     }
     else if (req.query.listType == 'miixMovieList'){
-        UGC_mgr.getUGCCountWithGenre('miix', function(err, count) {
+        UGC_mgr.getUGCCountWithGenre('miix_image', function(err, count) {
             res.send({err: err, size: count});
         });
     }
