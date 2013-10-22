@@ -7,5 +7,6 @@
 	"HOST_SCALA_URL":"http://192.168.5.189:8080",
 	"HOST_SCALA_USER_NAME":"administrator",
 	"HOST_SCALA_PASSWORD":"53768608",
-    "HOST_SCALA_PLAYER_NAME":"feltmeng"
+    "HOST_SCALA_PLAYER_NAME":"feltmeng",
+	"ADMIN_CACHE": false
 }
