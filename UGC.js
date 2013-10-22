@@ -211,7 +211,8 @@ FM.UGC = (function(){
 			                                                }
 			                                                // when count=0, there is no likes object.
 			                                                if (result[i].likes){
-			                                                    likes_count += (result[i].likes) ? result[i].likes.count : 0;
+//			                                                    console.log(result[i].likes);
+			                                                    likes_count += (result[i].likes) ? result[i].likes.data.length : 0;
 			                                                }
 			                                                if (result[i].shares){
 			                                                    shares_count += (result[i].shares) ? result[i].shares.count : 0;
@@ -337,9 +338,27 @@ FM.UGC = (function(){
 			},
 			
 			getUGCCount: function(_id, ugcType, cb){
-				var condition = { 'ownerId._id': _id, 'genre': ugcType };
+//				var condition = { 'ownerId._id': _id, 'genre': ugcType };
+				var condition = { 'ownerId._id': _id};
 				UGCs.count(condition, cb);
 			},
+			getUGCDoohPlayedCount: function(_id, cb){
+                var doohPlayedTimes_total = 0;
+			    var condition = { 'ownerId._id': _id};
+			    UGCs.find(condition).exec(function(err, result){
+			        console.log(result.length);
+			        for(var i in result){
+			            if(result[i].doohPlayedTimes)
+			                doohPlayedTimes_total = doohPlayedTimes_total + result[i].doohPlayedTimes
+			        }
+			        cb(null, doohPlayedTimes_total);
+			    });
+			},
+            kaiser_test: function(){
+                this.getUGCDoohPlayedCount('524ad83abc2a7e380a000005',function(err, res){
+                    console.log('res=%s', res);
+                });
+            },
 			
 			_test: function(){
                 var ObjectID = require('mongodb').ObjectID;
@@ -377,5 +396,6 @@ FM.UGC = (function(){
 /*  For TEST. */
 //FM.VIDEO.getInstance()._test();
 //FM.VIDEO.getInstance()._GZ_test();
+//FM.UGC.getInstance().kaiser_test();
 
 module.exports = FM.UGC.getInstance();

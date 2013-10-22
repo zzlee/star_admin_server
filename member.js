@@ -164,16 +164,16 @@ FM.MEMBER = (function(){
 //                                                                console.log('result'+result);
                                                                 for(var i in result){
                                                                     if(result[i]){
-                                                                    if (result[i].comments){
-                                                                        comments_count += result[i].comments.data.length;
-                                                                    }
-                                                                    // when count=0, there is no likes object.
-                                                                    if (result[i].likes){
-                                                                        likes_count += (result[i].likes) ? result[i].likes.count : 0;
-                                                                    }
-                                                                    if (result[i].shares){
-                                                                        shares_count += (result[i].shares) ? result[i].shares.count : 0;
-                                                                    }
+                                                                        if (result[i].comments){
+                                                                            comments_count = comments_count + result[i].comments.data.length;
+                                                                        }
+                                                                        // when count=0, there is no likes object.
+                                                                        if (result[i].likes){
+                                                                            likes_count = likes_count + result[i].likes.data.length;
+                                                                        }
+                                                                        if (result[i].shares){
+                                                                            shares_count = shares_count + result[i].shares.count;
+                                                                        }
                                                                     }
                                                                 }
                                                             }

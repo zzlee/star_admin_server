@@ -242,7 +242,7 @@ FM.DB = (function(){
             fbLike_count: {type: Number, min: 0, default: 0},         //FB讚總數
             fbComment_count: {type: Number, min: 0, default: 0},      //FB留言總數
             fbShare_count: {type: Number, min: 0, default: 0},         //FB分享次數
-            
+            app: {type: String, enum: appGenre, default: 'ondascreen'}
         }); //  memberListInfo collection
         
         var MiixPlayListInfoSchema = new Schema({
