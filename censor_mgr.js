@@ -8,6 +8,7 @@ var UGC_mgr = require('./UGC.js');
 var sheculeMgr = require('./schedule_mgr.js');
 var member_mgr = require('./member.js');
 var pushMgr = require('./push_mgr.js');
+var canvasProcessMgr = require('./canvas_process_mgr.js');
 
 var UGCs = FMDB.getDocModel("ugc");
 var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
@@ -178,13 +179,13 @@ var mappingUGCList = function(data, set_cb){
         
 
         if(next == limit - 1) {
-            UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight,data[next].url, UGCList);
+            UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight,data[next].url, UGCList);
             set_cb(null, 'ok'); 
             next = 0;
             UGCList = [];
         }
         else{
-            UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url,UGCList);
+            UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url,UGCList);
             next += 1;
             mappingUGCList(data, set_cb);
         }
@@ -196,18 +197,30 @@ var mappingUGCList = function(data, set_cb){
         return;
     }
         async.parallel([
-                        function(callback){
-                            getUserContent(data[next].ownerId.userID,function(err, result){
-                                if(err){
-                                    logger.error('[mappingUserProfilePicture_getUserContent]', err);
-                                    callback(err, null);
-                                }
-                                if(result){
-                                    callback(null, result);
-                                }
-                            });
-
-                        },
+                        //deprecated
+//                        function(callback){
+//                            memberModel.find({'_id': data[next].ownerId._id}).exec(function(err, member){
+//                                if(err){
+//                                    logger.error('[mappingUserProfilePicture_getUserContent]', err);
+//                                    callback(err, null);
+//                                }
+//                                if(member[0]){
+//                                    console.log(member);
+//                                    getUserContent(member[0].fb.userID, member[0].app, function(err, result){
+//                                        if(err){
+//                                            logger.error('[mappingUserProfilePicture_getUserContent]', err);
+//                                            callback(err, null);
+//                                        }
+//                                        if(result){
+//                                            callback(null, result);
+//                                        }
+//                                    });
+//                                }else
+//                                     callback(null, 'No User');
+//                                
+//                            });
+//
+//                        },
                         function(callback){
                             member_mgr.getUserNameAndID(data[next].ownerId._id, function(err, result){
                                 if(err) callback(err, null);
@@ -245,9 +258,9 @@ var getTimeslots = function(get_cb){
  *                       
  */
 
-var getUserContent = function(fb_id,get_cb){
+var getUserContent = function(fb_id, app, get_cb){
 
-    fb_handler.getUserProfilePicture(fb_id,function(err, result){
+    fb_handler.getUserProfilePicture(fb_id, app, function(err, result){
         if(err){
             get_cb(err,null);
         }
@@ -303,7 +316,7 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
  */
 censorMgr.getUGCListLite = function(condition, cb){
 
-    FMDB.listOfdocModels( UGCs,{'createdOn' : {$gte: condition.start, $lt: condition.end}},'_id genre contentGenre projectId fileExtension no ownerId mustPlay', {sort :{'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1}}, function(err, result){
+    FMDB.listOfdocModels( UGCs,{'createdOn' : {$gte: condition.start, $lt: condition.end}, 'rating': {$gte: 'A' , $lte: 'E' }},'_id genre contentGenre projectId fileExtension no ownerId mustPlay', {sort :{'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1}}, function(err, result){
         if(err) {
             logger.error('[censorMgr.getUGCListLite]', err);
             cb(err, null);
@@ -461,114 +474,75 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
     var access_token;
     var fb_name, playTime, start, link;
     
-    var pushPhotosToUser = function(albumId, pushPhotos_cb){
-        async.series([
-            /*function(simulate){
-                message = fb_name + '於' + playTime + '，登上台北天幕LED，上大螢幕APP特此感謝他精采的作品！\n' + 
-                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                //facebookMgr.postPhoto(access_token, message, photoUrl.simulate, albumId, simulate);
-                facebookMgr.postMessageAndShare(access_token, message, { link: photoUrl.simulate }, function(err, res){
-                    (!err)?simulate(null, true):simulate(null, false);
-                });
-            },*/
-            function(preview){
-                var message = fb_name + '於' + playTime + '，登上台北天幕LED，這是原始刊登素材，天幕尺寸：100公尺x16公尺。\n' + 
-                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                //facebookMgr.postPhoto(access_token, message, photoUrl.preview, albumId, preview);
-                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.preview }, function(err, resOfPostMessageAndShare){
-                    var fbObj = JSON.parse(resOfPostMessageAndShare);
-                    if(!err){
-                        putFbPostIdLiveContentsBy_id(liveContent_Id, fbObj.id, function(err, result){
-                            if(!err){
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+resOfPostMessageAndShare.id);  
-                              }else
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]err="+err);    
-                        });
-                        preview(null, true);
-                    }else{
-                        preview(null, false);
-                    }
-                });
-            },
-            function(play){
-                var message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝他精采的作品！\n' + 
-                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                //facebookMgr.postPhoto(access_token, message, photoUrl.play, albumId, play);
-                fb_handler.postMessageAndShare(access_token, message, { link: photoUrl.play }, function(err, resOfPostMessageAndShare){
-                    var fbObj = JSON.parse(resOfPostMessageAndShare);
-                    if(!err){
-                        putFbPostIdLiveContentsBy_id(liveContent_Id, fbObj.id, function(err, result){
-                            if(!err){
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]res="+result+"liveContent_Id:"+liveContent_Id+"fbPostId"+resOfPostMessageAndShare.id);  
-                              }else
-                                logger.error("[censorMgr.postMessageAndPicture.putFbPostIdLiveContentsBy_id]err="+err);    
-                        });
-                        play(null, true);
-                    }else{
-                        play(null, false);
-                    }
-                });
-            }
-        ], function(err, res){
-            //(err)?console.log(err):console.dir(res);
-            /* if(!err){
-                logger.info('post message to user on facebook, fb id is ' + fb_id);
-                pushPhotos_cb(null, 'done');
-            }
-            else
-                pushPhotos_cb(err, null); */
-            
-            (err)?logger.info('post message to user on facebook is failed, fb id is ' + fb_id):'';
-            (res[0])?logger.info('post preview message to user on facebook is success, fb id is ' + fb_id):logger.info('post preview message to user on facebook is failed, fb id is ' + fb_id);
-            (res[1])?logger.info('post play message to user on facebook is success, fb id is ' + fb_id):logger.info('post play message to user on facebook is failed, fb id is ' + fb_id);
-            pushPhotos_cb(null, 'done');
-        });
-    };
     //
     async.waterfall([
-        function(memberSearch){
-            memberModel.find({'fb.userID': fb_id}).exec(memberSearch);
-        },
-    ], function(err, member){
-        access_token = member[0].fb.auth.accessToken;
-        fb_name = member[0].fb.userName;
+       function(callback){
+           userLiveContentModel.find({'_id': liveContent_Id}).exec(function (err, userLiveContentObj) {
+               if (!err)
+                   callback(null, userLiveContentObj);
+               else
+                   callback("Fail to retrieve userLiveContent Obj from DB: "+err, userLiveContentObj);
+           });
+           
+       },
+       function(userLiveContentObj, callback){
+           memberModel.find({'_id': userLiveContentObj[0].ownerId._id}).exec(function (err, memberSearch) {
+               if (!err)
+                   callback(null, memberSearch);
+               else
+                   callback("Fail to retrieve member Obj from DB: "+err, memberSearch);
+           });
+       },
+    ], function(err, res){
+        
+        var member = res[0];
+        access_token = member.fb.auth.accessToken;
+        fb_name = member.fb.userName;
         start = new Date(parseInt(liveTime));
         if(start.getHours()>12)
             playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes();
         else
             playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes();
-        
-        var album_name = '實況記錄：' + start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日' + '登上台北天幕LED';
-        var album_message = '';
-        if(type == 'correct'){
-         message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
+            
+        var textContent = fb_name + ' 於' + playTime + '，登上台北小巨蛋天幕！';
+
+        if(type == 'correct') {
+            message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
                       '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-        }else{
-             message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
-                '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
         }
+        else {
+            message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                      '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
+        }
+        
         async.waterfall([
             function(push_cb){
-                pushMgr.sendMessageToDeviceByMemberId(member[0]._id, message, function(err, res){
-                    logger.info('push played notification to user, member id is ' + member[0]._id);
+                pushMgr.sendMessageToDeviceByMemberId(member._id, message, function(err, res){
+                    logger.info('push played notification to user, member id is ' + member._id);
                     push_cb(err, res);
                 });
             }
         ], function(err, res){
-            /*facebookMgr.createAlbum(access_token, album_name, album_message, function(err, res){
-                logger.info('create fb album for user, member id is ' + member[0]._id);
-                pushPhotosToUser(JSON.parse(res).id, postPicture_cb);
-            });*/
             if(type == 'correct'){
-			//stop post to fb!!
-            //pushPhotosToUser('', postPicture_cb);
-            }else
+                //stop post to fb!!
+                //pushPhotosToUser('', postPicture_cb);
+                var option = {
+                    accessToken: access_token,
+                    type: member.app,
+                    source: photoUrl.play,
+                    text: textContent
+                };
+                canvasProcessMgr.markTextAndIcon(option, postPicture_cb);
+            }
+            else {
                 postPicture_cb(null, 'done');
-            //postPicture_cb(err, res);
+                //postPicture_cb(err, res);
+            }
         });
         
     });
 };
+
 
 censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
     

@@ -17,4 +17,8 @@ exports.init = function() {
 
     app.post('/internal/story_cam_controller/available_story_movie', routes.storyCamControllerHandler.availableStoryMovie_post_cb);
 
+    //POST upload base64 image to facebook
+    app.post('/fb/image_uplaod/base64', routes.fbEventHandler.fbUploadImageByBase64);
+    app.post('/fb/image_uplaod', routes.fbEventHandler.fbUploadImage);
+    
 };

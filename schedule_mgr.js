@@ -20,6 +20,7 @@ var ugcModel = db.getDocModel("ugc");
 var candidateUgcCacheModel = db.getDocModel("candidateUgcCache");
 var sessionItemModel = db.getDocModel("sessionItem");
 
+var canvasProcessMgr = require('./canvas_process_mgr.js');
 var facebookMgr = require('./facebook_mgr.js');
 var pushMgr = require('./push_mgr.js');
 var memberModel = db.getDocModel("member");
@@ -84,19 +85,16 @@ var paddingContent =(function(){
                       //{name: "Jeff_start"},
                       {name: "ondascreen_padding-miix_it-end.jpg"}],
             cultural_and_creative: [{name: "ondascreen_padding-cultural_and_creative-start"},
-                                    //{name: "Jeff_start"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-end.jpg"}
                                     ],
             mood: [{name: "ondascreen_padding-wish-start"},
-                   //{name: "Jeff_start"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-end.jpg"}
                    ],
             check_in: [{name: "ondascreen_padding-check_in-start"},
-                       //{name: "Jeff_start"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-end.jpg"}
@@ -931,8 +929,6 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
         },
         function(programs, cb2){
             
-        
-            
             var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
                 
                 var access_token, message, link;
@@ -943,45 +939,49 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ ugcSearch(null, ugc); });
                     },
                     function(ugc, memberSearch){
-                        memberModel.find({'fb.userID': ugc[0].ownerId.userID}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
+                        memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
                     },
                 ], function(err, res){
-                    access_token = res.member[0].fb.auth.accessToken;
-                    fb_name = res.member[0].fb.userName;
+                
+                    var ugc = res.ugc[0],
+                        member = res.member[0];
+                    
+                    access_token = member.fb.auth.accessToken;
+                    fb_name = member.fb.userName;
                     var start = new Date(aProgram.timeslot.start);
                     var end = new Date(aProgram.timeslot.end);
-                    var ugcProjectId = res.ugc[0].projectId;
+                    var ugcProjectId = ugc.projectId;
                     if(start.getHours()>12)
                         play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes()+'~'+(end.getHours()-12)+':'+end.getMinutes();
                     else
                         play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes()+'~'+end.getHours()+':'+end.getMinutes();
-                    //message = fb_name + '的試鏡編號：' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！\n' + '上大螢幕APP(連結到FB粉絲團)特此預告。';
-                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-                    var shareOption =
-                    {
-                        name: "上大螢幕", 
-                        img_url: 'https://lh5.googleusercontent.com/-fpFqpP6pBoI/UihA_MSQaAI/AAAAAAAAAIU/b6FlwLNWBu0/s0/fb.png',
-                        link: "https://www.facebook.com/OnDaScreen?directed_target_id=0",
-                        description: "你可以將你的創作，發表在小巨蛋台北天幕LED！"
-                    };
+                    
+                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
 
                     async.parallel([
-                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });}//,
-/*                         function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(errOfPostMessageAndShare, resOfPostMessageAndShare){
-                            if(resOfPostMessageAndShare){
-                                var fbObj = JSON.parse(resOfPostMessageAndShare);
-                                putFbPostIdUgcs(ugcProjectId, fbObj.id, function(err, result){
-                                    if(!err){
-                                        logger.error("[pushProgramsTo3rdPartyContentMgr.putFbPostIdUgcs]res="+"no:"+aProgram.content.no+"fbPostId"+resOfPostMessageAndShare.id);  
-                                    }else{
-
-                                        logger.error("[pushProgramsTo3rdPartyContentMgr.putFbPostIdUgcs]err="+err);
-                                    }
-                                });
-                            }
-                            postFB_cb(err, res);
-                            });
-                        } */
+                        function(push_cb){
+                            pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
+                        function(postFB_cb){
+                            
+                            var option = {
+                                accessToken: access_token,
+                                type: member.app,
+                                // text: '哇！fb_name 即將2013年10月12日上午5:40~5:50之間，登上小巨蛋！'
+                            };
+                            
+                            switch(option.type.toLowerCase())
+                            {
+                                case 'ondascreen':
+                                    option.text = '哇！' + fb_name + '即將' + play_time + '之間，登上小巨蛋！';
+                                    break;
+                                case 'wowtaipeiarena':
+                                    option.text = '哇！' + fb_name + '即將' + play_time + '之間，登上小巨蛋！';
+                                    break;
+                                default:
+                                    break;
+                            }                            
+                            canvasProcessMgr.markTextToPreview(option, postFB_cb);
+                        }
                     ], function(err, res){
                         //(err)?console.log(err):console.dir(res);
                         postPreview_cb(err, res);

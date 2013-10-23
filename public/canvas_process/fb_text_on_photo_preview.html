@@ -1,0 +1,96 @@
+﻿<!DOCTYPE HTML>
+<html>
+  <head>
+    <script src="./jquery-2.0.3.min.js"></script>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+    <script>
+        
+        var option = {};
+        var strUrl = location.search;
+        strUrl = strUrl.replace('?', '');
+        var query = strUrl.split('&');
+
+        for(var i=0; i<query.length; i++) {
+            var temp = query[i].split('=');
+            option[temp[0]] = temp[1];
+            // console.log(temp[0] + ' : ' + decodeURI(temp[1]));
+        }
+        
+        // var preview_bg = 'https://lh5.googleusercontent.com/-b2N5Zoh80zA/UmDRrkjCtlI/AAAAAAAAACA/xs-KambbtxM/s0/wowOnTaipeiArena_preview_bg.jpg';
+        var preview_bg = {
+            'ondascreen': 'https://lh6.googleusercontent.com/-ZbVtdu-FvQo/UmDfZdcYUFI/AAAAAAAAACU/1UYWOtakhtc/s0/ondascreen_preview_bg.jpg',
+            'wowtaipeiarena': 'https://lh5.googleusercontent.com/-b2N5Zoh80zA/UmDRrkjCtlI/AAAAAAAAACA/xs-KambbtxM/s0/wowOnTaipeiArena_preview_bg.jpg'
+        };
+        
+        
+        var canvas = document.getElementById('myCanvas');
+        var context = canvas.getContext('2d');
+        var imageObj = new Image();
+        
+        // var content = '哇！Jeff Chai 即將2013年10月1日上午5:40~5:50之間，登上小巨蛋！';
+
+        imageObj.onload = function() {
+            canvas.width = imageObj.width;
+            canvas.height = imageObj.height;
+            context.drawImage(imageObj, 0, 0);
+            
+            context.font = 'bold 30px 微軟正黑體';
+            context.fillStyle = 'white';
+            context.textAlign="right";
+            context.fillText(decodeURI(option.textContent), canvas.width-157, 724);
+
+            context.save();
+            // alert(canvas.toDataURL());
+            textImageComplete(option.accessToken, canvas.toDataURL());
+            
+        };
+        
+        var textImageComplete = function(access_token, data){
+            $.post( "http://127.0.0.1/fb/image_uplaod/base64", { access_token: access_token, image: data }, function( data ){
+                window.close();
+            });
+        };
+        
+        var img64Loader = function(imgURL, img64load_cb){
+            $.ajax({
+                url: 'http://img64.com/?q=' + encodeURIComponent(imgURL),
+                dataType: 'jsonp'
+            }).then(function (image) {
+                img64load_cb(image.data);
+            });
+        };
+        
+        var previewController = function(type){
+            switch(type.toLowerCase())
+            {
+                case 'ondascreen':
+                    img64Loader(preview_bg.ondascreen, function(previewdata){
+                        imageObj.src = previewdata;
+                    });
+                    break;
+                case 'wowtaipeiarena':
+                    img64Loader(preview_bg.wowtaipeiarena, function(previewdata){
+                        imageObj.src = previewdata;
+                    });
+                    break;
+                default:
+                    break;
+            }
+        };
+        
+        previewController(option.type);
+        
+    </script>
+  </body>
+</html>
+
+
+
