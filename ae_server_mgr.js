@@ -175,7 +175,7 @@ aeServerMgr.downloadStoryMovieFromS3 = function(movieProjectID, downloadMovie_cb
     //getAeServerWithLowestLoad(function(_aeID, err){  //TODO: find a more robust way to get the right AE Server
     globalConnectionMgr.getConnectedRemoteWithLowestLoad('AE_SERVER', function(err, aeServerWithLowestLoad){
         if (!err){
-            starAeServerID = _aeID;
+            starAeServerID = aeServerWithLowestLoad;
         }
         else{
             starAeServerID = systemConfig.DEFAULT_AE_SERVER;
@@ -225,7 +225,7 @@ aeServerMgr.downloadMiixMovieFromS3 = function(miixMovieProjectID, miixMovieFile
     //getAeServerWithLowestLoad(function(_aeID, err){
     globalConnectionMgr.getConnectedRemoteWithLowestLoad('AE_SERVER', function(err, aeServerWithLowestLoad){
         if (!err){
-            starAeServerID = _aeID;
+            starAeServerID = aeServerWithLowestLoad;
         }
         else{
             starAeServerID = systemConfig.DEFAULT_AE_SERVER;
