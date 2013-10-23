@@ -114,12 +114,12 @@ FM.MEMBER = (function(){
                 FMDB.getValueOf(members, {"memberID" : memberID}, field, cb);
             },
             
-            getTotalCommentsLikesSharesOnFB: function(userID, app, cb){
+            getTotalCommentsLikesSharesOnFB: function(memberID, userID, app, cb){
                 var likes_count = 0,
                     comments_count = 0,
                     shares_count = 0;
                     debugger;
-                UGCDB.getUGCListOnFB(userID, function(err, UGCs){
+                UGCDB.getUGCListOnFB(memberID, function(err, UGCs){
 //                    console.log('UGCs'+UGCs);
                     if(err){
                          cb(err, null);

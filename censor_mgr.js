@@ -431,7 +431,7 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
     }
         var liveContentList = [];
 
-        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, fbUserId, programTimeSlot_id, arr) {
+        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, fbUserId, programTimeSlot_id, ownerId_id, arr) {
             arr.push({
                 ugcCensorNo: ugcCensorNo,
                 liveContent: liveContent,
@@ -439,13 +439,14 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
                 end: end,
                 liveState: liveState,
                 fbUserId: fbUserId,
-                programTimeSlot_id: programTimeSlot_id
+                programTimeSlot_id: programTimeSlot_id,
+                ownerId_id: ownerId_id
             });
         };  
         var mappingLiveContentList = function(data, cbOfMappingLiveContentList){
             userLiveContentModel.find({'liveTime': {$gte: data.timeslot.start, $lt: data.timeslot.end}, "sourceId": data.content.projectId}).exec(function(err, result){
                 if(!err){
-                    LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.content.ownerId.fbUserId, data._id, liveContentList);
+                    LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, liveContentList);
                     cbOfMappingLiveContentList(null); 
                 }else{
                     cbOfMappingLiveContentList(err); 
@@ -473,6 +474,7 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
     
     var access_token;
     var fb_name, playTime, start, link;
+    var sourceId;
     
     //
     async.waterfall([
@@ -486,6 +488,11 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
            
        },
        function(userLiveContentObj, callback){
+           console.log(userLiveContentObj);
+           if(userLiveContentObj[0]){
+               sourceId = userLiveContentObj[0].sourceId;
+               console.log('sourceId'+sourceId);
+           }
            memberModel.find({'_id': userLiveContentObj[0].ownerId._id}).exec(function (err, memberSearch) {
                if (!err)
                    callback(null, memberSearch);
@@ -526,11 +533,14 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
             if(type == 'correct'){
                 //stop post to fb!!
                 //pushPhotosToUser('', postPicture_cb);
+                console.log('liveContent_Id'+liveContent_Id);
+                console.log('sourceId'+sourceId);
                 var option = {
                     accessToken: access_token,
                     type: member.app,
                     source: photoUrl.play,
-                    text: textContent
+                    text: textContent,
+                    liveContent_Id: sourceId
                 };
                 canvasProcessMgr.markTextAndIcon(option, postPicture_cb);
             }
@@ -559,46 +569,6 @@ censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
     });
 };
 
-var putFbPostIdLiveContentsBy_id = function(liveContent_id, fbPostId, cbOfPutFbPostIdLiveContents){
-    var userLiveContentModel = FMDB.getDocModel("userLiveContent");
-    
-    async.waterfall([
-        function(callback){
-            userLiveContentModel.find({ "_id": liveContent_id}).sort({"createdOn":-1}).exec(function (err, userLiveContentObj) {
-                if (!err)
-                    callback(null, userLiveContentObj);
-                else
-                    callback("Fail to retrieve UGC Obj from DB: "+err, userLiveContentObj);
-            });
-            
-        },
-        function(userLiveContentObj, callback){
-            var vjson;
-            var arr = [];
-            
-            if(userLiveContentObj[0].fb_postId[0]){
-                userLiveContentObj[0].fb_postId.push({'postId': fbPostId});
-              vjson = {"fb_postId" :userLiveContentObj[0].fb_postId};
-            }else{
-                arr = [{'postId': fbPostId}];
-                vjson = {"fb_postId" : arr};
-            }
-            
-            FMDB.updateAdoc(userLiveContentModel, liveContent_id, vjson, function(errOfUpdateUserLiveContent, resOfUpdateUserLiveContent){
-                if (!errOfUpdateUserLiveContent){
-                    callback(null, resOfUpdateUserLiveContent);
-                }else
-                    callback("Fail to update liveContent Obj from DB: "+errOfUpdateUserLiveContent, resOfUpdateUserLiveContent);
-            });
-            
-        }
-    ],
-    function(err, result){
-        if (cbOfPutFbPostIdLiveContents){
-            cbOfPutFbPostIdLiveContents(err, result);
-        } 
-    });
-};
 
 module.exports = censorMgr;
 
@@ -640,6 +610,3 @@ module.exports = censorMgr;
 //console.log('--'+err, result);
 //});
 
-//putFbPostIdLiveContentsBy_id("5243681811974bd80d00002e", "100006588456341_1403499093213026", function(err, result){
-//console.log('--'+err, result);
-//});

@@ -26,7 +26,8 @@
         //var source = 'https://s3.amazonaws.com/miix_content/user_project/check_in-5248f77955ebecec1100000b-1380618600000-001-1380618827113/check_in-5248f77955ebecec1100000b-1380618600000-001-1380618827113.jpg';
         var source = option.sourceImage;
         // var icon = 'https://lh5.googleusercontent.com/-qB0YcnpbZI8/Ul0oE5I8juI/AAAAAAAAABM/QVLp-J0zG9A/s0/black_icon.png';
-        
+        var liveContent_Id = option.liveContent_Id;
+		
         var mark_bg = {
             'ondascreen': 'https://lh5.googleusercontent.com/-tqXMjQzRAA0/UmDfwZZbynI/AAAAAAAAACc/JlKPO7dGmAM/s0/ondascreen_black_icon.png',
             'wowtaipeiarena': 'https://lh6.googleusercontent.com/-hqkKLjk-brM/UmDvwloXh9I/AAAAAAAAADM/uEju9-TGC9k/s0/wowOnTaipeiArena_black_icon.png'
@@ -57,7 +58,7 @@
         };
         
         var textImageComplete = function(access_token, data){
-            $.post( "http://127.0.0.1/fb/image_uplaod/base64", { access_token: access_token, image: data }, function( data ){
+            $.post( "http://127.0.0.1/fb/image_uplaod/base64", { access_token: access_token, image: data, liveContent_Id: liveContent_Id }, function( data ){
                 window.close();
             });
         };
