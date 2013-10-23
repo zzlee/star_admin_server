@@ -470,7 +470,7 @@ censorMgr.updateLiveContents = function(liveContent_Id, vjson, cb){
     });
 };
 
-censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id, postPicture_cb){
+censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id, postPicture_cb){
     
     var access_token;
     var fb_name, playTime, start, link;
@@ -479,26 +479,39 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
     //
     async.waterfall([
        function(callback){
-           userLiveContentModel.find({'_id': liveContent_Id}).exec(function (err, userLiveContentObj) {
-               if (!err)
-                   callback(null, userLiveContentObj);
-               else
-                   callback("Fail to retrieve userLiveContent Obj from DB: "+err, userLiveContentObj);
-           });
            
+           if(type == 'correct'){
+               userLiveContentModel.find({'_id': liveContent_Id}).exec(function (err, userLiveContentObj) {
+                   if (!err)
+                       callback(null, userLiveContentObj);
+                   else
+                       callback("Fail to retrieve userLiveContent Obj from DB: "+err, userLiveContentObj);
+               });
+           }else{
+               callback(null, null);
+           }
        },
        function(userLiveContentObj, callback){
-           console.log(userLiveContentObj);
-           if(userLiveContentObj[0]){
-               sourceId = userLiveContentObj[0].sourceId;
-               console.log('sourceId'+sourceId);
+           
+           if(type == 'correct'){
+               if(userLiveContentObj[0]){
+                   sourceId = userLiveContentObj[0].sourceId;
+                   console.log('sourceId'+sourceId);
+               }
+               memberModel.find({'_id': userLiveContentObj[0].ownerId._id}).exec(function (err, memberSearch) {
+                   if (!err)
+                       callback(null, memberSearch);
+                   else
+                       callback("Fail to retrieve member Obj from DB: "+err, memberSearch);
+               });
+           }else{
+               memberModel.find({'_id': memberId}).exec(function (err, memberSearch) {
+                   if (!err)
+                       callback(null, memberSearch);
+                   else
+                       callback("Fail to retrieve member Obj from DB: "+err, memberSearch);
+               });
            }
-           memberModel.find({'_id': userLiveContentObj[0].ownerId._id}).exec(function (err, memberSearch) {
-               if (!err)
-                   callback(null, memberSearch);
-               else
-                   callback("Fail to retrieve member Obj from DB: "+err, memberSearch);
-           });
        },
     ], function(err, res){
         
@@ -531,16 +544,13 @@ censorMgr.postMessageAndPicture = function(fb_id, photoUrl, type, liveTime, ugcC
             }
         ], function(err, res){
             if(type == 'correct'){
-                //stop post to fb!!
-                //pushPhotosToUser('', postPicture_cb);
-                console.log('liveContent_Id'+liveContent_Id);
                 console.log('sourceId'+sourceId);
                 var option = {
                     accessToken: access_token,
                     type: member.app,
                     source: photoUrl.play,
                     text: textContent,
-                    liveContent_Id: sourceId
+                    ugcProjectId: sourceId
                 };
                 canvasProcessMgr.markTextAndIcon(option, postPicture_cb);
             }

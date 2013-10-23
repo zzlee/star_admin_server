@@ -146,10 +146,21 @@ FM.MEMBER = (function(){
                                                     
                                                     for(var idx in UGCs){
                                                         for(var _idx=0; _idx<UGCs[idx].fb_postId.length;_idx++){
-                                                            var relative_url = UGCs[idx].fb_postId[_idx].postId + "?fields=comments,likes,shares";
-//                                                            console.log('UGCs[idx].fb_postId[_idx].postId.length'+UGCs[idx].fb_postId[_idx].postId.length);
-                                                            if(UGCs[idx].fb_postId[_idx].postId){
-                                                                batch.push( {"method": "GET", "relative_url": relative_url} );
+                                                            var fbPostId = UGCs[idx].fb_postId[_idx].postId;
+                                                            if(fbPostId){
+                                                                if(fbPostId.length == 16){
+                                                                    var relative_url = UGCs[idx].fb_postId[_idx].postId + "?fields=comments,likes,sharedposts";
+        //                                                          console.log('UGCs[idx].fb_postId[_idx].postId.length'+UGCs[idx].fb_postId[_idx].postId.length);
+                                                                    if(UGCs[idx].fb_postId[_idx].postId){
+                                                                        batch.push( {"method": "GET", "relative_url": relative_url} );
+                                                                    }
+                                                                }else{
+                                                                    var relative_url = UGCs[idx].fb_postId[_idx].postId + "?fields=comments,likes,shares";
+        //                                                          console.log('UGCs[idx].fb_postId[_idx].postId.length'+UGCs[idx].fb_postId[_idx].postId.length);
+                                                                    if(UGCs[idx].fb_postId[_idx].postId){
+                                                                        batch.push( {"method": "GET", "relative_url": relative_url} );
+                                                                    }                                                                
+                                                                }
                                                             }
                                                         }
                                                     }

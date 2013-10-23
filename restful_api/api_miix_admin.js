@@ -339,7 +339,7 @@ exports.init = function() {
     
     app.put('/miix_admin/dooh/:doohId/liveContent', routes.censorHandler.updateLiveContents_get_cb);
     
-    app.post('/miix_admin/fbItem/:fbId', routes.censorHandler.postMessageAndPicture_get_cb);
+    app.post('/miix_admin/fbItem/:memberId', routes.censorHandler.postMessageAndPicture_get_cb);
     
     app.put('/miix_admin/dooh/:doohId/programTimeSlot', routes.censorHandler.updateProgramTimeSlot_get_cb);
 };

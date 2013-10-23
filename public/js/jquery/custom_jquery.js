@@ -254,8 +254,8 @@ var FailboxInput = $("<input>").attr({
          "fbUserId":res[i].fbUserId,
          "programTimeSlot_id":res[i].programTimeSlot_id,
          "ugcCensorNo":res[i].ugcCensorNo,
-         "liveState":res[i].liveState
-         
+         "liveState":res[i].liveState,
+         "ownerId_id":res[i].ownerId_id
 		                             });
 
 
@@ -451,7 +451,8 @@ if(res[i].liveContent[j].state=="correct"){
 	    	var _id=$(this).attr("programTimeSlot_id");
 	    	var liveState="incorrect";
 			var ugcCensorNo=$(this).attr("ugcCensorNo");
-			 var fbUserId=$(this).attr("fbUserId");
+			var fbUserId=$(this).attr("fbUserId");
+			var ownerId_id=$(this).attr("ownerId_id");
 	    	
 	    	console.log("programTimeSlot_id:"+_id+"\nfbUserId:"+fbUserId+"\nliveState:"+liveState);
 	    	
@@ -470,13 +471,12 @@ if(res[i].liveContent[j].state=="correct"){
                }
            });
 			
-			var url=DOMAIN+"fbItem/"+fbUserId;
+			var url=DOMAIN+"fbItem/"+ownerId_id;
 	    	$.ajax({
                url: url,
                type: 'POST',
-               data: {
-            	   vjson:{liveState: liveState},
-					   ugcCensorNo: ugcCensorNo},
+               data: {type:liveState,
+					  ugcCensorNo: ugcCensorNo},
                success: function(response) {
                    if(response.message){
                        console.log("[Response] message:" + response.message);

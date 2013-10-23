@@ -24,7 +24,6 @@ FM.fb_event_handler.fbUploadImageByBase64 = function(req, res) {
     
     var myToken = req.body.access_token;
     var base64Data = req.body.image.replace(/^data:image\/png;base64,/,"");
-    var liveContent_Id = req.body.liveContent_Id;
     var ugcProjectId = req.body.ugcProjectId;
     // var filename = path.join(__dirname, "out.png");
     var filename = new Date().getTime() + ".png";
@@ -39,21 +38,14 @@ FM.fb_event_handler.fbUploadImageByBase64 = function(req, res) {
                 logger.info('Post FB Text on Photo is Status: ' + res);
                 
                 var fbObj = JSON.parse(res);
-                console.log('liveContent_Id'+liveContent_Id);
-                console.log('ugcProjectId'+ugcProjectId);
-                if(liveContent_Id !== null && liveContent_Id !== undefined){
-                    console.log('liveContent_Id'+liveContent_Id, fbObj.id);
-                    putFbPostIdLiveContentsBy_id(liveContent_Id, fbObj.id, function(err, res){
-                        logger.info('The status of save FB post id to DB is: ' + res);
-                        fs.unlinkSync(filepath);
-                    });
-                }else if(ugcProjectId !== null && ugcProjectId !== undefined){
-                    console.log('ugcProjectId'+ugcProjectId, fbObj.id);
+                if(ugcProjectId !== null && ugcProjectId !== undefined){
+//                    console.log('ugcProjectId'+ugcProjectId, fbObj.id);
                     putFbPostIdUgcs(ugcProjectId, fbObj.id, function(err, res){
                         logger.info('The status of save FB post id to DB is: ' + res);
                         fs.unlinkSync(filepath);
                     });
-                }
+                }else
+                    fs.unlinkSync(filepath);
             }
         });
     });
@@ -105,46 +97,6 @@ FM.fb_event_handler.fbUploadImageByBase64 = function(req, res) {
         });
     };
     
-    var putFbPostIdLiveContentsBy_id = function(liveContent_id, fbPostId, cbOfPutFbPostIdLiveContents){
-        var userLiveContentModel = FMDB.getDocModel("userLiveContent");
-        
-        async.waterfall([
-            function(callback){
-                userLiveContentModel.find({ "_id": liveContent_id}).sort({"createdOn":-1}).exec(function (err, userLiveContentObj) {
-                    if (!err)
-                        callback(null, userLiveContentObj);
-                    else
-                        callback("Fail to retrieve UGC Obj from DB: "+err, userLiveContentObj);
-                });
-                
-            },
-            function(userLiveContentObj, callback){
-                var vjson;
-                var arr = [];
-                
-                if(userLiveContentObj[0].fb_postId[0]){
-                    userLiveContentObj[0].fb_postId.push({'postId': fbPostId});
-                  vjson = {"fb_postId" :userLiveContentObj[0].fb_postId};
-                }else{
-                    arr = [{'postId': fbPostId}];
-                    vjson = {"fb_postId" : arr};
-                }
-                
-                FMDB.updateAdoc(userLiveContentModel, liveContent_id, vjson, function(errOfUpdateUserLiveContent, resOfUpdateUserLiveContent){
-                    if (!errOfUpdateUserLiveContent){
-                        callback(null, resOfUpdateUserLiveContent);
-                    }else
-                        callback("Fail to update liveContent Obj from DB: "+errOfUpdateUserLiveContent, resOfUpdateUserLiveContent);
-                });
-                
-            }
-        ],
-        function(err, result){
-            if (cbOfPutFbPostIdLiveContents){
-                cbOfPutFbPostIdLiveContents(err, result);
-            } 
-        });
-    };
 };
 
 

@@ -11,7 +11,7 @@ var fbReportListener = new EventEmitter();
 var canvasProcessMgr = {};
 
 canvasProcessMgr.markTextAndIcon = function( option, markText_cb ){
-    _private.mark( option.accessToken, option.type, option.source, option.text, option.liveContent_Id, markText_cb );
+    _private.mark( option.accessToken, option.type, option.source, option.text, option.ugcProjectId, markText_cb );
 };
 
 canvasProcessMgr.markTextToPreview = function( option, markText_cb ){
@@ -23,7 +23,7 @@ canvasProcessMgr.markTextToPreview = function( option, markText_cb ){
 // };
 
 var _private = {
-    mark : function( accessToken, type, sourceImg , textContent, liveContent_Id, mark_cb) {
+    mark : function( accessToken, type, sourceImg , textContent, ugcProjectId, mark_cb) {
         fs.readFile( sourceImg, function (err, data){
             
             var mark_url = 'http://127.0.0.1/canvas_process/fb_text_on_photo.html';
@@ -34,7 +34,7 @@ var _private = {
                                '&type=' + type + 
                                '&sourceImage=' + sourceImg + 
                                '&textContent=' + textContent +
-                               '&liveContent_Id=' + liveContent_Id]);
+                               '&ugcProjectId=' + ugcProjectId]);
             
             chrome.stdout.on('data', function (data) { /* console.log('stdout: ' + data); */ });
             chrome.stderr.on('data', function (data) { /* console.log('stderr: ' + data); */ });

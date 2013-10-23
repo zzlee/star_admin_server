@@ -108,11 +108,6 @@ FM.facebookMgr = (function(){
                     cb( {error: "access_token is necessary."}, null);
                     return;
                 }
-//                if(app == "wowtaipeiarena"){    
-//                    qs = { 'input_token': user_token, 'access_token': app_access_token_WowTaipeiarena };
-//                }else{
-//                    qs = { 'input_token': user_token, 'access_token': app_access_token_OnDaScreen };
-//                }
                 switch(app){
                 case "wowtaipeiarena":
                     qs = { 'input_token': user_token, 'access_token': app_access_token_WowTaipeiarena };
@@ -455,11 +450,7 @@ FM.facebookMgr = (function(){
             getUserProfilePicture: function(fb_id, app, cb){
                 
                 var path = "/"+fb_id+"/?fields=picture&width=240&height=240";
-//                if(app == "wowtaipeiarena"){    
-//                    var qs = { "access_token": app_access_token_WowTaipeiarena};
-//                }else{
-//                    var qs = { "access_token": app_access_token_OnDaScreen};
-//                }
+                
                 switch(app){
                 case "wowtaipeiarena":
                     var qs = { "access_token": app_access_token_WowTaipeiarena};
