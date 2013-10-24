@@ -20,6 +20,7 @@ var ugcModel = db.getDocModel("ugc");
 var candidateUgcCacheModel = db.getDocModel("candidateUgcCache");
 var sessionItemModel = db.getDocModel("sessionItem");
 
+var canvasProcessMgr = require('./canvas_process_mgr.js');
 var facebookMgr = require('./facebook_mgr.js');
 var pushMgr = require('./push_mgr.js');
 var memberModel = db.getDocModel("member");
@@ -84,19 +85,16 @@ var paddingContent =(function(){
                       //{name: "Jeff_start"},
                       {name: "ondascreen_padding-miix_it-end.jpg"}],
             cultural_and_creative: [{name: "ondascreen_padding-cultural_and_creative-start"},
-                                    //{name: "Jeff_start"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-end.jpg"}
                                     ],
             mood: [{name: "ondascreen_padding-wish-start"},
-                   //{name: "Jeff_start"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-end.jpg"}
                    ],
             check_in: [{name: "ondascreen_padding-check_in-start"},
-                       //{name: "Jeff_start"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-end.jpg"}
@@ -931,8 +929,6 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
         },
         function(programs, cb2){
             
-        
-            
             var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
                 
                 var access_token, message, link;
@@ -943,44 +939,49 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ ugcSearch(null, ugc); });
                     },
                     function(ugc, memberSearch){
-                        memberModel.find({'fb.userID': ugc[0].ownerId.userID}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
+                        memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
                     },
                 ], function(err, res){
-                    access_token = res.member[0].fb.auth.accessToken;
-                    fb_name = res.member[0].fb.userName;
+                
+                    var ugc = res.ugc[0],
+                        member = res.member[0];
+                    
+                    access_token = member.fb.auth.accessToken;
+                    fb_name = member.fb.userName;
                     var start = new Date(aProgram.timeslot.start);
                     var end = new Date(aProgram.timeslot.end);
-                    var ugcProjectId = res.ugc[0].projectId;
+                    var ugcProjectId = ugc.projectId;
                     if(start.getHours()>12)
                         play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes()+'~'+(end.getHours()-12)+':'+end.getMinutes();
                     else
                         play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes()+'~'+end.getHours()+':'+end.getMinutes();
-                    //message = fb_name + '的試鏡編號：' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！\n' + '上大螢幕APP(連結到FB粉絲團)特此預告。';
-                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-                    var shareOption =
-                    {
-                        name: "上大螢幕", 
-                        img_url: 'https://lh5.googleusercontent.com/-fpFqpP6pBoI/UihA_MSQaAI/AAAAAAAAAIU/b6FlwLNWBu0/s0/fb.png',
-                        link: "https://www.facebook.com/OnDaScreen?directed_target_id=0",
-                        description: "你可以將你的創作，發表在小巨蛋台北天幕LED！"
-                    };
+                    
+                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
 
                     async.parallel([
-                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
-                        function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(errOfPostMessageAndShare, resOfPostMessageAndShare){
-                            if(resOfPostMessageAndShare){
-                                var fbObj = JSON.parse(resOfPostMessageAndShare);
-                                putFbPostIdUgcs(ugcProjectId, fbObj.id, function(err, result){
-                                    if(!err){
-                                        logger.error("[pushProgramsTo3rdPartyContentMgr.putFbPostIdUgcs]res="+"no:"+aProgram.content.no+"fbPostId"+resOfPostMessageAndShare.id);  
-                                    }else{
-
-                                        logger.error("[pushProgramsTo3rdPartyContentMgr.putFbPostIdUgcs]err="+err);
-                                    }
-                                });
-                            }
-                            postFB_cb(err, res);
-                            });
+                        function(push_cb){
+                            pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
+                        function(postFB_cb){
+                            
+                            var option = {
+                                accessToken: access_token,
+                                type: member.app,
+                                ugcProjectId: ugcProjectId
+                                // text: '哇！fb_name 即將2013年10月12日上午5:40~5:50之間，登上小巨蛋！'
+                            };
+                            
+                            switch(option.type.toLowerCase())
+                            {
+                                case 'ondascreen':
+                                    option.text = '哇！' + fb_name + '即將' + play_time + '之間，登上小巨蛋！';
+                                    break;
+                                case 'wowtaipeiarena':
+                                    option.text = '哇！' + fb_name + '即將' + play_time + '之間，登上小巨蛋！';
+                                    break;
+                                default:
+                                    break;
+                            }                            
+                            canvasProcessMgr.markTextToPreview(option, postFB_cb);
                         }
                     ], function(err, res){
                         //(err)?console.log(err):console.dir(res);
@@ -1624,93 +1625,59 @@ var dateTransfer = function(date, cbOfDateTransfer){
     cbOfDateTransfer(tempDate);
 };
 
+var flag = 0;
 var autoCheckProgramAndPushToPlayer = function(){
-    async.series([
-            function(callback1){
-                var option =
-                {
-                        search: "OnDaScreen"
-                };
-                scalaMgr.validProgramExpired(option, function(err, res){
-                    if(!err){
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
-                    }else{
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
-                    }
-                    callback1(null);
-                });
-            },
-            function(callback2){
-                var checkDateStart = new Date().getTime();
-                var checkDateEnd = checkDateStart + 60*60*1000;
-                sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
-                    if(!result){
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-                    }
-                    else if(!result[0]){
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-                    }
-                    else if(!err){
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
-                        scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}, player: {name: scalaPlayerName}}, function(res){
-                            logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
-                            
-                        });
-                    }else{
-                        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
-                    }
-                    callback2(null);
-                    //console.log(err, result);
-                });
+
+    if(flag == 1){
+        //validProgramExpired
+        var option =
+        {
+                search: "OnDaScreen"
+        };
+		logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] validProgramExpired start");
+        scalaMgr.validProgramExpired(option, function(err, res){
+            if(!err){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
+            }else{
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
             }
-            ],
-            function(err, results){
-                    setTimeout(autoCheckProgramAndPushToPlayer, 15*60*1000);
-            });
+        });
+    }
+    else if(flag === 0){
+        //pushEvent
+        var checkDateStart = new Date().getTime();
+        var checkDateEnd = checkDateStart + 40*60*1000;
+		logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]find sessionItemModel in checkDateStart:"+checkDateStart+",checkDateEnd:"+checkDateEnd);
+        sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
+            if(!result){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+            }
+            else if(!result[0]){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
+            }
+            else if(!err){
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
+                scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}, player: {name: scalaPlayerName}}, function(res){
+                    logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
+
+                });
+            }else{
+                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
+            }
+            //console.log(err, result);
+        });
+    }
+    //flag contorl
+    if(flag === 0)
+        flag = 1;
+    else
+        flag = 0;
+//    console.log('flag'+flag);
+    setTimeout(autoCheckProgramAndPushToPlayer, 6*60*1000);
 
 };
 //delay time for scala connect
 setTimeout(autoCheckProgramAndPushToPlayer, 2000);
-
-var putFbPostIdUgcs = function(ugcProjectID, fbPostId, cbOfPutFbPostIdUgcs){
-    
-    async.waterfall([
-        function(callback){
-            ugcModel.find({ "projectId": ugcProjectID}).sort({"createdOn":-1}).exec(function (err, ugcObj) {
-                if (!err)
-                    callback(null, ugcObj);
-                else
-                    callback("Fail to retrieve UGC Obj from DB: "+err, ugcObj);
-            });
-            
-        },
-        function(ugcObj, callback){
-            var vjson;
-            var arr = [];
-            
-            if(ugcObj[0].fb_postId[0]){
-              ugcObj[0].fb_postId.push({'postId': fbPostId});
-              vjson = {"fb_postId" :ugcObj[0].fb_postId};
-            }else{
-                arr = [{'postId': fbPostId}];
-                vjson = {"fb_postId" : arr};
-            }
-            
-            db.updateAdoc(ugcModel, ugcObj[0]._id, vjson, function(errOfUpdateUGC, resOfUpdateUGC){
-                if (!errOfUpdateUGC){
-                    callback(null, resOfUpdateUGC);
-                }else
-                    callback("Fail to update UGC Obj from DB: "+errOfUpdateUGC, resOfUpdateUGC);
-            });
-            
-        }
-    ],
-    function(err, result){
-        if (cbOfPutFbPostIdUgcs){
-            cbOfPutFbPostIdUgcs(err, result);
-        } 
-    });
-};
 
 
 //test
@@ -1720,10 +1687,6 @@ var putFbPostIdUgcs = function(ugcProjectID, fbPostId, cbOfPutFbPostIdUgcs){
 
 //scheduleMgr.getSessionList({start:(new Date("2013/5/5 7:30:20")).getTime(), end:(new Date("2013/8/30 8:30:20")).getTime()}, null, null, function(err, result){
 //    console.log(err, result);
-//});
-
-//putFbPostIdUgcs("cultural_and_creative-5226ff08ff6e3af835000009-20130916T072829495Z", "100006588456341_1403540869875515", function(err, result){
-//console.log('--'+err, result);
 //});
 
 module.exports = scheduleMgr;

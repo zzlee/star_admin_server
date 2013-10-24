@@ -113,30 +113,35 @@ function scalaMgr( url, account ){
             date : new Date(oneday),
         };
         contractor.schedule.findTimeslots(option, function(list){
-            for(var i=0; i < list.timeslots.length; i++){
-                if(list.timeslots[i].playlist.name.match(/FM/i)) {
-                    checkWeekday(option.date.getDay(), list.timeslots[i].weekdays, function(status){
-                        var timeslotDeadline;
-                        if((typeof(list.timeslots[i].endDate) === 'undefined'))
-                            timeslotDeadline = new Date(option.date.getTime() + 86399000);
-                        else if((list.timeslots[i].endTime == '24:00:00'))
-                            timeslotDeadline = new Date(list.timeslots[i].endDate + ' 23:59:59');
-                        else 
-                            timeslotDeadline = new Date(list.timeslots[i].endDate + ' ' + list.timeslots[i].endTime);
-                        //console.log(list.timeslots[i].endDate);
-                        if((option.date.getTime() <= timeslotDeadline.getTime()) && (status == 'OK')){
-                            result.push({
-                                //playlist: list.timeslots[i].playlist.name,
-                                interval: {
-                                    start: timeToInt(oneday, list.timeslots[i].startTime),
-                                    end: timeToInt(oneday, list.timeslots[i].endTime)
-                                },
-                                cycleDuration: durationToNumber(list.timeslots[i].playlist.prettifyDuration.replace('(','').replace(')','').split(' - '))
-                            });
-                        }
-                    });
+            if(typeof(list.timeslots) === 'undefined') {
+                timeslot_cb('no find timeslot', null);
+            }
+            else {
+                for(var i=0; i < list.timeslots.length; i++){
+                    if(list.timeslots[i].playlist.name.match(/FM/i)) {
+                        checkWeekday(option.date.getDay(), list.timeslots[i].weekdays, function(status){
+                            var timeslotDeadline;
+                            if((typeof(list.timeslots[i].endDate) === 'undefined'))
+                                timeslotDeadline = new Date(option.date.getTime() + 86399000);
+                            else if((list.timeslots[i].endTime == '24:00:00'))
+                                timeslotDeadline = new Date(list.timeslots[i].endDate + ' 23:59:59');
+                            else 
+                                timeslotDeadline = new Date(list.timeslots[i].endDate + ' ' + list.timeslots[i].endTime);
+                            //console.log(list.timeslots[i].endDate);
+                            if((option.date.getTime() <= timeslotDeadline.getTime()) && (status == 'OK')){
+                                result.push({
+                                    //playlist: list.timeslots[i].playlist.name,
+                                    interval: {
+                                        start: timeToInt(oneday, list.timeslots[i].startTime),
+                                        end: timeToInt(oneday, list.timeslots[i].endTime)
+                                    },
+                                    cycleDuration: durationToNumber(list.timeslots[i].playlist.prettifyDuration.replace('(','').replace(')','').split(' - '))
+                                });
+                            }
+                        });
+                    }
+                    if(i == list.timeslots.length-1) timeslot_cb(null, result);
                 }
-                if(i == list.timeslots.length-1) timeslot_cb(null, result);
             }
         });
         
@@ -510,6 +515,40 @@ function scalaMgr( url, account ){
     };
     
     /**
+     * Clear Media
+     *
+     */
+    var clearMedia = function( option, clear_cb ){
+        // contractor.media.list({ fields: 'id', search: option.search }, clear_cb);
+        var eventConsole = function(target, event){
+            event.push(function(callback){ 
+                contractor.media.remove({ media: { id: target } }, callback);
+            });
+        };
+        async.series([
+            function(list_cb){
+                contractor.media.list({ fields: 'id', search: option.search }, function(err, media){
+                    list_cb(err, media);
+                });
+            },
+        ], function(err, res){
+            var media = res[0];
+            if(media.count == 0)
+                clear_cb(err, 'no find media');
+            else {
+                var execute = [];
+                for(var i=0; i<media.count; i++)
+                {
+                    eventConsole(media.list[i].id, execute);
+                }
+                async.series(execute, function(err, res){
+                    (err)?clear_cb(err, null):clear_cb(null, 'done');
+                });
+            }
+        });
+    };
+    
+    /**
      * Push event list to all playlist in server.
      * 
      * @param {object} option Input setting of playlist, subplaylist and player.
@@ -535,44 +574,61 @@ function scalaMgr( url, account ){
             },
         ], function(err, result){
             
-            if((typeof(result[0]) === 'undefined') || (result[0].count == 0)) {
-                reportPush_cb('no find "search" playlist');
-                return;
-            }
-            if((typeof(result[1]) === 'undefined') || (result[1].count == 0)) {
-                reportPush_cb('no find "play" playlist');
-                return;
-            }
+            var detectFlag = 0;
+            var detectType = ['search', 'play'];
             
-            var pushSubplaylist = { subplaylist: { id: result[1].list[0].id, name: result[1].list[0].name } };
-            
-            for(var i=0; i<result[0].count; i++){
-                pushSubplaylist.id = result[0].list[i].id;
-                pushSubplaylist.name = result[0].list[i].name;
+            var pushTrigger = function(){
                 
-                if(!result[0].list[i].playlistItems){
-                    contractor.playlist.pushSubplaylist(pushSubplaylist, function(err, res){});
-                }
-                else {
-                    for(var j=0; j<result[0].list[i].playlistItems.length; j++){
-                        if(result[0].list[i].playlistItems[j].subplaylist)
-                            if(result[0].list[i].playlistItems[j].subplaylist.name == pushSubplaylist.subplaylist.name)
-                                break;
-                        if(j == result[0].list[i].playlistItems.length-1)
-                            contractor.playlist.pushSubplaylist(pushSubplaylist, function(err, res){});
+                var pushSubplaylist = { subplaylist: { id: result[1].list[0].id, name: result[1].list[0].name } };
+                
+                for(var i=0; i<result[0].count; i++){
+                    pushSubplaylist.id = result[0].list[i].id;
+                    pushSubplaylist.name = result[0].list[i].name;
+                    
+                    if(!result[0].list[i].playlistItems){
+                        contractor.playlist.pushSubplaylist(pushSubplaylist, function(err, res){});
+                    }
+                    else {
+                        for(var j=0; j<result[0].list[i].playlistItems.length; j++){
+                            if(result[0].list[i].playlistItems[j].subplaylist)
+                                if(result[0].list[i].playlistItems[j].subplaylist.name == pushSubplaylist.subplaylist.name)
+                                    break;
+                            if(j == result[0].list[i].playlistItems.length-1)
+                                contractor.playlist.pushSubplaylist(pushSubplaylist, function(err, res){});
+                        }
+                    }
+                    
+                    if(i == result[0].count-1) {
+                        if(!option.player) playerName = 'feltmeng';
+                        else playerName = option.player.name;
+                        contractor.player.findPlayerIdByName(playerName, function(err, playerId){
+                            contractor.player.pushProgram({"ids": [playerId]}, function(res){
+                                reportPush_cb(res);
+                            });
+                        });
                     }
                 }
-                
-                if(i == result[0].count-1) {
-                    if(!option.player) playerName = 'feltmeng';
-                    else playerName = option.player.name;
-                    contractor.player.findPlayerIdByName(playerName, function(err, playerId){
-                        contractor.player.pushProgram({"ids": [playerId]}, function(res){
-                            reportPush_cb(res);
-                        });
-                    });
+            };
+            
+            var detect = function(target, type){
+                if((typeof(target) === 'undefined')) {
+                    reportPush_cb('no find "' + type + '" playlist: no result array');
+                    return;
                 }
-            }
+                else if((typeof(target.list) === 'undefined')) {
+                    reportPush_cb('no find "' + type + '" playlist: no playlist');
+                    return;
+                }
+                else if((typeof(target.list[0]) === 'undefined')) {
+                    reportPush_cb('no find "' + type + '" playlist: no playlist to array');
+                    return;
+                }
+                else {
+                    detectFlag++;
+                    (detectFlag != 2)?detect(result[detectFlag], detectType[detectFlag]):pushTrigger();
+                }
+            };
+            detect(result[detectFlag], detectType[detectFlag]);
             
         });
     };
@@ -587,6 +643,7 @@ function scalaMgr( url, account ){
         clearPlaylistItems: clearPlaylistItems,
         validProgramExpired: validProgramExpired,
         removePlaylist: removePlaylist,
+        clearMedia: clearMedia,
         contractor: contractor,   //test
     };
 }

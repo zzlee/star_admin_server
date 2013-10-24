@@ -97,13 +97,13 @@ FM.UGC = (function(){
                 UGCs.find({"ownerId.userID":userID}, cb );
             },
             
-            getUGCListOnFB: function(userID, genre, cb){
+            getUGCListOnFB: function(memberID, genre, cb){
                 debugger;
                 var query = UGCs.find(null, 'fb_postId.postId');
                 
                 if('function' === typeof (genre)){
                     cb = genre;
-                    query.where("ownerId.userID", userID).ne("fb_postId.postId", null).sort({createdOn: -1}).exec(cb);
+                    query.where("ownerId._id", memberID).ne("fb_postId.postId", null).sort({createdOn: -1}).exec(cb);
 //                    console.log('UGC.js cb'+cb);
                 }else{
                     query.where("ownerId.userID", userID).where("genre", genre).ne("fb_id", null).sort({createdOn: -1}).exec(cb);
@@ -196,7 +196,13 @@ FM.UGC = (function(){
 			                                    if(err){
 			                                        callback(null, {totalComments: comments_count, totalLikes: likes_count, totalShares: shares_count});
 
-			                                    }else{
+			                                    }else if(!result){
+                                                    callback(null, {totalComments: comments_count, totalLikes: likes_count, totalShares: shares_count});
+                                                    
+                                                }else if(!result[0]){
+                                                    callback(null, {totalComments: comments_count, totalLikes: likes_count, totalShares: shares_count});
+                                                
+                                                }else{
 			                                        if (result) {
 //			                                            console.log('result'+result);
 			                                            for(var i in result){
@@ -205,7 +211,8 @@ FM.UGC = (function(){
 			                                                }
 			                                                // when count=0, there is no likes object.
 			                                                if (result[i].likes){
-			                                                    likes_count += (result[i].likes) ? result[i].likes.count : 0;
+//			                                                    console.log(result[i].likes);
+			                                                    likes_count += (result[i].likes) ? result[i].likes.data.length : 0;
 			                                                }
 			                                                if (result[i].shares){
 			                                                    shares_count += (result[i].shares) ? result[i].shares.count : 0;
@@ -331,9 +338,30 @@ FM.UGC = (function(){
 			},
 			
 			getUGCCount: function(_id, ugcType, cb){
-				var condition = { 'ownerId._id': _id, 'genre': ugcType };
+//				var condition = { 'ownerId._id': _id, 'genre': ugcType };
+				var condition = { 'ownerId._id': _id};
 				UGCs.count(condition, cb);
 			},
+			getUGCDoohPlayedCount: function(_id, cb){
+                var doohPlayedTimes_total = 0;
+			    var condition = { 'ownerId._id': _id};
+			    UGCs.find(condition).exec(function(err, result){
+//			        console.log(result.length);
+			        for(var i in result){
+			            if(result[i].doohPlayedTimes)
+			                doohPlayedTimes_total = doohPlayedTimes_total + result[i].doohPlayedTimes
+			        }
+			        cb(null, doohPlayedTimes_total);
+			    });
+			},
+            kaiser_test: function(){
+//                this.getUGCDoohPlayedCount('524ad83abc2a7e380a000005',function(err, res){
+//                    console.log('res=%s', res);
+//                });
+                this.getCommentsLikesSharesOnFB("5261135960d4fab01000006c", "525fc0afe29857685c000005", [{"id":"1420530771498234","post_id":"100006239742920_1420368784847766"}],function(err, res){
+                    console.log(res);
+                });
+            },
 			
 			_test: function(){
                 var ObjectID = require('mongodb').ObjectID;
@@ -371,5 +399,9 @@ FM.UGC = (function(){
 /*  For TEST. */
 //FM.VIDEO.getInstance()._test();
 //FM.VIDEO.getInstance()._GZ_test();
+//var test = function(){
+//    FM.UGC.getInstance().kaiser_test();
+//};
+//setTimeout(test,5*1000);
 
 module.exports = FM.UGC.getInstance();
