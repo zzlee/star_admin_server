@@ -496,7 +496,6 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
            if(type == 'correct'){
                if(userLiveContentObj[0]){
                    sourceId = userLiveContentObj[0].sourceId;
-                   console.log('sourceId'+sourceId);
                }
                memberModel.find({'_id': userLiveContentObj[0].ownerId._id}).exec(function (err, memberSearch) {
                    if (!err)
