@@ -543,7 +543,6 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
             }
         ], function(err, res){
             if(type == 'correct'){
-                console.log('sourceId'+sourceId);
                 var option = {
                     accessToken: access_token,
                     type: member.app,
