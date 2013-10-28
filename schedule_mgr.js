@@ -956,8 +956,8 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     else
                         play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes()+'~'+end.getHours()+':'+end.getMinutes();
                     
-                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-
+                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                    
                     async.parallel([
                         function(push_cb){
                             pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
@@ -967,16 +967,16 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                                 accessToken: access_token,
                                 type: member.app,
                                 ugcProjectId: ugcProjectId
-                                // text: '哇！fb_name 即將2013年10月12日上午5:40~5:50之間，登上小巨蛋！'
+                                // text: '哇！fb_name的作品，即將在play_time在小巨蛋播出，快到現場瞧瞧！'
                             };
                             
                             switch(option.type.toLowerCase())
                             {
                                 case 'ondascreen':
-                                    option.text = '哇！' + fb_name + '即將' + play_time + '之間，登上小巨蛋！';
+                                    option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
                                     break;
                                 case 'wowtaipeiarena':
-                                    option.text = '哇！' + fb_name + '即將' + play_time + '之間，登上小巨蛋！';
+                                    option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
                                     break;
                                 default:
                                     break;
