@@ -378,7 +378,7 @@ FM.ADMINCACHE = (function(){
 
                 var memberList = [];
 
-                var memberListInfo = function(fb_id, fb_name, email, mp_number, miixMovieVideo_count, doohPlay_count, movieViewed_count, fbLike_count, fbComment_count, fbShare_count, arr) {
+                var memberListInfo = function(fb_id, fb_name, email, mp_number, miixMovieVideo_count, doohPlay_count, movieViewed_count, fbLike_count, fbComment_count, fbShare_count, app, arr) {
                     arr.push({ 
                         fb: { userID: fb_id, userName: fb_name },
                         email: email,                        
@@ -388,7 +388,8 @@ FM.ADMINCACHE = (function(){
                         movieViewedCount: movieViewed_count, 
                         fbLikeCount: fbLike_count,           
                         fbCommentCount: fbComment_count,     
-                        fbShareCount: fbShare_count
+                        fbShareCount: fbShare_count,
+                        app: app
                     });
                 };
 
@@ -397,12 +398,12 @@ FM.ADMINCACHE = (function(){
 
                 var setMemberList = function(data, set_cb){
                     if(next == limit-1) {
-                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count,data[next].fbShare_count, memberList);               
+                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count, data[next].fbShare_count, data[next].app, memberList);               
                         next = 0;
                         set_cb(null, 'OK');
                     }
                     else {
-                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count,data[next].fbShare_count, memberList);               
+                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count, data[next].fbShare_count, data[next].app, memberList);               
                         next += 1;
                         setMemberList(data, set_cb);
                     }
@@ -416,7 +417,7 @@ FM.ADMINCACHE = (function(){
                     }
                 }
                 else{
-                    FMDB.listOfdocModels( memberListInfos,null,'fb.userName fb.userID _id email mPhone miixMovieVideo_count doohPlay_count movieViewed_count fbLike_count fbComment_count fbShare_count', {sort:'fb.userName',limit: _limit, skip: _skip}, function(err, result){
+                    FMDB.listOfdocModels( memberListInfos,null,'fb.userName fb.userID _id email mPhone miixMovieVideo_count doohPlay_count movieViewed_count fbLike_count fbComment_count fbShare_count app', {sort:'fb.userName',limit: _limit, skip: _skip}, function(err, result){
                         if(err) logger.error('[db.listOfMemebers]', err);
                         if(result){
 
