@@ -205,7 +205,7 @@ if(i%2==0){
 if(res[i].liveContent[0]){
 var s3img=$("<img>").attr({src:res[i].liveContent[0].url.longPhoto,
 	                       width:"400",
-	                       height:"150"});
+	                       height:"170"});
 }else{
 
 var s3img=$("<div>").attr({

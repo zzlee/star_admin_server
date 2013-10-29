@@ -60,7 +60,7 @@ FM.censorHandler.getUGCList_get_cb = function(req,res){ //審查名單
     limit = req.query.limit;
     skip = req.query.skip;
 
-    censorMgr.getUGCList(condition, sort, limit, skip, function(err, UGCList){
+    censorMgr.getUGCList(condition, sort, limit, skip, "UGC", function(err, UGCList){
         if (!err){
             res.render( 'table_censorUGC', {ugcCensorMovieList: UGCList} );
         }
@@ -286,7 +286,7 @@ FM.censorHandler.getHighlightUGCList_get_cb = function(req,res){
     limit = req.query.limit;
     skip = req.query.skip;
 
-    censorMgr.getUGCList(condition, sort, limit, skip, function(err, UGCList){
+    censorMgr.getUGCList(condition, sort, limit, skip, "highlight", function(err, UGCList){
         if (!err){
             res.render( 'table_censorHighlight', {highlightList: UGCList} );
         }

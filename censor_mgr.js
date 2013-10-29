@@ -35,7 +35,7 @@ sheculeMgr.init(censorMgr);
  *                       rating(Range A~E),
  *                       doohPlayedTimes}
  */
-censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, cb){
+censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, pageType, cb){
     var start;
     var end;
 
@@ -91,7 +91,7 @@ censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, cb){
                     limit = result.length;
 
                 if(limit > 0){ 
-                    mappingUGCList(result, function(err,docs){
+                    mappingUGCList(result, pageType, function(err,docs){
                         if (cb){
                             cb(err, UGCList);
                         }
@@ -116,7 +116,7 @@ var UGCList = [];
 var timeslotStart;
 var timeslotEnd;
 
-var UGCListInfo = function(userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url,arr) {
+var UGCListInfo = function(userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl,arr) {
     arr.push({
         userPhotoUrl: userPhotoUrl,
         ugcCensorNo: ugcCensorNo,
@@ -134,61 +134,71 @@ var UGCListInfo = function(userPhotoUrl, ugcCensorNo, userContent, fb_userName, 
         timeStamp: timeStamp,
         programTimeSlotId: programTimeSlotId,
         highlight: highlight,
-        url:url
-       
+        url: url,
+        liveContentUrl: liveContentUrl
     });
 };
-var mappingUGCList = function(data, set_cb){
+var mappingUGCList = function(data, type, set_cb){
     limit = data.length;
 
     var toDo = function(err, result){
-        if(!data[next]) return;
-        var userPhotoUrl = 'No Photo';
-        var description = null;
-        
-        if(data[next].timeslot){
-            timeslotDateStart = new Date(data[next].timeslot.start).toString().substring(0,25);
-            timeslotDateEnd = new Date(data[next].timeslot.end).toString().substring(0,25);
-            //timeslotStart date format
-            yyyy = timeslotDateStart.substring(11,15);
-            mm = new Date(data[next].timeslot.start).getMonth()+1;
-            dd = timeslotDateStart.substring(8,10);
-            time = timeslotDateStart.substring(16,25);
-            timeslotStart = yyyy+'/'+mm+'/'+dd+' '+time;
-            //timeslotEnd date format
-            yyyy = timeslotDateEnd.substring(11,15);
-            mm = new Date(data[next].timeslot.end).getMonth()+1;
-            dd = timeslotDateEnd.substring(8,10);
-            time = timeslotDateEnd.substring(16,25);
-            timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
-        }
-        //TODO  getUserUploadedImageUrls 
-        if(result[2]){
-            userPhotoUrl = result[2];
-        }
-
-        if(data[next].userRawContent){
-
-            for(var i=0 ; i <data[next].userRawContent.length ; i++){
-                if(data[next].userRawContent[i].type == 'text')
-                    description = data[next].userRawContent[i].content;
-                if(data[next].userRawContent[i].type == 'image')
-                    userPhotoUrl = data[next].userRawContent[i].content;
+        //err
+        if(err){
+            if(next == limit - 1) {
+                set_cb(null, 'ok'); 
+                next = 0;
+                UGCList = []; 
+            }else{
+                next += 1;
+                mappingUGCList(data, type, set_cb);
             }
+            return;
         }
-        
-
-        if(next == limit - 1) {
-            UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight,data[next].url, UGCList);
-            set_cb(null, 'ok'); 
-            next = 0;
-            UGCList = [];
-        }
-        else{
-            UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url,UGCList);
-            next += 1;
-            mappingUGCList(data, set_cb);
-        }
+            
+            //data[next] not exist
+            if(!data[next]) return;
+            
+            var userPhotoUrl = 'No Photo';
+            var description = null;
+            
+            //timeslot
+            if(data[next].timeslot){
+                timeslotDateStart = new Date(data[next].timeslot.start).toString().substring(0,25);
+                timeslotDateEnd = new Date(data[next].timeslot.end).toString().substring(0,25);
+                //timeslotStart date format
+                yyyy = timeslotDateStart.substring(11,15);
+                mm = new Date(data[next].timeslot.start).getMonth()+1;
+                dd = timeslotDateStart.substring(8,10);
+                time = timeslotDateStart.substring(16,25);
+                timeslotStart = yyyy+'/'+mm+'/'+dd+' '+time;
+                //timeslotEnd date format
+                yyyy = timeslotDateEnd.substring(11,15);
+                mm = new Date(data[next].timeslot.end).getMonth()+1;
+                dd = timeslotDateEnd.substring(8,10);
+                time = timeslotDateEnd.substring(16,25);
+                timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
+            }
+            //userRawContent
+            if(data[next].userRawContent){
+                for(var i=0 ; i <data[next].userRawContent.length ; i++){
+                    if(data[next].userRawContent[i].type == 'text')
+                        description = data[next].userRawContent[i].content;
+                    if(data[next].userRawContent[i].type == 'image')
+                        userPhotoUrl = data[next].userRawContent[i].content;
+                }
+            }
+            //UGCListInfo
+            if(next == limit - 1) {
+                UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[1], UGCList);
+                set_cb(null, 'ok'); 
+                next = 0;
+                UGCList = [];
+            }
+            else{
+                UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[1],UGCList);
+                next += 1;
+                mappingUGCList(data, type, set_cb);
+            }
 
     };//toDo End ******
 
@@ -227,6 +237,23 @@ var mappingUGCList = function(data, set_cb){
                                 else if(result === null) callback(null, 'No User');
                                 else callback(null, result.fb.userName);
                             });
+
+                        },
+                        function(callback){
+                            if(type == "highlight"){
+                            userLiveContentModel.find({"sourceId": data[next].projectId, "state":"correct"}).sort({'createdOn': -1}).exec(function(err, result){
+                                // console.log(err, result);
+                                   if(err) callback(err, null);
+                                   else if(!result) callback('No Live Content', null);
+                                   else if(!result[0]) callback('No Live Content', null);
+                                   else if(!result[0].url) callback('No Live Content', null);
+                                   else if(!result[0].url.s3) callback('No Live Content', null);
+                                   else{
+                                       callback(null, result[0].url.s3);
+                                   }
+                               });
+                            }else
+                                callback(null, 'not highlight');
 
                         }
                         ], toDo);
@@ -387,7 +414,7 @@ censorMgr.getPlayList = function(programList, updateUGC, cb){
     if(programList.length > 0){
         mappingPlayList(programList, updateUGC, function(err,docs){
             if (cb){
-                mappingUGCList(playList, function(err,docs){
+                mappingUGCList(playList, 'UGC', function(err,docs){
                     if (cb){
                         cb(err, UGCList);
                     }
