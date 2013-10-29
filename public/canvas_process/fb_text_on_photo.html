@@ -30,7 +30,8 @@
 		
         var mark_bg = {
             'ondascreen': 'https://lh5.googleusercontent.com/-tqXMjQzRAA0/UmDfwZZbynI/AAAAAAAAACc/JlKPO7dGmAM/s0/ondascreen_black_icon.png',
-            'wowtaipeiarena': 'https://lh6.googleusercontent.com/-hqkKLjk-brM/UmDvwloXh9I/AAAAAAAAADM/uEju9-TGC9k/s0/wowOnTaipeiArena_black_icon.png'
+            // 'wowtaipeiarena': 'https://lh6.googleusercontent.com/-hqkKLjk-brM/UmDvwloXh9I/AAAAAAAAADM/uEju9-TGC9k/s0/wowOnTaipeiArena_black_icon.png'
+            'wowtaipeiarena': 'https://lh4.googleusercontent.com/-oKi0_PfAs98/Um8enR6D8zI/AAAAAAAAADk/-_d8kt8Gcio/s0/wowOnTaipeiArena_fb_post_card_bg.jpg'
         };
 
         var canvas = document.getElementById('myCanvas');
@@ -41,15 +42,32 @@
         // var content = 'Jeff Chai 於2013年10月1日下午5:21，登上台北小巨蛋天幕！';
 
         imageObj.onload = function() {
-            canvas.width = imageObj.width;
-            canvas.height = imageObj.height;
-            context.drawImage(imageObj, 0, 0);
-            context.drawImage(imageBg, 0, 0);
             
-            context.font = 'bold 48px 微軟正黑體';
-            context.fillStyle = 'white';
-            context.textAlign="right";
-            context.fillText(decodeURI(option.textContent), canvas.width-186, 1164);
+            switch(option.type.toLowerCase())
+            {
+                case 'ondascreen':
+                    canvas.width = imageObj.width;
+                    canvas.height = imageObj.height;
+                    context.drawImage(imageObj, 0, 0);
+                    context.drawImage(imageBg, 0, 0);
+                    context.font = 'bold 48px 微軟正黑體';
+                    context.fillStyle = 'white';
+                    context.textAlign="right";
+                    context.fillText(decodeURI(option.textContent), canvas.width-186, 1164);
+                    break;
+                case 'wowtaipeiarena':
+                    canvas.width = imageBg.width;
+                    canvas.height = imageBg.height;
+                    context.drawImage(imageBg, 0, 0);
+                    context.drawImage(imageObj, 138, 81);
+                    context.font = 'bold 48px 微軟正黑體';
+                    context.fillStyle = 'black';
+                    context.textAlign="right";
+                    context.fillText(decodeURI(option.textContent), 1819.82, 1377.273);
+                    break;
+                default:
+                    break;
+            }
 
             context.save();
             // alert(canvas.toDataURL());
