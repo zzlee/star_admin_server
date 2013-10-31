@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @fileoverview Implementation of scheduleMgr
  */
 
@@ -921,6 +921,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             programTimeSlotModel.find({ "session": sessionId }).sort({"timeStamp":1}).exec(function (err1, _programs) {
                 if (!err1) {
                     var programs = JSON.parse(JSON.stringify(_programs));
+                    
+                    //for debugging
+                    logger.info('[scheduleMgr] programs to push (to 3rd-party Content Manager:' );
+                    for (var i in programs){
+                        logger.info(JSON.stringify(programs[i]));
+                    }
+                                       
                     cb1(null, programs);
                 }
                 else {
