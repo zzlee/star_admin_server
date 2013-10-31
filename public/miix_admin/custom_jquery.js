@@ -658,6 +658,20 @@ if(res[i].liveContent[j].state=="correct"){
         $.get('/miix_admin/table_censorPlayList_head.html', function(res){
             $('#table-content-header').html(res);
             $('#table-content').html('');
+            
+            //Listen to the command from star_admin_server
+            connectionMgr.connectToMainServer( function( commandID, resDataBody ){
+                
+                if (resDataBody.command == "SHOW_TRACE") {
+                    
+                    $("#traceWindow").prepend(resDataBody.parameters.trace+"<br>");
+                    var answerObj = {
+                            err: null
+                        };
+                    connectionMgr.answerMainServer(commandID, answerObj);
+                }   
+            });
+
                         
             $('#createProgramListBtn').click(function(){   
                 var flag = 0;

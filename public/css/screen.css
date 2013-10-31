@@ -1621,4 +1621,12 @@ a:hover.back-login	{
 	padding:3px;
 	}
 .row{
-	padding-top:10px;}
+	padding-top:10px;
+}
+	
+#traceWindow{
+	width: 80%;
+	height: 150px;
+	padding: 20px;
+	overflow-y: auto;
+}	
