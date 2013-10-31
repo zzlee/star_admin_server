@@ -60,7 +60,7 @@ FM.censorHandler.getUGCList_get_cb = function(req,res){ //審查名單
     limit = req.query.limit;
     skip = req.query.skip;
 
-    censorMgr.getUGCList(condition, sort, limit, skip, function(err, UGCList){
+    censorMgr.getUGCList(condition, sort, limit, skip, "UGC", function(err, UGCList){
         if (!err){
             res.render( 'table_censorUGC', {ugcCensorMovieList: UGCList} );
         }
@@ -286,7 +286,7 @@ FM.censorHandler.getHighlightUGCList_get_cb = function(req,res){
     limit = req.query.limit;
     skip = req.query.skip;
 
-    censorMgr.getUGCList(condition, sort, limit, skip, function(err, UGCList){
+    censorMgr.getUGCList(condition, sort, limit, skip, "highlight", function(err, UGCList){
         if (!err){
             res.render( 'table_censorHighlight', {highlightList: UGCList} );
         }
@@ -353,7 +353,7 @@ FM.censorHandler.updateLiveContents_get_cb = function(req, res){
 
 FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
 
-    var fb_Id =  req.params.fbId;
+    var memberId =  req.params.memberId;
     var photoUrl = {preview: req.body.longPic,
 					play:req.body.s3Url
                     };
@@ -362,7 +362,7 @@ FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
     var ugcCensorNo = req.body.ugcCensorNo;
     var liveContent_Id = req.body.liveContent_Id;
 	
-  censorMgr.postMessageAndPicture(fb_Id, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id, function(err, result){
+  censorMgr.postMessageAndPicture(memberId, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id, function(err, result){
   if (!err){
       res.send(200, {message: result});
   }

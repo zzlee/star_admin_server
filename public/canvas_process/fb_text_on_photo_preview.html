@@ -24,6 +24,7 @@
             // console.log(temp[0] + ' : ' + decodeURI(temp[1]));
         }
         
+		var ugcProjectId = option.ugcProjectId;
         // var preview_bg = 'https://lh5.googleusercontent.com/-b2N5Zoh80zA/UmDRrkjCtlI/AAAAAAAAACA/xs-KambbtxM/s0/wowOnTaipeiArena_preview_bg.jpg';
         var preview_bg = {
             'ondascreen': 'https://lh6.googleusercontent.com/-ZbVtdu-FvQo/UmDfZdcYUFI/AAAAAAAAACU/1UYWOtakhtc/s0/ondascreen_preview_bg.jpg',
@@ -42,7 +43,7 @@
             canvas.height = imageObj.height;
             context.drawImage(imageObj, 0, 0);
             
-            context.font = 'bold 30px 微軟正黑體';
+            context.font = 'bold 24px 微軟正黑體';
             context.fillStyle = 'white';
             context.textAlign="right";
             context.fillText(decodeURI(option.textContent), canvas.width-157, 724);
@@ -54,7 +55,7 @@
         };
         
         var textImageComplete = function(access_token, data){
-            $.post( "http://127.0.0.1/fb/image_uplaod/base64", { access_token: access_token, image: data }, function( data ){
+            $.post( "http://127.0.0.1/fb/image_uplaod/base64", { access_token: access_token, image: data, ugcProjectId:ugcProjectId }, function( data ){
                 window.close();
             });
         };

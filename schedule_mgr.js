@@ -956,8 +956,8 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     else
                         play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes()+'~'+end.getHours()+':'+end.getMinutes();
                     
-                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-
+                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                    
                     async.parallel([
                         function(push_cb){
                             pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
@@ -966,16 +966,17 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             var option = {
                                 accessToken: access_token,
                                 type: member.app,
-                                // text: '哇！fb_name 即將2013年10月12日上午5:40~5:50之間，登上小巨蛋！'
+                                ugcProjectId: ugcProjectId
+                                // text: '哇！fb_name的作品，即將在play_time在小巨蛋播出，快到現場瞧瞧！'
                             };
                             
                             switch(option.type.toLowerCase())
                             {
                                 case 'ondascreen':
-                                    option.text = '哇！' + fb_name + '即將' + play_time + '之間，登上小巨蛋！';
+                                    option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
                                     break;
                                 case 'wowtaipeiarena':
-                                    option.text = '哇！' + fb_name + '即將' + play_time + '之間，登上小巨蛋！';
+                                    option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
                                     break;
                                 default:
                                     break;
@@ -1671,54 +1672,12 @@ var autoCheckProgramAndPushToPlayer = function(){
         flag = 1;
     else
         flag = 0;
-		
 //    console.log('flag'+flag);
     setTimeout(autoCheckProgramAndPushToPlayer, 6*60*1000);
-
 
 };
 //delay time for scala connect
 setTimeout(autoCheckProgramAndPushToPlayer, 2000);
-
-var putFbPostIdUgcs = function(ugcProjectID, fbPostId, cbOfPutFbPostIdUgcs){
-    
-    async.waterfall([
-        function(callback){
-            ugcModel.find({ "projectId": ugcProjectID}).sort({"createdOn":-1}).exec(function (err, ugcObj) {
-                if (!err)
-                    callback(null, ugcObj);
-                else
-                    callback("Fail to retrieve UGC Obj from DB: "+err, ugcObj);
-            });
-            
-        },
-        function(ugcObj, callback){
-            var vjson;
-            var arr = [];
-            
-            if(ugcObj[0].fb_postId[0]){
-              ugcObj[0].fb_postId.push({'postId': fbPostId});
-              vjson = {"fb_postId" :ugcObj[0].fb_postId};
-            }else{
-                arr = [{'postId': fbPostId}];
-                vjson = {"fb_postId" : arr};
-            }
-            
-            db.updateAdoc(ugcModel, ugcObj[0]._id, vjson, function(errOfUpdateUGC, resOfUpdateUGC){
-                if (!errOfUpdateUGC){
-                    callback(null, resOfUpdateUGC);
-                }else
-                    callback("Fail to update UGC Obj from DB: "+errOfUpdateUGC, resOfUpdateUGC);
-            });
-            
-        }
-    ],
-    function(err, result){
-        if (cbOfPutFbPostIdUgcs){
-            cbOfPutFbPostIdUgcs(err, result);
-        } 
-    });
-};
 
 
 //test
@@ -1728,10 +1687,6 @@ var putFbPostIdUgcs = function(ugcProjectID, fbPostId, cbOfPutFbPostIdUgcs){
 
 //scheduleMgr.getSessionList({start:(new Date("2013/5/5 7:30:20")).getTime(), end:(new Date("2013/8/30 8:30:20")).getTime()}, null, null, function(err, result){
 //    console.log(err, result);
-//});
-
-//putFbPostIdUgcs("cultural_and_creative-5226ff08ff6e3af835000009-20130916T072829495Z", "100006588456341_1403540869875515", function(err, result){
-//console.log('--'+err, result);
 //});
 
 module.exports = scheduleMgr;
