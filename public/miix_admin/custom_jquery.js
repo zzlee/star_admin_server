@@ -27,7 +27,7 @@ $(document).ready(function(){
         var url = DOMAIN + "login";
         $('#login-inner input[class="login-inp"]').each(function(){
             //console.log("item: " + $(this).attr("value"));
-            inputData[$(this).attr("name")] = $(this).attr("value");
+            inputData[$(this).attr("name")] = $(this).val();
         });
         console.log("Input: " + JSON.stringify(inputData) );
         if(inputData.id && inputData.password){
