@@ -26,7 +26,7 @@ $(document).ready(function(){
         var inputData = {};
         var url = DOMAIN + "login";
         $('#login-inner input[class="login-inp"]').each(function(){
-            //console.log("item: " + $(this).attr("value"));
+            //console.log("item: " + $(this).val());
             inputData[$(this).attr("name")] = $(this).val();
         });
         console.log("Input: " + JSON.stringify(inputData) );
@@ -410,7 +410,7 @@ if(res[i].liveContent[j].state=="correct"){
 		  
 		  
 	    	var _id=$(this).attr("_id");
-	    	var userID=$(this).attr("value");
+	    	var userID=$(this).val();
 	    	var s3Url=$(this).attr("s3url");
 	    	var picType=$(this).attr("_type");
 			var longPic=$(this).attr("longPic");
@@ -470,7 +470,7 @@ if(res[i].liveContent[j].state=="correct"){
 		  
 		  
 	    	var _id=$(this).attr("_id");
-	    	var userID=$(this).attr("value");
+	    	var userID=$(this).val();
 	    	var s3Url=$(this).attr("s3url");
 	    	var picType=$(this).attr("_type");
 			var longPic=$(this).attr("longPic");
@@ -524,8 +524,8 @@ if(res[i].liveContent[j].state=="correct"){
 
               $('#condition-inner input[class="createHistoryProgramListBtn"]').each(function(i){
 
-                  inputSearchData[$(this).attr("name")] = $(this).attr("value");
-                  if($(this).attr("value") == "" && flag == 0){
+                  inputSearchData[$(this).attr("name")] = $(this).val();
+                  if($(this).val() == "" && flag == 0){
                       alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00');
                       flag = 1; 
                   }else{
@@ -680,12 +680,12 @@ if(res[i].liveContent[j].state=="correct"){
 
                 $('#condition-inner input[class="createProgramListBtn"]').each(function(i){
 
-                    inputSearchData[$(this).attr("name")] = $(this).attr("value");
+                    inputSearchData[$(this).attr("name")] = $(this).val();
 
                     if($(this).attr("name") == 'ugcSequenceText'){
                         
-                        originSequence = $(this).attr("value");
-                        var sequence = encodeURIComponent($(this).attr("value"));
+                        originSequence = $(this).val();
+                        var sequence = encodeURIComponent($(this).val());
                         
                         programSequenceStringToArr(sequence , function(err ,result){
                             if(!err){
@@ -696,7 +696,7 @@ if(res[i].liveContent[j].state=="correct"){
                         });
                     }
                     
-                    if($(this).attr("value") == "" && flag == 0){
+                    if($(this).val() == "" && flag == 0){
                         alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00\n順序請填入類別字首(合成影片填入"合",心情填入"心",etc)\nex:2013/08/01 00:00:00,合心打打文');
                         flag = 1; 
                     }
@@ -759,8 +759,8 @@ if(res[i].liveContent[j].state=="correct"){
 
                 $('#condition-inner input[class="createHistoryProgramListBtn"]').each(function(i){
 
-                    inputSearchData[$(this).attr("name")] = $(this).attr("value");
-                    if($(this).attr("value") == "" && flag == 0){
+                    inputSearchData[$(this).attr("name")] = $(this).val();
+                    if($(this).val() == "" && flag == 0){
                         alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00');
                         flag = 1; 
                     }else{
@@ -793,8 +793,8 @@ if(res[i].liveContent[j].state=="correct"){
 
                 $('#condition-inner input[class="searchHighlightListBtn"]').each(function(i){
 
-                    inputSearchData[$(this).attr("name")] = $(this).attr("value");
-                    if($(this).attr("value") == "" && flag == 0){
+                    inputSearchData[$(this).attr("name")] = $(this).val();
+                    if($(this).val() == "" && flag == 0){
                         alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00');
                         flag = 1; 
                     }else{
@@ -848,7 +848,7 @@ if(res[i].liveContent[j].state=="correct"){
             $('#ugcSearchBtn').click(function(){
                 var inputSearchData = {};
                 $('#condition-inner input[class="ugcSearchBtn"]').each(function(){
-                    inputSearchData = {'no':$(this).attr("value")};
+                    inputSearchData = {'no':$(this).val()};
                     conditions = inputSearchData;
                 });
                 if(conditions != null){
@@ -909,8 +909,8 @@ if(res[i].liveContent[j].state=="correct"){
                 var flag = 0;
                 
                 $('#condition-inner input[class="ugcSearchDateBtn"]').each(function(){                 
-                    inputSearchData[$(this).attr("name")] = $(this).attr("value");
-                    if($(this).attr("value") == "" && flag == 0){
+                    inputSearchData[$(this).attr("name")] = $(this).val();
+                    if($(this).val() == "" && flag == 0){
                         alert('請輸入完整的時間!!');
                         flag = 1; 
                     }
@@ -1031,9 +1031,9 @@ if(res[i].liveContent[j].state=="correct"){
                 var url = DOMAIN + "user_content_attribute";
                 var no = $(this).attr("name");
                 var mustPlay = null;
-                if($(this).attr("value") == 'true')
+                if($(this).val() == 'true')
                     mustPlay = false;
-                if($(this).attr("value") == 'false')
+                if($(this).val() == 'false')
                     mustPlay = true;
 
                 $.ajax({
@@ -1064,7 +1064,7 @@ if(res[i].liveContent[j].state=="correct"){
 
                 $('input[class="#ugcCensor.ugcCensorNoSetBtn"]').each(function(){
                     
-                    ugcReferenceNo = $(this).attr("value");
+                    ugcReferenceNo = $(this).val();
                     
                     if(ugcReferenceNo && programTimeSlotId){
                         $.ajax({
@@ -1200,9 +1200,9 @@ if(res[i].liveContent[j].state=="correct"){
                 var url = DOMAIN + "user_content_attribute";
                 var no = $(this).attr("name");
                 var mustPlay = null;
-                if($(this).attr("value") == 'true')
+                if($(this).val() == 'true')
                     highlight = false;
-                if($(this).attr("value") == 'false')
+                if($(this).val() == 'false')
                     highlight = true;
 
                 $.ajax({

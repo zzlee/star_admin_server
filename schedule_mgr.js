@@ -24,6 +24,7 @@ var canvasProcessMgr = require('./canvas_process_mgr.js');
 var facebookMgr = require('./facebook_mgr.js');
 var pushMgr = require('./push_mgr.js');
 var memberModel = db.getDocModel("member");
+var adminBrowserMgr = require('./admin_browser_mgr.js');
 
 /**
  * The manager who handles the scheduling of playing UGC on DOOHs
@@ -1066,11 +1067,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
                                 if (!errScala){
                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                    adminBrowserMgr.showTrace(null, "成功上傳"+fileToPlay+"至播放系統!");
                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
                                     callback(null, fileToPlay);
                                 }
                                 else{
                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                    adminBrowserMgr.showTrace(null, "!!!!!無法上傳"+fileToPlay+"至播放系統.");
                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
                                     callback('Failed to push content to Scala :'+errScala, null);
                                 }
@@ -1106,11 +1109,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         scalaMgr.setWebpageToPlaylist(option, function(errScala, resultScala){
                             if (!errScala){
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.uri );
+                                adminBrowserMgr.showTrace(null, "成功上傳"+aProgram.content.uri+"至播放系統!");
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
                                 callbackIterator(null);
                             }
                             else{
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.uri );
+                                adminBrowserMgr.showTrace(null, "!!!!!無法上傳"+aProgram.content.uri+"至播放系統.");
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + web.uri );
                                 callbackIterator('Failed to push content to Scala :'+errScala);
                             }
@@ -1132,11 +1137,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             if (!errScala){
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
+                                adminBrowserMgr.showTrace(null, "成功上傳"+aProgram.content.name+"至播放系統!");
                                 callbackIterator(null);
                             }
                             else{
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
+                                adminBrowserMgr.showTrace(null, "!!!!!無法上傳"+aProgram.content.name+"至播放系統!");
                                 callbackIterator('Failed to push content to Scala :'+errScala);
                             }
                         });
