@@ -935,6 +935,45 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                 }                             
             });
         },
+        function(programs, cb1_1){
+            //render Miix moive if it is not yet rendered
+            if ( systemConfig.RENDER_MIIX_MOVIE_IF_IT_IS_NOT_YET_RENDERED ) {
+                var miixContentMgr = require('./miix_content_mgr.js');
+                
+                var iteratorRenderMiixMovie = function(aProgram, callbackIterator){
+                    if ( (aProgram.contentType == "file") && (aProgram.contentGenre == "miix_it") && (!aProgram.content.url.youtube) ) {
+                        async.waterfall([
+                            function(callback){
+                                //get the corresponding UGC info
+                                ugcModel.findOne({ 'projectId': aProgram.content.projectId }, '_id ownerId projectId title', function (errOfFindOne, ugc) {
+                                    if (!errOfFindOne) {
+                                        var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded" 
+                                        callback(null, _ugc.projectId, _ugc.ownerId._id,  _ugc.ownerId.ownerId.fbUserId, _ugc.title);
+                                    }
+                                    else {
+                                        callback("Failed to get the corresponding UGC info: "+errOfFindOne, null, null, null, null);
+                                    }
+                                });
+                            }, 
+                            function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, callback){
+                                //render this video UGC (Miix movie)
+                                miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, callback);
+                            }
+                        ], function(errOfWaterFall){
+                            callbackIterator(errOfWaterFall);
+                        });
+                    }
+                };
+                async.eachSeries(programs, iteratorRenderMiixMovie, function(errEachSeries){
+                    cb1_1(errEachSeries, programs);
+                });
+                
+            }
+            else {
+                cb1_1(null, programs);
+            }
+            
+        },
         function(programs, cb2){
             
             var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
