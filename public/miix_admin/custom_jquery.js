@@ -659,25 +659,11 @@ if(res[i].liveContent[j].state=="correct"){
             $('#table-content-header').html(res);
             $('#table-content').html('');
             
-            //Listen to the command from star_admin_server
-            connectionMgr.connectToMainServer( function( commandID, resDataBody ){
-                
-                if (resDataBody.command == "SHOW_TRACE") {
-                    
-                    $("#traceWindow").prepend(resDataBody.parameters.trace+"<br>");
-                    var answerObj = {
-                            err: null
-                        };
-                    connectionMgr.answerMainServer(commandID, answerObj);
-                }   
-            });
-
-                        
             $('#createProgramListBtn').click(function(){   
                 var flag = 0;
                 var inputSearchData = {};
                 var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/program_timeslot_session";
-
+                
                 $('#condition-inner input[class="createProgramListBtn"]').each(function(i){
 
                     inputSearchData[$(this).attr("name")] = $(this).val();
@@ -1332,8 +1318,38 @@ if(res[i].liveContent[j].state=="correct"){
     }
     
 
-
 });
+
+
+//== trace window ==
+$(document).ready(function () {
+    
+    $("#cleanTraceBtn").hide();
+    
+    //Listen to the command from star_admin_server
+    connectionMgr.connectToMainServer( function( commandID, resDataBody ){
+        
+        if (resDataBody.command == "SHOW_TRACE") {
+            
+            $("#traceWindow").prepend("<p>"+resDataBody.parameters.trace+"</p>");
+            if ( $("#traceWindow").html().length > 0){
+                $("#cleanTraceBtn").show();
+            }
+            
+            var answerObj = {
+                    err: null
+                };
+            connectionMgr.answerMainServer(commandID, answerObj);
+        }   
+    });
+
+    
+    $("#cleanTraceBtn").click(function () {
+        $("#traceWindow").html('');
+        $("#cleanTraceBtn").hide();
+    });
+});
+
 
 
 /*

@@ -6,6 +6,8 @@ jQuery.support.cors = true;
 var REMOTE_TYPE = "ADMIN_BROWSER";
 var REMOTE_ID = "admin_browser";
 
+connectionMgr.isConnectedToMainServer = false;
+
 connectionMgr.answerMainServer = function( commandID, answerObj, cb ){
 	answerObj._commandId = commandID;
 	
@@ -34,41 +36,50 @@ connectionMgr.answerMainServer = function( commandID, answerObj, cb ){
 connectionMgr.connectToMainServer = function( getCommand_cb) {
 	var ajaxURL = "/internal/commands";
 	
-	var dataToSend = {
-		remoteId: REMOTE_ID,
-		remoteType: REMOTE_TYPE
+	var connect = function(){
+        var dataToSend = {
+                remoteId: REMOTE_ID,
+                remoteType: REMOTE_TYPE
+            };
+            
+        $.ajax({
+            url: ajaxURL,
+            type: "GET",
+            data:  dataToSend,
+            dataType: "json",
+            cache: false
+        }).done( function (resData) {
+            //console.log('resData: ');
+            //console.log(resData);
+            if ( resData.type == "COMMAND" ) {
+                //process the command sent from Star server
+                //console.log('COMMAND BODY: '+ resData.body);
+                
+                var commandID = resData.body._commandID;
+                
+                if (getCommand_cb) {
+                    getCommand_cb( commandID, resData.body);                
+                }
+                
+            }           
+            //console.log('<done>Connection to Main Server ends');
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            //console.log('<always>Connection to Main Server ends');
+            //console.log( 'err:' + errorThrown);
+        }).always(function() {
+            //console.log('<always>Connection to Main Server ends');
+            //console.log('Connection to Main Server ends');
+            //connectionMgr.connectToMainServer( getCommand_cb);         
+            connect();
+        });
 	};
 	
-	$.ajax({
-		url: ajaxURL,
-		type: "GET",
-		data:  dataToSend,
-		dataType: "json",
-		cache: false
-	}).done( function (resData) {
-		//console.log('resData: ');
-		//console.log(resData);
-		if ( resData.type == "COMMAND" ) {
-			//process the command sent from Star server
-			//console.log('COMMAND BODY: '+ resData.body);
-			
-			var commandID = resData.body._commandID;
-			
-			if (getCommand_cb) {
-				getCommand_cb( commandID, resData.body);				
-			}
-			
-		}			
-		//console.log('<done>Connection to Main Server ends');
-	}).fail(function(jqXHR, textStatus, errorThrown) {
-		//console.log('<always>Connection to Main Server ends');
-		//console.log( 'err:' + errorThrown);
-	}).always(function() {
-		//console.log('<always>Connection to Main Server ends');
-		//console.log('Connection to Main Server ends');
-		connectionMgr.connectToMainServer( getCommand_cb);			
-	});
+	if (!connectionMgr.isConnectedToMainServer) {
+        
+	    connect();
+        connectionMgr.isConnectedToMainServer = true;
+        
+	}
 	
-	//console.log('Connection to Main Server starts');
 
 };

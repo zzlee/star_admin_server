@@ -1625,8 +1625,14 @@ a:hover.back-login	{
 }
 	
 #traceWindow{
-	width: 80%;
+	width: 65%;
 	height: 150px;
 	padding: 20px;
 	overflow-y: auto;
-}	
+}
+
+#cleanTraceBtn{
+	position: relative;
+	top: 15px;
+	left: 20px;
+}
