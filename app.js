@@ -144,6 +144,17 @@ async.waterfall([
             console.log("Express server listening on port " + app.get('port'));
             callback(null);
         });
+    },
+    function(callback){
+        //tests
+//        var adminBrowserMgr = require('./admin_browser_mgr.js');
+//        setInterval(function(){
+//            var trace = (new Date()).toString();
+//            adminBrowserMgr.showTrace(null, trace);
+//            //console.log('show trace: '+trace);
+//        }, 2000);
+        
+        callback(null);
     }
 ], function (err) {
     if (err){

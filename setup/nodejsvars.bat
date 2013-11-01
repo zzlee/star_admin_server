@@ -4,10 +4,11 @@ set WORK_PATH=D:\nodejs_projects\star_server
 
 set FFMPEG_BIN=C:\ffmpeg\bin
 set CHROME_BIN=C:\Program Files (x86)\Google\Chrome\Application
+set MONGODB_BIN=C:\mongodb\bin
 
 rem Ensure this Node.js and NPM are first in the PATH
 ::set PATH=%APPDATA%\npm;%~dp0;%PATH%
-set PATH=%APPDATA%\npm;%~dp0;%PATH%;%FFMPEG_BIN%;%CHROME_BIN%
+set PATH=%APPDATA%\npm;%~dp0;%PATH%;%FFMPEG_BIN%;%CHROME_BIN%;%MONGODB_BIN%
 
 rem Figure out node version and architecture and print it.
 setlocal

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @fileoverview Implementation of scheduleMgr
  */
 
@@ -24,6 +24,7 @@ var canvasProcessMgr = require('./canvas_process_mgr.js');
 var facebookMgr = require('./facebook_mgr.js');
 var pushMgr = require('./push_mgr.js');
 var memberModel = db.getDocModel("member");
+var adminBrowserMgr = require('./admin_browser_mgr.js');
 
 /**
  * The manager who handles the scheduling of playing UGC on DOOHs
@@ -920,6 +921,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             programTimeSlotModel.find({ "session": sessionId }).sort({"timeStamp":1}).exec(function (err1, _programs) {
                 if (!err1) {
                     var programs = JSON.parse(JSON.stringify(_programs));
+                    
+                    //for debugging
+                    logger.info('[scheduleMgr] programs to push (to 3rd-party Content Manager:' );
+                    for (var i in programs){
+                        logger.info(JSON.stringify(programs[i]));
+                    }
+                                       
                     cb1(null, programs);
                 }
                 else {
@@ -1007,28 +1015,28 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                                     var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);
                                 }
                                 else{
-                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension; 
+                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
                                     //TODO: make sure that target directory exists
-                                    if(typeof(aProgram.content.fileExtension) === 'undefined') {
+                                    if(typeof(aProgram.content.fileExtension) === 'undefined') {  //TODO: find out the bug, and remove this check
                                         //aProgram.content.fileExtension = '.mp4';
                                         var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.mp4';
                                         var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.mp4');
                                     }
                                     else {
-                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension;
-                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+aProgram.content.fileExtension);                                        
+                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension;
+                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);                                        
                                     }
                                 }
                                 awsS3.downloadFromAwsS3(targetLocalPath, s3Path, function(errS3,resultS3){
                                     if (!errS3){
                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
-                                        callback(null, targetLocalPath, aProgram.timeslot);
+                                        callback(null, targetLocalPath, aProgram.timeslot, aProgram.content.no);
                                     }
                                     else{
                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
-                                        callback('Failed to download from S3 '+s3Path+' :'+errS3, null, null);
+                                        callback('Failed to download from S3 '+s3Path+' :'+errS3, null, null, null);
                                     }
                                     
                                 });
@@ -1042,11 +1050,11 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             }
                             else {
                                 var paddingFilePath = path.join(workingPath, 'public', aProgram.content.dir, aProgram.content.file);
-                                callback(null, paddingFilePath, aProgram.timeslot);
+                                callback(null, paddingFilePath, aProgram.timeslot, aProgram.content.no);
                             }
     
                         }, 
-                        function(fileToPlay, timeslot, callback){
+                        function(fileToPlay, timeslot, contentNo, callback){
                             //debugger;
                             //push content to Scala
                             var option = 
@@ -1066,11 +1074,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
                                 if (!errScala){
                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                    adminBrowserMgr.showTrace(null, "成功上傳編號"+contentNo+"的UGC至播放系統!");
                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
                                     callback(null, fileToPlay);
                                 }
                                 else{
                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                    adminBrowserMgr.showTrace(null, "!!!!!無法上傳"+contentNo+"的UGC至播放系統!");
                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
                                     callback('Failed to push content to Scala :'+errScala, null);
                                 }
@@ -1106,11 +1116,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         scalaMgr.setWebpageToPlaylist(option, function(errScala, resultScala){
                             if (!errScala){
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.uri );
+                                adminBrowserMgr.showTrace(null, "成功上傳"+aProgram.content.uri+"至播放系統!");
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
                                 callbackIterator(null);
                             }
                             else{
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.uri );
+                                adminBrowserMgr.showTrace(null, "!!!!!無法上傳"+aProgram.content.uri+"至播放系統.");
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + web.uri );
                                 callbackIterator('Failed to push content to Scala :'+errScala);
                             }
@@ -1132,11 +1144,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             if (!errScala){
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
+                                adminBrowserMgr.showTrace(null, "成功上傳"+aProgram.content.name+"至播放系統!");
                                 callbackIterator(null);
                             }
                             else{
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
+                                adminBrowserMgr.showTrace(null, "!!!!!無法上傳"+aProgram.content.name+"至播放系統!");
                                 callbackIterator('Failed to push content to Scala :'+errScala);
                             }
                         });
