@@ -88,4 +88,59 @@ FM.dooh_handler.streamVideoTrigger = function(req, res){
     });
 };
 
+//JF
+//GET /internal/dooh/padding_start_html/shutter
+FM.dooh_handler.streamShutterTrigger = function(req, res){
+    var contentGenre = req.params.contentGenre;
+    var contentHtmlFile = null;
+    switch(contentGenre)
+    {
+    case 'cultural_and_creative':
+        contentHtmlFile = path.join(workingPath, 'public/contents/padding_content/ondascreen_padding-cultural_and_creative-start.html');
+        break;
+    case 'mood':
+        contentHtmlFile = path.join(workingPath, 'public/contents/padding_content/ondascreen_padding-wish-start.html');
+        break;
+    case 'check_in':
+        contentHtmlFile = path.join(workingPath, 'public/contents/padding_content/ondascreen_padding-check_in-start.html');
+        break;
+    default:
+        
+    } 
+    fs.readFile(contentHtmlFile, 'utf8', function(err, text){
+        res.send(text);
+		logger.info('story cam started shutter.');
+        FM.dooh_handler.lastMoviePlayed = req.headers.miix_movie_project_id;
+        storyCamControllerMgr.startShutter(function(resParametes){
+            logger.info('res: _commandId='+resParametes._commandId+' err='+resParametes.err);
+            res.send(200);
+            resIsSent = true;
+        });
+    });
+};
+
+//GET /internal/dooh/padding_start_html/recording
+FM.dooh_handler.streamRecordingTrigger = function(req, res){
+    var contentGenre = req.params.contentGenre;
+    var contentHtmlFile = null;
+    switch(contentGenre)
+    {
+    case 'miix_it':
+        contentHtmlFile = path.join(workingPath, 'public/contents/padding_content/ondascreen_padding-miix_it-start.html');
+        break;
+    default:
+        
+    } 
+    fs.readFile(contentHtmlFile, 'utf8', function(err, text){
+        res.send(text);
+		logger.info('story cam started recording.');
+        FM.dooh_handler.lastMoviePlayed = req.headers.miix_movie_project_id;
+        storyCamControllerMgr.startRecording( '', function(resParametes){
+            logger.info('res: _commandId='+resParametes._commandId+' err='+resParametes.err);
+            res.send(200);
+            resIsSent = true;
+        });
+    });
+};
+
 module.exports = FM.dooh_handler;

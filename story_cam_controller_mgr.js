@@ -82,6 +82,49 @@ storyCamControllerMgr.uploadStoryMovieToS3 = function(movieProjectID, uploadMovi
 
 };
 
+// long-polling shutter control : start
+storyCamControllerMgr.startShutter = function( startedShutter_cb ){
+    
+    //console.log('start recod.');
+
+	//TODO:: get corresponding storyCamController ID
+	var storyCamControllerID = correspondingStoryCamController;
+    
+    // camera time trigger setting
+    var actionSetting = [5.5, 9, 9];
+    
+	var commandParameters = {
+		movieProjectID: '',
+        actionSetting: actionSetting
+	};
+	
+	globalConnectionMgr.sendRequestToRemote( storyCamControllerID, { command: "START_SHUTTER", parameters: commandParameters }, function(responseParameters) {
+		//console.dir(responseParameters);
+		if (startedShutter_cb )  {
+			startedShutter_cb(responseParameters);
+		}
+	});
+    
+};
+
+storyCamControllerMgr.stopShutter = function( stoppedShutter_cb ){
+
+	//TODO:: get corresponding storyCamController ID
+	var storyCamControllerID = correspondingStoryCamController;
+
+	var commandParameters = null;
+	
+	globalConnectionMgr.sendRequestToRemote( storyCamControllerID, { command: "STOP_SHUTTER", parameters: commandParameters }, function(responseParameters) {
+		//console.dir(responseParameters);
+		if (stoppedShutter_cb )  {
+			stoppedShutter_cb(responseParameters);
+		}
+	});
+    
+};
+
+// long-polling shutter control : end
+
 
 
 module.exports = storyCamControllerMgr;

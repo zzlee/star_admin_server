@@ -37,91 +37,42 @@ FM.storyCamControllerHandler.availableStoryMovie_post_cb = function(req, res) {
 
 };
 
+
 FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
 
-    logger.info('get story cam report: ' + req.params.playTime);
-    
+    logger.info('get story cam report: ' + req.params.playTime);    
     recordTime = req.params.playTime;
     
-    var miix_story = function(option, liveVideo_cb){
+    var live_video = function( option, liveVideo_cb ){
         
-        var list = {
-            ugc: '',
-            file: '',
-            awsS3: ''
-        };
+        // console.dir(option.filePath);
+        // console.dir(option.programInterval);
+        
+        var file = option.filePath,
+            program = option.programInterval;
+        
         async.waterfall([
-            function(uploadAwsS3_cb){
-                uploadVideoToAwsS3(option, function(err, s3Path){
-                    list.awsS3 = s3Path;
-                    uploadAwsS3_cb(null);
-                });
-            },
-            function(updateLiveVideoContent_cb){
-                updateLiveVideoContent(option.programInterval, list, function(err, res){
-                    updateLiveVideoContent_cb(null, res);
-                });
-            },
+            function( setting_cb ){ videoSetting( program, setting_cb ); },
+            function( target, categories_cb ){ videoCategoriesByUser( file, target, categories_cb ); },
+            function( target, update_cb ){ updateLiveVideoContent( program, target, update_cb ); },
             function(renderLive_cb){
                 var projectId = list.awsS3[0].split('/');
-                projectId = projectId[projectId.length-1].split('__');
+                projectId = projectId[projectId.length-1].split('__')[0];
                 var url = 'http://127.0.0.1/internal/story_cam_controller/available_story_movie';
                 var headers = { 'miix_movie_project_id' : projectId, 'record_time' : recordTime };
                 request.post({ url: url, headers: headers }, function (e, r, body) {
                     renderLive_cb(null, 'done');
                 });
             },
-        ], function(err, res){
-            //clear
-            clearMemory(option.filePath, function(status){
-                liveVideo_cb(null, status);
-            });
-        });
-    };
-    
-    var miix_image_live_photo = function(option, livePhoto_cb){
-        
-        var list = {
-            ugc: '',
-            file: '',
-            awsS3: ''
-        };
-        //console.dir(option);
-        async.waterfall([
-            function(actionSetting_cb){
-                actionSetting(option.programInterval, function(err, action, ugc){
-                    // list.ugc = ugc;
-                    actionSetting_cb(err, action);
-                });
-            },
-            function(action, cuttingImage_cb){ 
-                cuttingImageFromVideo(option, action, function(err, imagePath){
-                    list.file = imagePath;
-                    cuttingImage_cb(null);
-                }); 
-            },
-            function(uploadAwsS3_cb){
-                uploadToAwsS3(list.file, function(err, s3Path){
-                    list.awsS3 = s3Path;
-                    uploadAwsS3_cb(null);
-                });
-            },
-            function(updateLiveContent_cb){
-                updateLiveContent(option.programInterval, list, function(err, res){
-                    updateLiveContent_cb(null, res);
-                });
-            },
-        ], function(err, res){
-            //clear
-            clearMemory(option.filePath, list.file, function(status){
-                livePhoto_cb(null, status);
-            });
+        ], function( err, res ){
+            // (err)?console.dir(err):console.dir(res);
+            liveVideo_cb( err, res );
         });
     };
     
     async.parallel([
-        function(filepath){ getLiveVideo(recordTime, filepath); },
-        function(programInterval){ findMember(recordTime, programInterval); },
+        function(filePath){ getLiveVideo(recordTime, filePath); },
+        function(programInterval){ findMember(recordTime, "UGC", programInterval); },
     ], function(err, res){
         var option =
         {
@@ -130,37 +81,97 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
         };
         if(option.programInterval.count == 0)
         {
-            logger.info('Get live record video is failed: ' + recordTime);
+            logger.info('Get live video owner is failed: ' + recordTime);
             return;
         }
-        else if(option.programInterval.count == 1)
-            miix_story(option, function(err, res){ /* no work */ });
-        else
-            miix_image_live_photo(option, function(err, status){ 
-                logger.info('Live content process is success: ' + recordTime);
-            });
+        
+        live_video(option, function(err, res){ 
+            /* clear aws s3. */ 
+            clearVideo( option.filePath, function( err, res ){
+                if(err)
+                    logger.info('Delete live video is failed: ' + recordTime);
+                else
+                    logger.info('Delete live video is Successful: ' + recordTime);
+            } );
+        });
+        
     });
     
     res.end();
 };
 
-var getLiveVideo = function(recordTime, report_cb){
-    var s3Path =  '/camera_record/' + recordTime + '/'+ recordTime + '__story.avi';
-    var savePath = path.join(__dirname, recordTime + '__story.avi');
-    awsS3.downloadFromAwsS3(savePath, s3Path, function(err, res){
-        (err)?report_cb(err, null):report_cb(null, savePath);
+FM.storyCamControllerHandler.availableStreetPhotos = function(req, res){
+    
+    logger.info('get story cam report: ' + req.params.playTime);
+    recordTime = req.params.playTime;
+    
+    var live_photo = function(option, livePhoto_cb){
+        
+        // console.dir(option.filePath);
+        // console.dir(option.programInterval);
+        
+        var file = option.filePath,
+            program = option.programInterval;
+        
+        async.waterfall([
+            function( setting_cb ){ targetSetting( program, file, setting_cb ); },
+            function( target, categories_cb ){ photoCategoriesByUser( file, target, categories_cb ); },
+            function( target, assign_cb){ assignPhotoToProject( program, target, assign_cb ); },
+            function( swarm, update_cb ){ updateLivePhotoContent( program, swarm, update_cb ); },
+        ], function( err, res ){
+            // (err)?console.dir(err):console.dir(res);
+            livePhoto_cb( err, res );
+        });
+        
+    };
+    
+    async.parallel([
+        function(filePath){ getLivePhoto(recordTime, filePath); },
+        function(programInterval){ findMember(recordTime, "UGC", programInterval); },
+    ], function(err, res){
+        var option =
+        {
+            filePath: res[0],
+            programInterval: res[1]
+        };
+        if(option.programInterval.count == 0)
+        {
+            logger.info('Get live photo owner is failed: ' + recordTime);
+            return;
+        }
+        
+        live_photo(option, function(err, res){ 
+            /* clear aws s3. */ 
+            clearPhotos( option.filePath, function( err, res ){
+                if(err)
+                    logger.info('Delete live photos is failed: ' + recordTime);
+                else
+                    logger.info('Delete live photos is Successful: ' + recordTime);
+            } );
+        });
+        
     });
+    
+    res.end();
 };
 
-var findMember = function(recordTime, find_cb){
+var findMember = function( recordTime, type, find_cb ){
     var count = 0;
     var schema = {};
-    
-    programTimeSlotModel.find({ 
+    var query = { 
         "timeslot.start": {$lte: recordTime}, 
         "timeslot.end": {$gte: recordTime}, 
-        //"type": "UGC",
-    }).sort({timeStamp:1}).exec(function (_err, result) {
+        // "type": "UGC",
+    };
+    
+    if(typeof(type) === 'function') {
+        find_cb = type;
+    }
+    else {
+        query.type = type;
+    }
+    
+    programTimeSlotModel.find(query).sort({timeStamp:1}).exec(function (_err, result) {
         for(var i=0; i<result.length; i++)
             (result[i].type == 'UGC') ? count++ : '';
         schema.count = count;
@@ -169,118 +180,123 @@ var findMember = function(recordTime, find_cb){
     });
 };
 
-var cuttingImageFromVideo = function(option, action, cuttingImage_cb){
 
-    var source = option.filePath;
-    var part = 0,
-        playTime = 0.0;
-    var imagePath = [];
+/*--- live photos ---*/
+var getLivePhoto = function( recordTime, report_cb ){
+
+    var S3List = [];
     
-    var cutting = function(source, dest, specificTime, cutImage_cb){
-        //ffmpeg -i {source} -y -f image2 -ss {specificTime} -vframes 1 {dest}
-        execFile(path.join('ffmpeg.exe'), ['-y', '-i', source, '-f', 'image2', '-ss', specificTime, '-frames:v', '1', '-an', path.join(__dirname, dest)], function(error, stdout, stderr){
-            if(error){
-                logger.info('Get image content is failed: ' + path.join(__dirname, dest));
-                cutImage_cb(error, null);
-            }
-            else{
-                logger.info('Get image content is success: ' + path.join(__dirname, dest));
-                cutImage_cb(null, path.join(__dirname, dest));
-            }
-        });
-    };
+    awsS3.listAwsS3('camera_record/' + recordTime, function(err, res){
+        // (err)?console.log(err):console.dir(res);
+        for(var i=0; i<res.Contents.length; i++) {
+            // console.log('Path: ' + '/' + res.Contents[i].Key);
+            S3List.push('/' + res.Contents[i].Key);
+        }
+        report_cb(err, S3List);
+    });
     
-    var cuttingImage = function(setting){
-        if(setting.type != 'UGC'){
-            playTime += setting.duration;
-            part++;
-            (part != action.length)?cuttingImage(action[part]):cuttingImage_cb(null, imagePath);
-        }
-        else{
-            var interval = (parseFloat(playTime) + (parseFloat(setting.duration)/2)) / 1000;
-            cutting(source, action[part].name, interval, function(err, filepath){
-                imagePath.push(filepath);
-                playTime += setting.duration;
-                part++;
-                (part != action.length)?cuttingImage(action[part]):cuttingImage_cb(null, imagePath);
-            });
-        }
-    };
-    cuttingImage(action[part]);
 };
 
-var actionSetting = function(programList, action_setting_cb){
+var targetSetting = function( programInterval, sourceList, setting_cb ){
     //[contentGenre]-[ownerId._id]-[time stamp]-[record time]
-    var part = 0,
-        ugcList = [],
-        action = [];
-    var naming = function(program, naming_cb){
+    var folder_path = 'user_project/';
+    var naming = function(program, no, naming_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
-            ugcList.push(result[0]);
-            naming_cb( program.contentGenre + '-' + 
-                       result[0].ownerId._id + '-' + 
-                       program.timeStamp + '-' +
-                       recordTime + '.jpg' );
+            var project_path = program.contentGenre + '-' + 
+                               result[0].ownerId._id + '-' + 
+                               program.timeStamp + '-' +
+                               recordTime;
+            naming_cb( null, 
+                       folder_path + project_path + '/' + project_path + '-' + no + '.jpg' );
         });
-    };    
-    var setting = function(program){
-        if(program.type != 'UGC'){
-            var set = {
-                type: 'padding',
-                duration: parseFloat(program.timeslot.playDuration)
-            };
-            action.push(set);
-            part++;
-            (part != programList.list.length)?setting(programList.list[part]):action_setting_cb(null, action, ugcList);
-        }
-        else{
-            var set = {
-                type: 'UGC',
-                name: '',
-                duration: parseFloat(program.timeslot.playDuration)
-            };
-            //action.push(set);
-            naming(program, function(imageName){
-                set.name = imageName;
-                action.push(set);
-                part++;
-                (part != programList.list.length)?setting(programList.list[part]):action_setting_cb(null, action, ugcList);
-            });
+    };
+    
+    var settingConsole = function(target, no, event){
+        event.push(function(callback){ naming(target, no, callback); });
+    };
+    
+    var execute = [];
+    for(var part=0; part<programInterval.count; part++) {
+        for(var no=0; no<(sourceList.length / programInterval.count); no++) {
+            settingConsole(programInterval.list[part], (part+1) + '-' + no, execute);
         }
     }
-    setting(programList.list[part]);
+    
+    async.series(execute, function(err, targetPathList){
+        // (err)?console.dir(err):console.dir(res);
+        setting_cb(null, targetPathList);
+    });
 };
 
-var uploadToAwsS3 = function(fileset, awsS3_cb){
-
-    var part = 0;
-    var awsS3List = [];
-    
-    var upload = function(file){
-        var filetype = file.replace(__dirname + '\\', '').split('.');
-        if((filetype[filetype.length-1] == 'jpg')||(filetype[filetype.length-1] == 'png')){
-            var projectFolder = filetype[0].split('\\');
-            var s3Path = '/user_project/' + filetype[0] + '/' + filetype[0] + '.' + filetype[filetype.length-1];
-            awsS3List.push('https://s3.amazonaws.com/miix_content' + s3Path);
-            awsS3.uploadToAwsS3(file, s3Path, 'image/jpeg', function(err,result){
-                if (!err)
-                    logger.info('Live content image was successfully uploaded to S3 '+s3Path);
-                else
-                    logger.info('Live content image failed to be uploaded to S3 '+s3Path);
-                part++;
-                (part != fileset.length)?upload(fileset[part]):awsS3_cb(null, awsS3List);
+var photoCategoriesByUser = function( sourceList, targetList, photo_categories_cb ){
+    // copyTo and update
+    var photoCategories = function(source, target, categories_cb){
+        async.series([
+            function(callback){
+                awsS3.copyToAwsS3(source, target, function(err, res){
+                    if (!err){
+                        logger.info('Copy photo file was successfully to S3 '+target);
+                    }
+                    else {
+                        logger.info('Copy photo file was failed to S3 '+target);
+                    }
+                    callback(null, target);
+                });
+            },
+        ], function(err, res){
+            awsS3.updateFileACLAwsS3(target, function(err, res){
+                if (!err){
+                    logger.info('Update photo file ACL was successfully to S3 '+target);
+                }
+                else {
+                    logger.info('Update photo file ACL was failed to S3 '+target);
+                }
+                categories_cb(null, 'done');
             });
-        }
+        });
     };
-    upload(fileset[part]);
+    
+    var categoriesConsole = function( source, target, event ){
+        event.push(function(callback){ photoCategories(source, target, callback); });
+    };
+    
+    var execute = [];
+    for(var i=0; i<sourceList.length; i++) {
+        categoriesConsole(sourceList[i], targetList[i], execute);
+    }
+    async.series(execute, function(err, res){
+        // (err)?console.dir(err):console.dir(res);
+        photo_categories_cb(null, targetList);
+    });
+    
 };
 
-var updateLiveContent = function(programList, list, update_cb){
-
-    var part = 0,
-        count = 0;
+var assignPhotoToProject = function( programInterval, targetList, assign_cb ){
     
-    var schema = function(program, livePhotoUrl, schema_cb){
+    var swarm,
+        part = 0,
+        numbers;
+    
+    numbers = targetList.length / programInterval.count;
+    swarm = new Array( programInterval.count );
+    
+    for(var i=0; i<swarm.length; i++)
+        swarm[i] = new Array( numbers );
+    
+    for(var i=0; i<targetList.length; i++) {
+        swarm[part][i % numbers] = 'https://s3.amazonaws.com/miix_content/' + targetList[i];
+        if( i % numbers == numbers - 1 )
+            part++;
+    }
+    assign_cb( null, swarm );
+    
+};
+
+var updateLivePhotoContent = function( programList, list, update_cb ){
+    
+    var part = 0;
+    
+    var schema = function(program, livePhotoUrl, livePhotoList, schema_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var ugc = result[0];
             var liveContentId = livePhotoUrl.split('/');
@@ -290,7 +306,7 @@ var updateLiveContent = function(programList, list, update_cb){
                 "ownerId": { '_id': ugc.ownerId._id, 
                              'fbUserId': ugc.ownerId.userID,
                              'userID': ugc.ownerId.userID },
-                'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3 },
+                'url': { 's3': livePhotoUrl, 'longPhoto': ugc.url.s3, 'livePhotos': livePhotoList },
                 'genre': 'miix_image_live_photo',
                 'projectId': liveContentId,
                 'sourceId': ugc.projectId,
@@ -301,288 +317,142 @@ var updateLiveContent = function(programList, list, update_cb){
         });
     };
     var update = function(program){
-        if(program.type != 'UGC'){
-            part++;
-            (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
-        }
-        else{
-            schema(program, list.awsS3[count], function(live, ugc){
-                async.series([
-                    function(createLive_cb){
-                        db.addUserLiveContent(live, function(err, result){
-                            (err)?createLive_cb(null, err):createLive_cb(null, result);
-                        });
-                    },
-                    function(updateUGC_cb){
-                        ugcModel.findByIdAndUpdate(ugc._id, { 'doohPlayedTimes': ugc.doohPlayedTimes + 1 }, function(err, result){
-                            (err)?updateUGC_cb(null, err):updateUGC_cb(null, result);
-                        });
-                    },
-                ], function(err, res){
-                    count++;
-                    part++;
-                    (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
-                });
+
+        schema(program, list[part][0], list[part], function(live, ugc){
+            async.series([
+                function(createLive_cb){
+                    db.addUserLiveContent(live, function(err, result){
+                        (err)?createLive_cb(null, err):createLive_cb(null, result);
+                    });
+                },
+                function(updateUGC_cb){
+                    ugcModel.findByIdAndUpdate(ugc._id, { 'doohPlayedTimes': ugc.doohPlayedTimes + 1 }, function(err, result){
+                        (err)?updateUGC_cb(null, err):updateUGC_cb(null, result);
+                    });
+                },
+            ], function(err, res){
+                part++;
+                (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
             });
-        }
+        });
+
     };
     update(programList.list[part]);
 };
 
-var clearMemory = function(rawFile, file, clear_cb){
-    fs.unlink(rawFile);
-    if(typeof(file) === 'function') {
-        clear_cb = file;
-        clear_cb('done');
-    }
-    else {
-        for(var i=0; i<file.length; i++){
-            fs.unlink(file[i]);
-        };
-        clear_cb('done');
-    }
+/*--- live video ---*/
+var getLiveVideo = function( recordTime, report_cb ){
+    
+    awsS3.listAwsS3('camera_record/' + recordTime, function(err, res){
+        report_cb(err, '/' + res.Contents[0].Key);
+    });
+    
 };
 
-var uploadVideoToAwsS3 = function(option, awsS3_cb){
-    
-    var source = option.filePath,
-        programInterval = option.programInterval;
-    var awsS3List = [];
-    
-    var upload = function(contentId){
-        ugcModel.find({"_id": contentId}).exec(function (_err, result) {
+var videoSetting = function( programInterval, setting_cb ){
+    // [projectId].__story.avi
+    var folder_path = 'user_project/';
+    var naming = function(program, naming_cb){
+        ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var name = result[0].projectId + '__story.avi';
-            var s3Path = '/user_project/' + result[0].projectId + '/' + name;
-            awsS3List.push('https://s3.amazonaws.com/miix_content' + s3Path);
-            awsS3.uploadToAwsS3(source, s3Path, 'video/x-msvideo', function(err,result){
-                if (!err){
-                    logger.info('Live content video was successfully uploaded to S3 '+s3Path);
-                    awsS3_cb(null, awsS3List);
-                }
-                else {
-                    logger.info('Live content video failed to be uploaded to S3 '+s3Path);
-                    awsS3_cb(null, awsS3List);
-                }
-            });
+            var s3Path = folder_path + result[0].projectId + '/' + name;
+            
+            naming_cb( null, s3Path );
         });
     };
     
-    for(var i=0; i<programInterval.list.length; i++){
-        if(programInterval.list[i].type == 'UGC')
-            upload(programInterval.list[i].content._id);
-    }
+    naming( programInterval.list[0], setting_cb );
 };
 
-var updateLiveVideoContent = function(programList, list, updateVideoToUGC_cb){
+var videoCategoriesByUser = function( source, target, video_categories_cb ){
     
-    var part = 0,
-        count = 0;
+    // copyTo and update
+    var videoCategories = function(source, target, categories_cb){
+        async.series([
+            function(callback){
+                awsS3.copyToAwsS3(source, target, function(err, res){
+                    if (!err){
+                        logger.info('Copy video file was successfully to S3 '+target);
+                    }
+                    else {
+                        logger.info('Copy video file was failed to S3 '+target);
+                    }
+                    callback(null, target);
+                });
+            },
+        ], function(err, res){
+            awsS3.updateFileACLAwsS3(target, function(err, res){
+                if (!err){
+                    logger.info('Update video file ACL was successfully to S3 '+target);
+                }
+                else {
+                    logger.info('Update video file ACL was failed to S3 '+target);
+                }
+                categories_cb(null, 'done');
+            });
+        });
+    };
+    videoCategories( source, target, function(err, res){
+        video_categories_cb( null, target );
+    } );
     
-    var schema = function(program, schema_cb){
+};
+
+var updateLiveVideoContent = function( programList, target, video_update_cb ) {
+    
+    var schema = function(program, liveVideoUrl, schema_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var ugc = result[0];
-            var liveContentId = list.awsS3[0].split('/');
+            var liveContentId = liveVideoUrl.split('/');
             liveContentId = liveContentId[liveContentId.length-1].split('__')[0];
             var livejson =
             {
                 "ownerId": { '_id': ugc.ownerId._id, 
                              'fbUserId': ugc.ownerId.userID,
                              'userID': ugc.ownerId.userID },
-                'url': { 's3': list.awsS3[0] },
-                'genre': 'miix_story',
+                'url': { 's3': liveVideoUrl },
+                'genre': 'miix_story_raw',
                 'projectId': liveContentId,
                 'sourceId': ugc.projectId,
                 'liveTime': parseInt(recordTime)
             };
             var ugcjson = ugc;
-            schema_cb(livejson, ugcjson);
+            schema_cb( livejson, ugcjson );
         });
     };
-    var update = function(program){
-        if(program.type != 'UGC'){
-            part++;
-            (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
-        }
-        else{
-            schema(program, list.awsS3[count], function(live, ugc){
-                async.series([
-                    function(createLive_cb){
-                        db.addUserLiveContent(live, function(err, result){
-                            (err)?createLive_cb(null, err):createLive_cb(null, result);
-                        });
-                    },
-                    function(updateUGC_cb){
-                        ugcModel.findByIdAndUpdate(ugc._id, { 'doohPlayedTimes': ugc.doohPlayedTimes + 1 }, function(err, result){
-                            (err)?updateUGC_cb(null, err):updateUGC_cb(null, result);
-                        });
-                    },
-                ], function(err, res){
-                    count++;
-                    part++;
-                    (part != programList.list.length)?update(programList.list[part]):update_cb(null, 'done');
-                });
-            });
-        }
-    };
-    update(programList.list[part]);
-};
-
-
-/*--- old use, but don't delete ---*/
-
-var updateToUGC = function(updateUGC_cb){
-
-    var i = 0;
     
-    var update = function(){
-        var projectId = awsS3List[i].split('/');
-        projectId = projectId[projectId.length-1].split('.');
-        var vjson = {
-            "ownerId": { '_id': ownerList[i]._id, 
-                         'fbUserId': ownerList[i].userID,
-                         'userID': ownerList[i].userID },
-            'url': { 's3': awsS3List[i], 'longPhoto': doohPreviewList[i].url },
-            'genre': 'miix_image_live_photo',
-            'projectId': projectId[0],
-            'liveTime': parseInt(recordTime)
-        };
-        var photoUrl = 
-        {
-            preview: doohPreviewList[i].url,
-            simulate: doohPreviewList[i].doohPreviewUrl,
-            play: awsS3List[i]
-        };
-        /* postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
-            if(err)
-                logger.info('Post message and pictrue to user is Error: ' + err);
-            else
-                logger.info('Post message and pictrue to user is Success: ' + res);
-            
-            db.addUserLiveContent(vjson, function(err, result){
-                //if(err) console.log(err);
-                //else console.log(result);
-                //if(!err) fmapi._fbPostUGCThenAdd(vjson);
-                i++;
-                (i < ownerList.length)?update():updateUGC_cb(null, 'done');
-            });
-        }); */
-        db.addUserLiveContent(vjson, function(err, result){
-            //if(err) console.log(err);
-            //else console.log(result);
-            //if(!err) fmapi._fbPostUGCThenAdd(vjson);
-            postMessageAndPicture(ownerList[i].userID, photoUrl, function(err, res){
-                if(err)
-                    logger.info('Post message and pictrue to user is Error: ' + err);
-                else
-                    logger.info('Post message and pictrue to user is Success: ' + res);
-                i++;
-                (i < ownerList.length)?update():updateUGC_cb(null, 'done');
+    var update = function( program, videoUrl, update_cb ){
+        schema(program, videoUrl, function(live, ugc){
+            async.series([
+                function( createLive_cb ){
+                    db.addUserLiveContent(live, function(err, result){
+                        (err)?createLive_cb(null, err):createLive_cb(null, result);
+                    });
+                },
+                function( updateUGC_cb ){
+                    ugcModel.findByIdAndUpdate(ugc._id, { 'doohPlayedTimes': ugc.doohPlayedTimes + 1 }, function(err, result){
+                        (err)?updateUGC_cb(null, err):updateUGC_cb(null, result);
+                    });
+                },
+            ], function(err, res){
+                update_cb(null, 'done');
             });
         });
     };
-    update();
+    update( programList.list[0], target, video_update_cb );
+    
 };
 
-//subject to modification
-var determineUGCType = function(programInterval, determine_cb){
-    console.log('determineUGCType : enter');
-    var type = '';
-    var i;
-    for(i=0; i<programInterval.list.length; i++) {
-        ugcModel.find({"_id": programInterval.list[i].content._id}).exec(function (_err, result) {
-            console.log(result);
-            if((result.length > 0) && (result[0].genre == 'miix'))
-                type = 'miix';
-            console.log('find: ' + type);
-        });
-        console.log('out: ' + type);
-        if(i == programInterval.list.length-1)
-            (type == 'miix') ? determine_cb(null, 'miix') : determine_cb(null, 'other');
-    }
+/*--- clear ---*/
+var clearPhotos = function( fileset, clear_cb ){
+    awsS3.deleteMultipleFileAwsS3( fileset, clear_cb );
 };
 
-var postMessageAndPicture = function(fb_id, photoUrl, postPicture_cb){
-    
-    var access_token;
-    var fb_name, playTime, start, link;
-    
-    var pushPhotosToUser = function(albumId, pushPhotos_cb){
-        async.series([
-            /*function(simulate){
-                message = fb_name + '於' + playTime + '，登上台北天幕LED，上大螢幕APP特此感謝他精采的作品！\n' + 
-                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                //facebookMgr.postPhoto(access_token, message, photoUrl.simulate, albumId, simulate);
-                facebookMgr.postMessageAndShare(access_token, message, { link: photoUrl.simulate }, function(err, res){
-                    (!err)?simulate(null, true):simulate(null, false);
-                });
-            },*/
-            function(preview){
-                var message = fb_name + '於' + playTime + '，登上台北天幕LED，，這是原始刊登素材，天幕尺寸：100公尺x16公尺。\n' + 
-                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                //facebookMgr.postPhoto(access_token, message, photoUrl.preview, albumId, preview);
-                facebookMgr.postMessageAndShare(access_token, message, { link: photoUrl.preview }, function(err, res){
-                    (!err)?preview(null, true):preview(null, false);
-                });
-            },
-            function(play){
-                var message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝他精采的作品！\n' + 
-                          '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-                //facebookMgr.postPhoto(access_token, message, photoUrl.play, albumId, play);
-                facebookMgr.postMessageAndShare(access_token, message, { link: photoUrl.play }, function(err, res){
-                    (!err)?play(null, true):play(null, false);
-                });
-            },
-        ], function(err, res){
-            //(err)?console.log(err):console.dir(res);
-            /* if(!err){
-                logger.info('post message to user on facebook, fb id is ' + fb_id);
-                pushPhotos_cb(null, 'done');
-            }
-            else
-                pushPhotos_cb(err, null); */
-            
-            (err)?logger.info('post message to user on facebook is failed, fb id is ' + fb_id):'';
-            (res[0])?logger.info('post preview message to user on facebook is success, fb id is ' + fb_id):logger.info('post preview message to user on facebook is failed, fb id is ' + fb_id);
-            (res[1])?logger.info('post play message to user on facebook is success, fb id is ' + fb_id):logger.info('post play message to user on facebook is failed, fb id is ' + fb_id);
-            pushPhotos_cb(null, 'done');
-        });
-    };
-    //
-    async.waterfall([
-        function(memberSearch){
-            memberModel.find({'fb.userID': fb_id}).exec(memberSearch);
-        },
-    ], function(err, member){
-        access_token = member[0].fb.auth.accessToken;
-        fb_name = member[0].fb.userName;
-        start = new Date(parseInt(recordTime));
-        if(start.getHours()>12)
-            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes();
-        else
-            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes();
-        
-        var album_name = '實況記錄：' + start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日' + '登上台北天幕LED';
-        var album_message = '';
-        var message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
-                      '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-        
-        async.waterfall([
-            function(push_cb){
-                pushMgr.sendMessageToDeviceByMemberId(member[0]._id, message, function(err, res){
-                    logger.info('push played notification to user, member id is ' + member[0]._id);
-                    push_cb(err, res);
-                });
-            }
-        ], function(err, res){
-            /*facebookMgr.createAlbum(access_token, album_name, album_message, function(err, res){
-                logger.info('create fb album for user, member id is ' + member[0]._id);
-                pushPhotosToUser(JSON.parse(res).id, postPicture_cb);
-            });*/
-            pushPhotosToUser('', postPicture_cb);
-            //postPicture_cb(err, res);
-        });
-        
-    });
+var clearVideo = function( filepath, clear_cb ){
+    var fileset = [];
+    fileset.push( filepath );
+    // awsS3.deleteAwsS3( filepath, clear_cb );
+    awsS3.deleteMultipleFileAwsS3( fileset, clear_cb );
 };
 
 module.exports = FM.storyCamControllerHandler;
