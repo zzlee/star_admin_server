@@ -815,12 +815,13 @@ if(res[i].liveContent[j].state=="correct"){
             $('#createProgramListBtn').show();
             //$('#ugcCensor').show();
             $("input[id='ugcCensor']").show();
-            $('#pushProgramsBtn').show();
+            $('#traceWindow').show();
         }
         else if ( localStorage.role == "OPERATOR" ) {
             $('#createProgramListBtn').hide();
             $("input[id='ugcCensor']").hide();
-            $('#pushProgramsBtn').hide();
+            $('#pushProgramsBtn').remove();
+            $('#traceWindow').hide();
         }
 
 
@@ -1138,7 +1139,7 @@ if(res[i].liveContent[j].state=="correct"){
                             $('#underPushingText').html('上傳失敗： '+textStatus+" "+errorThrown);
                         }
                     });
-                    $('#pushProgramsBtn').remove();
+                    $('#pushProgramsBtn').hide();
                     $('#table-content').append($('<p>').attr("id","underPushingText").html('上傳至播放系統中，請稍候....'));
                 }
             });            
