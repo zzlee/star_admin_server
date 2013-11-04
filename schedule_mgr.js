@@ -914,6 +914,15 @@ scheduleMgr.getProgramListBySession_test = function(sessionId,cbOfGetProgramList
  *     if successful, err returns null; if failed, err returns the error message.
  */
 scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
+    
+    var timeInfos = sessionId.split('-');
+    var intervalStart = new Date( Number(timeInfos[2]) );
+    var intervalEnd = new Date( Number(timeInfos[3]) );
+    var straceStamp = '[推送'+intervalStart.toDateString()+' '+intervalStart.toLocaleTimeString()+'~'+intervalEnd.toDateString()+' '+intervalEnd.toLocaleTimeString()+'的節目] ';
+    
+    adminBrowserMgr.showTrace(null, straceStamp+"節目推送作業開始....");
+    
+    logger.info('[scheduleMgr] start to push session '+sessionId+' to 3rd-party Content Manager' );
     var arrayOfsessionId = sessionId.split('-');
     async.waterfall([
         function(cb1){
@@ -964,14 +973,14 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             }, 
                             function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, ugcNo, callback){
                                 //render this video UGC (Miix movie)
-                                adminBrowserMgr.showTrace(null, "開始合成編號"+ugcNo+"的UGC....請等待約5~10分鐘");
+                                adminBrowserMgr.showTrace(null, straceStamp+"開始合成編號"+ugcNo+"的UGC....請等待約5~15分鐘");
                                 miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, function(errOfGenerateMiixMoive){
                                     if (!errOfGenerateMiixMoive){
-                                        adminBrowserMgr.showTrace(null, "成功地合成編號"+ugcNo+"的UGC!");
+                                        adminBrowserMgr.showTrace(null, straceStamp+"成功地合成編號"+ugcNo+"的UGC!");
                                         callback(null);
                                     }
                                     else {
-                                        adminBrowserMgr.showTrace(null, "!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
+                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
                                         callback(errOfGenerateMiixMoive);
                                     }
                                 });
@@ -1133,13 +1142,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
                                 if (!errScala){
                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                    adminBrowserMgr.showTrace(null, "成功上傳編號"+contentNo+"的UGC至播放系統!");
+                                    adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
                                     callback(null, fileToPlay);
                                 }
                                 else{
                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                    adminBrowserMgr.showTrace(null, "!!!!!無法上傳"+contentNo+"的UGC至播放系統!");
+                                    adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
                                     callback('Failed to push content to Scala :'+errScala, null);
                                 }
@@ -1175,13 +1184,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         scalaMgr.setWebpageToPlaylist(option, function(errScala, resultScala){
                             if (!errScala){
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.uri );
-                                adminBrowserMgr.showTrace(null, "成功上傳"+aProgram.content.uri+"至播放系統!");
+                                adminBrowserMgr.showTrace(null, straceStamp+"成功推送"+aProgram.content.uri+"至播放系統!");
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
                                 callbackIterator(null);
                             }
                             else{
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.uri );
-                                adminBrowserMgr.showTrace(null, "!!!!!無法上傳"+aProgram.content.uri+"至播放系統.");
+                                adminBrowserMgr.showTrace(null, "!!!!!無法推送"+aProgram.content.uri+"至播放系統.");
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + web.uri );
                                 callbackIterator('Failed to push content to Scala :'+errScala);
                             }
@@ -1203,13 +1212,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             if (!errScala){
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
-                                adminBrowserMgr.showTrace(null, "成功上傳"+aProgram.content.name+"至播放系統!");
+                                adminBrowserMgr.showTrace(null, straceStamp+"成功推送"+aProgram.content.name+"至播放系統!");
                                 callbackIterator(null);
                             }
                             else{
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
-                                adminBrowserMgr.showTrace(null, "!!!!!無法上傳"+aProgram.content.name+"至播放系統!");
+                                adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+aProgram.content.name+"至播放系統!");
                                 callbackIterator('Failed to push content to Scala :'+errScala);
                             }
                         });
@@ -1243,8 +1252,17 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             });
         }
     ], function (err, result) {
-        if (pushed_cb) {
-            pushed_cb(err);
+        if (!err) {
+            adminBrowserMgr.showTrace(null, straceStamp+"節目推送完成!");
+            if (pushed_cb) {
+                pushed_cb(null);
+            }
+        }
+        else {
+            adminBrowserMgr.showTrace(null, straceStamp+"!!!節目推送失敗: "+err);
+            if (pushed_cb) {
+                pushed_cb(err);
+            }            
         }
     });
                                                 
