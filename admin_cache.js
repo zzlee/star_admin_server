@@ -29,7 +29,6 @@ FM.ADMINCACHE = (function(){
                 var mPhone = null;
                 if(data[next].mPhone.number)
                     mPhone = data[next].mPhone.number;
-                    
                 //update mongoDB
                 var vjson = {
                         fb: { userID: data[next].fb.userID, userName: data[next].fb.userName},
@@ -41,10 +40,11 @@ FM.ADMINCACHE = (function(){
                         fbLike_count: result[3][0].totalLikes,
                         fbComment_count: result[3][0].totalComments,
                         fbShare_count: result[3][0].totalShares,
+                        app: data[next].app
                 };
 
-                var field = "fb.userID";
-                FMDB.getValueOf(memberListInfos, {"fb.userID": data[next].fb.userID}, field, function(err, result){
+                var field = "fb.userID app";
+                FMDB.getValueOf(memberListInfos, {"fb.userID": data[next].fb.userID, "app":data[next].app}, field, function(err, result){
                     if(!result){ 
                         FMDB.createAdoc(memberListInfos, vjson, function(err, result){
                         });
@@ -77,7 +77,7 @@ FM.ADMINCACHE = (function(){
                                         });
                                     },
                                     function(callback){
-                                        UGC_mgr.getUGCCount(data[next]._id, 'miix_story', function(err, result){
+                                        UGC_mgr.getUGCDoohPlayedCount(data[next]._id, function(err, result){
                                             if(err) callback(err, null);
                                             else callback(null, result);
                                         });
@@ -89,7 +89,7 @@ FM.ADMINCACHE = (function(){
                                         });
                                     },
                                     function(callback){
-                                        member_mgr.getTotalCommentsLikesSharesOnFB(data[next].fb.userID, function(err, result){
+                                        member_mgr.getTotalCommentsLikesSharesOnFB(data[next]._id, data[next].fb.userID, data[next].app, function(err, result){
                                             if(err) callback(err, null);
                                             else callback(null, result);
                                         });
@@ -99,7 +99,7 @@ FM.ADMINCACHE = (function(){
             }
         };//cacheMemberList End ******
 
-        member_mgr_t.listOfMembers( null, 'fb.userName fb.userID _id email mPhone ugc_count doohTimes triedDoohTimes', {sort: 'fb.userName'}, function(err, result){
+        member_mgr_t.listOfMembers( null, 'fb.userName fb.userID _id email mPhone ugc_count doohTimes triedDoohTimes app', {sort: 'fb.userName'}, function(err, result){
             if(err) console.log('[member_mgr.listOfMemebers]', err);
             if(result){
                 limit = result.length;
@@ -134,8 +134,9 @@ FM.ADMINCACHE = (function(){
                 var userPhotoUrl = null;
                 var userContentType = null;
                 if(data[next].userRawContent[0]){
-                userPhotoUrl = data[next].userRawContent[0].content;
-                userContentType = data[next].userRawContent[0].type;
+//                    userPhotoUrl = data[next].userRawContent[0].content;
+                    userPhotoUrl = data[next].url.s3;
+                    userContentType = data[next].userRawContent[0].type;
                 }
                 //update mongoDB
                 var vjson = {
@@ -331,7 +332,7 @@ FM.ADMINCACHE = (function(){
         /*
          * Timer
          */            
-        setTimeout(retrieveDataAndUpdateCacheDB,300000);
+        setTimeout(retrieveDataAndUpdateCacheDB,30*60*1000);
 
     };
     
@@ -344,14 +345,17 @@ FM.ADMINCACHE = (function(){
         miixPlayListInfos.remove().exec(function(err, res){
         });
 
-//      setTimeout(deleteCacheDB,3000000);
-
     };
-    //TODO use config to control
-//    deleteCacheDB();
-//
-//    retrieveDataAndUpdateCacheDB();
-
+    
+    var adminCache = function(){
+        if(systemConfig.ADMIN_CACHE){
+            
+            deleteCacheDB();
+        
+            retrieveDataAndUpdateCacheDB();
+        }
+    };
+    setTimeout(adminCache,5*1000);
 
     function constructor(){
 
@@ -374,17 +378,18 @@ FM.ADMINCACHE = (function(){
 
                 var memberList = [];
 
-                var memberListInfo = function(fb_id, fb_name, email, mp_number, miixMovieVideo_count, doohPlay_count, movieViewed_count, fbLike_count, fbComment_count, fbShare_count, arr) {
+                var memberListInfo = function(fb_id, fb_name, email, mp_number, miixMovieVideo_count, doohPlay_count, movieViewed_count, fbLike_count, fbComment_count, fbShare_count, app, arr) {
                     arr.push({ 
                         fb: { userID: fb_id, userName: fb_name },
                         email: email,                        
                         mobilePhoneNumber: mp_number,        
-                        miixMovieVideoCount: miixMovieVideo_count, 
+                        miixMovieCount: miixMovieVideo_count, 
                         doohPlayCount: doohPlay_count,       
                         movieViewedCount: movieViewed_count, 
                         fbLikeCount: fbLike_count,           
                         fbCommentCount: fbComment_count,     
-                        fbShareCount: fbShare_count
+                        fbShareCount: fbShare_count,
+                        app: app
                     });
                 };
 
@@ -393,12 +398,12 @@ FM.ADMINCACHE = (function(){
 
                 var setMemberList = function(data, set_cb){
                     if(next == limit-1) {
-                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count,data[next].fbShare_count, memberList);               
+                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count, data[next].fbShare_count, data[next].app, memberList);               
                         next = 0;
                         set_cb(null, 'OK');
                     }
                     else {
-                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count,data[next].fbShare_count, memberList);               
+                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count, data[next].fbShare_count, data[next].app, memberList);               
                         next += 1;
                         setMemberList(data, set_cb);
                     }
@@ -412,7 +417,7 @@ FM.ADMINCACHE = (function(){
                     }
                 }
                 else{
-                    FMDB.listOfdocModels( memberListInfos,null,'fb.userName fb.userID _id email mPhone miixMovieVideo_count doohPlay_count movieViewed_count fbLike_count fbComment_count fbShare_count', {sort:'fb.userName',limit: _limit, skip: _skip}, function(err, result){
+                    FMDB.listOfdocModels( memberListInfos,null,'fb.userName fb.userID _id email mPhone miixMovieVideo_count doohPlay_count movieViewed_count fbLike_count fbComment_count fbShare_count app', {sort:'fb.userName',limit: _limit, skip: _skip}, function(err, result){
                         if(err) logger.error('[db.listOfMemebers]', err);
                         if(result){
 

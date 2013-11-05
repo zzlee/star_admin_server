@@ -12,22 +12,18 @@ FM.pushMgr = (function() {
 		 * Google Cloud Messaging, a.k.a., GCM. GCM sender_ID: 701982981612 API
 		 * Key: AIzaSyDn_H-0W251CKUjDCl-EkBLV0GunnWwpZ4
 		 */
-		function GCM(deviceToken, msg) {
+		function GCM(deviceToken, app, msg) {
 			
 			var gcm = require('node-gcm');
 
 			var message = new gcm.Message();
-			var sender = new gcm.Sender(
+			//ondascreen
+			var sender_ondascreen = new gcm.Sender(
 					'AIzaSyDn_H-0W251CKUjDCl-EkBLV0GunnWwpZ4');
+			//wowtaipeiarena
+			var sender_wowtaipeiarena = new gcm.Sender(
+			        'AIzaSyDwbqzeZwq5pjwMqHrvJNem_oRoX2taeP0');
 			var registrationIds = [];
-
-			// Optional
-			message.addData('title', '上大螢幕');
-			message.addData('message', msg);
-			message.addData('msgcnt', '1');
-			message.collapseKey = 'OnDascreen';
-			message.delayWhileIdle = true;
-			message.timeToLive = 3;
 
 			// At least one required
 			registrationIds.push(deviceToken);
@@ -37,21 +33,49 @@ FM.pushMgr = (function() {
 			 * Parameters: message-literal, registrationIds-array, No. of
 			 * retries, callback-function
 			 */
-			sender.send(message, registrationIds, 4, function(result) {
-				FM_LOG("[GCM]send : " + result);
-			});
+			switch(app){
+            case "wowtaipeiarena":
+                // Optional
+                message.addData('title', '哇!上小巨蛋');
+                message.addData('message', msg);
+                message.addData('msgcnt', '1');
+                message.collapseKey = 'WowTaipeiArena';
+                message.delayWhileIdle = true;
+                message.timeToLive = 3;
+                
+                sender_wowtaipeiarena.send(message, registrationIds, 4, function(result) {
+    				FM_LOG("[GCM]send : " + result);
+    			});
+		        break;
+            default:
+                // Optional
+                message.addData('title', '上大螢幕');
+                message.addData('message', msg);
+                message.addData('msgcnt', '1');
+                message.collapseKey = 'OnDascreen';
+                message.delayWhileIdle = true;
+                message.timeToLive = 3;
+                
+                sender_ondascreen.send(message, registrationIds, 4, function(result) {
+                    FM_LOG("[GCM]send : " + result);
+                });
+                break;
+            }
 		}
 
 		// Apple Push Notification Service.
-		function APN(deviceToken, msg) {
+		function APN(deviceToken, app, msg) {
 		    var apns = require('apn');
 		    var options;
 		    
+		    //for WowTaipeiarena app
 		    if (systemConfig.USE_PRODUCT_PEM){
-                options = {
-                        cert: './apns-prod/apns-prod-cert.pem',           /* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
+                switch(app){
+                case "wowtaipeiarena":
+                    options = {
+                        cert: './apn_pem/wowtaipeiarena/apns-prod-cert.pem',           /* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
                         certData: null,                             /* String or Buffer containing certificate data, if supplied uses this instead of cert file path */
-                        key:  './apns-prod/apns-prod-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
+                        key:  './apn_pem/wowtaipeiarena/apns-prod-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
                         keyData: null,                              /* String or Buffer containing key data, as certData */
                         passphrase: null,                           /* A passphrase for the Key file */
                         ca: null,                                   /* String or Buffer of CA data to use for the TLS connection */
@@ -61,12 +85,32 @@ FM.pushMgr = (function() {
                         errorCallback: pushErrorCallback,   /* Callback when error occurs function(err,notification) */
                         cacheLength: 100                            /* Number of notifications to cache for error purposes */
                 };
+                    break;
+                default:
+                    options = {
+                        cert: './apn_pem/ondascreen/apns-prod-cert.pem',           /* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
+                        certData: null,                             /* String or Buffer containing certificate data, if supplied uses this instead of cert file path */
+                        key:  './apn_pem/ondascreen/apns-prod-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
+                        keyData: null,                              /* String or Buffer containing key data, as certData */
+                        passphrase: null,                           /* A passphrase for the Key file */
+                        ca: null,                                   /* String or Buffer of CA data to use for the TLS connection */
+                        gateway: 'gateway.push.apple.com',  /* gateway address 'Sand-box' - gateway.sandbox.push.apple.com */ /* Product- gateway.push.apple.com */
+                        port: 2195,                                 /* gateway port */
+                        enhanced: true,                             /* enable enhanced format */
+                        errorCallback: pushErrorCallback,   /* Callback when error occurs function(err,notification) */
+                        cacheLength: 100                            /* Number of notifications to cache for error purposes */
+                };
+                    break;
+                }
+
 		    }
 		    else { //use the PEM for development
-                options = {
-                        cert: './apns/apns-dev-cert.pem',           /* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
+                switch(app){
+                case "wowtaipeiarena":
+                    options = {
+                        cert: './apn_pem/wowtaipeiarena/apns-dev-cert.pem',           /* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
                         certData: null,                             /* String or Buffer containing certificate data, if supplied uses this instead of cert file path */
-                        key:  './apns/apns-dev-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
+                        key:  './apn_pem/wowtaipeiarena/apns-dev-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
                         keyData: null,                              /* String or Buffer containing key data, as certData */
                         passphrase: null,                           /* A passphrase for the Key file */
                         ca: null,                                   /* String or Buffer of CA data to use for the TLS connection */
@@ -76,6 +120,24 @@ FM.pushMgr = (function() {
                         errorCallback: pushErrorCallback,   /* Callback when error occurs function(err,notification) */
                         cacheLength: 100                            /* Number of notifications to cache for error purposes */
                 };
+                    break;
+                default:
+                    options = {
+                        cert: './apn_pem/ondascreen/apns-dev-cert.pem',           /* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
+                        certData: null,                             /* String or Buffer containing certificate data, if supplied uses this instead of cert file path */
+                        key:  './apn_pem/ondascreen/apns-dev-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
+                        keyData: null,                              /* String or Buffer containing key data, as certData */
+                        passphrase: null,                           /* A passphrase for the Key file */
+                        ca: null,                                   /* String or Buffer of CA data to use for the TLS connection */
+                        gateway: 'gateway.sandbox.push.apple.com',  /* gateway address 'Sand-box' - gateway.sandbox.push.apple.com */ /* Product- gateway.push.apple.com */
+                        port: 2195,                                 /* gateway port */
+                        enhanced: true,                             /* enable enhanced format */
+                        errorCallback: pushErrorCallback,   /* Callback when error occurs function(err,notification) */
+                        cacheLength: 100                            /* Number of notifications to cache for error purposes */
+                };
+                    break;
+                }
+
 
 		    }
 
@@ -109,13 +171,13 @@ FM.pushMgr = (function() {
 
 		return {
 
-			sendMessageToDevice : function(platform, deviceToken, message) {
+			sendMessageToDevice : function(platform, deviceToken, app, message) {
 				FM_LOG("[push_mgr]sendMessageToDevice : ");
 				FM_LOG(platform + " : " + deviceToken);
 				if (platform == "Android") {
-					GCM(deviceToken, message);
+					GCM(deviceToken, app, message);
 				} else {
-					APN(deviceToken, message);
+					APN(deviceToken, app, message);
 				}
 
 			},
@@ -141,7 +203,7 @@ FM.pushMgr = (function() {
                                  FM_LOG("[push_mgr]deviceToken is undefined" + JSON.stringify(result.deviceToken)+"memberId="+memberId ); 
                              }
                              else if(deviceTokenCheck){
-                                 FM.pushMgr.getInstance().sendMessageToDevice(devicePlatform, result.deviceToken[devicePlatform], message);
+                                 FM.pushMgr.getInstance().sendMessageToDevice(devicePlatform, result.deviceToken[devicePlatform], result.app, message);
                              }else{
                                  FM_LOG("[push_mgr]deviceToken error" + JSON.stringify(result.deviceToken)+"memberId="+memberId );
                              }
@@ -154,7 +216,7 @@ FM.pushMgr = (function() {
             /** TEST */
             _testkaiser: function(){
                 var userNo = 1234;
-                var memberId = '52201b3999f24f9809000006';
+                var memberId = '526107a409900bbc02000005';
                 var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
                 this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
                         console.log(err, result);

@@ -28,10 +28,10 @@ aeServerMgr.createMiixMovie = function(movieProjectID, ownerStdID, ownerFbID, mo
 
         youtubeTokenMgr.getAccessToken( function(ytAccessToken){
             if (ytAccessToken) {
-                var userDataFolder = path.join( workingPath, 'public/contents/user_project', movieProjectID, 'user_data');
+                //var userDataFolder = path.join( workingPath, 'public/contents/user_project', movieProjectID, 'user_data');
                 
                 var commandParameters = {
-                    userFileList: fs.readdirSync(userDataFolder),
+                    //userFileList: fs.readdirSync(userDataFolder),
                     movieProjectID: movieProjectID,
                     ownerStdID: ownerStdID,
                     ownerFbID: ownerFbID,
@@ -175,7 +175,7 @@ aeServerMgr.downloadStoryMovieFromS3 = function(movieProjectID, downloadMovie_cb
     //getAeServerWithLowestLoad(function(_aeID, err){  //TODO: find a more robust way to get the right AE Server
     globalConnectionMgr.getConnectedRemoteWithLowestLoad('AE_SERVER', function(err, aeServerWithLowestLoad){
         if (!err){
-            starAeServerID = _aeID;
+            starAeServerID = aeServerWithLowestLoad;
         }
         else{
             starAeServerID = systemConfig.DEFAULT_AE_SERVER;
@@ -225,7 +225,7 @@ aeServerMgr.downloadMiixMovieFromS3 = function(miixMovieProjectID, miixMovieFile
     //getAeServerWithLowestLoad(function(_aeID, err){
     globalConnectionMgr.getConnectedRemoteWithLowestLoad('AE_SERVER', function(err, aeServerWithLowestLoad){
         if (!err){
-            starAeServerID = _aeID;
+            starAeServerID = aeServerWithLowestLoad;
         }
         else{
             starAeServerID = systemConfig.DEFAULT_AE_SERVER;

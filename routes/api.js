@@ -7,7 +7,8 @@
 var memberDB = require("../member.js"),
     UGCDB = require("../UGC.js"),
     tokenMgr = require("../token_mgr.js"),
-    fbMgr = require("../facebook_mgr.js");
+    fbMgr = require("../facebook_mgr.js"),
+    globalConnectionMgr = require("../global_connection_mgr.js");
     
 
 
@@ -39,167 +40,7 @@ FM.api._pushErrorCallback = function(err, notification){
         FM_LOG("[notification] "+ JSON.stringify(notification) );
 };
 
-/**
- * Google Cloud Messaging, a.k.a., GCM.
- * GCM sender_ID: 701982981612
- * API Key: AIzaSyDn_H-0W251CKUjDCl-EkBLV0GunnWwpZ4
- */
-FM.api._GCM_PushNotification = function( device_token ){
-
-    var gcm = require('node-gcm');
-
-    var message = new gcm.Message();
-    var sender = new gcm.Sender('AIzaSyDn_H-0W251CKUjDCl-EkBLV0GunnWwpZ4');
-    var registrationIds = [];
-
-    // Optional
-    message.addData('title', '登大螢幕');
-    message.addData('message','您有一個新影片');
-    message.addData('msgcnt','1');
-    message.collapseKey = 'OnDascreen';
-    message.delayWhileIdle = true;
-    message.timeToLive = 3;
-
-    // At least one required
-    registrationIds.push(device_token);
-    //registrationIds.push('regId2'); 
-
-    /**
-     * Parameters: message-literal, registrationIds-array, No. of retries, callback-function
-     */
-    sender.send(message, registrationIds, 4, function (result) {
-        FM_LOG(result);
-    });
-};
-
-// Apple Push Notification Service.	
-FM.api._pushNotification = function( device_token ){
-    var apns = require('apn');
-    var options = {
-            cert: './apns/apns-dev-cert.pem',  			/* Certificate file path */ /*./apns-prod/apns-prod-cert.pem*/ /*./apns/apns-dev-cert.pem*/
-            certData: null,                   			/* String or Buffer containing certificate data, if supplied uses this instead of cert file path */
-            key:  './apns/apns-dev-key-noenc.pem',/* Key file path */ /*./apns-prod/apns-prod-key-noenc.pem*/ /*./apns/apns-dev-key-noenc.pem*/
-            keyData: null,                    			/* String or Buffer containing key data, as certData */
-            passphrase: null,                 			/* A passphrase for the Key file */
-            ca: null,                         			/* String or Buffer of CA data to use for the TLS connection */
-            gateway: 'gateway.sandbox.push.apple.com',	/* gateway address 'Sand-box' - gateway.sandbox.push.apple.com */ /* Product- gateway.push.apple.com */
-            port: 2195,                   				/* gateway port */
-            enhanced: true,               				/* enable enhanced format */
-            errorCallback: FM.api._pushErrorCallback,	/* Callback when error occurs function(err,notification) */
-            cacheLength: 100              				/* Number of notifications to cache for error purposes */
-    };
-
-    
-    var apnsConnection = new apns.Connection(options);
-    var device = new apns.Device(device_token);
-    var note = new apns.Notification();
-    note.expiry = Math.floor(Date.now() / 1000) + 3600*24; // Expires 1 day from now.
-    note.badge = 1;
-    note.sound = "ping.aiff";
-    note.alert = "You have a new video!";
-    note.payload = {'messageFrom': 'Miix.tv'};
-    note.device = device;
-    
-    FM_LOG("PUSH to Device[" + device_token +"]");
-    apnsConnection.sendNotification(note);
-
-};
-
-
-//DEPRECATED
-FM.api.fbStatus = function(req, res){
-    
-    var sid = req.sessionID;
-    FM_LOG("\n[Get LongPolling] sessionID: " + sid);
-    FM_LOG("Session: " + JSON.stringify(req.session) );
-    var date = new Date();
-    
-    if(date - req.socket._idleStart.getTime() > 59999){
-        res.send("Keep Polling");
-    }
-    
-    FM.api.reply[sid] = res;
-};
-
-//DEPRECATED
-FM.api._fbStatusAck = function(response){
-    FM_LOG("\n[fbStatusAck]:");
-    
-    var sid = response.data.sessionID;
-    if(response.data._id){
-        response.data._id = response.data._id.toHexString();
-    }
-    FM.api.reply[sid].send(response);
-        
-    delete FM.api.reply[sid];
-};
-
-//DEPRECATED
-FM.api._fbExtendToken = function(accessToken, callback){
-
-    FM_LOG("\n[_fbExtendToken]: ");
-    
-    var https = require('https');
-    var path = "/oauth/access_token?grant_type=fb_exchange_token"
-        + "&client_id=116813818475773" // Miixcard: 116813818475773; Watasi: 243619402408275
-        + "&client_secret=b8f94311a712b98531b292165884124a" // MiixCard: b8f94311a712b98531b292165884124a; Watasi: c35e27572a71efcd3035247c024c9d4b
-        + "&fb_exchange_token=" + accessToken
-        + "&scope=read_stream,publish_stream";
-        
-    var host = "graph.facebook.com",
-        urlOpts = {
-            host: host,
-            port: 443,
-            path: path,
-            method: 'POST'
-        },
-        req = https.request(urlOpts, function(res){
-            res.setEncoding('utf8');
-            res.on('data', function(result){
             
-                if(typeof(result) != 'string'){
-                    FM_LOG("Error: " + result.error.message);
-                    
-                }else{
-                    FM_LOG("\nGot longer lived token: ");
-                    FM_LOG(result);
-                    
-                    var longerToken = result.substring( result.indexOf("=")+1, result.indexOf("&expires") );
-                    var longerExpiresIn = parseInt(result.substring( result.lastIndexOf("=")+1 ), 10);
-                    var now = new Date();
-                    var data = { "data":{
-                        "accessToken": longerToken,
-                        "expiresIn": now.getTime() + longerExpiresIn * 1000
-                    }};
-                
-                    callback(data);
-                }
-            });                  
-        });
-                
-    req.on('error', function(e){
-        FM_LOG("[Failed to Extend Token]: " + e.message );
-    });
-    
-    req.end();
-    
-};
-
-
-/* where = /PROFILE_ID/ or /OBJECT_ID/
-             * what = 
-             * {    "message": "",
-             *      "picture": "",
-             *         "link": "",
-             *         "name": "",
-             *      "caption": "",
-             *  "description": "",
-             *       "source": "",
-             *        "place": "",
-             *         "tags": "" };
-             */
-
-             
              
 // Inter
 // TODO: it is suggested that these codes are handled by different roles (such as SocialNetworkMgr, VideoDB, PushMgr)
@@ -246,7 +87,14 @@ FM.api._fbPostUGCThenAdd = function(vjson){
 //                    vjsonData.fb_id = fb_id;
 //                    
 //                }
-                UGCDB.updateOne({"projectId":pid}, vjsonData, {"upsert": true}, function(err, vdoc){
+            
+                var vjsonToUpdate = {
+                        "url": vjsonData.url,
+                        "aeId": vjsonData.aeId,
+                        "mediaType": vjsonData.mediaType,
+                        "fileExtension": vjsonData.fileExtension
+                        };
+                UGCDB.updateOne({"projectId":pid}, vjsonToUpdate, {"upsert": true}, function(err, vdoc){
                     if(err)
                         logger.error(err);
                     
@@ -262,7 +110,7 @@ FM.api._fbPostUGCThenAdd = function(vjson){
                             for( var devicePlatform in result.deviceToken){
                                 if(result.deviceToken[devicePlatform] != 'undefined'){
                                 	var pushMgr = require("../push_mgr.js");
-                                	pushMgr.sendMessageToDevice(devicePlatform, result.deviceToken[devicePlatform], "您有一個新影片！");
+                                	pushMgr.sendMessageToDevice(devicePlatform, result.deviceToken[devicePlatform], result.app, "您有一個新影片！");
                                 }
                             }
                         }
@@ -274,76 +122,6 @@ FM.api._fbPostUGCThenAdd = function(vjson){
 };
 
 
-//DEPRECATED
-FM.api._fbPostUGC = function(projectID, content){
-        
-    UGCDB.getValueByProject(projectID, "ownerId _id url.youtube", function(err, result){    
-        if(result){
-            var ownerId = result["ownerId"];
-            var v_oid = result["_id"];
-            var link = result["url"].youtube;
-            
-            memberDB.getFBAccessTokenById(ownerId, function(err, result){
-    
-                if(err) throw err;
-                if(result){
-                    var userID = result.fb.userID;
-                    var accessToken = result.fb.auth.accessToken;
-                        path = "/" + userID + "/feed",
-                        query = "?" + "access_token=" + accessToken
-                        + "&message=" + content.message
-                        + "&link=" + link;
-                    path += query.replace(/\s/g, "+");
-                    
-                    FM_LOG("[POST req to FB with:]\n" + JSON.stringify(path) );
-                    //  Post on FB.
-                    FM.api._fbPost(path, function(response){     
-                        
-                        //  Get Object_id of Post Item on FB, then update db.
-                        if(response.error){
-                            FM_LOG("[POST on FB:ERROR] " + response.error.message );
-                            
-                        }else{
-                            var fb_id = response.id;    // Using full_id to get detail info.  full_id = userID + item_id
-                            FM_LOG("\n[Response after POST on FB:]\n" + JSON.stringify(response) ); 
-                            //var fb_id = full_id.substring(full_id.lastIndexOf("_")+1);
-                            var newdata = {"fb_id": fb_id};
-                            UGCDB.update(v_oid, newdata);
-                        }
-                    });
-                }
-            });
-        }
-    });
-};
-
-//DEPRECATED
-// POST
-FM.api.fbPostCommentReq = function(req, res){
-    FM_LOG("[api.fbPostCommentReq]");
-    if(req.body && req.body.post){
-    
-        var path = post.path,
-            token = post.token;
-            
-        var path = "/" + fb_oid + "/comments",
-            data = "?" + "access_token=" + token;
-        
-        for(var key in post.data){
-            data += "&" + key + "=" + post.data[key];
-        }
-        path += data;
-        FM.api._fbPost( path, function(response){
-        
-            if(response.error){
-                logger.info(error);
-            }else{
-                logger.info(response.id);
-                res.send({"res":"Succeed"});
-            }
-        });
-    }
-};
 
 //TODO: move to facebook_mgr.js
 //GET /fb/comment
@@ -457,33 +235,6 @@ FM.api._fbGet = function( path, cb){ //is only actively used by FM.api.fbGetComm
 
 };
 
-//DEPRECATED
-FM.api._fbGetHttp = function( path, cb){
-
-    var host = "graph.facebook.com",
-        http = require('http'),
-        urlOpts = {
-            host: host,
-            port: 80,
-            path: path,
-            method: 'GET'
-        };
-        
-    var req = http.request(urlOpts, function(res){
-            res.setEncoding('utf8');
-            res.on('data', function(chunk){
-                FM_LOG("[fbGet] \n" + chunk);
-                cb(JSON.parse(chunk));
-            });                  
-        });
-                
-    req.on('error', function(e){
-        FM_LOG("[Error from FB after GET]: " + e.message );
-    });
-    
-    req.end();
-
-};
 
 //TODO:
 //POST
@@ -518,6 +269,7 @@ FM.api.signupwithFB = function(req, res){
     
     var sid = req.sessionID;
     FM_LOG("\n[signupwithFB] sessionID: " + sid);
+    var appGenre = "ondascreen";
     
     if(req.body && req.body.authResponse){
     
@@ -546,11 +298,14 @@ FM.api.signupwithFB = function(req, res){
             email = authRes.email;
             member.email = email;
         }
-            
+        if(authRes.appGenre){
+            appGenre =authRes.appGenre;
+            member.app = appGenre;
+        }    
             
         
         /* New FB User or Exsited User */
-        memberDB.isFBValid( userID, function(err, result){
+        memberDB.isFBValid( userID, appGenre, function(err, result){
         
             if(err){
                 res.send(500, { error: "Valid User/Password"});
@@ -577,7 +332,7 @@ FM.api.signupwithFB = function(req, res){
                     
                 }
                 
-                fbMgr.isTokenValid(accessToken, function(err, result){
+                fbMgr.isTokenValid(accessToken, appGenre, function(err, result){
                     
                     if(err){
                         res.send(500, { error: "Valid User/Password"});
@@ -585,7 +340,7 @@ FM.api.signupwithFB = function(req, res){
                     
                     // Extending new/short access_token replaces invalid existed access_token.
                     else if(!result.is_valid){
-                        fbMgr.extendToken(accessToken, function(err, response){
+                        fbMgr.extendToken(accessToken, appGenre, function(err, response){
                             if(err){
                                 //res.send( {"data":{"_id": oid.toHexString(), "accessToken": accessToken, "expiresIn": expiresIn, "verified": mPhone_verified  }, "message":"success"} );
                                 tokenMgr.getToken(oid, function(err, miixToken){
@@ -618,7 +373,7 @@ FM.api.signupwithFB = function(req, res){
                         // existed access_token is valid. Check if expire within 20days, then renew it.
                         if( parseInt(fb.auth.expiresIn) - Date.now() < 20*86400*1000 || isNaN(fb.auth.expiresIn) || fb.auth.expiresIn === null){
                     
-                            fbMgr.extendToken(authRes.accessToken, function(err, response){
+                            fbMgr.extendToken(authRes.accessToken, appGenre, function(err, response){
                                 if(err){
                                     //res.send( {"data":{"_id": oid.toHexString(), "accessToken": existed_access_token, "verified": mPhone_verified  }, "message":"success"} );
                                     tokenMgr.getToken(oid, function(err, miixToken){
@@ -679,7 +434,7 @@ FM.api.signupwithFB = function(req, res){
                     member.deviceToken= deviceToken;
                 }
                 
-                fbMgr.extendToken(authRes.accessToken, function(err, response){
+                fbMgr.extendToken(authRes.accessToken, appGenre, function(err, response){
 
                     
                     if(err){
@@ -707,12 +462,13 @@ FM.api.signupwithFB = function(req, res){
                                 var ack = { "data":{"sessionID": sid, "accessToken": accessToken, "userID": userID, "_id": oid} };
                                 FM.api._fbStatusAck(ack);
                                 */
-                                
-                                req.session.user = {
-                                    userID: member.fb.userID,
-                                    _id: oid,
-                                    accessToken: member.fb.auth.accessToken
-                                };
+                                if(req.session){
+                                    req.session.user = {
+                                        userID: userID,
+                                        _id: oid,
+                                        accessToken: member.fb.auth.accessToken
+                                    };
+                                }
                                 
                                 //res.send( {"data":{ "_id": oid.toHexString(), "accessToken": member.fb.auth.accessToken, "expiresIn": member.fb.auth.expiresIn}, "message":"success"} );
                                 tokenMgr.getToken(oid, function(err, miixToken){
@@ -900,47 +656,6 @@ FM.api.newUGCList = function(req, res){
     }
 };
 
-//  GET  //DEPRECATED
-FM.api.newStreetUGCList = function(req, res){
-    FM_LOG("[api.newStreetUGCList]: ");
-    
-    if(req.query && req.query.userID){
-    
-        var userID = req.query.userID;
-        var after = new Date(parseInt(req.query.after));
-        
-        UGCDB.getNewStreetUGCListByFB( userID, after, function(err, result){
-            if(err){
-                logger.error("[api.newStreetUGCList] error: ", err);
-                res.send({error: "Internal Server Error."});
-                return;
-            }
-            
-            FM_LOG("[getNewStreetUGCListByFB] " + JSON.stringify(result));
-
-            var data;
-            if(result){
-                data = {streetUGCs: result};
-            }else{
-                data = {message: "No UGC"};
-            }
-            res.send(data);
-        });
-        
-    }else{
-        res.send({error: "Bad Request!"});
-    }
-};
-
-
-/*
-var vjson2 = {  "title":"A Awesome World",
-                    "ownerId": {"_id": "509ba9395a5ce36006000001", "userID": "100004053532907"},
-                    "url": {"youtube":"http://www.youtube.com/embed/oZmtwUAD1ds"},
-                    "projectId": "Miix-Street-20121115T004014395Z",
-                    "genre": "miix_story",
-                    "createdOn": 1357010644000,
-             };*/
 
 // POST
 //POST /miix/videos/miix_videos
@@ -1034,16 +749,19 @@ FM.api.codeGenerate = function(req, res){
                 res.send({error: 'Internal Server Error'});
                 return;
             }
-            var smsMgr = require("../sms_mgr.js");
+
             if(phoneNum == "0988888888"){
                 res.send(200, {message:"手機認證碼已發送"});
             }
             else{
-            smsMgr.sendMessageToMobile(phoneNum, code, function(err, result){
+				logger.info("[codeGenerate.sendMessageToMobileByRemote] start phoneNum:"+phoneNum+"code"+code);
+				globalConnectionMgr.sendMessageToMobileByRemote(phoneNum, code, function(err, result){
                 if (err){
+				    logger.error("[globalConnectionMgr.sendMessageToMobileByRemote] error: ", err);
                     res.send(401, {message:"手機認證碼發送失敗"});
                 }
                 else{
+				    logger.info("[globalConnectionMgr.sendMessageToMobileByRemote] result: ", result);
                     res.send(200, {message:"手機認證碼已發送"});
                 }
             });

@@ -68,7 +68,7 @@ connectionHandler.commandResponse_post_cb = function(req, res) {
 //GET /internal/commands
 connectionHandler.command_get_cb = function(req, res) {
 	logger.info('['+ new Date() +']Got long-polling from remote: '+ req.query.remoteId );
-	//console.log('['+ new Date() +']Got long-polling HTTP request from remote: '+ req.query.remoteId )
+	//console.log('['+ new Date() +']Got long-polling from remote: '+ req.query.remoteId );
 	//console.dir(req);
 	
 	if ( systemConfig.IS_STAND_ALONE ) {

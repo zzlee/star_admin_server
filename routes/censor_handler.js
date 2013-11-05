@@ -60,7 +60,7 @@ FM.censorHandler.getUGCList_get_cb = function(req,res){ //審查名單
     limit = req.query.limit;
     skip = req.query.skip;
 
-    censorMgr.getUGCList(condition, sort, limit, skip, function(err, UGCList){
+    censorMgr.getUGCList(condition, sort, limit, skip, "UGC", function(err, UGCList){
         if (!err){
             res.render( 'table_censorUGC', {ugcCensorMovieList: UGCList} );
         }
@@ -137,7 +137,7 @@ FM.censorHandler.gettimeslots_get_cb = function(req, res){
 
     logger.info('[FM.censorHandler.gettimeslots_get_cb()] sessionId='+ sessionId);
     scheduleMgr.getProgramListBySession(sessionId, limit, skip, function(err, programList){
-        debugger;
+        
         if (!err){
             if (programList.length > 0){
                 censorMgr.getPlayList(programList , updateUGC, function(errGetPlayList, result){
@@ -175,33 +175,38 @@ FM.censorHandler.pushProgramsTo3rdPartyContentMgr_get_cb = function(req, res){
     var intervalOfPlanningDoohProgrames = {start: intervalOfPlanningDoohProgramesStart, end: intervalOfPlanningDoohProgramesEnd};
     
     var originSequence = req.body.originSequence;
+    
+    logger.info('[PUT ' + req.path + '] is called');
 
     scheduleMgr.pushProgramsTo3rdPartyContentMgr(sessionId, function(err){
         if (!err){
             //TODO pushProgramsTo3rdPartyContentMgr
-            res.send(200);
+            //res.send(200);
             //write session info to db
-          sessionInfoVjson = {
-          dooh: doohId,
-          sessionId: sessionId,
-          intervalOfSelectingUGC: intervalOfSelectingUGC,
-          intervalOfPlanningDoohProgrames: intervalOfPlanningDoohProgrames,
-          pushProgramsTime: new Date,
-          programSequence: originSequence
-          };
-          db.createAdoc(sessionItemModel, sessionInfoVjson, function(err, result){
-          if(!err){
-              logger.info('[FM.censorHandler.postProgramTimeSlotSession_cb()] sessionItemModel create to db ok! sessionId='+ sessionId);
-          }else{
-              logger.info('[FM.censorHandler.postProgramTimeSlotSession_cb()] sessionItemModel create to db fail! sessionId='+ sessionId+'err='+err);
-          }
-      });
+            sessionInfoVjson = {
+                dooh: doohId,
+                sessionId: sessionId,
+                intervalOfSelectingUGC: intervalOfSelectingUGC,
+                intervalOfPlanningDoohProgrames: intervalOfPlanningDoohProgrames,
+                pushProgramsTime: new Date,
+                programSequence: originSequence
+            };
+            db.createAdoc(sessionItemModel, sessionInfoVjson, function(err, result){
+                if(!err){
+                    logger.info('[FM.censorHandler.postProgramTimeSlotSession_cb()] sessionItemModel create to db ok! sessionId='+ sessionId);
+                }else{
+                    logger.info('[FM.censorHandler.postProgramTimeSlotSession_cb()] sessionItemModel create to db fail! sessionId='+ sessionId+'err='+err);
+                }
+            });
             //end of write session info to db
         }
         else{
-            res.send(400, {error: err});
+            //res.send(400, {error: err});
         }
     });
+    
+    //response immediately after scheduleMgr.pushProgramsTo3rdPartyContentMgr()
+    res.send(200); 
 
 };
 
@@ -286,7 +291,7 @@ FM.censorHandler.getHighlightUGCList_get_cb = function(req,res){
     limit = req.query.limit;
     skip = req.query.skip;
 
-    censorMgr.getUGCList(condition, sort, limit, skip, function(err, UGCList){
+    censorMgr.getUGCList(condition, sort, limit, skip, "highlight", function(err, UGCList){
         if (!err){
             res.render( 'table_censorHighlight', {highlightList: UGCList} );
         }
@@ -353,7 +358,7 @@ FM.censorHandler.updateLiveContents_get_cb = function(req, res){
 
 FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
 
-    var fb_Id =  req.params.fbId;
+    var memberId =  req.params.memberId;
     var photoUrl = {preview: req.body.longPic,
 					play:req.body.s3Url
                     };
@@ -362,7 +367,7 @@ FM.censorHandler.postMessageAndPicture_get_cb = function(req, res){
     var ugcCensorNo = req.body.ugcCensorNo;
     var liveContent_Id = req.body.liveContent_Id;
 	
-  censorMgr.postMessageAndPicture(fb_Id, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id, function(err, result){
+  censorMgr.postMessageAndPicture(memberId, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id, function(err, result){
   if (!err){
       res.send(200, {message: result});
   }

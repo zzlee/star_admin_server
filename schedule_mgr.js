@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @fileoverview Implementation of scheduleMgr
  */
 
@@ -20,9 +20,11 @@ var ugcModel = db.getDocModel("ugc");
 var candidateUgcCacheModel = db.getDocModel("candidateUgcCache");
 var sessionItemModel = db.getDocModel("sessionItem");
 
+var canvasProcessMgr = require('./canvas_process_mgr.js');
 var facebookMgr = require('./facebook_mgr.js');
 var pushMgr = require('./push_mgr.js');
 var memberModel = db.getDocModel("member");
+var adminBrowserMgr = require('./admin_browser_mgr.js');
 
 /**
  * The manager who handles the scheduling of playing UGC on DOOHs
@@ -84,19 +86,16 @@ var paddingContent =(function(){
                       //{name: "Jeff_start"},
                       {name: "ondascreen_padding-miix_it-end.jpg"}],
             cultural_and_creative: [{name: "ondascreen_padding-cultural_and_creative-start"},
-                                    //{name: "Jeff_start"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
                                     {name: "ondascreen_padding-cultural_and_creative-end.jpg"}
                                     ],
             mood: [{name: "ondascreen_padding-wish-start"},
-                   //{name: "Jeff_start"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-middle.jpg"},
                    {name: "ondascreen_padding-wish-end.jpg"}
                    ],
             check_in: [{name: "ondascreen_padding-check_in-start"},
-                       //{name: "Jeff_start"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-middle.jpg"},
                        {name: "ondascreen_padding-check_in-end.jpg"}
@@ -915,6 +914,15 @@ scheduleMgr.getProgramListBySession_test = function(sessionId,cbOfGetProgramList
  *     if successful, err returns null; if failed, err returns the error message.
  */
 scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
+    
+    var timeInfos = sessionId.split('-');
+    var intervalStart = new Date( Number(timeInfos[2]) );
+    var intervalEnd = new Date( Number(timeInfos[3]) );
+    var straceStamp = '[推送'+intervalStart.toDateString()+' '+intervalStart.toLocaleTimeString()+'~'+intervalEnd.toDateString()+' '+intervalEnd.toLocaleTimeString()+'的節目] ';
+    
+    adminBrowserMgr.showTrace(null, straceStamp+"節目推送作業開始....");
+    
+    logger.info('[scheduleMgr] start to push session '+sessionId+' to 3rd-party Content Manager' );
     var arrayOfsessionId = sessionId.split('-');
     async.waterfall([
         function(cb1){
@@ -922,6 +930,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             programTimeSlotModel.find({ "session": sessionId }).sort({"timeStamp":1}).exec(function (err1, _programs) {
                 if (!err1) {
                     var programs = JSON.parse(JSON.stringify(_programs));
+                    
+                    //for debugging
+                    logger.info('[scheduleMgr] programs to push (to 3rd-party Content Manager:' );
+                    for (var i in programs){
+                        logger.info(JSON.stringify(programs[i]));
+                    }
+                                       
                     cb1(null, programs);
                 }
                 else {
@@ -929,9 +944,66 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                 }                             
             });
         },
-        function(programs, cb2){
+        function(programs, cb1_1){
+            //render Miix moive if it is not yet rendered
             
-        
+            if ( systemConfig.RENDER_MIIX_MOVIE_IF_IT_IS_NOT_YET_RENDERED ) {
+                var miixContentMgr = require('./miix_content_mgr.js');
+                
+                var iteratorRenderMiixMovie = function(aProgram, callbackIterator){
+                    
+                    //console.log("aProgram=");
+                    //console.dir(aProgram);
+                    //TODO: find a way to check aProgram.content.url.youtube does not exist
+                    if ( (aProgram.contentType == "file") && (aProgram.contentGenre == "miix_it") && (!aProgram.content.url) ) {
+                        async.waterfall([
+                            function(callback){
+                                //get the corresponding UGC info
+                                ugcModel.findOne({ 'projectId': aProgram.content.projectId }, '_id ownerId projectId title no', function (errOfFindOne, ugc) {
+                                    if (!errOfFindOne) {
+                                        var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded" 
+                                        //console.log("_ugc=");
+                                        //console.dir(_ugc);
+                                        callback(null, _ugc.projectId, _ugc.ownerId._id,  _ugc.ownerId.fbUserId, _ugc.title, _ugc.no);
+                                    }
+                                    else {
+                                        callback("Failed to get the corresponding UGC info: "+errOfFindOne, null, null, null, null, null);
+                                    }
+                                });
+                            }, 
+                            function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, ugcNo, callback){
+                                //render this video UGC (Miix movie)
+                                adminBrowserMgr.showTrace(null, straceStamp+"開始合成編號"+ugcNo+"的UGC....請等待約5~15分鐘");
+                                miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, function(errOfGenerateMiixMoive){
+                                    if (!errOfGenerateMiixMoive){
+                                        adminBrowserMgr.showTrace(null, straceStamp+"成功地合成編號"+ugcNo+"的UGC!");
+                                        callback(null);
+                                    }
+                                    else {
+                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
+                                        callback(errOfGenerateMiixMoive);
+                                    }
+                                });
+                            }
+                        ], function(errOfWaterFall){
+                            callbackIterator(errOfWaterFall);
+                        });
+                    }
+                    else {
+                        callbackIterator(null);
+                    }
+                };
+                async.eachSeries(programs, iteratorRenderMiixMovie, function(errEachSeries){
+                    cb1_1(errEachSeries, programs);
+                });
+                
+            }
+            else {
+                cb1_1(null, programs);
+            }
+            
+        },
+        function(programs, cb2){
             
             var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
                 
@@ -943,45 +1015,50 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ ugcSearch(null, ugc); });
                     },
                     function(ugc, memberSearch){
-                        memberModel.find({'fb.userID': ugc[0].ownerId.userID}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
+                        memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
                     },
                 ], function(err, res){
-                    access_token = res.member[0].fb.auth.accessToken;
-                    fb_name = res.member[0].fb.userName;
+                
+                    var ugc = res.ugc[0],
+                        member = res.member[0];
+                    
+                    access_token = member.fb.auth.accessToken;
+                    fb_name = member.fb.userName;
                     var start = new Date(aProgram.timeslot.start);
                     var end = new Date(aProgram.timeslot.end);
-                    var ugcProjectId = res.ugc[0].projectId;
+                    var ugcProjectId = ugc.projectId;
                     if(start.getHours()>12)
                         play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes()+'~'+(end.getHours()-12)+':'+end.getMinutes();
                     else
                         play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes()+'~'+end.getHours()+':'+end.getMinutes();
-                    //message = fb_name + '的試鏡編號：' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！\n' + '上大螢幕APP(連結到FB粉絲團)特此預告。';
-                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + res.ugc[0].no + '作品，將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-                    var shareOption =
-                    {
-                        name: "上大螢幕", 
-                        img_url: 'https://lh5.googleusercontent.com/-fpFqpP6pBoI/UihA_MSQaAI/AAAAAAAAAIU/b6FlwLNWBu0/s0/fb.png',
-                        link: "https://www.facebook.com/OnDaScreen?directed_target_id=0",
-                        description: "你可以將你的創作，發表在小巨蛋台北天幕LED！"
-                    };
-
+                    
+                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                    
                     async.parallel([
-                        function(push_cb){pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });}//,
-/*                         function(postFB_cb){facebookMgr.postMessageAndShare(access_token, message, shareOption, function(errOfPostMessageAndShare, resOfPostMessageAndShare){
-                            if(resOfPostMessageAndShare){
-                                var fbObj = JSON.parse(resOfPostMessageAndShare);
-                                putFbPostIdUgcs(ugcProjectId, fbObj.id, function(err, result){
-                                    if(!err){
-                                        logger.error("[pushProgramsTo3rdPartyContentMgr.putFbPostIdUgcs]res="+"no:"+aProgram.content.no+"fbPostId"+resOfPostMessageAndShare.id);  
-                                    }else{
-
-                                        logger.error("[pushProgramsTo3rdPartyContentMgr.putFbPostIdUgcs]err="+err);
-                                    }
-                                });
-                            }
-                            postFB_cb(err, res);
-                            });
-                        } */
+                        function(push_cb){
+                            pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
+                        function(postFB_cb){
+                            
+                            var option = {
+                                accessToken: access_token,
+                                type: member.app,
+                                ugcProjectId: ugcProjectId
+                                // text: '哇！fb_name的作品，即將在play_time在小巨蛋播出，快到現場瞧瞧！'
+                            };
+                            
+                            switch(option.type.toLowerCase())
+                            {
+                                case 'ondascreen':
+                                    option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                    break;
+                                case 'wowtaipeiarena':
+                                    option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                    break;
+                                default:
+                                    break;
+                            }                            
+                            canvasProcessMgr.markTextToPreview(option, postFB_cb);
+                        }
                     ], function(err, res){
                         //(err)?console.log(err):console.dir(res);
                         postPreview_cb(err, res);
@@ -1006,28 +1083,28 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                                     var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);
                                 }
                                 else{
-                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension; 
+                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
                                     //TODO: make sure that target directory exists
-                                    if(typeof(aProgram.content.fileExtension) === 'undefined') {
+                                    if(typeof(aProgram.content.fileExtension) === 'undefined') {  //TODO: find out the bug, and remove this check
                                         //aProgram.content.fileExtension = '.mp4';
                                         var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.mp4';
                                         var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.mp4');
                                     }
                                     else {
-                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+aProgram.content.fileExtension;
-                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+aProgram.content.fileExtension);                                        
+                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension;
+                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);                                        
                                     }
                                 }
                                 awsS3.downloadFromAwsS3(targetLocalPath, s3Path, function(errS3,resultS3){
                                     if (!errS3){
                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
-                                        callback(null, targetLocalPath, aProgram.timeslot);
+                                        callback(null, targetLocalPath, aProgram.timeslot, aProgram.content.no);
                                     }
                                     else{
                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
-                                        callback('Failed to download from S3 '+s3Path+' :'+errS3, null, null);
+                                        callback('Failed to download from S3 '+s3Path+' :'+errS3, null, null, null);
                                     }
                                     
                                 });
@@ -1041,11 +1118,11 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             }
                             else {
                                 var paddingFilePath = path.join(workingPath, 'public', aProgram.content.dir, aProgram.content.file);
-                                callback(null, paddingFilePath, aProgram.timeslot);
+                                callback(null, paddingFilePath, aProgram.timeslot, aProgram.content.no);
                             }
     
                         }, 
-                        function(fileToPlay, timeslot, callback){
+                        function(fileToPlay, timeslot, contentNo, callback){
                             //debugger;
                             //push content to Scala
                             var option = 
@@ -1065,11 +1142,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
                                 if (!errScala){
                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                    adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
                                     callback(null, fileToPlay);
                                 }
                                 else{
                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                    adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
                                     callback('Failed to push content to Scala :'+errScala, null);
                                 }
@@ -1105,11 +1184,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         scalaMgr.setWebpageToPlaylist(option, function(errScala, resultScala){
                             if (!errScala){
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.uri );
+                                adminBrowserMgr.showTrace(null, straceStamp+"成功推送"+aProgram.content.uri+"至播放系統!");
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
                                 callbackIterator(null);
                             }
                             else{
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.uri );
+                                adminBrowserMgr.showTrace(null, "!!!!!無法推送"+aProgram.content.uri+"至播放系統.");
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + web.uri );
                                 callbackIterator('Failed to push content to Scala :'+errScala);
                             }
@@ -1131,11 +1212,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             if (!errScala){
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
+                                adminBrowserMgr.showTrace(null, straceStamp+"成功推送"+aProgram.content.name+"至播放系統!");
                                 callbackIterator(null);
                             }
                             else{
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
+                                adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+aProgram.content.name+"至播放系統!");
                                 callbackIterator('Failed to push content to Scala :'+errScala);
                             }
                         });
@@ -1169,8 +1252,17 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             });
         }
     ], function (err, result) {
-        if (pushed_cb) {
-            pushed_cb(err);
+        if (!err) {
+            adminBrowserMgr.showTrace(null, straceStamp+"節目推送完成!");
+            if (pushed_cb) {
+                pushed_cb(null);
+            }
+        }
+        else {
+            adminBrowserMgr.showTrace(null, straceStamp+"!!!節目推送失敗: "+err);
+            if (pushed_cb) {
+                pushed_cb(err);
+            }            
         }
     });
                                                 
@@ -1671,54 +1763,12 @@ var autoCheckProgramAndPushToPlayer = function(){
         flag = 1;
     else
         flag = 0;
-		
 //    console.log('flag'+flag);
     setTimeout(autoCheckProgramAndPushToPlayer, 6*60*1000);
-
 
 };
 //delay time for scala connect
 setTimeout(autoCheckProgramAndPushToPlayer, 2000);
-
-var putFbPostIdUgcs = function(ugcProjectID, fbPostId, cbOfPutFbPostIdUgcs){
-    
-    async.waterfall([
-        function(callback){
-            ugcModel.find({ "projectId": ugcProjectID}).sort({"createdOn":-1}).exec(function (err, ugcObj) {
-                if (!err)
-                    callback(null, ugcObj);
-                else
-                    callback("Fail to retrieve UGC Obj from DB: "+err, ugcObj);
-            });
-            
-        },
-        function(ugcObj, callback){
-            var vjson;
-            var arr = [];
-            
-            if(ugcObj[0].fb_postId[0]){
-              ugcObj[0].fb_postId.push({'postId': fbPostId});
-              vjson = {"fb_postId" :ugcObj[0].fb_postId};
-            }else{
-                arr = [{'postId': fbPostId}];
-                vjson = {"fb_postId" : arr};
-            }
-            
-            db.updateAdoc(ugcModel, ugcObj[0]._id, vjson, function(errOfUpdateUGC, resOfUpdateUGC){
-                if (!errOfUpdateUGC){
-                    callback(null, resOfUpdateUGC);
-                }else
-                    callback("Fail to update UGC Obj from DB: "+errOfUpdateUGC, resOfUpdateUGC);
-            });
-            
-        }
-    ],
-    function(err, result){
-        if (cbOfPutFbPostIdUgcs){
-            cbOfPutFbPostIdUgcs(err, result);
-        } 
-    });
-};
 
 
 //test
@@ -1728,10 +1778,6 @@ var putFbPostIdUgcs = function(ugcProjectID, fbPostId, cbOfPutFbPostIdUgcs){
 
 //scheduleMgr.getSessionList({start:(new Date("2013/5/5 7:30:20")).getTime(), end:(new Date("2013/8/30 8:30:20")).getTime()}, null, null, function(err, result){
 //    console.log(err, result);
-//});
-
-//putFbPostIdUgcs("cultural_and_creative-5226ff08ff6e3af835000009-20130916T072829495Z", "100006588456341_1403540869875515", function(err, result){
-//console.log('--'+err, result);
 //});
 
 module.exports = scheduleMgr;

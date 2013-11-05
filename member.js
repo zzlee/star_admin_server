@@ -51,21 +51,21 @@ FM.MEMBER = (function(){
                 FMDB.updateOne(members, condition, {'mPhone.verified': true, 'mPhone.code': null}, {select: 'mPhone.number'}, cb)
             },
             
-            isFBValid: function(userID, cb){
+            isFBValid: function(userID, app, cb){
                 
                 var field = { "_id":1, "fb": 1, "deviceToken":1, "mPhone":1 };
-                FMDB.getValueOf(members, {"fb.userID":userID}, field, cb);
+                FMDB.getValueOf(members, {"fb.userID":userID, "app":app}, field, cb);
             },
             
 			getDeviceTokenById: function(oid, cb){
-				var field = {"deviceToken": 1};
+				var field = {"deviceToken": 1, "app": 1};
                 FMDB.getValueOf(members, {"_id":oid}, field, cb);
 			},
 			
-            getFBAccessTokenByFBId: function(userID, cb){
+            getFBAccessTokenByFBId: function(userID, app, cb){
             
                 var field = {"fb.auth": 1, "fb.userName":1 };
-                FMDB.getValueOf(members, {"fb.userID":userID}, field, cb);
+                FMDB.getValueOf(members, {"fb.userID":userID, "app":app}, field, cb);
             },
             
             getFBAccessTokenById: function(oid, cb){
@@ -114,12 +114,12 @@ FM.MEMBER = (function(){
                 FMDB.getValueOf(members, {"memberID" : memberID}, field, cb);
             },
             
-            getTotalCommentsLikesSharesOnFB: function(userID, cb){
+            getTotalCommentsLikesSharesOnFB: function(memberID, userID, app, cb){
                 var likes_count = 0,
                     comments_count = 0,
                     shares_count = 0;
                     debugger;
-                UGCDB.getUGCListOnFB(userID, function(err, UGCs){
+                UGCDB.getUGCListOnFB(memberID, function(err, UGCs){
 //                    console.log('UGCs'+UGCs);
                     if(err){
                          cb(err, null);
@@ -129,7 +129,7 @@ FM.MEMBER = (function(){
 //                        console.log('---UGCs---'+UGCs);
                         var async = require("async");
                         
-                        FM.MEMBER.getInstance().getFBAccessTokenByFBId(userID, function(err, fb_auth){
+                        FM.MEMBER.getInstance().getFBAccessTokenByFBId(userID, app, function(err, fb_auth){
                             if(err){
                                 logger.error("[getTotalLikesOnFB] ", err);
                                 cb(err, null);
@@ -146,10 +146,16 @@ FM.MEMBER = (function(){
                                                     
                                                     for(var idx in UGCs){
                                                         for(var _idx=0; _idx<UGCs[idx].fb_postId.length;_idx++){
-                                                            var relative_url = UGCs[idx].fb_postId[_idx].postId + "?fields=comments,likes,shares";
-//                                                            console.log('UGCs[idx].fb_postId[_idx].postId.length'+UGCs[idx].fb_postId[_idx].postId.length);
-                                                            if(UGCs[idx].fb_postId[_idx].postId){
-                                                                batch.push( {"method": "GET", "relative_url": relative_url} );
+                                                            var fbPostId = UGCs[idx].fb_postId[_idx].postId;
+                                                            if(fbPostId){
+                                                                if(fbPostId.length == 33){
+                                                                    var relative_url = UGCs[idx].fb_postId[_idx].postId + "?fields=comments,likes,shares";
+                                                                }else{
+                                                                    var relative_url = UGCs[idx].fb_postId[_idx].postId + "?fields=comments,likes,sharedposts";
+                                                                }
+                                                                if(UGCs[idx].fb_postId[_idx].postId){
+                                                                    batch.push( {"method": "GET", "relative_url": relative_url} );
+                                                                }                                                                
                                                             }
                                                         }
                                                     }
@@ -161,19 +167,25 @@ FM.MEMBER = (function(){
                                                             callback(null, {totalLikes: likes_count, totalComments: comments_count, totalShares: shares_count} );
                                                         }else{
                                                             if (result) {
-//                                                                console.log('result'+result);
+//                                                                console.log('memberID'+memberID);
+//                                                                console.log(result);
                                                                 for(var i in result){
-                                                                    if(result[i]){
-                                                                    if (result[i].comments){
-                                                                        comments_count += result[i].comments.data.length;
-                                                                    }
-                                                                    // when count=0, there is no likes object.
-                                                                    if (result[i].likes){
-                                                                        likes_count += (result[i].likes) ? result[i].likes.count : 0;
-                                                                    }
-                                                                    if (result[i].shares){
-                                                                        shares_count += (result[i].shares) ? result[i].shares.count : 0;
-                                                                    }
+                                                                    if(!result[i]){
+                                                                        
+                                                                    }else if(result[i]){
+                                                                        if (result[i].comments){
+                                                                            comments_count = comments_count + result[i].comments.data.length;
+                                                                        }
+                                                                        // when count=0, there is no likes object.
+                                                                        if (result[i].likes){
+                                                                            likes_count = likes_count + result[i].likes.data.length;
+                                                                        }
+                                                                        if (result[i].shares){
+                                                                            shares_count = shares_count + result[i].shares.count;
+                                                                        }
+                                                                        if (result[i].sharedposts){
+                                                                            shares_count = shares_count + result[i].sharedposts.data.length;
+                                                                        }
                                                                     }
                                                                 }
                                                             }
@@ -236,9 +248,13 @@ FM.MEMBER = (function(){
                 var fb_id = req.query.fb_id;
                 var user_token = null;
                 var expiresIn = 0;
+                var appGenre = "ondascreen";
+                if(req.body.appGenre){
+                    appGenre = req.body.appGenre;
+                }  
                 
                 // Do not use "this" here, it's in differenct closure since "async callback".
-                FM.MEMBER.getInstance().getFBAccessTokenByFBId( fb_id, function(err, result){
+                FM.MEMBER.getInstance().getFBAccessTokenByFBId( fb_id, appGenre, function(err, result){
                     if(err){
                         res.send({error: "Internal Server Error"});
                         
@@ -247,7 +263,7 @@ FM.MEMBER = (function(){
                         var is_valid = null;
                         //console.log("getFBAccessTokenByFBId" + JSON.stringify(result));
                         
-                        fbMgr.isTokenValid(user_token, function(err, result){
+                        fbMgr.isTokenValid(user_token, appGenre, function(err, result){
                             if(err){
                                 res.send({error: err});
                                 
@@ -257,7 +273,7 @@ FM.MEMBER = (function(){
                                 
                                 if(expiresIn*1000 - Date.now() < 15*864000*1000){
                                 
-                                    fbMgr.extendToken(user_token, function(err, result){
+                                    fbMgr.extendToken(user_token, appGenre, function(err, result){
                                         if(err){
                                             res.send({message: is_valid, });
                                         }else{
