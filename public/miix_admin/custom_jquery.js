@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FeltMeng.com
  */
 
@@ -110,20 +110,21 @@ if(i%2==0){
 
 if(res[i].liveContent[0]){
 var s3img=$("<img>").attr({src:res[i].liveContent[0].url.longPhoto,
-	                       width:"400",
-	                       height:"170"});
+	                       width:"200",
+	                       height:"80"
+						   });
 }else{
 
 var s3img=$("<div>").attr({
-	                       width:"400",
-	                       height:"150"}).html("live content 尚未產生喔~");
+	                       width:"200",
+	                       height:"80"}).html("live content 尚未產生喔~");
 }
 
 if(res[i].liveContent[0]){
 var s3imgLink=$("<a>").attr({href:res[i].liveContent[0].url.longPhoto,
-	                         target:"_blank"}).append(s3img);
+	                         target:"_blank"
+							 }).append(s3img);
 }
-
 
 
 var post_live_time_start=new Date(parseInt(res[i].start));
@@ -193,16 +194,68 @@ tr.append(td_3);
 //tr.append(td_4);
 // table.html("test");
 
+if(res[i].liveContent.length == 0){
+var tr_for_null = $("<tr>");
+  
+tr.append(tr_for_null);
+}
+
+
 for(var j=0;j<res[i].liveContent.length;j++){
 	//alert("a");
+	
+	//for(var k=0;k<res[i].liveContent.url.livePhotos.length;k++)
+	/*
 	var linkS3=$("<a>").attr({href:res[i].liveContent[0].url.s3,
 		                      target:"_blank"});
 	var live_img=$("<img>").attr({src:res[i].liveContent[0].url.s3,
 		                           width:"330",
 		                           height:"200"});
+								   */
 	
-	linkS3.append(live_img);
-	var tr_4=$("<tr>").html(linkS3);
+	//linkS3.append(live_img);
+	var div_live = $("<div>");
+	
+	if(res[i].liveContent[j].url.livePhotos){
+	for(var k=0;k<res[i].liveContent[j].url.livePhotos.length;k++){
+	//alert("!");
+	  var span_img = $("<span>").attr({
+	                                   
+	  
+	                                  });
+		var inner_img = $("<img>").attr({src:res[i].liveContent[j].url.livePhotos[k],
+		                                   width:300,
+										   height:150,
+										   id:"testMove",
+										   class:"ho"
+	                                   
+	  
+	                                  });	
+									  
+									  var boxInput2 = $("<input>").attr({type:"radio",
+		id:"boxCheckLive",
+		class:"good",
+        name:"yo",
+        value:res[i].liveContent[j].ownerId.userID,
+        "s3url":res[i].liveContent[j].url.s3,
+		"longPic":res[i].liveContent[j].url.longPhoto,
+        "_id":res[i].liveContent[j]._id,
+		"liveTime":res[i].liveContent[j].liveTime,
+		"ugcCensorNo":res[i].ugcCensorNo,
+        "_type":"correct"});
+
+     span_img.append(inner_img);
+	 span_img.append(boxInput2);
+	 
+div_live.append(span_img);	  
+if(k==2){
+div_live.append("<br>");
+}
+	}
+	}
+	
+	
+	var tr_4=$("<tr>").html(div_live);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
 	
 	
 	
@@ -217,17 +270,17 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	
 	
 	
-	var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].liveContent[j].no+"  		│   "+timeString);
-	//var td_4=$("<td>").html("aa");
-	//tr.append(td_4);
+	var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].liveContent[j].no+"  		│   "+timeString); //sp是編號+日期
 	
-	/* radio box  */
+	
 	
 	var boxForm = $("<form>").attr({style:"display: inline-block;vertical-align:400%"});
 	var boxInput = $("<input>").attr({type:"radio",
 		                              name:"yo",
 		                              value:"ha",
 		                              checked:"checked"});
+									  
+	//---------------------- deprecated, 因為要一次拍五張 五選一--------------------------------------------								  
 	var boxInput2 = $("<input>").attr({type:"radio",
 		id:"boxCheckLive",
 		class:"good",
@@ -240,6 +293,7 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"correct"});
 	
+	 
 	var boxInput3 = $("<input>").attr({type:"radio",
 		id:"boxCheckLive",
         class:"bad",
@@ -251,7 +305,7 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"liveTime":res[i].liveContent[j].liveTime,
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"incorrect"});
-	
+	//-------------------------------------------------------------------------
 	
 	
 if(res[i].liveContent[j].state=="correct"){
@@ -267,6 +321,7 @@ if(res[i].liveContent[j].state=="correct"){
 	boxForm.append(boxInput);
 	boxForm.append("");
 	boxForm.append("<br>");
+	
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput2);
 	boxForm.append("<b style='color:blue'>成功(done)<b>");
@@ -275,10 +330,12 @@ if(res[i].liveContent[j].state=="correct"){
 	boxForm.append(boxInput3);
 	boxForm.append("");
 	/* ends of radio box */
-	tr_4.prepend(sp);
+	tr_4.prepend(sp); //編號日期連接liveimg
 	tr.append(tr_4);
 	//tr.append(boxForm);
-	boxForm.appendTo(tr_4)
+	//boxForm.appendTo(tr_4)
+	tr.append("<br>");
+	tr.append("<hr>");
 	tr.append("<br>");
 }else if(res[i].liveContent[j].state=="incorrect"){
 	
@@ -304,7 +361,9 @@ if(res[i].liveContent[j].state=="correct"){
 	tr_4.prepend(sp);
 	tr.append(tr_4);
 	//tr.append(boxForm);
-	boxForm.appendTo(tr_4)
+	//boxForm.appendTo(tr_4)
+	tr.append("<br>");
+	tr.append("<hr>");
 	tr.append("<br>");
 	//---------------------------------------------
 }else{
@@ -323,7 +382,13 @@ if(res[i].liveContent[j].state=="correct"){
 	tr_4.prepend(sp);
 	tr.append(tr_4);
 	//tr.append(boxForm);
-	boxForm.appendTo(tr_4)
+	//boxForm.appendTo(tr_4)
+	tr.append("<br>");
+	
+	 if(j!=res[i].liveContent.length-1){
+	 tr.append("<hr>");
+	 }
+	
 	tr.append("<br>");
 }
 	
@@ -337,12 +402,12 @@ if(res[i].liveContent[j].state=="correct"){
 	}
 	
 	
-	//-------------for fail-----
+	//-------------for fail 最左邊--------------------------------------
 	 $("#failbox.bad").click(function(){
 		  //alert("g");
 		  
 		  
-		  var forComfirm=confirm("你按下的是 ***失敗***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
+		  var forComfirm=confirm("你按下的是 ***失敗***\n辛苦囉 ~~~!!");
 		  if (forComfirm==true)
 		    {
 		  // alert("good");
@@ -391,8 +456,10 @@ if(res[i].liveContent[j].state=="correct"){
            });
 	    	
 	    });
-	//--------------------
+	//--------- end 最左邊 fail-----------
 	
+	
+	/* ------------------------------  最右邊正確紐---------------------------------------------------*/
 	  $("#boxCheckLive.good").click(function(){
 		  //alert("g");
 		  
@@ -452,6 +519,9 @@ if(res[i].liveContent[j].state=="correct"){
             });
 	    	
 	    });
+		/* ------------------------------ end 最右邊正確紐---------------------------------------------------*/
+		
+		/* ------------------------------ deprecated---------------------------------------------------*/
 	  $("#boxCheckLive.bad").click(function(){
 		  // alert("b");
 		  
@@ -512,6 +582,7 @@ if(res[i].liveContent[j].state=="correct"){
 	    	
 	    	
 	    });
+		/* ------------------------------ends deprecated---------------------------------------------------*/
 	  
 	  $.get('/miix_admin/table_censorHistoryList_head.html', function(res){
           $('#table-content-header').html(res);
