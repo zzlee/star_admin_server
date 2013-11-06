@@ -1296,26 +1296,34 @@ if(res[i].liveContent[j].state=="correct"){
 
     //== access control ==
     if ( localStorage.role == "SUPER_ADMINISTRATOR" ) {
-        $('#memberList').show();
-        $('#miixPlayList').show();
-        $('#storyPlayList').show();
-        $('#UGCList').show();
-        $('#highlightList').show();
-        $('#live_check').show();
+        $("[id^='memberList']").show();
+        $("[id^='miixPlayList']").show();
+        $("[id^='storyPlayList']").show();
+        $("[id^='UGCList']").show();
+        $("[id^='highlightList']").show();
+        $("[id^='live_check']").show();
         FM.currentContent = FM.memberList;
         $('#memberListBtn').click();
-
+    } 
+    else if ( localStorage.role == "FELTMENG_ADMINISTRATOR" ) {
+        $("[id^='memberList']").show();
+        $("[id^='miixPlayList']").hide();
+        $("[id^='storyPlayList']").hide();
+        $("[id^='UGCList']").show();
+        $("[id^='highlightList']").show();
+        $("[id^='live_check']").show();
+        FM.currentContent = FM.memberList;
+        $('#memberListBtn').click();
     }
     else if ( localStorage.role == "OPERATOR" ) {
-        $('#memberList').hide();
-        $('#miixPlayList').hide();
-        $('#storyPlayList').hide();
-        $('#UGCList').hide();
-        $('#highlightList').hide();
-        $('#live_check').hide();
+        $("[id^='memberList']").hide();
+        $("[id^='miixPlayList']").hide();
+        $("[id^='storyPlayList']").hide();
+        $("[id^='UGCList']").hide();
+        $("[id^='highlightList']").hide();
+        $("[id^='live_check']").hide();
         FM.currentContent = FM.historyList;
         $('#historyListBtn').click();
-
     }
     
 

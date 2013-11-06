@@ -15,7 +15,7 @@ var memberDB = require("./member.js");
 var awsS3 = require('./aws_s3.js');
 var fmapi = require(workingPath+'/routes/api.js');   //TODO:: find a better name
 var db = require('./db.js');
-var fbMgr = require('./facebook_mgr.js');
+//var fbMgr = require('./facebook_mgr.js');
 var pushMgr = require('./push_mgr.js');
 
 
