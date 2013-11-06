@@ -205,18 +205,10 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	//alert("a");
 	
 	//for(var k=0;k<res[i].liveContent.url.livePhotos.length;k++)
-	/*
-	var linkS3=$("<a>").attr({href:res[i].liveContent[0].url.s3,
-		                      target:"_blank"});
-	var live_img=$("<img>").attr({src:res[i].liveContent[0].url.s3,
-		                           width:"330",
-		                           height:"200"});
-								   */
 	
-	//linkS3.append(live_img);
 	var div_live = $("<div>");
 	
-	if(res[i].liveContent[j].url.livePhotos){
+	if(res[i].liveContent[j].url.livePhotos){ //determine livePhotos or not
 	for(var k=0;k<res[i].liveContent[j].url.livePhotos.length;k++){
 	//alert("!");
 	  var span_img = $("<span>").attr({
@@ -232,30 +224,48 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	  
 	                                  });	
 									  
-									  var boxInput2 = $("<input>").attr({type:"radio",
+	  var boxForChoose = $("<input>").attr({
+		  type:"radio",
 		id:"boxCheckLive",
-		class:"good",
+		class:"chooseOne",
         name:"yo",
-        value:res[i].liveContent[j].ownerId.userID,
-        "s3url":res[i].liveContent[j].url.s3,
-		"longPic":res[i].liveContent[j].url.longPhoto,
-        "_id":res[i].liveContent[j]._id,
+        value:res[i].liveContent[j].ownerId.userID, //user id
+        "s3url":res[i].liveContent[j].url.livePhotos[k], //五選一
+		"longPic":res[i].liveContent[j].url.longPhoto, //長條圖
+        "_id":res[i].liveContent[j]._id, //_id
 		"liveTime":res[i].liveContent[j].liveTime,
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"correct"});
 
      span_img.append(inner_img);
-	 span_img.append(boxInput2);
+	 span_img.append(boxForChoose);
 	 
 div_live.append(span_img);	  
-if(k==2){
+if(k==3){
 div_live.append("<br>");
 }
-	}
-	}
+	  }
+var tr_4=$("<tr>").html(div_live);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+	  
+	  }else{
+	  
+	  
+	  
+	var linkS3=$("<a>").attr({href:res[i].liveContent[0].url.s3,
+		                      target:"_blank"});
+	var live_img=$("<img>").attr({src:res[i].liveContent[0].url.s3,
+		                           width:"330",
+		                           height:"200"});
+								   
+	
+	linkS3.append(live_img);
+	var tr_4=$("<tr>").html(live_img);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+	  
+	  
+}
 	
 	
-	var tr_4=$("<tr>").html(div_live);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+	
 	
 	
 	
@@ -307,7 +317,7 @@ div_live.append("<br>");
         "_type":"incorrect"});
 	//-------------------------------------------------------------------------
 	
-	
+	if(!res[i].liveContent[j].url.livePhotos){  //determine livePhotos to show radio button
 if(res[i].liveContent[j].state=="correct"){
 	boxInput2.attr({checked:"checked"});
 	
@@ -332,8 +342,8 @@ if(res[i].liveContent[j].state=="correct"){
 	/* ends of radio box */
 	tr_4.prepend(sp); //編號日期連接liveimg
 	tr.append(tr_4);
-	//tr.append(boxForm);
-	//boxForm.appendTo(tr_4)
+	tr.append(boxForm);
+	boxForm.appendTo(tr_4)
 	tr.append("<br>");
 	tr.append("<hr>");
 	tr.append("<br>");
@@ -360,8 +370,8 @@ if(res[i].liveContent[j].state=="correct"){
 	/* ends of radio box */
 	tr_4.prepend(sp);
 	tr.append(tr_4);
-	//tr.append(boxForm);
-	//boxForm.appendTo(tr_4)
+	tr.append(boxForm);
+	boxForm.appendTo(tr_4)
 	tr.append("<br>");
 	tr.append("<hr>");
 	tr.append("<br>");
@@ -381,6 +391,51 @@ if(res[i].liveContent[j].state=="correct"){
 	/* ends of radio box */
 	tr_4.prepend(sp);
 	tr.append(tr_4);
+	tr.append(boxForm);
+	boxForm.appendTo(tr_4)
+	tr.append("<br>");
+	
+	 if(j!=res[i].liveContent.length-1){
+	 tr.append("<hr>");
+	 }
+	
+	tr.append("<br>");
+}
+
+}else{//for 1/5
+	
+	if(res[i].liveContent[j].state=="correct"){
+		// tr.append("<hr>");
+		
+		var selectedImg = $("<img>").attr({src:res[i].liveContent[j].url.s3,
+			                              width:600,height:300});
+		tr_4.html("");
+		tr_4.append(selectedImg);
+		tr_4.append("讚!!!");
+		tr_4.prepend(sp);
+		tr.append(tr_4);
+		tr.append("<br>");
+		
+		 if(j!=res[i].liveContent.length-1){
+		 tr.append("<hr>");
+		 }
+		
+		tr.append("<br>");
+	}else{
+boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	//boxForm.append(boxInput);
+	//boxForm.append("default");
+	//boxForm.append("<br>");
+	//boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	//boxForm.append(boxInput2);
+	//boxForm.append("正確");
+	//boxForm.append("<br>");
+	//boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	//boxForm.append(boxInput3);
+	//boxForm.append("失敗");
+	/* ends of radio box */
+	tr_4.prepend(sp);
+	tr.append(tr_4);
 	//tr.append(boxForm);
 	//boxForm.appendTo(tr_4)
 	tr.append("<br>");
@@ -390,6 +445,7 @@ if(res[i].liveContent[j].state=="correct"){
 	 }
 	
 	tr.append("<br>");
+}
 }
 	
 	
@@ -458,7 +514,7 @@ if(res[i].liveContent[j].state=="correct"){
 	    });
 	//--------- end 最左邊 fail-----------
 	
-	
+	 
 	/* ------------------------------  最右邊正確紐---------------------------------------------------*/
 	  $("#boxCheckLive.good").click(function(){
 		  //alert("g");
@@ -520,6 +576,72 @@ if(res[i].liveContent[j].state=="correct"){
 	    	
 	    });
 		/* ------------------------------ end 最右邊正確紐---------------------------------------------------*/
+	 /* ------------------------------  最右邊五選一紐---------------------------------------------------*/
+	  $(".chooseOne").click(function(){
+		  console.log($(this));
+		  //alert("g");
+		  
+		  
+		  var forComfirm=confirm("你選了五張中最讚的張，請確定好之後送出!");
+		  
+		  
+		  
+	    	var _id=$(this).attr("_id");
+	    	var userID=$(this).val();
+	    	var s3Url=$(this).attr("s3url");
+	    	var picType=$(this).attr("_type");
+			var longPic=$(this).attr("longPic");
+			var liveTime=$(this).attr("liveTime");
+			var ugcCensorNo=$(this).attr("ugcCensorNo");
+	    	
+	    	console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
+	    	if (forComfirm==true)
+		    {
+		  // alert("good");
+		    }
+		  else
+		    {
+		   //alert("><");
+		   return false;
+		    }
+	    	
+	    	var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+	    	$.ajax({
+               url: url,
+               type: 'PUT',
+               data: {liveContent_Id:_id,
+               	   userID:userID,
+               	   photoUrl:s3Url,
+               	   vjson:{state: picType,
+               		   	  "url.s3": s3Url,
+               		     }
+               		 },
+               success: function(response) {
+                   if(response.message){
+                       console.log("[Response] message:" + response.message);
+                   }
+               }
+           });
+			
+			var url=DOMAIN+"fbItem/"+userID;
+	    	$.ajax({
+               url: url,
+               type: 'POST',
+               data: {s3Url: s3Url,
+               	   longPic: longPic,
+               	   type: picType,
+					   liveTime: liveTime,
+					   ugcCensorNo: ugcCensorNo,
+					   liveContent_Id:_id},
+               success: function(response) {
+                   if(response.message){
+                       console.log("[Response] message:" + response.message);
+                   }
+               }
+           });
+	    	
+	    });
+		/* ------------------------------ end 五選一紐---------------------------------------------------*/
 		
 		/* ------------------------------ deprecated---------------------------------------------------*/
 	  $("#boxCheckLive.bad").click(function(){
