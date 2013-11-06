@@ -60,13 +60,14 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
                 });
             },
             function(renderLive_cb){
-                var projectId = list.awsS3[0].split('/');
-                projectId = projectId[projectId.length-1].split('__')[0];
-                var url = 'http://127.0.0.1/internal/story_cam_controller/available_story_movie';
-                var headers = { 'miix_movie_project_id' : projectId, 'record_time' : recordTime };
-                request.post({ url: url, headers: headers }, function (e, r, body) {
-                    renderLive_cb(null, 'done');
-                });
+                // var projectId = list.awsS3[0].split('/');
+                // projectId = projectId[projectId.length-1].split('__')[0];
+                // var url = 'http://127.0.0.1/internal/story_cam_controller/available_story_movie';
+                // var headers = { 'miix_movie_project_id' : projectId, 'record_time' : recordTime };
+                // request.post({ url: url, headers: headers }, function (e, r, body) {
+                    // renderLive_cb(null, 'done');
+                // });
+                renderLive_cb(null, 'done');
             },
         ], function(err, res){
             //clear
