@@ -46,6 +46,8 @@ FM.DB = (function(){
             liveContentState = 'not_checked correct incorrect'.split(' '),
             appGenre = 'ondascreen wowtaipeiarena'.split(' '),
             
+            adminRole = 'SUPER_ADMINISTRATOR FELTMENG_ADMINISTRATOR OPERATOR'.split(' '),
+            
             videoStatus = 'good soso bad waiting none'.split(' '), //DEPRECATE, keep for reference
             videoGenre = 'miix miix_street miix_story'.split(' '); //DEPRECATE, keep for reference 
             //programTimeSlotStatus = 'waiting proved'.split(' ');
@@ -218,7 +220,8 @@ FM.DB = (function(){
         
         var AdminSchema = new Schema({
             id: {type: String},
-            password: {type: String}
+            password: {type: String},
+            role: {type: String, enume: adminRole}
         });
         
         

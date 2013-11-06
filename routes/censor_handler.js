@@ -137,7 +137,7 @@ FM.censorHandler.gettimeslots_get_cb = function(req, res){
 
     logger.info('[FM.censorHandler.gettimeslots_get_cb()] sessionId='+ sessionId);
     scheduleMgr.getProgramListBySession(sessionId, limit, skip, function(err, programList){
-        debugger;
+        
         if (!err){
             if (programList.length > 0){
                 censorMgr.getPlayList(programList , updateUGC, function(errGetPlayList, result){
@@ -175,33 +175,38 @@ FM.censorHandler.pushProgramsTo3rdPartyContentMgr_get_cb = function(req, res){
     var intervalOfPlanningDoohProgrames = {start: intervalOfPlanningDoohProgramesStart, end: intervalOfPlanningDoohProgramesEnd};
     
     var originSequence = req.body.originSequence;
+    
+    logger.info('[PUT ' + req.path + '] is called');
 
     scheduleMgr.pushProgramsTo3rdPartyContentMgr(sessionId, function(err){
         if (!err){
             //TODO pushProgramsTo3rdPartyContentMgr
-            res.send(200);
+            //res.send(200);
             //write session info to db
-          sessionInfoVjson = {
-          dooh: doohId,
-          sessionId: sessionId,
-          intervalOfSelectingUGC: intervalOfSelectingUGC,
-          intervalOfPlanningDoohProgrames: intervalOfPlanningDoohProgrames,
-          pushProgramsTime: new Date,
-          programSequence: originSequence
-          };
-          db.createAdoc(sessionItemModel, sessionInfoVjson, function(err, result){
-          if(!err){
-              logger.info('[FM.censorHandler.postProgramTimeSlotSession_cb()] sessionItemModel create to db ok! sessionId='+ sessionId);
-          }else{
-              logger.info('[FM.censorHandler.postProgramTimeSlotSession_cb()] sessionItemModel create to db fail! sessionId='+ sessionId+'err='+err);
-          }
-      });
+            sessionInfoVjson = {
+                dooh: doohId,
+                sessionId: sessionId,
+                intervalOfSelectingUGC: intervalOfSelectingUGC,
+                intervalOfPlanningDoohProgrames: intervalOfPlanningDoohProgrames,
+                pushProgramsTime: new Date,
+                programSequence: originSequence
+            };
+            db.createAdoc(sessionItemModel, sessionInfoVjson, function(err, result){
+                if(!err){
+                    logger.info('[FM.censorHandler.postProgramTimeSlotSession_cb()] sessionItemModel create to db ok! sessionId='+ sessionId);
+                }else{
+                    logger.info('[FM.censorHandler.postProgramTimeSlotSession_cb()] sessionItemModel create to db fail! sessionId='+ sessionId+'err='+err);
+                }
+            });
             //end of write session info to db
         }
         else{
-            res.send(400, {error: err});
+            //res.send(400, {error: err});
         }
     });
+    
+    //response immediately after scheduleMgr.pushProgramsTo3rdPartyContentMgr()
+    res.send(200); 
 
 };
 

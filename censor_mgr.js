@@ -9,6 +9,7 @@ var sheculeMgr = require('./schedule_mgr.js');
 var member_mgr = require('./member.js');
 var pushMgr = require('./push_mgr.js');
 var canvasProcessMgr = require('./canvas_process_mgr.js');
+var storyContentMgr = require('./story_content_mgr.js');
 
 var UGCs = FMDB.getDocModel("ugc");
 var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
@@ -343,7 +344,7 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
  */
 censorMgr.getUGCListLite = function(condition, cb){
 
-    FMDB.listOfdocModels( UGCs,{'createdOn' : {$gte: condition.start, $lt: condition.end}, 'rating': {$gte: 'A' , $lte: 'E' }},'_id genre contentGenre projectId fileExtension no ownerId mustPlay', {sort :{'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1}}, function(err, result){
+    FMDB.listOfdocModels( UGCs,{'createdOn' : {$gte: condition.start, $lt: condition.end}, 'rating': {$gte: 'A' , $lte: 'E' }},'_id genre contentGenre projectId fileExtension no ownerId url mustPlay', {sort :{'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1}}, function(err, result){
         if(err) {
             logger.error('[censorMgr.getUGCListLite]', err);
             cb(err, null);
@@ -545,10 +546,21 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
         access_token = member.fb.auth.accessToken;
         fb_name = member.fb.userName;
         start = new Date(parseInt(liveTime));
+        
+        var showTime = function( time ){
+            var show;
+            if(time < 10)
+                show = '0' + time;
+            else
+                show = time;
+            
+            return show;
+        };
+        
         if(start.getHours()>12)
-            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes();
+            playTime = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日下午'+showTime(start.getHours()-12)+':'+showTime(start.getMinutes());
         else
-            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes();
+            playTime = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日上午'+showTime(start.getHours())+':'+showTime(start.getMinutes());
             
         var textContent = fb_name + ' 於' + playTime + '，登上台北小巨蛋天幕！';
 
@@ -602,6 +614,14 @@ censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
 //          console.log('updateAdoc_result'+result);
         }
     });
+};
+
+/**
+ *  Render story MV.
+ * 
+ */
+censorMgr.renderLiveVideoMV = function( live_video_project_id, record_time ){
+    storyContentMgr.generateStoryMV( live_video_project_id, record_time );
 };
 
 
