@@ -9,6 +9,7 @@ var sheculeMgr = require('./schedule_mgr.js');
 var member_mgr = require('./member.js');
 var pushMgr = require('./push_mgr.js');
 var canvasProcessMgr = require('./canvas_process_mgr.js');
+var storyContentMgr = require('./story_content_mgr.js');
 
 var UGCs = FMDB.getDocModel("ugc");
 var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
@@ -613,6 +614,14 @@ censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
 //          console.log('updateAdoc_result'+result);
         }
     });
+};
+
+/**
+ *  Render story MV.
+ * 
+ */
+censorMgr.renderLiveVideoMV = function( live_video_project_id, record_time ){
+    storyContentMgr.generateStoryMV( live_video_project_id, record_time );
 };
 
 
