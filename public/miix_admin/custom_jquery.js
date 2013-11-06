@@ -1159,11 +1159,11 @@ if(res[i].liveContent[j].state=="correct"){
                     sessionId = sessionItemInfoArray[0];
                     
                     $('#table-content-header').html(res);
-                    $('#timeStartText').attr('value', sessionItemInfoArray[1]);
-                    $('#timeEndText').attr('value', sessionItemInfoArray[2]);
-                    $('#playTimeStartText').attr('value', sessionItemInfoArray[3]);
-                    $('#playTimeEndText').attr('value', sessionItemInfoArray[4]);
-                    $('#sequenceText').attr('value', sessionItemInfoArray[5]);
+                    $('#timeStartText').val( sessionItemInfoArray[1]);
+                    $('#timeEndText').val( sessionItemInfoArray[2]);
+                    $('#playTimeStartText').val( sessionItemInfoArray[3]);
+                    $('#playTimeEndText').val( sessionItemInfoArray[4]);
+                    $('#sequenceText').val( sessionItemInfoArray[5]);
 
                     $('#main_menu ul[class="current"]').attr("class", "select");
                     $('#UGCPlayList').attr("class", "current");
@@ -1261,7 +1261,7 @@ if(res[i].liveContent[j].state=="correct"){
     });
 
     $('#pageNoInput').change(function(){
-        var pageNo = parseInt($("#pageNoInput").attr('value'));
+        var pageNo = parseInt($("#pageNoInput").val());
         if (pageNo){
             if ( pageNo < 1) {
                 pageNo = 1;
@@ -1271,17 +1271,17 @@ if(res[i].liveContent[j].state=="correct"){
             }
             FM.currentContent.showPageContent(pageNo);
             FM.currentContent.currentPage=pageNo;
-            $("#pageNoInput").attr('value',pageNo);
+            $("#pageNoInput").val(pageNo);
         }
         else{
-            $("#pageNoInput").attr('value', FM.currentContent.currentPage);
+            $("#pageNoInput").val( FM.currentContent.currentPage);
         }
     });
 
 
 
     $('input#rowsPerPage').change(function(){
-        var rowsPerPage = parseInt($('input#rowsPerPage').attr('value'));
+        var rowsPerPage = parseInt($('input#rowsPerPage').val());
         if (rowsPerPage){
             if ( rowsPerPage < 1) {
                 rowsPerPage = 1;
@@ -1289,7 +1289,7 @@ if(res[i].liveContent[j].state=="correct"){
             FM.currentContent.setRowsPerPage(rowsPerPage);
         }
         else{
-            $('input#rowsPerPage').attr('value', FM.currentContent.rowsPerPage);
+            $('input#rowsPerPage').val( FM.currentContent.rowsPerPage);
         }
     });
 
