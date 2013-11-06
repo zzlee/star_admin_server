@@ -1027,10 +1027,19 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     var start = new Date(aProgram.timeslot.start);
                     var end = new Date(aProgram.timeslot.end);
                     var ugcProjectId = ugc.projectId;
+                    var showTime = function( time ){
+                        var show;
+                        if(time < 10)
+                            show = '0' + time;
+                        else
+                            show = time;
+                        
+                        return show;
+                    };
                     if(start.getHours()>12)
-                        play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes()+'~'+(end.getHours()-12)+':'+end.getMinutes();
+                        play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日下午'+showTime(start.getHours()-12)+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours()-12)+':'+showTime(end.getMinutes());
                     else
-                        play_time = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes()+'~'+end.getHours()+':'+end.getMinutes();
+                        play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日上午'+showTime(start.getHours())+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours())+':'+showTime(end.getMinutes());
                     
                     message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
                     

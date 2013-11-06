@@ -545,10 +545,21 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
         access_token = member.fb.auth.accessToken;
         fb_name = member.fb.userName;
         start = new Date(parseInt(liveTime));
+        
+        var showTime = function( time ){
+            var show;
+            if(time < 10)
+                show = '0' + time;
+            else
+                show = time;
+            
+            return show;
+        };
+        
         if(start.getHours()>12)
-            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日下午'+(start.getHours()-12)+':'+start.getMinutes();
+            playTime = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日下午'+showTime(start.getHours()-12)+':'+showTime(start.getMinutes());
         else
-            playTime = start.getFullYear()+'年'+(start.getMonth()+1)+'月'+start.getDate()+'日上午'+start.getHours()+':'+start.getMinutes();
+            playTime = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日上午'+showTime(start.getHours())+':'+showTime(start.getMinutes());
             
         var textContent = fb_name + ' 於' + playTime + '，登上台北小巨蛋天幕！';
 
