@@ -17,15 +17,19 @@ function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction)
         }
     });
     
-}; 
+} 
 
 PageList.prototype.setExtraParameters = function(extraParameters){
     this.extraParameters = extraParameters;
 };
 
-PageList.prototype.showPageContent = function(Page,condition){
+PageList.prototype.showPageContent = function(Page,condition, cbOfShowPageContent){
     $('#table-content').html('Loading...');
     var _this = this;
+    
+    
+    
+    
     $.get(this.urlToGetListContent, {skip: (Page-1)*this.rowsPerPage, limit: this.rowsPerPage, token:localStorage.token, condition:conditions, extraParameters: JSON.stringify(this.extraParameters)}, function(res){
         if(res.message){
             console.log("[Response] message:" + res.message);
