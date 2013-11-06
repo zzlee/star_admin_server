@@ -15,7 +15,7 @@ body	{
 #page-top-outer	{
 	background: url(../images/shared/top_bg.jpg) top center repeat-x;
 	border-bottom: 1px solid #7e7e7e;
-	height: 92px;
+	height: 50px;
 	}
 #page-top	{
 	margin: 0 auto;
@@ -25,7 +25,7 @@ body	{
 	}
 #logo	{
 	float: left;
-	margin: 45px 0 0 15px;
+	margin: 10px 0 0 15px;
 	}
 #logo	a	{
 	display: block;
@@ -59,7 +59,7 @@ body	{
 	margin: 0 auto 0 auto;
 	max-width: 1260px;
 	min-width: 780px;
-	padding: 35px 0px 30px 0px;
+	padding: 20px 0px 20px 0px;
 	}
 #content-inner	{
 	color: #333;
@@ -86,7 +86,7 @@ body	{
 #content-table-inner	{
 	font-size: 12px;
 	line-height: 12px;
-	padding: 10px 0 20px 0;
+	padding: 0 0 10px 0;
 	}
 #tbl-border-top	{
 	background: url(../images/shared/border_bit.jpg) top repeat-x;
@@ -334,8 +334,8 @@ a:hover.icon-5	{
 	margin: 0;
 	}
 #product-table	{
-	margin-bottom: 20px;
-	margin-top: 20px;
+	margin-bottom: 5px;
+	margin-top: 5px;
 	}
 #product-table	td a	{
 	color: #393939;
@@ -859,7 +859,6 @@ font-family: Tahoma;
 	}
 .nav-outer-repeat	{
 	background: url(../images/shared/nav/repeat.jpg) repeat-x;
-	height: 77px;
 	}
 .nav-outer	{
 	margin: 0 auto;
