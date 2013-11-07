@@ -9,7 +9,7 @@ SDOMAIN = "/miix_admin/";
 
 var FM = {};    
 
-var conditions = {};
+//var conditions = {};
 var DEFAULT_DOOH = "taipeiarena";
 var sessionId = null;
 var originSequence = null;
@@ -529,7 +529,8 @@ if(res[i].liveContent[j].state=="correct"){
                       alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00');
                       flag = 1; 
                   }else{
-                      conditions = inputSearchData;
+                      //conditions = inputSearchData;
+                      FM.live_check.setConditions(inputSearchData);
                   }
               });
               FM.currentContent = FM.live_check;
@@ -608,7 +609,7 @@ if(res[i].liveContent[j].state=="correct"){
 
 
     $('#UGCListBtn').click(function(){
-        conditions = {};
+        //conditions = {};
         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
         $('#main_menu ul[class="current"]').attr("class", "select");
         $('#UGCList').attr("class", "current");
@@ -750,7 +751,8 @@ if(res[i].liveContent[j].state=="correct"){
                         alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00');
                         flag = 1; 
                     }else{
-                        conditions = inputSearchData;
+                        //conditions = inputSearchData;
+                        FM.historyList.setConditions(inputSearchData);
                     }
                 });
                 FM.currentContent = FM.historyList;
@@ -784,7 +786,9 @@ if(res[i].liveContent[j].state=="correct"){
                         alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00');
                         flag = 1; 
                     }else{
-                        conditions = inputSearchData;
+                        //conditions = inputSearchData;
+                        FM.highlightList.setConditions(inputSearchData);
+                        
                     }
                 });
                 $('#table-content').html('<br> <br>刊登名單準備中，請稍候....');
@@ -832,15 +836,19 @@ if(res[i].liveContent[j].state=="correct"){
             /**
              * 查詢影片 click
              */
+            var conditions;
+            
             $('#ugcSearchBtn').click(function(){
                 var inputSearchData = {};
                 $('#condition-inner input[class="ugcSearchBtn"]').each(function(){
                     inputSearchData = {'no':$(this).val()};
                     conditions = inputSearchData;
+                    
                 });
-                if(conditions != null){
+                if(inputSearchData != null){
 				    $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
                     FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                    FM.UGCList.setConditions(conditions);
                     $('#main_menu ul[class="current"]').attr("class", "select");
                     $('#UGCList').attr("class", "current");
                     FM.currentContent = FM.UGCList;
@@ -855,6 +863,7 @@ if(res[i].liveContent[j].state=="correct"){
                 if(conditions != null){
 				    $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
                     FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                    FM.UGCList.setConditions(conditions);
                     $('#main_menu ul[class="current"]').attr("class", "select");
                     $('#UGCList').attr("class", "current");
                     FM.currentContent = FM.UGCList;
@@ -869,6 +878,7 @@ if(res[i].liveContent[j].state=="correct"){
                 if(conditions != null){
 				    $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
                     FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                    FM.UGCList.setConditions(conditions);
                     $('#main_menu ul[class="current"]').attr("class", "select");
                     $('#UGCList').attr("class", "current");
                     FM.currentContent = FM.UGCList;
@@ -882,6 +892,7 @@ if(res[i].liveContent[j].state=="correct"){
                 $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
                 conditions = {};
                 FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                FM.UGCList.setConditions(conditions);
                 $('#main_menu ul[class="current"]').attr("class", "select");
                 $('#UGCList').attr("class", "current");
                 FM.currentContent = FM.UGCList;
@@ -904,12 +915,13 @@ if(res[i].liveContent[j].state=="correct"){
                     conditions = inputSearchData;
                 });
                 if(conditions != null){
-				$('#table-content').html('<br> <br>審查名單準備中，請稍候....');
-                FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
-                $('#main_menu ul[class="current"]').attr("class", "select");
-                $('#UGCList').attr("class", "current");
-                FM.currentContent = FM.UGCList;
-                FM.currentContent.showCurrentPageContent();
+    				$('#table-content').html('<br> <br>審查名單準備中，請稍候....');
+                    FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                    FM.UGCList.setConditions(conditions);
+                    $('#main_menu ul[class="current"]').attr("class", "select");
+                    $('#UGCList').attr("class", "current");
+                    FM.currentContent = FM.UGCList;
+                    FM.currentContent.showCurrentPageContent();
                 }
             });
 
@@ -1061,7 +1073,8 @@ if(res[i].liveContent[j].state=="correct"){
                             success: function(response) {
                                 if(response.message){
                                     console.log("[Response_Set] message:" + response.message);
-                                    conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
+                                    //conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
+                                    FM.UGCPlayList.setConditions({ newUGCId :response.message, oldUGCId: programTimeSlotId});
                                     if(response.message.substring(0,6) != 'Cannot'){
                                     $('#main_menu ul[class="current"]').attr("class", "select");
                                     $('#UGCPlayList').attr("class", "current");
@@ -1099,7 +1112,8 @@ if(res[i].liveContent[j].state=="correct"){
                         success: function(response) {
                             if(response.message){
                                 console.log("[Response] message:" + response.message);
-                                conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
+                                //conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
+                                FM.UGCPlayList.setConditions({ newUGCId :response.message, oldUGCId: programTimeSlotId});
 
                                 $('#main_menu ul[class="current"]').attr("class", "select");
                                 $('#UGCPlayList').attr("class", "current");

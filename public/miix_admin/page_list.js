@@ -7,6 +7,7 @@ function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction)
     this.totalPageNumber = 1;
     this.listType = listType;
     this.extraParameters = null;
+    this.conditions = null;
     this.drawPageFunction = drawPageFunction;
     $.get('/miix_admin/list_size', {listType: listType, token: localStorage.token}, function(res){
         if (!res.err){
@@ -17,10 +18,41 @@ function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction)
         }
     });
     
+    
+    
+    //TODO: consider this new implementation
+    this.getListSize = function(cbOfGetListSize) {
+        $.get('/miix_admin/list_size', {listType: listType, token: localStorage.token}, function(res){
+            if (!res.err){
+                var listSize = res.size;
+                
+                if (cbOfGetListSize) {
+                    cbOfGetListSize(null, listSize);
+                }
+
+                
+               
+                _this.totalPageNumber = Math.ceil(res.size/_this.rowsPerPage); 
+                $('#totalPage').html(FM.currentContent.totalPageNumber);
+            }
+            else {
+                if (cbOfGetListSize) {
+                    cbOfGetListSize(res.err);
+                }
+            }
+        });
+    };
+    
+    
+    
 } 
 
 PageList.prototype.setExtraParameters = function(extraParameters){
     this.extraParameters = extraParameters;
+};
+
+PageList.prototype.setConditions = function(conditions){
+    this.conditions = conditions;
 };
 
 PageList.prototype.showPageContent = function(Page,condition, cbOfShowPageContent){
@@ -30,7 +62,7 @@ PageList.prototype.showPageContent = function(Page,condition, cbOfShowPageConten
     
     
     
-    $.get(this.urlToGetListContent, {skip: (Page-1)*this.rowsPerPage, limit: this.rowsPerPage, token:localStorage.token, condition:conditions, extraParameters: JSON.stringify(this.extraParameters)}, function(res){
+    $.get(this.urlToGetListContent, {skip: (Page-1)*this.rowsPerPage, limit: this.rowsPerPage, token:localStorage.token, condition:this.conditions, extraParameters: JSON.stringify(this.extraParameters)}, function(res){
         if(res.message){
             console.log("[Response] message:" + res.message);
             
