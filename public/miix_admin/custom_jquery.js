@@ -195,9 +195,9 @@ tr.append(td_3);
 
 for(var j=0;j<res[i].liveContent.length;j++){
 	//alert("a");
-	var linkS3=$("<a>").attr({href:res[i].liveContent[0].url.s3,
+	var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.s3,
 		                      target:"_blank"});
-	var live_img=$("<img>").attr({src:res[i].liveContent[0].url.s3,
+	var live_img=$("<img>").attr({src:res[i].liveContent[j].url.s3,
 		                           width:"330",
 		                           height:"200"});
 	
