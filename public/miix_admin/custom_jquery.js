@@ -215,16 +215,21 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	                                   
 	  
 	                                  });
+									  
+var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.livePhotos[k],
+		                      target:"_blank"});									  
 		var inner_img = $("<img>").attr({src:res[i].liveContent[j].url.livePhotos[k],
-		                                   width:300,
-										   height:150,
+		                                   width:350,
+										   height:200,
 										   id:"testMove",
-										   class:"ho"
+										   class:"ho",
+										   style:"margin-bottom:10px"
 	                                   
 	  
 	                                  });	
 									  
 	  var boxForChoose = $("<input>").attr({
+	  style:"margin-left:10px;margin-right:10px;",
 		  type:"radio",
 		id:"boxCheckLive",
 		class:"chooseOne",
@@ -237,7 +242,9 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"correct"});
 
-     span_img.append(inner_img);
+		
+		linkS3.append(inner_img);
+     span_img.append(linkS3);
 	 span_img.append(boxForChoose);
 	 
 div_live.append(span_img);	  
@@ -251,15 +258,15 @@ var tr_4=$("<tr>").html(div_live);//"live ugc, 編號+日期+圖+按鈕(靠右�
 	  
 	  
 	  
-	var linkS3=$("<a>").attr({href:res[i].liveContent[0].url.s3,
+	var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.s3,
 		                      target:"_blank"});
-	var live_img=$("<img>").attr({src:res[i].liveContent[0].url.s3,
+	var live_img=$("<img>").attr({src:res[i].liveContent[j].url.s3,
 		                           width:"330",
 		                           height:"200"});
 								   
 	
 	linkS3.append(live_img);
-	var tr_4=$("<tr>").html(live_img);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+	var tr_4=$("<tr>").html(linkS3);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
 	  
 	  
 }
@@ -407,11 +414,14 @@ if(res[i].liveContent[j].state=="correct"){
 	if(res[i].liveContent[j].state=="correct"){
 		// tr.append("<hr>");
 		
+		var chooseResult=$("<a>").attr({href:res[i].liveContent[j].url.s3,
+		                      target:"_blank"});					
 		var selectedImg = $("<img>").attr({src:res[i].liveContent[j].url.s3,
-			                              width:600,height:300});
+			                              width:500,height:250});
+				chooseResult.append(selectedImg);						  
 		tr_4.html("");
-		tr_4.append(selectedImg);
-		tr_4.append("讚!!!");
+		tr_4.append(chooseResult);
+		tr_4.append("<b style='color:blue'>五選一(done)<b>");
 		tr_4.prepend(sp);
 		tr.append(tr_4);
 		tr.append("<br>");
