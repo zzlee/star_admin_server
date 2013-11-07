@@ -546,26 +546,7 @@ if(res[i].liveContent[j].state=="correct"){
     
     
 
-    $('#memberListBtn').click(function(){
-        $('#main_menu ul[class="current"]').attr("class", "select");
-        $('#memberList').attr("class", "current");
-
-        FM.currentContent = FM.memberList;
-        FM.currentContent.showCurrentPageContent();
-        $('#table-content-header').html('');
-
-        /*
-        //FM.memberList(1, 18, function(res){
-        FM.memberList.getCurrentPageContent( function(res){
-            if(res.message){
-                console.log("[Response of memberList] message:" + res.message);
-            }else{
-                FM.currentContent = FM.memberList;
-                $('#table-content').html(res);
-            }
-        });
-         */
-    });
+    $('#memberListBtn').click( memberListSubPg.loadPage );
 
 
     $('#miixPlayListBtn').click(function(){
@@ -652,7 +633,7 @@ if(res[i].liveContent[j].state=="correct"){
     });
 	
 
-    $('#UGCPlayListBtn').click( UGCPlayListPg.loadInitialPg );
+    $('#UGCPlayListBtn').click( UGCPlayListSubPg.loadInitialPage );
 
     $('#historyListBtn').click(function(){
         $('#main_menu ul[class="current"]').attr("class", "select");

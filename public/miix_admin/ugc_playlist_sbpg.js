@@ -1,6 +1,6 @@
-var UGCPlayListPg = {
+var UGCPlayListSubPg = {
         
-    loadInitialPg: function(){
+    loadInitialPage: function(){
         $('#main_menu ul[class="current"]').attr("class", "select");
         $('#UGCPlayList').attr("class", "current");
         
@@ -8,7 +8,7 @@ var UGCPlayListPg = {
             $('#table-content-header').html(res);
             $('#table-content').html('');
             
-            $('#createProgramListBtn').click( UGCPlayListPg.loadProgramListTable );
+            $('#createProgramListBtn').click( UGCPlayListSubPg.loadProgramListTable );
 
         });
 
@@ -97,7 +97,7 @@ var UGCPlayListPg = {
 
                             FM.currentContent = FM.UGCPlayList;
                             FM.currentContent.setExtraParameters({sessionId: sessionId});
-                            FM.currentContent.showCurrentPageContent(UGCPlayListPg.afterProgramListTableIsLoaded);
+                            FM.currentContent.showCurrentPageContent(UGCPlayListSubPg.afterProgramListTableIsLoaded);
                             programSequenceArr =[];
                         }
                     },
