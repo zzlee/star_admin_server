@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FeltMeng.com
  */
 
@@ -110,20 +110,21 @@ if(i%2==0){
 
 if(res[i].liveContent[0]){
 var s3img=$("<img>").attr({src:res[i].liveContent[0].url.longPhoto,
-	                       width:"400",
-	                       height:"170"});
+	                       width:"200",
+	                       height:"80"
+						   });
 }else{
 
 var s3img=$("<div>").attr({
-	                       width:"400",
-	                       height:"150"}).html("live content 尚未產生喔~");
+	                       width:"200",
+	                       height:"80"}).html("live content 尚未產生喔~");
 }
 
 if(res[i].liveContent[0]){
 var s3imgLink=$("<a>").attr({href:res[i].liveContent[0].url.longPhoto,
-	                         target:"_blank"}).append(s3img);
+	                         target:"_blank"
+							 }).append(s3img);
 }
-
 
 
 var post_live_time_start=new Date(parseInt(res[i].start));
@@ -193,16 +194,78 @@ tr.append(td_3);
 //tr.append(td_4);
 // table.html("test");
 
+if(res[i].liveContent.length == 0){
+var tr_for_null = $("<tr>");
+  
+tr.append(tr_for_null);
+}
+
+
 for(var j=0;j<res[i].liveContent.length;j++){
 	//alert("a");
-	var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.s3,
+	
+	//for(var k=0;k<res[i].liveContent.url.livePhotos.length;k++)
+	
+	var div_live = $("<div>");
+	
+	if(res[i].liveContent[j].url.livePhotos){ //determine livePhotos or not
+	for(var k=0;k<res[i].liveContent[j].url.livePhotos.length;k++){
+	//alert("!");
+	  var span_img = $("<span>").attr({
+	                                   
+	  
+	                                  });
+		var inner_img = $("<img>").attr({src:res[i].liveContent[j].url.livePhotos[k],
+		                                   width:300,
+										   height:150,
+										   id:"testMove",
+										   class:"ho"
+	                                   
+	  
+	                                  });	
+									  
+	  var boxForChoose = $("<input>").attr({
+		  type:"radio",
+		id:"boxCheckLive",
+		class:"chooseOne",
+        name:"yo",
+        value:res[i].liveContent[j].ownerId.userID, //user id
+        "s3url":res[i].liveContent[j].url.livePhotos[k], //五選一
+		"longPic":res[i].liveContent[j].url.longPhoto, //長條圖
+        "_id":res[i].liveContent[j]._id, //_id
+		"liveTime":res[i].liveContent[j].liveTime,
+		"ugcCensorNo":res[i].ugcCensorNo,
+        "_type":"correct"});
+
+     span_img.append(inner_img);
+	 span_img.append(boxForChoose);
+	 
+div_live.append(span_img);	  
+if(k==3){
+div_live.append("<br>");
+}
+	  }
+var tr_4=$("<tr>").html(div_live);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+	  
+	  }else{
+	  
+	  
+	  
+	var linkS3=$("<a>").attr({href:res[i].liveContent[0].url.s3,
 		                      target:"_blank"});
-	var live_img=$("<img>").attr({src:res[i].liveContent[j].url.s3,
+	var live_img=$("<img>").attr({src:res[i].liveContent[0].url.s3,
 		                           width:"330",
 		                           height:"200"});
+								   
 	
 	linkS3.append(live_img);
-	var tr_4=$("<tr>").html(linkS3);
+	var tr_4=$("<tr>").html(live_img);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+	  
+	  
+}
+	
+	
+	
 	
 	
 	
@@ -217,17 +280,17 @@ for(var j=0;j<res[i].liveContent.length;j++){
 	
 	
 	
-	var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].liveContent[j].no+"  		│   "+timeString);
-	//var td_4=$("<td>").html("aa");
-	//tr.append(td_4);
+	var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].liveContent[j].no+"  		│   "+timeString); //sp是編號+日期
 	
-	/* radio box  */
+	
 	
 	var boxForm = $("<form>").attr({style:"display: inline-block;vertical-align:400%"});
 	var boxInput = $("<input>").attr({type:"radio",
 		                              name:"yo",
 		                              value:"ha",
 		                              checked:"checked"});
+									  
+	//---------------------- deprecated, 因為要一次拍五張 五選一--------------------------------------------								  
 	var boxInput2 = $("<input>").attr({type:"radio",
 		id:"boxCheckLive",
 		class:"good",
@@ -240,6 +303,7 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"correct"});
 	
+	 
 	var boxInput3 = $("<input>").attr({type:"radio",
 		id:"boxCheckLive",
         class:"bad",
@@ -251,9 +315,9 @@ for(var j=0;j<res[i].liveContent.length;j++){
 		"liveTime":res[i].liveContent[j].liveTime,
 		"ugcCensorNo":res[i].ugcCensorNo,
         "_type":"incorrect"});
+	//-------------------------------------------------------------------------
 	
-	
-	
+	if(!res[i].liveContent[j].url.livePhotos){  //determine livePhotos to show radio button
 if(res[i].liveContent[j].state=="correct"){
 	boxInput2.attr({checked:"checked"});
 	
@@ -267,6 +331,7 @@ if(res[i].liveContent[j].state=="correct"){
 	boxForm.append(boxInput);
 	boxForm.append("");
 	boxForm.append("<br>");
+	
 	boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	boxForm.append(boxInput2);
 	boxForm.append("<b style='color:blue'>成功(done)<b>");
@@ -275,10 +340,12 @@ if(res[i].liveContent[j].state=="correct"){
 	boxForm.append(boxInput3);
 	boxForm.append("");
 	/* ends of radio box */
-	tr_4.prepend(sp);
+	tr_4.prepend(sp); //編號日期連接liveimg
 	tr.append(tr_4);
-	//tr.append(boxForm);
+	tr.append(boxForm);
 	boxForm.appendTo(tr_4)
+	tr.append("<br>");
+	tr.append("<hr>");
 	tr.append("<br>");
 }else if(res[i].liveContent[j].state=="incorrect"){
 	
@@ -303,8 +370,10 @@ if(res[i].liveContent[j].state=="correct"){
 	/* ends of radio box */
 	tr_4.prepend(sp);
 	tr.append(tr_4);
-	//tr.append(boxForm);
+	tr.append(boxForm);
 	boxForm.appendTo(tr_4)
+	tr.append("<br>");
+	tr.append("<hr>");
 	tr.append("<br>");
 	//---------------------------------------------
 }else{
@@ -322,9 +391,61 @@ if(res[i].liveContent[j].state=="correct"){
 	/* ends of radio box */
 	tr_4.prepend(sp);
 	tr.append(tr_4);
-	//tr.append(boxForm);
+	tr.append(boxForm);
 	boxForm.appendTo(tr_4)
 	tr.append("<br>");
+	
+	 if(j!=res[i].liveContent.length-1){
+	 tr.append("<hr>");
+	 }
+	
+	tr.append("<br>");
+}
+
+}else{//for 1/5
+	
+	if(res[i].liveContent[j].state=="correct"){
+		// tr.append("<hr>");
+		
+		var selectedImg = $("<img>").attr({src:res[i].liveContent[j].url.s3,
+			                              width:600,height:300});
+		tr_4.html("");
+		tr_4.append(selectedImg);
+		tr_4.append("讚!!!");
+		tr_4.prepend(sp);
+		tr.append(tr_4);
+		tr.append("<br>");
+		
+		 if(j!=res[i].liveContent.length-1){
+		 tr.append("<hr>");
+		 }
+		
+		tr.append("<br>");
+	}else{
+boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	//boxForm.append(boxInput);
+	//boxForm.append("default");
+	//boxForm.append("<br>");
+	//boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	//boxForm.append(boxInput2);
+	//boxForm.append("正確");
+	//boxForm.append("<br>");
+	//boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+	//boxForm.append(boxInput3);
+	//boxForm.append("失敗");
+	/* ends of radio box */
+	tr_4.prepend(sp);
+	tr.append(tr_4);
+	//tr.append(boxForm);
+	//boxForm.appendTo(tr_4)
+	tr.append("<br>");
+	
+	 if(j!=res[i].liveContent.length-1){
+	 tr.append("<hr>");
+	 }
+	
+	tr.append("<br>");
+}
 }
 	
 	
@@ -337,12 +458,12 @@ if(res[i].liveContent[j].state=="correct"){
 	}
 	
 	
-	//-------------for fail-----
+	//-------------for fail 最左邊--------------------------------------
 	 $("#failbox.bad").click(function(){
 		  //alert("g");
 		  
 		  
-		  var forComfirm=confirm("你按下的是 ***失敗***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
+		  var forComfirm=confirm("你按下的是 ***失敗***\n辛苦囉 ~~~!!");
 		  if (forComfirm==true)
 		    {
 		  // alert("good");
@@ -391,8 +512,10 @@ if(res[i].liveContent[j].state=="correct"){
            });
 	    	
 	    });
-	//--------------------
+	//--------- end 最左邊 fail-----------
 	
+	 
+	/* ------------------------------  最右邊正確紐---------------------------------------------------*/
 	  $("#boxCheckLive.good").click(function(){
 		  //alert("g");
 		  
@@ -452,6 +575,75 @@ if(res[i].liveContent[j].state=="correct"){
             });
 	    	
 	    });
+		/* ------------------------------ end 最右邊正確紐---------------------------------------------------*/
+	 /* ------------------------------  最右邊五選一紐---------------------------------------------------*/
+	  $(".chooseOne").click(function(){
+		  console.log($(this));
+		  //alert("g");
+		  
+		  
+		  var forComfirm=confirm("你選了五張中最讚的張，請確定好之後送出!");
+		  
+		  
+		  
+	    	var _id=$(this).attr("_id");
+	    	var userID=$(this).val();
+	    	var s3Url=$(this).attr("s3url");
+	    	var picType=$(this).attr("_type");
+			var longPic=$(this).attr("longPic");
+			var liveTime=$(this).attr("liveTime");
+			var ugcCensorNo=$(this).attr("ugcCensorNo");
+	    	
+	    	console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
+	    	if (forComfirm==true)
+		    {
+		  // alert("good");
+		    }
+		  else
+		    {
+		   //alert("><");
+		   return false;
+		    }
+	    	
+	    	var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+	    	$.ajax({
+               url: url,
+               type: 'PUT',
+               data: {liveContent_Id:_id,
+               	   userID:userID,
+               	   photoUrl:s3Url,
+               	   vjson:{state: picType,
+               		   	  "url.s3": s3Url,
+               		     }
+               		 },
+               success: function(response) {
+                   if(response.message){
+                       console.log("[Response] message:" + response.message);
+                   }
+               }
+           });
+			
+			var url=DOMAIN+"fbItem/"+userID;
+	    	$.ajax({
+               url: url,
+               type: 'POST',
+               data: {s3Url: s3Url,
+               	   longPic: longPic,
+               	   type: picType,
+					   liveTime: liveTime,
+					   ugcCensorNo: ugcCensorNo,
+					   liveContent_Id:_id},
+               success: function(response) {
+                   if(response.message){
+                       console.log("[Response] message:" + response.message);
+                   }
+               }
+           });
+	    	
+	    });
+		/* ------------------------------ end 五選一紐---------------------------------------------------*/
+		
+		/* ------------------------------ deprecated---------------------------------------------------*/
 	  $("#boxCheckLive.bad").click(function(){
 		  // alert("b");
 		  
@@ -512,6 +704,7 @@ if(res[i].liveContent[j].state=="correct"){
 	    	
 	    	
 	    });
+		/* ------------------------------ends deprecated---------------------------------------------------*/
 	  
 	  $.get('/miix_admin/table_censorHistoryList_head.html', function(res){
           $('#table-content-header').html(res);
@@ -1159,11 +1352,11 @@ if(res[i].liveContent[j].state=="correct"){
                     sessionId = sessionItemInfoArray[0];
                     
                     $('#table-content-header').html(res);
-                    $('#timeStartText').val( sessionItemInfoArray[1]);
-                    $('#timeEndText').val( sessionItemInfoArray[2]);
-                    $('#playTimeStartText').val( sessionItemInfoArray[3]);
-                    $('#playTimeEndText').val( sessionItemInfoArray[4]);
-                    $('#sequenceText').val( sessionItemInfoArray[5]);
+                    $('#timeStartText').attr('value', sessionItemInfoArray[1]);
+                    $('#timeEndText').attr('value', sessionItemInfoArray[2]);
+                    $('#playTimeStartText').attr('value', sessionItemInfoArray[3]);
+                    $('#playTimeEndText').attr('value', sessionItemInfoArray[4]);
+                    $('#sequenceText').attr('value', sessionItemInfoArray[5]);
 
                     $('#main_menu ul[class="current"]').attr("class", "select");
                     $('#UGCPlayList').attr("class", "current");
@@ -1261,7 +1454,7 @@ if(res[i].liveContent[j].state=="correct"){
     });
 
     $('#pageNoInput').change(function(){
-        var pageNo = parseInt($("#pageNoInput").val());
+        var pageNo = parseInt($("#pageNoInput").attr('value'));
         if (pageNo){
             if ( pageNo < 1) {
                 pageNo = 1;
@@ -1271,17 +1464,17 @@ if(res[i].liveContent[j].state=="correct"){
             }
             FM.currentContent.showPageContent(pageNo);
             FM.currentContent.currentPage=pageNo;
-            $("#pageNoInput").val(pageNo);
+            $("#pageNoInput").attr('value',pageNo);
         }
         else{
-            $("#pageNoInput").val( FM.currentContent.currentPage);
+            $("#pageNoInput").attr('value', FM.currentContent.currentPage);
         }
     });
 
 
 
     $('input#rowsPerPage').change(function(){
-        var rowsPerPage = parseInt($('input#rowsPerPage').val());
+        var rowsPerPage = parseInt($('input#rowsPerPage').attr('value'));
         if (rowsPerPage){
             if ( rowsPerPage < 1) {
                 rowsPerPage = 1;
@@ -1289,41 +1482,33 @@ if(res[i].liveContent[j].state=="correct"){
             FM.currentContent.setRowsPerPage(rowsPerPage);
         }
         else{
-            $('input#rowsPerPage').val( FM.currentContent.rowsPerPage);
+            $('input#rowsPerPage').attr('value', FM.currentContent.rowsPerPage);
         }
     });
 
 
     //== access control ==
     if ( localStorage.role == "SUPER_ADMINISTRATOR" ) {
-        $("[id^='memberList']").show();
-        $("[id^='miixPlayList']").show();
-        $("[id^='storyPlayList']").show();
-        $("[id^='UGCList']").show();
-        $("[id^='highlightList']").show();
-        $("[id^='live_check']").show();
+        $('#memberList').show();
+        $('#miixPlayList').show();
+        $('#storyPlayList').show();
+        $('#UGCList').show();
+        $('#highlightList').show();
+        $('#live_check').show();
         FM.currentContent = FM.memberList;
         $('#memberListBtn').click();
-    } 
-    else if ( localStorage.role == "FELTMENG_ADMINISTRATOR" ) {
-        $("[id^='memberList']").show();
-        $("[id^='miixPlayList']").hide();
-        $("[id^='storyPlayList']").hide();
-        $("[id^='UGCList']").show();
-        $("[id^='highlightList']").show();
-        $("[id^='live_check']").show();
-        FM.currentContent = FM.memberList;
-        $('#memberListBtn').click();
+
     }
     else if ( localStorage.role == "OPERATOR" ) {
-        $("[id^='memberList']").hide();
-        $("[id^='miixPlayList']").hide();
-        $("[id^='storyPlayList']").hide();
-        $("[id^='UGCList']").hide();
-        $("[id^='highlightList']").hide();
-        $("[id^='live_check']").hide();
+        $('#memberList').hide();
+        $('#miixPlayList').hide();
+        $('#storyPlayList').hide();
+        $('#UGCList').hide();
+        $('#highlightList').hide();
+        $('#live_check').hide();
         FM.currentContent = FM.historyList;
         $('#historyListBtn').click();
+
     }
     
 
