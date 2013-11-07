@@ -34,15 +34,15 @@ PageList.prototype.showPageContent = function(Page,condition){
             if (!_this.drawPageFunction){
                 _this.currentPage = Page;
                 $('#table-content').html(res);
-                $('#pageNoInput').attr('value',_this.currentPage);
-                $('input#rowsPerPage').attr('value', _this.rowsPerPage);
+                $('#pageNoInput').val(_this.currentPage);
+                $('input#rowsPerPage').val( _this.rowsPerPage);
             }
             else { //drawPageFunction exists
             console.log(res);
                 _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
                 // console.log(_this.currentPage);
-                $('#pageNoInput').attr('value',_this.currentPage);
-                $('input#rowsPerPage').attr('value', _this.rowsPerPage);
+                $('#pageNoInput').val(_this.currentPage);
+                $('input#rowsPerPage').val( _this.rowsPerPage);
             }
         }
     });
