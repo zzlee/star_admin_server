@@ -190,13 +190,13 @@ var mappingUGCList = function(data, type, set_cb){
             }
             //UGCListInfo
             if(next == limit - 1) {
-                UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[1], UGCList);
+                UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], UGCList);
                 set_cb(null, 'ok'); 
                 next = 0;
                 UGCList = [];
             }
             else{
-                UGCListInfo(userPhotoUrl, data[next].no, description, result[0], null, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[1],UGCList);
+                UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2],UGCList);
                 next += 1;
                 mappingUGCList(data, type, set_cb);
             }
@@ -209,29 +209,33 @@ var mappingUGCList = function(data, type, set_cb){
     }
         async.parallel([
                         //deprecated
-//                        function(callback){
-//                            memberModel.find({'_id': data[next].ownerId._id}).exec(function(err, member){
-//                                if(err){
-//                                    logger.error('[mappingUserProfilePicture_getUserContent]', err);
-//                                    callback(err, null);
-//                                }
-//                                if(member[0]){
-//                                    console.log(member);
-//                                    getUserContent(member[0].fb.userID, member[0].app, function(err, result){
-//                                        if(err){
-//                                            logger.error('[mappingUserProfilePicture_getUserContent]', err);
-//                                            callback(err, null);
-//                                        }
-//                                        if(result){
-//                                            callback(null, result);
-//                                        }
-//                                    });
-//                                }else
-//                                     callback(null, 'No User');
-//                                
-//                            });
-//
-//                        },
+                       function(callback){
+						   if(data[next].contentGenre == "miix_it"){
+							   memberModel.find({'_id': data[next].ownerId._id}).exec(function(err, member){
+								   if(err){
+									   logger.error('[mappingUserProfilePicture_getUserContent]', err);
+									   callback(err, null);
+								   }
+								   if(member[0]){
+									   // console.log(member);
+									   getUserContent(member[0].fb.userID, member[0].app, function(err, result){
+										   if(err){
+											   logger.error('[mappingUserProfilePicture_getUserContent]', err);
+											   callback(err, null);
+										   }
+										   if(result){
+											   callback(null, result);
+										   }
+									   });
+								   }else
+										callback(null, 'No User');
+								   
+							   });
+						   }else{
+								callback(null, 'No User');
+						   }
+
+                       },
                         function(callback){
                             member_mgr.getUserNameAndID(data[next].ownerId._id, function(err, result){
                                 if(err) callback(err, null);
