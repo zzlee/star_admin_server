@@ -55,7 +55,7 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
             function( setting_cb ){ videoSetting( program, setting_cb ); },
             function( target, categories_cb ){ videoCategoriesByUser( file, target, categories_cb ); },
             function( target, update_cb ){ updateLiveVideoContent( program, target, update_cb ); },
-            function(renderLive_cb){
+            function( status, renderLive_cb ){
                 // var projectId = list.awsS3[0].split('/');
                 // projectId = projectId[projectId.length-1].split('__')[0];
                 // var url = 'http://127.0.0.1/internal/story_cam_controller/available_story_movie';
