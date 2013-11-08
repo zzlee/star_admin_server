@@ -214,7 +214,7 @@ FM.censorHandler.updatetimeslots_get_cb = function(req, res){
 
     var programTimeSlot =  req.body.programTimeSlotId;
     var ugcReferenceNo = req.body.ugcReferenceNo;
-
+    var sessionId = req.params.sessionId;
 
     if(req.body.type == 'removeUgcfromProgramAndAutoSetNewOne'){
         scheduleMgr.removeUgcfromProgramAndAutoSetNewOne(sessionId, programTimeSlot, function(err, result){

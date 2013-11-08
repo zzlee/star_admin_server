@@ -1455,18 +1455,22 @@ scheduleMgr.removeUgcfromProgramAndAutoSetNewOne = function(sessionId, programTi
                       //get candidate UGCs from DB 
                       candidateUgcCacheModel.find({ "sessionId": sessionId }).sort({"index":1}).exec(function (err3, doc) {
                           if (!err3){
-                              for (var i=0; i<doc.length; i++) {
-                                  candidateUgcList.push(doc[i].candidateUgc);
+                              if(!doc[0]){
+                                  cb3('Failed to get candidate UGCs from DB: '+err3);
+                              }else{
+                                  for (var i=0; i<doc.length; i++) {
+                                      candidateUgcList.push(doc[i].candidateUgc);
+                                  }
+                                  indexOfLatCandidatUgcCache = doc[doc.length-1].index;
+                                  //console.log('indexOfLatCandidatUgcCache=%s', indexOfLatCandidatUgcCache);
+                                  //debugger;
+                                  //console.log("candidateUgcList=");
+                                  //console.dir(candidateUgcList);               
+                                  cb3(null);
                               }
-                              indexOfLatCandidatUgcCache = doc[doc.length-1].index;
-                              //console.log('indexOfLatCandidatUgcCache=%s', indexOfLatCandidatUgcCache);
-                              //debugger;
-                              //console.log("candidateUgcList=");
-                              //console.dir(candidateUgcList);               
-                              cb3(null);
                           }
                           else {
-                              cb3('Failed to get candidate UGCs from DB: '+err3_1);
+                              cb3('Failed to get candidate UGCs from DB: '+err3);
                           }
                       });
                   },

@@ -48,9 +48,17 @@ form#mainform(action='')
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
                       td #{ugcCensor.ugcCensorNo}
-                      td
-                         a(href='#{ugcCensor.url.s3}',target='_blank')  
-                          img(src='#{ugcCensor.url.s3}', alt='', width='700', height='149') 
+                      if(ugcCensor.contentGenre == 'miix_it')
+                         td
+                             img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
+                             label       
+                             img(src='#{ugcCensor.userPhotoUrl}', alt='', width='360')
+                             br
+                             label #{ugcCensor.fb_userName} 
+                      else
+                         td
+                             a(href='#{ugcCensor.url.s3}',target='_blank')  
+                                 img(src='#{ugcCensor.url.s3}', alt='', width='700', height='149') 
                      
                       td #{ugcCensor.doohPlayedTimes}
                       td
@@ -123,9 +131,17 @@ form#mainform(action='')
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
                       td #{ugcCensor.ugcCensorNo}
-                      td
-                         a(href='#{ugcCensor.url.s3}',target='_blank')  
-                          img(src='#{ugcCensor.url.s3}', alt='', width='700', height='149')
+                      if(ugcCensor.contentGenre == 'miix_it')
+                         td
+                             img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
+                             label       
+                             img(src='#{ugcCensor.userPhotoUrl}', alt='', width='360')
+                             br
+                             label #{ugcCensor.fb_userName} 
+                      else
+                         td
+                             a(href='#{ugcCensor.url.s3}',target='_blank')  
+                                 img(src='#{ugcCensor.url.s3}', alt='', width='700', height='149')
                       
                       td #{ugcCensor.doohPlayedTimes}
                       td
