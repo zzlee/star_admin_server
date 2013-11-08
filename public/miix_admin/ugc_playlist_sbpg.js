@@ -3,6 +3,7 @@ var UGCPlayListSubPg = {
     loadInitialPage: function(){
         $('#main_menu ul[class="current"]').attr("class", "select");
         $('#UGCPlayList').attr("class", "current");
+        $('#contentExtra').html("").hide();
         
         $.get('/miix_admin/table_censorPlayList_head.html', function(res){
             $('#table-content-header').html(res);

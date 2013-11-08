@@ -46,7 +46,7 @@ FM.DB = (function(){
             liveContentState = 'not_checked correct incorrect'.split(' '),
             appGenre = 'ondascreen wowtaipeiarena'.split(' '),
             
-            adminRole = 'SUPER_ADMINISTRATOR FELTMENG_ADMINISTRATOR OPERATOR'.split(' '),
+            adminRole = 'SUPER_ADMINISTRATOR FELTMENG_ADMINISTRATOR FELTMENG_DEMO OPERATOR'.split(' '),
             
             videoStatus = 'good soso bad waiting none'.split(' '), //DEPRECATE, keep for reference
             videoGenre = 'miix miix_street miix_story'.split(' '); //DEPRECATE, keep for reference 

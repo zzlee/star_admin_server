@@ -6,5 +6,14 @@ var memberListSubPg = {
         FM.currentContent = FM.memberList;
         FM.currentContent.showCurrentPageContent();
         $('#table-content-header').html('');
+        
+        $.get('/miix_admin/table_censorMemberList_contentExtra.html', function(res){
+            $('#contentExtra').html(res).show();
+            $.get('/miix_admin/member_total_counts', {token: localStorage.token}, function(res){
+                $('#tdFBLikeTatalCount').html(res.totalFbLike);
+                $('#tdFBCommentTatalCount').html(res.totalFbComment);
+                $('#tdFBShareTatalCount').html(res.totalFbShare);
+            });
+        });
     }
 };

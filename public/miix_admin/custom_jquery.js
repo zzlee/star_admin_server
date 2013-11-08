@@ -552,6 +552,7 @@ if(res[i].liveContent[j].state=="correct"){
     $('#miixPlayListBtn').click(function(){
         $('#main_menu ul[class="current"]').attr("class", "select");
         $('#miixPlayList').attr("class", "current");
+        $('#contentExtra').html("").hide();
 
         FM.currentContent = FM.miixPlayList;
         FM.currentContent.showCurrentPageContent();
@@ -571,6 +572,7 @@ if(res[i].liveContent[j].state=="correct"){
     $('#storyPlayListBtn').click(function(){
         $('#main_menu ul[class="current"]').attr("class", "select");
         $('#storyPlayList').attr("class", "current");
+        $('#contentExtra').html("").hide();
 
         FM.currentContent = FM.storyPlayList;
         FM.currentContent.showCurrentPageContent();
@@ -594,6 +596,7 @@ if(res[i].liveContent[j].state=="correct"){
         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
         $('#main_menu ul[class="current"]').attr("class", "select");
         $('#UGCList').attr("class", "current");
+        $('#contentExtra').html("").hide();
 
         FM.currentContent = FM.UGCList;
         FM.currentContent.showCurrentPageContent();
@@ -629,6 +632,7 @@ if(res[i].liveContent[j].state=="correct"){
         FM.currentContent = FM.live_check;
         FM.currentContent.showCurrentPageContent();
         $('#table-content-header').html('');
+        $('#contentExtra').html("").hide();
 
     });
 	
@@ -638,6 +642,7 @@ if(res[i].liveContent[j].state=="correct"){
     $('#historyListBtn').click(function(){
         $('#main_menu ul[class="current"]').attr("class", "select");
         $('#historyList').attr("class", "current");
+        $('#contentExtra').html("").hide();
 
         $.get('/miix_admin/table_censorHistoryList_head.html', function(res){
             $('#table-content-header').html(res);
@@ -1081,6 +1086,16 @@ if(res[i].liveContent[j].state=="correct"){
         $("[id^='UGCList']").show();
         $("[id^='highlightList']").show();
         $("[id^='live_check']").show();
+        FM.currentContent = FM.memberList;
+        $('#memberListBtn').click();
+    }
+    else if ( localStorage.role == "FELTMENG_DEMO" ) {
+        $("[id^='memberList']").show();
+        $("[id^='miixPlayList']").hide();
+        $("[id^='storyPlayList']").hide();
+        $("[id^='UGCList']").show();
+        $("[id^='highlightList']").hide();
+        $("[id^='live_check']").hide();
         FM.currentContent = FM.memberList;
         $('#memberListBtn').click();
     }
