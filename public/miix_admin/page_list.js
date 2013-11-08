@@ -7,7 +7,10 @@ function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction)
     this.totalPageNumber = 1;
     this.listType = listType;
     this.extraParameters = null;
+    this.conditions = null;
     this.drawPageFunction = drawPageFunction;
+    
+    //TODO: have a cleaner way to get the list size
     $.get('/miix_admin/list_size', {listType: listType, token: localStorage.token}, function(res){
         if (!res.err){
             var listSize = res.size;
@@ -17,78 +20,104 @@ function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction)
         }
     });
     
-}; 
+} 
 
 PageList.prototype.setExtraParameters = function(extraParameters){
     this.extraParameters = extraParameters;
 };
 
-PageList.prototype.showPageContent = function(Page,condition){
+PageList.prototype.setConditions = function(conditions){
+    this.conditions = conditions;
+};
+
+PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
     $('#table-content').html('Loading...');
     var _this = this;
-    $.get(this.urlToGetListContent, {skip: (Page-1)*this.rowsPerPage, limit: this.rowsPerPage, token:localStorage.token, condition:conditions, extraParameters: JSON.stringify(this.extraParameters)}, function(res){
-        if(res.message){
-            console.log("[Response] message:" + res.message);
-            
-        }else{
-            if (!_this.drawPageFunction){
-                _this.currentPage = Page;
-                $('#table-content').html(res);
-                $('#pageNoInput').attr('value',_this.currentPage);
-                $('input#rowsPerPage').attr('value', _this.rowsPerPage);
-            }
-            else { //drawPageFunction exists
-            console.log(res);
-                _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
-                // console.log(_this.currentPage);
-                $('#pageNoInput').attr('value',_this.currentPage);
-                $('input#rowsPerPage').attr('value', _this.rowsPerPage);
-            }
-        }
-    });
+    
+    
+    async.parallel([
+        function(callback){
+            //get list's HTML content
+            $.get(_this.urlToGetListContent, {skip: (Page-1)*_this.rowsPerPage, limit: _this.rowsPerPage, token:localStorage.token, condition:_this.conditions, extraParameters: JSON.stringify(_this.extraParameters)}, function(res){
+                if(res.message){
+                    console.log("[Response] message:" + res.message);
+                    callback("Failed to get list's HTML content: "+res.message);
+                    
+                }else{
+                    if (!_this.drawPageFunction){
+                        _this.currentPage = Page;
+                        $('#table-content').html(res);
+                    }
+                    else { //drawPageFunction exists
+                        _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
+                    }
+                    $('#pageNoInput').val(_this.currentPage);
+                    $('input#rowsPerPage').val( _this.rowsPerPage);
+                    callback(null);
+                }
+            }).fail(function() {
+                callback("Failed to get list's HTML content");
+            });
+        },
+        function(callback){
+            //get list's size
+            //TODO: have a cleaner way to get the list size
+            $.get('/miix_admin/list_size', {listType: _this.listType, token: localStorage.token}, function(res){
+                if (!res.err){
+                //console.log(res);
+                    var listSize = res.size;
+                    _this.totalPageNumber = Math.ceil(res.size/_this.rowsPerPage); 
+                    $('#totalPage').html(FM.currentContent.totalPageNumber);
+                    callback(null);
+                }
+                else {
+                    callback("Failed to get list's size: "+ res.err);
+                }
+            }).fail(function() {
+                callback("Failed to get list's size");
+            });
 
-    $.get('/miix_admin/list_size', {listType: this.listType, token: localStorage.token}, function(res){
-        if (!res.err){
-        //console.log(res);
-            var listSize = res.size;
-            _this.totalPageNumber = Math.ceil(res.size/_this.rowsPerPage); 
-            $('#totalPage').html(FM.currentContent.totalPageNumber);
+        }
+    ],
+    function(err){
+        if (cbOfShowPageContent){
+            cbOfShowPageContent(err);
         }
     });
 };
 
-PageList.prototype.showCurrentPageContent = function(){
-    this.showPageContent(this.currentPage);
+PageList.prototype.showCurrentPageContent = function(cb){
+    this.showPageContent(this.currentPage, cb);
 };
 
 
-PageList.prototype.showNextPageContent = function(){
+PageList.prototype.showNextPageContent = function(cb){
     if (this.currentPage < this.totalPageNumber){
         this.currentPage++;
-        this.showCurrentPageContent();
+        this.showCurrentPageContent(cb);
     }
 };
 
-PageList.prototype.showPreviousPageContent = function(){
+PageList.prototype.showPreviousPageContent = function(cb){
     if (this.currentPage > 1){
         this.currentPage--;
-        this.showCurrentPageContent();
+        this.showCurrentPageContent(cb);
     }
 
 };
 
-PageList.prototype.showFirstPageContent = function(){
-    this.showPageContent(1);
+PageList.prototype.showFirstPageContent = function(cb){
+    this.showPageContent(1, cb);
 };
 
-PageList.prototype.showLastPageContent = function(){
-    this.showPageContent(this.totalPageNumber);
+PageList.prototype.showLastPageContent = function(cb){
+    this.showPageContent(this.totalPageNumber, cb);
 };
 
-PageList.prototype.setRowsPerPage = function(newRowsPerPage ){
+PageList.prototype.setRowsPerPage = function(newRowsPerPage, cb ){
     var keyRow = this.rowsPerPage*(this.currentPage-1)+1;
     var newPage = Math.ceil(keyRow/newRowsPerPage); 
     this.rowsPerPage = newRowsPerPage;
-    this.showPageContent(newPage);
+    this.showPageContent(newPage, cb);
 };
 
