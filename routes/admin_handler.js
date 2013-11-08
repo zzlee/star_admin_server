@@ -118,6 +118,20 @@ FM.admin.memberList_get_cb = function(req, res){
     
 };
 
+FM.admin.member_total_counts_get_cb = function(req, res){
+    logger.info('[GET ' + req.path + '] is called');
+    var db = require('../db.js');
+    var memberListInfoModel = db.getDocModel("memberListInfo");
+    memberListInfoModel.aggregate(
+            {$group:{ _id:"", totalFbLike:{$sum: "$fbLike_count"}, totalFbComment:{$sum: "$fbComment_count"}, totalFbShare:{$sum: "$fbShare_count"}} }, 
+            {$project:{ _id:0, totalFbLike: "$totalFbLike", totalFbComment: "$totalFbComment", totalFbShare: "$totalFbShare"}}, function(err, result){
+        
+        logger.info("Memeber's FB total counts: "+JSON.stringify(result[0]));
+        //console.log("result=");
+        //console.dir(result);
+        res.send(result[0]);
+    });
+};
 
 FM.admin.miixPlayList_get_cb = function(req, res){
 
@@ -153,7 +167,7 @@ FM.admin.storyPlayList_get_cb = function(req, res){
      
 };
 
-//GZ
+
 FM.admin.listSize_get_cb = function(req, res){
     if (req.query.listType == 'memberList'){
         member_mgr.getMemberCount(function(err, count) {

@@ -147,12 +147,26 @@ async.waterfall([
     },
     function(callback){
         //tests
+        
+//        //adminBrowserMgr.showTrace() test
 //        var adminBrowserMgr = require('./admin_browser_mgr.js');
 //        setInterval(function(){
 //            var trace = (new Date()).toString();
 //            adminBrowserMgr.showTrace(null, trace);
 //            //console.log('show trace: '+trace);
 //        }, 2000);
+
+//        //aggregate test
+//        var db = require('./db.js');
+//        var memberListInfoModel = db.getDocModel("memberListInfo");
+//        memberListInfoModel.aggregate(
+//                {$group:{ _id:"", totalFbLike:{$sum: "$fbLike_count"}, totalFbComment:{$sum: "$fbComment_count"}, totalFbShare:{$sum: "$fbShare_count"}} }, 
+//                {$project:{ _id:0, totalFbLike: "$totalFbLike", totalFbComment: "$totalFbComment", totalFbShare: "$totalFbShare"}}, 
+//                function(err, result){
+//            console.log("result=");
+//            console.dir(result);
+//        });
+        
         
         callback(null);
     }

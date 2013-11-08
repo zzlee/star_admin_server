@@ -10,6 +10,7 @@ exports.init = function() {
     app.get('/miix_admin/login', routes.admin.login_get_cb); //TODO: change to a better resource name of RESTful style
     app.get('/miix_admin/logout', routes.admin.logout_get_cb); //TODO: change to a better resource name of RESTful style
     app.get('/miix_admin/members', routes.authorizationHandler.checkAuth, routes.admin.memberList_get_cb);
+    app.get('/miix_admin/member_total_counts', routes.authorizationHandler.checkAuth, routes.admin.member_total_counts_get_cb);
     app.get('/miix_admin/miix_movies', routes.authorizationHandler.checkAuth, routes.admin.miixPlayList_get_cb); 
     app.get('/miix_admin/story_movies', routes.authorizationHandler.checkAuth, routes.admin.storyPlayList_get_cb);
     app.get('/miix_admin/list_size', routes.authorizationHandler.checkAuth, routes.admin.listSize_get_cb);
