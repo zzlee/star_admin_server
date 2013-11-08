@@ -49,7 +49,7 @@ FM.censorHandler.getUGCList_get_cb = function(req,res){ //審查名單
             'projectId':{ $exists: true}
     };
     sort = {
-            'createdOn':-1
+            'no':-1
     };
     
     if(req.query.condition)   
