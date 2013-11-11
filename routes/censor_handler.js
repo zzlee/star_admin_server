@@ -49,7 +49,7 @@ FM.censorHandler.getUGCList_get_cb = function(req,res){ //審查名單
             'projectId':{ $exists: true}
     };
     sort = {
-            'createdOn':-1
+            'no':-1
     };
     
     if(req.query.condition)   
@@ -214,7 +214,7 @@ FM.censorHandler.updatetimeslots_get_cb = function(req, res){
 
     var programTimeSlot =  req.body.programTimeSlotId;
     var ugcReferenceNo = req.body.ugcReferenceNo;
-
+    var sessionId = req.params.sessionId;
 
     if(req.body.type == 'removeUgcfromProgramAndAutoSetNewOne'){
         scheduleMgr.removeUgcfromProgramAndAutoSetNewOne(sessionId, programTimeSlot, function(err, result){

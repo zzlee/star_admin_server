@@ -98,7 +98,8 @@ var UGCPlayListSubPg = {
 
                             FM.currentContent = FM.UGCPlayList;
                             FM.currentContent.setExtraParameters({sessionId: sessionId});
-                            FM.currentContent.showCurrentPageContent(UGCPlayListSubPg.afterProgramListTableIsLoaded);
+                            //FM.currentContent.showCurrentPageContent(UGCPlayListSubPg.afterProgramListTableIsLoaded);
+                            FM.currentContent.showCurrentPageContent();
                             programSequenceArr =[];
                         }
                     },
@@ -118,13 +119,14 @@ var UGCPlayListSubPg = {
     },
     
     afterProgramListTableIsLoaded: function() {
-        $('#ugcCensor.ugcCensorNoSetBtn').click(function(){
+        $('#PlayList.ugcCensorNoSetBtn').click(function(){
+            console.log("PlayList.ugcCensorNoSetBtn");
             var flag = 0;
-            var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/sessionId";
+            var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
             var programTimeSlotId = $(this).attr("name");
             var ugcReferenceNo;
 
-            $('input[class="#ugcCensor.ugcCensorNoSetBtn"]').each(function(){
+            $('input[class="#PlayList.ugcCensorNoSetBtn"]').each(function(){
                 
                 ugcReferenceNo = $(this).val();
                 
@@ -158,9 +160,10 @@ var UGCPlayListSubPg = {
 
         });
 
-        $('#ugcCensor.ugcCensorNoRemoveBtn').click(function(){
+        $('#PlayList.ugcCensorNoRemoveBtn').click(function(){
+            console.log("PlayList.ugcCensorNoRemoveBtn");
             var flag = 0;
-            var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/sessionId";
+            var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
             var programTimeSlotId = $(this).attr("name");
 
             if(sessionId === null && flag == 0){

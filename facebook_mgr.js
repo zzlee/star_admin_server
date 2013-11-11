@@ -449,7 +449,7 @@ FM.facebookMgr = (function(){
           //kaiser
             getUserProfilePicture: function(fb_id, app, cb){
                 
-                var path = "/"+fb_id+"/?fields=picture&width=240&height=240";
+                var path = "/"+fb_id+"/?fields=picture.height(720).width(720)";
                 
                 switch(app){
                 case "wowtaipeiarena":
