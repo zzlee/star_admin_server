@@ -504,8 +504,60 @@ $(document).ready(function(){
 		  //alert("g");
 		  
 		  if($(this).attr("genre") == "miix_story_raw"){
-									alert("it's miix_story_raw");		
-									
+									//alert("it's miix_story_raw");		
+									var forComfirm=confirm("你按下的是 ***正確***(for video)\n多謝!!");
+							  if (forComfirm==true)
+								{
+							 
+								}
+							  else
+								{
+							  
+							   return false;
+								}
+							  
+							  
+								var _id=$(this).attr("_id");
+								var userID=$(this).val();
+								var s3Url=$(this).attr("s3url");
+								var picType=$(this).attr("_type");
+								var longPic=$(this).attr("longPic");
+								var liveTime=$(this).attr("liveTime");
+								var ugcCensorNo=$(this).attr("ugcCensorNo");
+								
+								console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
+								
+								var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+								$.ajax({
+									url: url,
+									type: 'PUT',
+									data: {liveContent_Id:_id,
+										   userID:userID,
+										   photoUrl:s3Url,
+										   vjson:{state: picType}},
+									success: function(response) {
+										if(response.message){
+											console.log("[Response] message:" + response.message);
+										}
+									}
+								});
+								
+								var url=DOMAIN+"fbItem/"+userID;
+								$.ajax({
+									url: url,
+									type: 'POST',
+									data: {s3Url: s3Url,
+										   longPic: longPic,
+										   type: picType,
+										   liveTime: liveTime,
+										   ugcCensorNo: ugcCensorNo,
+										   liveContent_Id:_id},
+									success: function(response) {
+										if(response.message){
+											console.log("[Response] message:" + response.message);
+										}
+									}
+								});
 						/* add code to implement "miix_story_raw"*/
 		  
 		  }else{
