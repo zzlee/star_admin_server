@@ -167,6 +167,14 @@ async.waterfall([
 //            console.dir(result);
 //        });
         
+//        //count test
+//        var db = require('./db.js');
+//        var ugcModel = db.getDocModel("ugc");
+//        ugcModel.count(function(err, result){
+//            console.log("result=");
+//            console.dir(result);
+//        });
+        
         
         callback(null);
     }

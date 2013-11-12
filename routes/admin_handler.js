@@ -1,5 +1,6 @@
 ﻿var fs = require('fs');
 var path = require('path');
+var async = require('async');
 var workingPath = process.cwd();
 
 var admin_mgr = require("../admin.js"),
@@ -121,15 +122,49 @@ FM.admin.memberList_get_cb = function(req, res){
 FM.admin.member_total_counts_get_cb = function(req, res){
     logger.info('[GET ' + req.path + '] is called');
     var db = require('../db.js');
-    var memberListInfoModel = db.getDocModel("memberListInfo");
-    memberListInfoModel.aggregate(
-            {$group:{ _id:"", totalFbLike:{$sum: "$fbLike_count"}, totalFbComment:{$sum: "$fbComment_count"}, totalFbShare:{$sum: "$fbShare_count"}} }, 
-            {$project:{ _id:0, totalFbLike: "$totalFbLike", totalFbComment: "$totalFbComment", totalFbShare: "$totalFbShare"}}, function(err, result){
-        
-        logger.info("Memeber's FB total counts: "+JSON.stringify(result[0]));
-        //console.log("result=");
-        //console.dir(result);
-        res.send(result[0]);
+    
+    async.waterfall([
+        function(callback){ 
+            var memberListInfoModel = db.getDocModel("memberListInfo");
+            memberListInfoModel.aggregate(
+                    {$group:{ _id:"", totalPlayOnDooh:{$sum: "$doohPlay_count"}, totalFbLike:{$sum: "$fbLike_count"}, totalFbComment:{$sum: "$fbComment_count"}, totalFbShare:{$sum: "$fbShare_count"}} }, 
+                    {$project:{ _id:0, totalPlayOnDooh: "$totalPlayOnDooh", totalFbLike: "$totalFbLike", totalFbComment: "$totalFbComment", totalFbShare: "$totalFbShare"}}, function(errOfAggregate, result){
+                if (!errOfAggregate) {
+                    logger.info("Memeber's FB total counts: "+JSON.stringify(result[0]));
+                    //console.log("result=");
+                    //console.dir(result);
+                    callback(null, result[0]);
+                }
+                else {
+                    callback("Fail to execute memberListInfoModel.aggregate(): "+errOfAggregate, null);
+                }
+            });
+
+        },
+        function(memberListAggregateResult, callback){ 
+            var allResult = memberListAggregateResult;
+            var ugcModel = db.getDocModel("ugc");
+            ugcModel.count(function(errOfCount, result){
+                if (!errOfCount) {
+                    logger.info("Total UGC counts: "+JSON.stringify(result));
+                    //console.log("result=");
+                    //console.dir(result);
+                    allResult.totalUgc = result;
+                    callback(null, allResult);
+                }
+                else {
+                    callback("Fail to execute ugcModel.count(): "+errOfCount, null);
+                }
+            });
+
+        }
+    ], function (err, StatisticalResult) {
+        if (!err){
+            res.send(StatisticalResult);
+        }
+        else {
+            res.send(500);
+        }
     });
 };
 
