@@ -230,16 +230,20 @@ $(document).ready(function(){
 											}else{
 											/*---------------------------------- when genre is   "miix_story_raw"----------------------------------------*/
 														  if(res[i].liveContent[j].genre == "miix_story_raw"){
-														  
+                                                                        var videoSrc = res[i].liveContent[j].url.s3;
+                                                                        if(videoSrc[0] != 'h')
+                                                                            videoSrc = 'https://s3.amazonaws.com/miix_content/' + videoSrc;
+                                                                        
 																	   var sourceTag=$("<source>").attr({
-																									src:'https://s3.amazonaws.com/miix_content/'+res[i].liveContent[j].url.s3,
-																									type:"video/mp4",
+																									// src:'https://s3.amazonaws.com/miix_content/'+res[i].liveContent[j].url.s3,
+																									// src:res[i].liveContent[j].url.s3,
+																									src: videoSrc,
+																									type: "video/mp4",
 																								});
 																		var videoTag = $("<video>").attr({
 																									 controls:"",
 																									 width:500,
 																									 height:500
-																										
 																									});
 																		videoTag.append(sourceTag);
 																		var tr_4=$("<tr>").html(videoTag);//"live ugc, 編號+日期+圖+按鈕(靠右的))"

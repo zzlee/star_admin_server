@@ -411,7 +411,7 @@ var updateLiveVideoContent = function( programList, target, video_update_cb ) {
                 "ownerId": { '_id': ugc.ownerId._id, 
                              'fbUserId': ugc.ownerId.userID,
                              'userID': ugc.ownerId.userID },
-                'url': { 's3': liveVideoUrl },
+                'url': { 's3': 'https://s3.amazonaws.com/miix_content/' + liveVideoUrl },
                 'genre': 'miix_story_raw',
                 'projectId': liveContentId,
                 'sourceId': ugc.projectId,
