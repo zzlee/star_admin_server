@@ -155,7 +155,8 @@ FM.DB = (function(){
             fb_postId: [{
                 postId: String,
             }],
-            highlight: {type: Boolean, default: false}
+            highlight: {type: Boolean, default: false},
+            hot: {type: Boolean, default: false}
         }); //  UGC collection
         
         var CommentSchema = new Schema({
@@ -246,7 +247,8 @@ FM.DB = (function(){
             fbLike_count: {type: Number, min: 0, default: 0},         //FB讚總數
             fbComment_count: {type: Number, min: 0, default: 0},      //FB留言總數
             fbShare_count: {type: Number, min: 0, default: 0},         //FB分享次數
-            app: {type: String, enum: appGenre, default: 'ondascreen'}
+            app: {type: String, enum: appGenre, default: 'ondascreen'},
+            hot: {type: Boolean, default: false}
         }); //  memberListInfo collection
         
         var MiixPlayListInfoSchema = new Schema({
@@ -329,6 +331,28 @@ FM.DB = (function(){
             sourceId: {type: String},   //UGC projectId
             state: {type: String, enum: liveContentState, default: 'not_checked'}
         }); //  UserLiveContent collection
+        
+        var MyMemberSchema = new Schema({
+            fb: {type: Mixed},  //  Facebook, Carefull! don't use {type: [Mixed]}
+            fullname: {type: String},
+            memberID: {type: String},
+            password: {type: String},
+            deviceToken: {type: Mixed},
+            mPhone: { number: String, verified: {type: Boolean, default: false}, code: String },
+            email: {type: String, default: 'xyz@feltmeng.com'},
+            birthday: {type: Number, min:19110101},
+            occupation: {type: String, enum: occupationList},
+            gender: {type: Boolean},    //  0:Male 1:Female
+            education: {type: String, enum: eduLv},
+            notification: {type: Boolean, default: true},
+            ugc_ids: {type: [ObjectID]},
+            activity_ids: {type: [ObjectID]},
+            ugc_count: {type: Number, min: 0, default: 0},
+            thumbnail: {type: String},    //  path/to/filename
+            doohTimes: {type: Number, min: 0, default: 0},
+            app: {type: String, enum: appGenre, default: 'ondascreen'},
+            apply: {type: Boolean, default: false}
+        }); //  MyMember collection
 		
         /****************** End of DB Schema ******************/
 		
@@ -347,7 +371,8 @@ FM.DB = (function(){
             UGC = connection.model('UGC', UGCSchema, 'ugc'),
             CustomerServiceItem = connection.model('CustomerServiceItem', CustomerServiceItemSchema, 'customerServiceItem'),
             SessionItem = connection.model('SessionItem', SessionItemSchema, 'sessionItem'),
-            UserLiveContent = connection.model('UserLiveContent', UserLiveContentSchema, 'userLiveContent');
+            UserLiveContent = connection.model('UserLiveContent', UserLiveContentSchema, 'userLiveContent'),
+            MyMember = connection.model('MyMember', MyMemberSchema, 'myMember');
            
             
         var dbModels = [];
@@ -367,6 +392,7 @@ FM.DB = (function(){
         dbModels["customerServiceItem"] = CustomerServiceItem;
         dbModels["sessionItem"] = SessionItem;
         dbModels["userLiveContent"] = UserLiveContent;
+        dbModels["myMember"] = MyMember;
         
         //???? nobody uses it, so this section can be removed? 
         var dbSchemas = [];
@@ -474,6 +500,9 @@ FM.DB = (function(){
                         break;
                     case 'userLiveContent':
                         return UserLiveContent;
+                        break;
+                    case 'myMember':
+                        return MyMember;
                         break;
                     default:
                         throw new error('DB Cannot find this Collection: ' + collection);

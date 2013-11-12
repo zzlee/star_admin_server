@@ -350,7 +350,7 @@ FM.ADMINCACHE = (function(){
     var adminCache = function(){
         if(systemConfig.ADMIN_CACHE){
             
-            deleteCacheDB();
+//            deleteCacheDB();
         
             retrieveDataAndUpdateCacheDB();
         }
