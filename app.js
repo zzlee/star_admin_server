@@ -175,6 +175,45 @@ async.waterfall([
 //            console.dir(result);
 //        });
         
+//        //data gen
+//        var db = require('./db.js');
+//        var async = require('async');
+//        var ugcModel = db.getDocModel("ugc");
+//        var memberListInfoModel = db.getDocModel("memberListInfo");
+//
+//        memberListInfoModel.find().sort('fb.userName').exec(function(err, memberList){
+//            //console.log('result=');
+//            //console.dir(result);
+//            
+//            var indexList = [];
+//            for (var i=0; i<memberList.length; i++) {
+//                //console.dir(memberList[i]);
+//                indexList.push(i);
+//                //memberList[i].miixMovieVideo_count = 1;
+//                
+//            }
+//            //console.dir(indexList);
+//            
+//            var iteratorUpdateAMemberInfo = function(anIndex, callback){
+//                memberList[anIndex].miixMovieVideo_count = Math.floor( 5*Math.random() );
+//                memberList[anIndex].fbShare_count = Math.floor( memberList[anIndex].miixMovieVideo_count*0.5 );
+//                memberList[anIndex].doohPlay_count = Math.floor( memberList[anIndex].miixMovieVideo_count*2 );
+//                memberList[anIndex].fbLike_count = Math.floor( memberList[anIndex].miixMovieVideo_count*35*Math.random() );
+//                memberList[anIndex].fbComment_count = Math.floor( memberList[anIndex].fbLike_count*0.5*Math.random() );
+//                memberList[anIndex].save(callback);
+//            };
+//            
+//            async.eachSeries(indexList, iteratorUpdateAMemberInfo, function(err){
+//                
+//                if (!err) {
+//                    console.log('done!');
+//                }
+//                else {
+//                    console.log('error! : '+err);
+//                }
+//            });
+//        });
+        
         
         callback(null);
     }
