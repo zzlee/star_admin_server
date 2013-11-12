@@ -14,6 +14,7 @@ FM.MEMBER = (function(){
     
     function constructor(){
         var members = FMDB.getDocModel("member");
+        var memberListInfoModel = FMDB.getDocModel("memberListInfo");
         
         return {
         
@@ -330,7 +331,7 @@ FM.MEMBER = (function(){
             
             //GZ
 			getMemberCount: function( cb){
-				members.count(cb);
+			    memberListInfoModel.count(cb);
 			},
             
             _GZ_test: function(){
