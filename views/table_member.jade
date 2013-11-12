@@ -6,20 +6,16 @@ form#mainform(action='')
             a(href='') FB名稱
           th.table-header-repeat.line-left(width='140')
             a(href='') App
-          th.table-header-repeat.line-left(width='192')
-            a(href='') Email
-          th.table-header-repeat.line-left(width='150')
-            a(href='') 手機
           th.table-header-repeat.line-left(width='160')
-            a(href='') 已製作影片數
+            a(href='') 已製作內容數
           th.table-header-repeat.line-left(width='160')
             a(href='') DOOH刊登次數
           th.table-header-repeat.line-left(width='140')
-            a(href='') FB讚總數
+            a(href='') FB讚數
           th.table-header-repeat.line-left(width='140')
-            a(href='') FB留言總數
+            a(href='') FB留言數
           th.table-header-repeat.line-left(width='140')
-            a(href='') FB分享總數
+            a(href='') FB分享數
         
         if(memberList)
             each member, i in memberList
@@ -27,8 +23,6 @@ form#mainform(action='')
                     tr
                       td #{member.fb.userName}
                       td #{member.app}
-                      td #{member.email}
-                      td #{member.mobilePhoneNumber}
                       td #{member.miixMovieCount}
                       td #{member.doohPlayCount}
                       td #{member.fbLikeCount}
@@ -38,8 +32,6 @@ form#mainform(action='')
                     tr.alternate-row
                       td #{member.fb.userName}
                       td #{member.app}
-                      td #{member.email}
-                      td #{member.mobilePhoneNumber}
                       td #{member.miixMovieCount}
                       td #{member.doohPlayCount}
                       td #{member.fbLikeCount}
