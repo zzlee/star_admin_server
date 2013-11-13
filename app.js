@@ -181,9 +181,9 @@ async.waterfall([
 //        var ugcModel = db.getDocModel("ugc");
 //        var memberListInfoModel = db.getDocModel("memberListInfo");
 //
-//        memberListInfoModel.find().sort('fb.userName').exec(function(err, memberList){
-//            //console.log('result=');
-//            //console.dir(result);
+//        memberListInfoModel.find({"hot":true}).exec(function(err, memberList){
+//            //console.log('memberList=');
+//            //console.dir(memberList);
 //            
 //            var indexList = [];
 //            for (var i=0; i<memberList.length; i++) {
@@ -201,6 +201,7 @@ async.waterfall([
 //                memberList[anIndex].fbLike_count = Math.floor( memberList[anIndex].miixMovieVideo_count*35*Math.random() );
 //                memberList[anIndex].fbComment_count = Math.floor( memberList[anIndex].fbLike_count*0.5*Math.random() );
 //                memberList[anIndex].save(callback);
+//                console.log("updated "+anIndex);
 //            };
 //            
 //            async.eachSeries(indexList, iteratorUpdateAMemberInfo, function(err){
