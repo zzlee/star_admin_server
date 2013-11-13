@@ -1041,7 +1041,19 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     else
                         play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日上午'+showTime(start.getHours())+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours())+':'+showTime(end.getMinutes());
                     
-                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                    // message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                    
+                    switch(member.app.toLowerCase())
+                    {
+                        case 'ondascreen':
+                            message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                            break;
+                        case 'wowtaipeiarena':
+                            message = '你的No.' + ugc.no + '作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧!';
+                            break;
+                        default:
+                            break;
+                    } 
                     
                     async.parallel([
                         function(push_cb){

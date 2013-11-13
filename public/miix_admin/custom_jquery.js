@@ -234,7 +234,7 @@ $(document).ready(function(){
                                                                         if(videoSrc[0] != 'h')
                                                                             videoSrc = 'https://s3.amazonaws.com/miix_content/' + videoSrc;
                                                                         
-																	   var sourceTag=$("<source>").attr({
+																	    var sourceTag=$("<source>").attr({
 																									// src:'https://s3.amazonaws.com/miix_content/'+res[i].liveContent[j].url.s3,
 																									// src:res[i].liveContent[j].url.s3,
 																									src: videoSrc,
