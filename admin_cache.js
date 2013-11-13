@@ -417,7 +417,7 @@ FM.ADMINCACHE = (function(){
                     }
                 }
                 else{
-                    FMDB.listOfdocModels( memberListInfos,null,'fb.userName fb.userID _id email mPhone miixMovieVideo_count doohPlay_count movieViewed_count fbLike_count fbComment_count fbShare_count app', {sort:'fb.userName',limit: _limit, skip: _skip}, function(err, result){
+                    FMDB.listOfdocModels( memberListInfos, {miixMovieVideo_count:{$gte:1}},'fb.userName fb.userID _id email mPhone miixMovieVideo_count doohPlay_count movieViewed_count fbLike_count fbComment_count fbShare_count app', {sort:'fb.userName',limit: _limit, skip: _skip}, function(err, result){
                         if(err) logger.error('[db.listOfMemebers]', err);
                         if(result){
 
