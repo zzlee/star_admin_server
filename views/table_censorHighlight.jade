@@ -7,8 +7,10 @@ form#mainform(action='')
             a(href='') 主題類別
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 影片編號
-          th.table-header-repeat.line-left.minwidth-1(width='800')
-            a(href='') s3 long
+          th.table-header-repeat.line-left.minwidth-1(width='500')
+            a(href='') 長條圖
+          th.table-header-repeat.line-left.minwidth-1(width='500')
+            a(href='') 實拍圖
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 已刊登次數
           th.table-header-repeat.line-left.minwidth-1(width='10')
@@ -30,8 +32,22 @@ form#mainform(action='')
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
                       td #{ugcCensor.ugcCensorNo}
-                      td 
-                        img(src='#{ugcCensor.url.s3}', alt='', width='800')
+                      if(ugcCensor.contentGenre == 'miix_it')
+                         td
+                             img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
+                             label       
+                             img(src='#{ugcCensor.userPhotoUrl}', alt='', width='360')
+                             br
+                             label #{ugcCensor.fb_userName} 
+                      else
+                         td 
+                             img(src='#{ugcCensor.url.s3}', alt='', width='500', height='149')
+                      if(ugcCensor.contentGenre == 'miix_it')
+                         td
+                             video(src='https://s3.amazonaws.com/miix_content/'+'#{ugcCensor.liveContentUrl}', alt='', width='370', height='210', controls)
+                      else
+                         td
+                             img(src='#{ugcCensor.liveContentUrl}', alt='', width='320')
                       td #{ugcCensor.doohPlayedTimes}
                       td #{ugcCensor.rating}
                       td 
@@ -53,8 +69,22 @@ form#mainform(action='')
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
                       td #{ugcCensor.ugcCensorNo}
-                       td 
-                        img(src='#{ugcCensor.url.s3}', alt='', width='800')
+                      if(ugcCensor.contentGenre == 'miix_it')
+                         td
+                             img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
+                             label       
+                             img(src='#{ugcCensor.userPhotoUrl}', alt='', width='360')
+                             br
+                             label #{ugcCensor.fb_userName} 
+                      else
+                         td 
+                             img(src='#{ugcCensor.url.s3}', alt='', width='500', height='149')
+                      if(ugcCensor.contentGenre == 'miix_it')
+                         td
+                             video(src='https://s3.amazonaws.com/miix_content/'+'#{ugcCensor.liveContentUrl}', alt='', width='370', height='210', controls)
+                      else
+                         td
+                             img(src='#{ugcCensor.liveContentUrl}', alt='', width='320')
                       td #{ugcCensor.doohPlayedTimes}
                       td #{ugcCensor.rating}
                       td 

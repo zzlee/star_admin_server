@@ -14,6 +14,7 @@ FM.MEMBER = (function(){
     
     function constructor(){
         var members = FMDB.getDocModel("member");
+        var memberListInfoModel = FMDB.getDocModel("memberListInfo");
         
         return {
         
@@ -148,19 +149,14 @@ FM.MEMBER = (function(){
                                                         for(var _idx=0; _idx<UGCs[idx].fb_postId.length;_idx++){
                                                             var fbPostId = UGCs[idx].fb_postId[_idx].postId;
                                                             if(fbPostId){
-                                                                if(fbPostId.length == 16){
-                                                                    var relative_url = UGCs[idx].fb_postId[_idx].postId + "?fields=comments,likes,sharedposts";
-        //                                                          console.log('UGCs[idx].fb_postId[_idx].postId.length'+UGCs[idx].fb_postId[_idx].postId.length);
-                                                                    if(UGCs[idx].fb_postId[_idx].postId){
-                                                                        batch.push( {"method": "GET", "relative_url": relative_url} );
-                                                                    }
-                                                                }else{
+                                                                if(fbPostId.length == 33){
                                                                     var relative_url = UGCs[idx].fb_postId[_idx].postId + "?fields=comments,likes,shares";
-        //                                                          console.log('UGCs[idx].fb_postId[_idx].postId.length'+UGCs[idx].fb_postId[_idx].postId.length);
-                                                                    if(UGCs[idx].fb_postId[_idx].postId){
-                                                                        batch.push( {"method": "GET", "relative_url": relative_url} );
-                                                                    }                                                                
+                                                                }else{
+                                                                    var relative_url = UGCs[idx].fb_postId[_idx].postId + "?fields=comments,likes,sharedposts";
                                                                 }
+                                                                if(UGCs[idx].fb_postId[_idx].postId){
+                                                                    batch.push( {"method": "GET", "relative_url": relative_url} );
+                                                                }                                                                
                                                             }
                                                         }
                                                     }
@@ -172,9 +168,12 @@ FM.MEMBER = (function(){
                                                             callback(null, {totalLikes: likes_count, totalComments: comments_count, totalShares: shares_count} );
                                                         }else{
                                                             if (result) {
-//                                                                console.log('result'+result);
+//                                                                console.log('memberID'+memberID);
+//                                                                console.log(result);
                                                                 for(var i in result){
-                                                                    if(result[i]){
+                                                                    if(!result[i]){
+                                                                        
+                                                                    }else if(result[i]){
                                                                         if (result[i].comments){
                                                                             comments_count = comments_count + result[i].comments.data.length;
                                                                         }
@@ -184,6 +183,9 @@ FM.MEMBER = (function(){
                                                                         }
                                                                         if (result[i].shares){
                                                                             shares_count = shares_count + result[i].shares.count;
+                                                                        }
+                                                                        if (result[i].sharedposts){
+                                                                            shares_count = shares_count + result[i].sharedposts.data.length;
                                                                         }
                                                                     }
                                                                 }
@@ -329,7 +331,7 @@ FM.MEMBER = (function(){
             
             //GZ
 			getMemberCount: function( cb){
-				members.count(cb);
+			    memberListInfoModel.count(cb);
 			},
             
             _GZ_test: function(){

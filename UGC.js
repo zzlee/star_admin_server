@@ -188,8 +188,19 @@ FM.UGC = (function(){
 			                                var batch = [];
 
 			                                for(var _idx=0; _idx<fb_postId.length;_idx++){
-			                                    var relative_url = fb_postId[_idx].postId + "?fields=comments,likes,shares";
-			                                    batch.push( {"method": "GET", "relative_url": relative_url} );
+//			                                    var relative_url = fb_postId[_idx].postId + "?fields=comments,likes,shares";
+//			                                    batch.push( {"method": "GET", "relative_url": relative_url} );
+			                                    var fbPostId = fb_postId[_idx].postId;
+                                                if(fbPostId){
+                                                    if(fbPostId.length == 33){
+                                                        var relative_url = fb_postId[_idx].postId + "?fields=comments,likes,shares";
+                                                    }else{
+                                                        var relative_url = fb_postId[_idx].postId + "?fields=comments,likes,sharedposts";
+                                                    }
+                                                    if(fb_postId[_idx].postId){
+                                                        batch.push( {"method": "GET", "relative_url": relative_url} );
+                                                    }                                                                
+                                                }
 			                                }
 //			                                console.dir(batch);
 			                                fbMgr.batchRequestToFB(access_token, null, batch, function(err, result){
@@ -204,7 +215,7 @@ FM.UGC = (function(){
                                                 
                                                 }else{
 			                                        if (result) {
-//			                                            console.log('result'+result);
+//			                                            console.log(result);
 			                                            for(var i in result){
 			                                                if (result[i].comments){
 			                                                    comments_count += result[i].comments.data.length;
@@ -217,6 +228,9 @@ FM.UGC = (function(){
 			                                                if (result[i].shares){
 			                                                    shares_count += (result[i].shares) ? result[i].shares.count : 0;
 			                                                }
+                                                            if (result[i].sharedposts){
+                                                                shares_count = shares_count + result[i].sharedposts.data.length;
+                                                            }
 			                                            }
 			                                        }
 

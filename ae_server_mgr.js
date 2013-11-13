@@ -28,10 +28,10 @@ aeServerMgr.createMiixMovie = function(movieProjectID, ownerStdID, ownerFbID, mo
 
         youtubeTokenMgr.getAccessToken( function(ytAccessToken){
             if (ytAccessToken) {
-                var userDataFolder = path.join( workingPath, 'public/contents/user_project', movieProjectID, 'user_data');
+                //var userDataFolder = path.join( workingPath, 'public/contents/user_project', movieProjectID, 'user_data');
                 
                 var commandParameters = {
-                    userFileList: fs.readdirSync(userDataFolder),
+                    //userFileList: fs.readdirSync(userDataFolder),
                     movieProjectID: movieProjectID,
                     ownerStdID: ownerStdID,
                     ownerFbID: ownerFbID,

@@ -3,175 +3,25 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>夢蝶後台管理系統</title>
-<link rel="stylesheet" href="css/screen.css" type="text/css" media="screen" title="default" />
-<!--[if IE]>
-<link rel="stylesheet" media="all" type="text/css" href="css/pro_dropline_ie.css" />
-<![endif]-->
+<link rel="stylesheet" href="miix_admin/css/screen.css" type="text/css" media="screen" title="default" />
 
 <!--  jquery core -->
-<script src="js/jquery/jquery-1.4.1.min.js" type="text/javascript"></script>
+<script src="miix_admin/lib/jquery-2.0.3.min.js" type="text/javascript"></script>
+<script src="miix_admin/lib/async.js" type="text/javascript"></script>
 
 <!--  checkbox styling script -->
-<script src="js/jquery/ui.core.js" type="text/javascript"></script>
-<script src="js/jquery/ui.checkbox.js" type="text/javascript"></script>
-<script src="js/jquery/jquery.bind.js" type="text/javascript"></script>
-<script type="text/javascript">
-$(function(){
-	$('input').checkBox();
-	$('#toggle-all').click(function(){
- 	$('#toggle-all').toggleClass('toggle-checked');
-	$('#mainform input[type=checkbox]').checkBox('toggle');
-	return false;
-	});
-});
-</script>  
 
 
-<!--  styled select box script version 1 -->
-<!--[if !IE 7]>
-
-<script src="js/jquery/jquery.selectbox-0.5.js" type="text/javascript"></script>
-<script type="text/javascript">
-$(document).ready(function() {
-	$('.styledselect').selectbox({ inputClass: "selectbox_styled" });
-});
-</script>
+<!-- Custom scripts -->
+<script src="/miix_admin/custom_jquery.js" type="text/javascript"></script>
+<script src="/miix_admin/page_list.js" type="text/javascript"></script>
+<script src="/miix_admin/connection_mgr.js" type="text/javascript"></script>
+<script src="/miix_admin/member_list_sbpg.js" type="text/javascript"></script>
+<script src="/miix_admin/ugc_playlist_sbpg.js" type="text/javascript"></script>
  
-
-<![endif]-->
-
-<!--  styled select box script version 2 --> 
-<script src="js/jquery/jquery.selectbox-0.5_style_2.js" type="text/javascript"></script>
-<script type="text/javascript">
-$(document).ready(function() {
-	$('.styledselect_form_1').selectbox({ inputClass: "styledselect_form_1" });
-	$('.styledselect_form_2').selectbox({ inputClass: "styledselect_form_2" });
-});
-</script>
-
-<!--  styled select box script version 3 --> 
-<script src="js/jquery/jquery.selectbox-0.5_style_2.js" type="text/javascript"></script>
-<script type="text/javascript">
-$(document).ready(function() {
-	$('.styledselect_pages').selectbox({ inputClass: "styledselect_pages" });
-});
-</script>
-
-<!--  styled file upload script --> 
-<script src="js/jquery/jquery.filestyle.js" type="text/javascript"></script>
-<script type="text/javascript" charset="utf-8">
-  $(function() {
-      $("input.file_1").filestyle({ 
-          image: "images/forms/choose-file.gif",
-          imageheight : 21,
-          imagewidth : 78,
-          width : 310
-      });
-  });
-</script>
-
-<!-- Custom jquery scripts -->
-<script src="common.js" type="text/javascript"></script>
-<script src="js/jquery/custom_jquery.js" type="text/javascript"></script>
- 
-<!-- Tooltips -->
-<script src="js/jquery/jquery.tooltip.js" type="text/javascript"></script>
-<script src="js/jquery/jquery.dimensions.js" type="text/javascript"></script>
-<script type="text/javascript">
-$(function() {
-	$('a.info-tooltip ').tooltip({
-		track: true,
-		delay: 0,
-		fixPNG: true, 
-		showURL: false,
-		showBody: " - ",
-		top: -35,
-		left: 5
-	});
-});
-</script> 
-
-
-<!--  date picker script -->
-<link rel="stylesheet" href="css/datePicker.css" type="text/css" />
-<script src="js/jquery/date.js" type="text/javascript"></script>
-<script src="js/jquery/jquery.datePicker.js" type="text/javascript"></script>
-<script type="text/javascript" charset="utf-8">
-        $(function()
-{
-
-// initialise the "Select date" link
-$('#date-pick')
-	.datePicker(
-		// associate the link with a date picker
-		{
-			createButton:false,
-			startDate:'01/01/2005',
-			endDate:'31/12/2020'
-		}
-	).bind(
-		// when the link is clicked display the date picker
-		'click',
-		function()
-		{
-			updateSelects($(this).dpGetSelected()[0]);
-			$(this).dpDisplay();
-			return false;
-		}
-	).bind(
-		// when a date is selected update the SELECTs
-		'dateSelected',
-		function(e, selectedDate, $td, state)
-		{
-			updateSelects(selectedDate);
-		}
-	).bind(
-		'dpClosed',
-		function(e, selected)
-		{
-			updateSelects(selected[0]);
-		}
-	);
-	
-var updateSelects = function (selectedDate)
-{
-	var selectedDate = new Date(selectedDate);
-	$('#d option[value=' + selectedDate.getDate() + ']').attr('selected', 'selected');
-	$('#m option[value=' + (selectedDate.getMonth()+1) + ']').attr('selected', 'selected');
-	$('#y option[value=' + (selectedDate.getFullYear()) + ']').attr('selected', 'selected');
-}
-// listen for when the selects are changed and update the picker
-$('#d, #m, #y')
-	.bind(
-		'change',
-		function()
-		{
-			var d = new Date(
-						$('#y').val(),
-						$('#m').val()-1,
-						$('#d').val()
-					);
-			$('#date-pick').dpSetSelected(d.asString());
-		}
-	);
-
-// default the position of the selects to today
-var today = new Date();
-updateSelects(today.getTime());
-
-// and update the datePicker to reflect it...
-$('#d').trigger('change');
-});
-</script>
-
-<!-- MUST BE THE LAST SCRIPT IN <HEAD></HEAD></HEAD> png fix -->
-<script src="js/jquery/jquery.pngFix.pack.js" type="text/javascript"></script>
-<script type="text/javascript">
-$(document).ready(function(){
-$(document).pngFix( );
-});
-</script>
 </head>
+
+
 <body> 
 <!-- Start: page-top-outer -->
 <div id="page-top-outer">    
@@ -237,108 +87,92 @@ $(document).pngFix( );
 		<div id="main_menu" class="table">
 		
 		<ul id="memberList" class="current"><li><a id="memberListBtn"><b>會員資料</b><!--[if IE 7]><!--></a><!--<![endif]-->
-		<!--[if lte IE 6]><table><tr><td><![endif]-->
 		<div class="select_sub">
 			<ul class="sub">
 			</ul>
 		</div>
-		<!--[if lte IE 6]></td></tr></table></a><![endif]-->
 		</li>
 		</ul>
 		
 		<div class="nav-divider">&nbsp;</div>
 		                    
 		<ul id="miixPlayList" class="select"><li><a id="miixPlayListBtn"><b>《我的影片》資料</b><!--[if IE 7]><!--></a><!--<![endif]-->
-		<!--[if lte IE 6]><table><tr><td><![endif]-->
 		<div class="select_sub show">
 			<ul class="sub">
 			</ul>
 		</div>
-		<!--[if lte IE 6]></td></tr></table></a><![endif]-->
 		</li>
 		</ul>
 		
-		<div class="nav-divider">&nbsp;</div>
+		<div id="miixPlayListDiveider" class="nav-divider">&nbsp;</div>
 		
 		<ul id="storyPlayList" class="select"><li><a id="storyPlayListBtn"><b>《我的影像故事》資料</b><!--[if IE 7]><!--></a><!--<![endif]-->
-		<!--[if lte IE 6]><table><tr><td><![endif]-->
 		<div class="select_sub">
 			<ul class="sub">
 			
 			</ul>
 		</div>
-		<!--[if lte IE 6]></td></tr></table></a><![endif]-->
 		</li>
 		</ul>
 		
-		<div class="nav-divider">&nbsp;</div>
+		<div id="storyPlayListDiveider" class="nav-divider">&nbsp;</div>
 		
 		<ul id="UGCList" class="select"><li><a id="UGCListBtn"><b>審查名單</b><!--[if IE 7]><!--></a><!--<![endif]-->
-		<!--[if lte IE 6]><table><tr><td><![endif]-->
 		<div class="select_sub show">
 			<ul class="sub">
 			
 			</ul>
 		</div>
-		<!--[if lte IE 6]></td></tr></table></a><![endif]-->
 		</li>
 		</ul>
 		
-				<div class="nav-divider">&nbsp;</div>
+		<div id="UGCListDiveider" class="nav-divider">&nbsp;</div>
 		
 		<ul id="UGCPlayList" class="select"><li><a id="UGCPlayListBtn"><b>播放清單</b><!--[if IE 7]><!--></a><!--<![endif]-->
-		<!--[if lte IE 6]><table><tr><td><![endif]-->
 		<div class="select_sub show">
 			<ul class="sub">
 			
 			</ul>
 		</div>
-		<!--[if lte IE 6]></td></tr></table></a><![endif]-->
 		</li>
 		</ul>	
         
-        <div class="nav-divider">&nbsp;</div>
+        <div id="UGCPlayListDiveider" class="nav-divider">&nbsp;</div>
         
 		<ul id="historyList" class="select"><li><a id="historyListBtn"><b>歷史紀錄</b><!--[if IE 7]><!--></a><!--<![endif]-->
-		<!--[if lte IE 6]><table><tr><td><![endif]-->
 		<div class="select_sub show">
 			<ul class="sub">
 			
 			</ul>
 		</div>
-		<!--[if lte IE 6]></td></tr></table></a><![endif]-->
 		</li>
 		</ul>	
         
         <div class="nav-divider">&nbsp;</div>
 
 		<ul id="highlightList" class="select"><li><a id="highlightListBtn"><b>精彩刊登</b><!--[if IE 7]><!--></a><!--<![endif]-->
-		<!--[if lte IE 6]><table><tr><td><![endif]-->
 		<div class="select_sub show">
 			<ul class="sub">
 			
 			</ul>
 		</div>
-		<!--[if lte IE 6]></td></tr></table></a><![endif]-->
 		</li>
 		</ul>	
         <!-- --- -->
         
-         <div class="nav-divider">&nbsp;</div>		
+         <div id="highlightListDiveider" class="nav-divider">&nbsp;</div>		
 		
-        <ul id="live_check" class="select"><li><a id="live_check"><b>live check</b><!--[if IE 7]><!--></a><!--<![endif]-->
-        <!--[if lte IE 6]><table><tr><td><![endif]-->
+        <ul id="live_check" class="select"><li><a id="live_check"><b>現場實況</b><!--[if IE 7]><!--></a><!--<![endif]-->
         <div class="select_sub">
             <ul class="sub">
             
             </ul>
         </div>
-        <!--[if lte IE 6]></td></tr></table></a><![endif]-->
         </li>
         </ul>
         
         <!--  -->
-        <div class="nav-divider">&nbsp;</div>		
+        <div id="live_checkDiveider" class="nav-divider">&nbsp;</div>		
 		
         <ul id="logout" class="select"><li><a id="logoutBtn"><b>登出</b><!--[if IE 7]><!--></a><!--<![endif]-->
         <!--[if lte IE 6]><table><tr><td><![endif]-->
@@ -347,7 +181,6 @@ $(document).pngFix( );
             
             </ul>
         </div>
-        <!--[if lte IE 6]></td></tr></table></a><![endif]-->
         </li>
         </ul>
         
@@ -355,25 +188,21 @@ $(document).pngFix( );
 
 		<ul class="select">
 		  <li><!--<![endif]-->
-		<!--[if lte IE 6]><table><tr><td><![endif]-->
 		<div class="select_sub">
 			<ul class="sub">
 				
 			 
 			</ul>
 		</div>
-		<!--[if lte IE 6]></td></tr></table></a><![endif]-->
 		</li>
 		</ul>
 		<ul class="select">
 		  <li><!--<![endif]-->
-		<!--[if lte IE 6]><table><tr><td><![endif]-->
 		<div class="select_sub">
 			<ul class="sub">
 				
 			</ul>
 		</div>
-		<!--[if lte IE 6]></td></tr></table></a><![endif]-->
 		</li>
 		</ul>
 		
@@ -409,137 +238,137 @@ $(document).pngFix( );
 	<tr>
 		<td id="tbl-border-left"></td>
 		<td>
-		<!--  start content-table-inner ...................................................................... START -->
-		<div id="content-table-inner">
-		
-		    <!-- table-content-header -->
-		    <div id="table-content-header"></div>
-		    
-			<!--  start table-content  -->
-			<div id="table-content">
+			<!--  start content-table-inner ...................................................................... START -->
+			<div id="content-table-inner">
 			
-				<!--  start message-yellow --><!--  end message-yellow -->
+			    <!-- table-content-header -->
+			    <div id="table-content-header"></div>
+			    
+				<!--  start table-content  -->
+				<div id="table-content">
 				
-				<!--  start message-red --><!--  end message-red -->
+					<!--  start message-yellow --><!--  end message-yellow -->
+					
+					<!--  start message-red --><!--  end message-red -->
+					
+					<!--  start message-blue --><!--  end message-blue -->
 				
-				<!--  start message-blue --><!--  end message-blue -->
+					<!--  start message-green --><!--  end message-green -->
 			
-				<!--  start message-green --><!--  end message-green -->
-		
-		 
-				<!--  start product-table ..................................................................................... -->
-				<form id="mainform" action="">
-				<table border="0" width="100%" cellpadding="0" cellspacing="0" id="product-table">
-				<tr>
-					<th width="70" class="table-header-repeat line-left minwidth-1"><a href="">FB名稱</a>	</th>
-					<th width="78" class="table-header-repeat line-left minwidth-1"><a href="">FB編號</a></th>
-					<th width="185" class="table-header-repeat line-left"><a href="">Email</a></th>
-					<th width="149" class="table-header-repeat line-left"><a href="">手機</a></th>
-					<th width="115" class="table-header-repeat line-left"><a href="">已製作影片數</a></th>
-					<th width="116" class="table-header-repeat line-left"><a href="">DOOH刊登次數</a></th>
-					<th width="131" class="table-header-repeat line-left"><a href="">影片觀看總次數</a></th>
-					<th width="94" class="table-header-repeat line-left"><a href="">FB 讚總數</a></th>
-					<th width="94" class="table-header-repeat line-left"><a href="">FB留言總數</a></th>
-					<th width="107" class="table-header-repeat line-left"><a href="">FB分享總數</a></th>
-				  </tr>
-				<tr>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-				  </tr>
-				<tr class="alternate-row">
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-				  </tr>
-				<tr>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-				  </tr>
-				<tr class="alternate-row">
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-				  </tr>
-				<tr>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-				  </tr>
+			 
+					<!--  start product-table ..................................................................................... -->
+					<form id="mainform" action="">
+					<table border="0" width="100%" cellpadding="0" cellspacing="0" id="product-table">
+					<tr>
+						<th width="70" class="table-header-repeat line-left minwidth-1"><a href="">FB名稱</a>	</th>
+						<th width="78" class="table-header-repeat line-left minwidth-1"><a href="">FB編號</a></th>
+						<th width="185" class="table-header-repeat line-left"><a href="">Email</a></th>
+						<th width="149" class="table-header-repeat line-left"><a href="">手機</a></th>
+						<th width="115" class="table-header-repeat line-left"><a href="">已製作影片數</a></th>
+						<th width="116" class="table-header-repeat line-left"><a href="">DOOH刊登次數</a></th>
+						<th width="131" class="table-header-repeat line-left"><a href="">影片觀看總次數</a></th>
+						<th width="94" class="table-header-repeat line-left"><a href="">FB 讚總數</a></th>
+						<th width="94" class="table-header-repeat line-left"><a href="">FB留言總數</a></th>
+						<th width="107" class="table-header-repeat line-left"><a href="">FB分享總數</a></th>
+					  </tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+					  </tr>
+					<tr class="alternate-row">
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+					  </tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+					  </tr>
+					<tr class="alternate-row">
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+					  </tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+					  </tr>
+					</table>
+					<!--  end product-table................................... --> 
+					</form>
+				</div>
+				<!--  end content-table  -->
+			
+				<!--  start actions-box ............................................... --><!-- end actions-box........... -->
+				
+				<!--  start paging..................................................... -->
+				<table border="0" cellpadding="0" cellspacing="0" id="paging-table">
+					<tr>
+						<td>
+							<a id="goToFirstPage" class="page-far-left"></a>
+							<a id="goToPreviousPage" class="page-left"></a>
+							<div id="page-info">Page <strong><input id="pageNoInput" value="1" style="width:20px"></strong> / <span id="totalPage">15</span></div>
+							<a id="goToNextPage" class="page-right"></a>
+							<a id="goToLastPage" class="page-far-right"></a>
+						</td>
+						<td>
+			                Number of rows
+			                <input id="rowsPerPage" value="1" style="width:35px" type="number">
+			                <!--
+			                <select id="rowsPerPageSelect" class="styledselect_pages">
+			                    <option value="default" selected="selected">Number of rows</option>
+			                    <option value="10">10</option>
+			                    <option value="20">20</option>
+			                    <option value="30">30</option>
+			                </select>
+			                -->
+						</td>
+					</tr>
 				</table>
-				<!--  end product-table................................... --> 
-				</form>
+				<!--  end paging................ -->
+				
+				<div class="clear"></div>
+			 
 			</div>
-			<!--  end content-table  -->
-		
-			<!--  start actions-box ............................................... --><!-- end actions-box........... -->
-			
-			<!--  start paging..................................................... -->
-			<table border="0" cellpadding="0" cellspacing="0" id="paging-table">
-			<tr>
-			<td>
-				<a id="goToFirstPage" class="page-far-left"></a>
-				<a id="goToPreviousPage" class="page-left"></a>
-				<div id="page-info">Page <strong><input id="pageNoInput" value="1" style="width:20px"></strong> / <span id="totalPage">15</span></div>
-				<a id="goToNextPage" class="page-right"></a>
-				<a id="goToLastPage" class="page-far-right"></a>
-			</td>
-			<td>
-                Number of rows
-                <input id="rowsPerPage" value="1" style="width:35px" type="number">
-                <!--
-                <select id="rowsPerPageSelect" class="styledselect_pages">
-                    <option value="default" selected="selected">Number of rows</option>
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="30">30</option>
-                </select>
-                -->
-			</td>
-			</tr>
-			</table>
-			<!--  end paging................ -->
-			
-			<div class="clear"></div>
-		 
-		</div>
-		<!--  end content-table-inner ............................................END  -->
+			<!--  end content-table-inner ............................................END  -->
 		</td>
 		<td id="tbl-border-right"></td>
 	</tr>
@@ -552,7 +381,13 @@ $(document).pngFix( );
 	<div class="clear">&nbsp;</div>
 
 </div>
+<div id="contentExtra"></div>
 <!--  end content -->
+
+<input id="cleanTraceBtn" type="button" value="清除trace">
+<div id="traceWindow"></div>
+
+
 <div class="clear">&nbsp;</div>
 </div>
 <!--  end content-outer........................................................END -->
@@ -562,7 +397,7 @@ $(document).pngFix( );
 <!-- start footer -->         
 <div id="footer">
 	<!--  start footer-left -->
-	<div id="footer-left">Fletmeng Inc &copy; Copyright Fletmeng Inc. <span id="spanYear"></span> <a href="">www.netdreams.co.uk</a>. All rights reserved.</div>
+	<div id="footer-left">&copy; Copyright Fletmeng Inc. <span id="spanYear"></span> All rights reserved.</div>
 	<!--  end footer-left -->
 	<div class="clear">&nbsp;</div>
 </div>

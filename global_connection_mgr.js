@@ -25,9 +25,9 @@ FM.globalConnectionMgr = (function(){
             getConnectedRemoteWithLowestLoad: function(type, cbOfGetConnectedRemoteWithLowestLoad){
                 
             	if ( systemConfig.IS_STAND_ALONE ) {
+            	    var connectedRemoteWithLowestLoad = null;
                     for (anId in connectedRemotes){
-                        var lowestLoadIndex = 1000000;
-                        var connectedRemoteWithLowestLoad = null;
+                        var lowestLoadIndex = 1000000;                        
                         //console.log('%s %s', anId, connectedRemotes[anId]);
                         if (type){
                             if (connectedRemotes[anId].type==type){
@@ -97,6 +97,28 @@ FM.globalConnectionMgr = (function(){
                     });
 
                 }
+            },
+            
+            sendMessageToMobileByRemote: function( phoneNum, code, cbOfSendMessageToMobileByRemote ) {
+					logger.info("[globalConnectionMgr.sendMessageToMobileByRemote] start phoneNum:"+phoneNum+"code"+code);
+                    request({
+                        method: 'POST',
+                        uri: systemConfig.HOST_STAR_COORDINATOR_URL + '/internal/send_message_to_mobile_by_remote',
+                        body: {"phoneNum": phoneNum, "code": code},
+                        json: true,
+                        // timeout: 60*60*1000
+                        
+                    }, function(error, response, body){
+                    
+                        if (body) {
+                            cbOfSendMessageToMobileByRemote(null, body.responseParameters);    
+                        }
+                        else {
+                            cbOfSendMessageToMobileByRemote({err: "Failed to send request to remote: "+error}, null);  //TODO: check the content of error parameters
+                        }
+                                
+                    });
+
             }
             
                 

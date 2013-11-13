@@ -109,6 +109,64 @@ FM.AWSS3 = (function(){
                   });
             },
             
+            /**
+             *  Copy File To Other Path On Aws S3.
+             */
+            copyToAwsS3 : function(source, dest, copy_cb){
+                
+                if(source[0] != '/') source = '/' + source;
+                if(dest[0] != '/') dest = '/' + dest;
+                
+                s3Client.copyFile(source, dest, function(err, res){
+                    if (copy_cb) {
+                        copy_cb(null, "Copy Successful");
+                    }
+
+                    if (err) {
+                        if (copy_cb) copy_cb(err, null);
+                    }
+                });
+            },
+            
+            /**
+             *  Update File ACLs From Aws S3.
+             */
+            updateFileACLAwsS3 : function(file, acl, update_cb){
+                
+                if(file[0] != '/') file = '/' + file;
+                if(typeof(acl) === 'function') {
+                    update_cb = acl;
+                    acl = 'public-read';
+                }
+                
+                s3Client.request('PUT', file + '?acl', { 'x-amz-acl': acl }).on('response', function(res){
+                    if ((res.statusCode <= 250) && (res.statusCode >= 200)) {
+                        if (update_cb) update_cb(null, "Update Successful");
+                    }
+                    else {
+                        if (update_cb) update_cb('request error: http status code is ' + res.statusCode, null);
+                    }
+                }).end();
+            },
+            
+            /**
+             *  Delete Multiple file From Aws S3.
+             */
+            deleteMultipleFileAwsS3 : function( fileset, delete_cb ){
+                
+                for(var i=0; i<fileset.length; i++)
+                    if(fileset[i][0] != '/') fileset[i] = '/' + fileset[i];
+                
+                s3Client.deleteMultiple( fileset, function(err, res){
+                    if (delete_cb) {
+                        if (err) 
+                            delete_cb(err, null);
+                        else
+                            delete_cb(null, "Delete Successful");
+                    }
+                } );
+            },
+            
             _test: function(){
                 this.deleteAwsS3('testfolder/test_upload.jpg', function(err, result){
                     console.log('deleteAwsS3'+err+result);
