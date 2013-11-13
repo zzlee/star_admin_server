@@ -568,14 +568,44 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
             
         var textContent = fb_name + ' 於' + playTime + '，登上台北小巨蛋天幕！';
 
-        if(type == 'correct') {
-            message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
-                      '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-        }
-        else {
-            message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
-                      '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
-        }
+        // if(type == 'correct') {
+            // message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
+                      // '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
+        // }
+        // else {
+            // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                      // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
+        // }
+        
+        switch(member.app.toLowerCase())
+        {
+            case 'ondascreen':
+                if(type == 'correct') {
+                    message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
+                              '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
+                }
+                else {
+                    // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                              // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
+                    message = '您的試鏡編號' + ugcCensorNo + '作品已順利播出，但很遺憾的，實拍照片未能順利拍攝。' + 
+                              '我們將儘快安排再次播出，希望能為您留下精彩的影像。';
+                }
+                break;
+            case 'wowtaipeiarena':
+                if(type == 'correct') {
+                    message = '你的No.' + ugcCensorNo + '作品，在' + playTime + 
+                              '，登上小巨蛋天幕，感謝你的精采作品，快到 我的投稿/哇!紀錄 裡瞧瞧實拍照!';
+                }
+                else {
+                    // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                              // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
+                    message = '您的No.' + ugcCensorNo + '作品已順利播出，但很遺憾的，實拍照片未能順利拍攝。' + 
+                              '我們將儘快安排再次播出，希望能為您留下精彩的影像。';
+                }
+                break;
+            default:
+                break;
+        } 
         
         async.waterfall([
             function(push_cb){
