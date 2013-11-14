@@ -331,7 +331,7 @@ FM.MEMBER = (function(){
             
             //GZ
 			getMemberCount: function( cb){
-			    memberListInfoModel.count({miixMovieVideo_count:{$gte:1}},cb);
+			    memberListInfoModel.count({miixMovieVideo_count:{$gte:1}, shine:true},cb);
 			},
             
             _GZ_test: function(){

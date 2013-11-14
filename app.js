@@ -216,6 +216,52 @@ async.waterfall([
 //            });
 //        });
         
+//        //set shine
+//        var db = require('./db.js');
+//        var async = require('async');
+//        var ugcModel = db.getDocModel("ugc");
+//        var memberListInfoModel = db.getDocModel("memberListInfo");
+//
+//        memberListInfoModel.find({"hot":true}).exec(function(err, memberList){
+//            //console.log('memberList=');
+//            //console.dir(memberList);
+//            
+//            var shineList = [];
+//            for (var i=0; i<memberList.length; i++) {
+//                //console.dir(memberList[i]);
+//                if ( (i%3) == 0 ) {
+//                    shineList.push({index:i, shine:false});
+//                }
+//                else {
+//                    shineList.push({index:i, shine:true});
+//
+//                }
+//                
+//                shineList.push({index:i, shine:true});
+//                    
+//                
+//            }
+//            //console.dir(shineList);
+//            
+//            var iteratorUpdateAMemberInfo = function(aShineItem, callback){
+//                memberList[aShineItem.index].shine = aShineItem.shine;
+//
+//                memberList[aShineItem.index].save(callback);
+//                console.log("updated "+aShineItem.index);
+//            };
+//            
+//            async.eachSeries(shineList, iteratorUpdateAMemberInfo, function(err){
+//                
+//                if (!err) {
+//                    console.log('done!');
+//                }
+//                else {
+//                    console.log('error! : '+err);
+//                }
+//            });
+//        });
+
+        
         
         callback(null);
     }
