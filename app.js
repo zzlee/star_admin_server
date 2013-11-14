@@ -195,11 +195,11 @@ async.waterfall([
 //            //console.dir(indexList);
 //            
 //            var iteratorUpdateAMemberInfo = function(anIndex, callback){
-//                memberList[anIndex].miixMovieVideo_count = 1+ Math.floor( 4*Math.random()*Math.random()*Math.random()*Math.random() );
-//                memberList[anIndex].doohPlay_count = Math.floor( memberList[anIndex].miixMovieVideo_count*2 );
-//                memberList[anIndex].fbLike_count = Math.floor( 3+memberList[anIndex].miixMovieVideo_count*37*Math.random() );
+//                memberList[anIndex].miixMovieVideo_count = 1+ Math.floor( 3*Math.random()*Math.random()*Math.random() );
+//                memberList[anIndex].doohPlay_count = Math.floor( memberList[anIndex].miixMovieVideo_count*(1+3*Math.random()*Math.random()) );
+//                memberList[anIndex].fbLike_count = Math.floor( memberList[anIndex].doohPlay_count*40*Math.random() );
 //                memberList[anIndex].fbComment_count = Math.floor( memberList[anIndex].fbLike_count*0.5*Math.random() );
-//                memberList[anIndex].fbShare_count = Math.floor( memberList[anIndex].fbComment_count*2*Math.random()*Math.random()*Math.random() );
+//                memberList[anIndex].fbShare_count = Math.floor( memberList[anIndex].doohPlay_count*2*Math.random()*Math.random() );
 //
 //                memberList[anIndex].save(callback);
 //                console.log("updated "+anIndex);
