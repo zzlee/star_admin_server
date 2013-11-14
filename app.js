@@ -237,7 +237,6 @@ async.waterfall([
 //
 //                }
 //                
-//                shineList.push({index:i, shine:true});
 //                    
 //                
 //            }
