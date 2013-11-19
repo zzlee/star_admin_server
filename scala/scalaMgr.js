@@ -347,6 +347,36 @@ function scalaMgr( url, account ){
     };
     
     /**
+     * Upload Media Item.
+     * 
+     */
+    var uploadMediaItem = function(option, upload_cb){
+    
+        var file = option.file;
+        
+        if( !file.name ) upload_cb('No_File_Name', null);
+        if( !file.path ) upload_cb('No_File_Path', null);
+        
+        var media = 
+        {
+            id: '',
+            name: file.name
+        };
+        
+        contractor.media.fileupload(file, function(err, status){
+            // upload_cb(null, status);
+            contractor.media.list({search: media.name}, function(err, res){ 
+                if(typeof(res.list) === 'undefined')
+                    step1('NO_MEDIA_INFO', null);
+                else {
+                    media.id = res.list[0].id;
+                    upload_cb(null, { media: media });
+                }
+            });
+        });
+    };
+    
+    /**
      * Pull playlist item.
      */
     var pullPlaylistItem = function(option, pull_cb){
@@ -639,6 +669,7 @@ function scalaMgr( url, account ){
         pushEvent : pushEvent,
         setWebpageToPlaylist: setWebpageToPlaylist,
         pushMediaToPlaylist: pushMediaToPlaylist,
+        uploadMediaItem: uploadMediaItem,
         pullPlaylistItem: pullPlaylistItem,
         clearPlaylistItems: clearPlaylistItems,
         validProgramExpired: validProgramExpired,
