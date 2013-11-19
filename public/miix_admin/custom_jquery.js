@@ -1189,6 +1189,13 @@ $(document).ready(function(){
                         }
                     });
                 });
+                
+                /**
+                 * gen video UGC btn
+                 */
+                $('#ugcGenVideoUgcBtn').click(function(){
+                    alert($(this).attr('projectId'));
+                });
     
             }// End of UGCList
     
