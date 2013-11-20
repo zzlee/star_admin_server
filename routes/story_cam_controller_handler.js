@@ -28,13 +28,16 @@ var recordTime = '';
 FM.storyCamControllerHandler.availableStoryMovie_post_cb = function(req, res) {
 
     if ( req.headers.miix_movie_project_id ) {
+        // console.log( 'miix_movie_project_id: ' + req.headers.miix_movie_project_id );
+        // console.log( 'record_time: ' + req.headers.record_time );
         storyContentMgr.generateStoryMV( req.headers.miix_movie_project_id, req.headers.record_time );
         res.send(200);
     }
 	else {
 		res.send(400, {error: "Bad Request!"} );
 	}
-
+    
+    res.end();
 };
 
 
