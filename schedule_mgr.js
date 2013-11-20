@@ -945,62 +945,63 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             });
         },
         function(programs, cb1_1){
-            //render Miix moive if it is not yet rendered
-            
-            if ( systemConfig.RENDER_MIIX_MOVIE_IF_IT_IS_NOT_YET_RENDERED ) {
-                var miixContentMgr = require('./miix_content_mgr.js');
-                
-                var iteratorRenderMiixMovie = function(aProgram, callbackIterator){
-                    
-                    //console.log("aProgram=");
-                    //console.dir(aProgram);
-                    //TODO: find a way to check aProgram.content.url.youtube does not exist
-                    if ( (aProgram.contentType == "file") && (aProgram.contentGenre == "miix_it") && (!aProgram.content.url) ) {
-                        async.waterfall([
-                            function(callback){
-                                //get the corresponding UGC info
-                                ugcModel.findOne({ 'projectId': aProgram.content.projectId }, '_id ownerId projectId title no', function (errOfFindOne, ugc) {
-                                    if (!errOfFindOne) {
-                                        var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded" 
-                                        //console.log("_ugc=");
-                                        //console.dir(_ugc);
-                                        callback(null, _ugc.projectId, _ugc.ownerId._id,  _ugc.ownerId.fbUserId, _ugc.title, _ugc.no);
-                                    }
-                                    else {
-                                        callback("Failed to get the corresponding UGC info: "+errOfFindOne, null, null, null, null, null);
-                                    }
-                                });
-                            }, 
-                            function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, ugcNo, callback){
-                                //render this video UGC (Miix movie)
-                                adminBrowserMgr.showTrace(null, straceStamp+"開始合成編號"+ugcNo+"的UGC....請等待約15~20分鐘");
-                                miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, function(errOfGenerateMiixMoive){
-                                    if (!errOfGenerateMiixMoive){
-                                        adminBrowserMgr.showTrace(null, straceStamp+"成功地合成編號"+ugcNo+"的UGC!");
-                                        callback(null);
-                                    }
-                                    else {
-                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
-                                        callback(errOfGenerateMiixMoive);
-                                    }
-                                });
-                            }
-                        ], function(errOfWaterFall){
-                            callbackIterator(errOfWaterFall);
-                        });
-                    }
-                    else {
-                        callbackIterator(null);
-                    }
-                };
-                async.eachSeries(programs, iteratorRenderMiixMovie, function(errEachSeries){
-                    cb1_1(errEachSeries, programs);
-                });
-                
-            }
-            else {
-                cb1_1(null, programs);
-            }
+//            //render Miix moive if it is not yet rendered
+//            
+//            if ( systemConfig.RENDER_MIIX_MOVIE_IF_IT_IS_NOT_YET_RENDERED ) {
+//                var miixContentMgr = require('./miix_content_mgr.js');
+//                
+//                var iteratorRenderMiixMovie = function(aProgram, callbackIterator){
+//                    
+//                    //console.log("aProgram=");
+//                    //console.dir(aProgram);
+//                    //TODO: find a way to check aProgram.content.url.youtube does not exist
+//                    if ( (aProgram.contentType == "file") && (aProgram.contentGenre == "miix_it") && (!aProgram.content.url) ) {
+//                        async.waterfall([
+//                            function(callback){
+//                                //get the corresponding UGC info
+//                                ugcModel.findOne({ 'projectId': aProgram.content.projectId }, '_id ownerId projectId title no', function (errOfFindOne, ugc) {
+//                                    if (!errOfFindOne) {
+//                                        var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded" 
+//                                        //console.log("_ugc=");
+//                                        //console.dir(_ugc);
+//                                        callback(null, _ugc.projectId, _ugc.ownerId._id,  _ugc.ownerId.fbUserId, _ugc.title, _ugc.no);
+//                                    }
+//                                    else {
+//                                        callback("Failed to get the corresponding UGC info: "+errOfFindOne, null, null, null, null, null);
+//                                    }
+//                                });
+//                            }, 
+//                            function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, ugcNo, callback){
+//                                //render this video UGC (Miix movie)
+//                                adminBrowserMgr.showTrace(null, straceStamp+"開始合成編號"+ugcNo+"的UGC....請等待約15~20分鐘");
+//                                miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, function(errOfGenerateMiixMoive){
+//                                    if (!errOfGenerateMiixMoive){
+//                                        adminBrowserMgr.showTrace(null, straceStamp+"成功地合成編號"+ugcNo+"的UGC!");
+//                                        callback(null);
+//                                    }
+//                                    else {
+//                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
+//                                        callback(errOfGenerateMiixMoive);
+//                                    }
+//                                });
+//                            }
+//                        ], function(errOfWaterFall){
+//                            callbackIterator(errOfWaterFall);
+//                        });
+//                    }
+//                    else {
+//                        callbackIterator(null);
+//                    }
+//                };
+//                async.eachSeries(programs, iteratorRenderMiixMovie, function(errEachSeries){
+//                    cb1_1(errEachSeries, programs);
+//                });
+//                
+//            }
+//            else {
+//                cb1_1(null, programs);
+//            }
+            cb1_1(null, programs);
             
         },
         function(programs, cb2){
