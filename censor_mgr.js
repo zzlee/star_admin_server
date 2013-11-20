@@ -620,6 +620,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                     accessToken: access_token,
                     type: member.app,
                     source: photoUrl.play,
+                    photo: photoUrl.preview,
                     text: textContent,
                     ugcProjectId: sourceId
                 };
