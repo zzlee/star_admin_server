@@ -1190,7 +1190,7 @@ $(document).ready(function(){
                 /**
                  * generate video UGC btn
                  */
-                $('#ugcGenVideoUgcBtn').click(function(){
+                $("input[id='ugcGenVideoUgcBtn']").click(function(){
                     //alert($(this).attr('projectId'));
                     $.ajax({
                         url: '/miix_admin/video_ugcs/'+$(this).attr('projectId'),
