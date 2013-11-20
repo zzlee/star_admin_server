@@ -1191,10 +1191,32 @@ $(document).ready(function(){
                 });
                 
                 /**
-                 * gen video UGC btn
+                 * generate video UGC btn
                  */
                 $('#ugcGenVideoUgcBtn').click(function(){
-                    alert($(this).attr('projectId'));
+                    //alert($(this).attr('projectId'));
+                    $.ajax({
+                        url: '/miix_admin/video_ugcs/'+$(this).attr('projectId'),
+                        type: 'PUT',
+                        data: {token: localStorage.token},
+                        timeout: 30*60*1000, //30 min
+                        success: function(response) {
+                            if(response.message){
+                                console.log("Successfully inform server to generate video UGC: " + response.message);
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown ) {
+                            console.log("Failed to inform server to generate video UGC: " + errorThrown);
+                            if (jqXHR.response) {
+                                var errMessage = JSON.parse(jqXHR.response).error;
+                                if (errMessage) {
+                                    console.log(errMessage);
+                                }
+                            }
+                        }
+                    });
+                    
+                    $(this).hide();
                 });
     
             }// End of UGCList

@@ -396,7 +396,7 @@ FM.censorHandler.updateProgramTimeSlot_get_cb = function(req, res){
 };
 
 //PUT /miix_admin/video_ugcs/:projectId
-FM.censorHandler.generateMiixMovie = function(req, res){
+FM.censorHandler.generateVideoUgc = function(req, res){
     var ugcProjectId =  req.params.projectId;
     var miixContentMgr = require('../miix_content_mgr.js');
     var adminBrowserMgr = require('../admin_browser_mgr.js');
@@ -433,11 +433,9 @@ FM.censorHandler.generateMiixMovie = function(req, res){
             });
         }
     ], function(errOfWaterFall){
-        callbackIterator(errOfWaterFall);
     });
-
     
-    
+    res.send(200);
 };
 
 module.exports = FM.censorHandler;
