@@ -6,17 +6,18 @@ form#mainform(action='')
       input(class='ugcSearchBtn', type='text' ,name='ugcSearchText' ,onfocus='this.value=\'\'')
       input#ugcSearchBtn(type='button', class='ugcSearch', value='搜尋')
       br
-      label
-      | 篩選條件
-      input#ugcSearchNoRatingBtn(type='button', value='尚未審核')
-      input#ugcSearchRatingBtn(type='button', value='已經審核')
-      input#ugcSearchAllBtn(type='button', value='All')
-      | and / or
-      label 投件時間
-      input(class='ugcSearchDateBtn', type='text', name='timeStart')
-      | 到
-      input(class='ugcSearchDateBtn', type='text', name='timeEnd')
-      input#ugcSearchDateBtn(type='button', class='ugcSearchDate', value='送出')
+      div(sensitive='true')
+          label
+          | 篩選條件
+          input#ugcSearchNoRatingBtn(type='button', value='尚未審核')
+          input#ugcSearchRatingBtn(type='button', value='已經審核')
+          input#ugcSearchAllBtn(type='button', value='All')
+          | and / or
+          label 投件時間
+          input(class='ugcSearchDateBtn', type='text', name='timeStart')
+          | 到
+          input(class='ugcSearchDateBtn', type='text', name='timeEnd')
+          input#ugcSearchDateBtn(type='button', class='ugcSearchDate', value='送出')
     
 
     table#product-table(border='0', width='100%', cellpadding='0', cellspacing='0')
@@ -24,10 +25,10 @@ form#mainform(action='')
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 主題類別
           th.table-header-repeat.line-left.minwidth-1(width='10')
-            a(href='') 影片編號
+            a(href='') UGC編號
           th.table-header-repeat.line-left.minwidth-1(width='700')
             a(href='') 長條圖
-          th.table-header-repeat.line-left.minwidth-1(width='10')
+          th.table-header-repeat.line-left.minwidth-1(width='10' sensitive='true')
             a(href='') 已刊登次數
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 審核
@@ -60,7 +61,7 @@ form#mainform(action='')
                              a(href='#{ugcCensor.url.s3}',target='_blank')  
                                  img(src='#{ugcCensor.url.s3}', alt='', width='700', height='149') 
                      
-                      td #{ugcCensor.doohPlayedTimes}
+                      td(sensitive='true') #{ugcCensor.doohPlayedTimes}
                       td
                          #checkboxGroup
                            if(ugcCensor.rating == 'A')
@@ -143,7 +144,7 @@ form#mainform(action='')
                              a(href='#{ugcCensor.url.s3}',target='_blank')  
                                  img(src='#{ugcCensor.url.s3}', alt='', width='700', height='149')
                       
-                      td #{ugcCensor.doohPlayedTimes}
+                      td(sensitive='true') #{ugcCensor.doohPlayedTimes}
                       td
                          #checkboxGroup
                            if(ugcCensor.rating == 'A')

@@ -961,9 +961,12 @@ $(document).ready(function(){
             $("input[id='ugcCensor']").show();
             $('#traceWindow').show();
         }
-        else if ( localStorage.role == "OPERATOR" ) {
+        else if ( (localStorage.role == "OPERATOR") || (localStorage.role == "FELTMENG_DEMO") ) {
             $('#createProgramListBtn').hide();
             $("input[id='ugcCensor']").hide();
+            $("th[sensitive='true']").hide();
+            $("td[sensitive='true']").hide();
+            $("div[sensitive='true']").hide();
             $('#pushProgramsBtn').remove();
             $('#traceWindow').hide();
         }
@@ -1435,6 +1438,8 @@ $(document).ready(function(){
         $("[id^='miixPlayList']").hide();
         $("[id^='storyPlayList']").hide();
         $("[id^='UGCList']").show();
+        $("[id^='UGCPlayList']").hide();
+        $("[id^='historyList']").hide();
         $("[id^='highlightList']").hide();
         $("[id^='live_check']").hide();
         FM.currentContent = FM.memberList;
