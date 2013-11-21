@@ -484,7 +484,7 @@ $(document).ready(function(){
                	 },
                success: function(response) {
                    if(response.message){
-                       console.log("[Response] message:" + response.message);
+                       console.log("[Response] message: PUT"+ url + ':'  + response.message);
                    }
                }
            });
@@ -497,10 +497,24 @@ $(document).ready(function(){
 					  ugcCensorNo: ugcCensorNo},
                success: function(response) {
                    if(response.message){
-                       console.log("[Response] message:" + response.message);
+                       console.log("[Response] message: POST"+ url + ':' + response.message);
                    }
                }
            });
+	    	
+            var url = DOMAIN + "user_content_attribute";
+            var mustPlay = true;
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                data: {no: ugcCensorNo, vjson:{mustPlay: mustPlay}},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message: PUT"+ url + ':' + response.message);
+                    }
+                }
+            });
+	    	
 	    	
 	    });
 	//--------- end 最左邊 fail-----------
@@ -1340,6 +1354,7 @@ $(document).ready(function(){
                     $.get('/miix_admin/table_censorPlayList_head.html', function(res){
                         
                         sessionId = sessionItemInfoArray[0];
+                        console.log("sessionId = "+sessionId);
                         
                         $('#table-content-header').html(res);
                         $('#timeStartText').val( sessionItemInfoArray[1]);

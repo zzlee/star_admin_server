@@ -334,7 +334,7 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
                     cb(err,null);
                 }
                 if(result){
-                    cb(null,'success');
+                    cb(null, 'done');
 //                  console.log('updateAdoc_result'+result);
                 }
             });
@@ -496,7 +496,7 @@ censorMgr.updateLiveContents = function(liveContent_Id, vjson, cb){
             cb(err,null);
         }
         if(result){
-            cb(null,'successful');
+            cb(null, 'done');
             logger.info('[updateLiveContents_updateAdoc] successful', liveContent_Id);
           //console.log('updateAdoc_result'+result);
         }
@@ -645,7 +645,7 @@ censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
             cb(err,null);
         }
         if(result){
-            cb(null,'successful');
+            cb(null, 'done');
             logger.info('[updateProgramTimeSlots_updateAdoc] successful', programTimeSlot_Id);
 //          console.log('updateAdoc_result'+result);
         }
