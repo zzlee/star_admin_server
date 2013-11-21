@@ -1145,7 +1145,26 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
     
                         }, 
                         function(fileToPlay, timeslot, contentNo, callback){
-                            //debugger;
+                            //remove the "mustPlay" flag 
+                            ugcModel.findOne({"no":contentNo}).exec(function(err, ugcItem){
+                                if (ugcItem.mustPlay) {
+                                    ugcItem.mustPlay = false;
+                                    ugcItem.save(function(errOfSave){
+                                        if (!errOfSave) {
+                                            callback(null, fileToPlay, timeslot, contentNo);
+                                        }
+                                        else {
+                                            callback("Failed to update mustPlay flag: "+errOfSave, null, null, null);
+                                        }
+                                    });
+                                }
+                                else {
+                                    callback(null, fileToPlay, timeslot, contentNo);
+                                }
+                                
+                            });
+                        },
+                        function(fileToPlay, timeslot, contentNo, callback){
                             //push content to Scala
                             var option = 
                             {
