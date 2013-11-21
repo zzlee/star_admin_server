@@ -1224,43 +1224,53 @@ $(document).ready(function(){
     
             if(playlistCheck == '/miix_admin/doohs'){
                 
+                console.log(sessionId);
+                var arrayOfSessionId = sessionId.split('-');
+                console.log(arrayOfSessionId[2]);
+                console.log(arrayOfSessionId[3]);
+                
                 $('#PlayList.ugcCensorNoSetBtn').click(function(){
                     console.log('PlayList.ugcCensorNoSetBtn');
                     var flag = 0;
                     var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
                     var programTimeSlotId = $(this).attr("name");
                     var ugcReferenceNo;
-    
-                    $('input[class="#PlayList.ugcCensorNoSetBtn"]').each(function(){
-                        
-                        ugcReferenceNo = $(this).val();
-                        
-                        if(ugcReferenceNo && programTimeSlotId){
-                            $.ajax({
-                                url: url,
-                                type: 'PUT',
-                                data: { type: 'setUgcToProgram', programTimeSlotId: programTimeSlotId, ugcReferenceNo: ugcReferenceNo},
-                                success: function(response) {
-                                    if(response.message){
-                                        console.log("[Response_Set] message:" + response.message);
-                                        conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
-                                        if(response.message.substring(0,6) != 'Cannot'){
-                                        $('#main_menu ul[class="current"]').attr("class", "select");
-                                        $('#UGCPlayList').attr("class", "current");
-    
-                                        FM.currentContent = FM.UGCPlayList;
-                                        FM.currentContent.showCurrentPageContent();
-                                        }else{
-                                             if(flag == 0){
-                                                 alert(response.message);
-                                                 flag = 1;
-                                                 }
+                    var checkDate = new Date().getTime() + 60*60*1000;
+                    console.log(checkDate+','+arrayOfSessionId[2]);
+                    if(checkDate <= arrayOfSessionId[2]){
+                        alert("播出時間:"+arrayOfSessionId[2]+"，此節目已排入序列無法異動，有更改需求請洽工程師!");
+                    }else{
+                        $('input[class="#PlayList.ugcCensorNoSetBtn"]').each(function(){
+                            
+                            ugcReferenceNo = $(this).val();
+                            
+                            if(ugcReferenceNo && programTimeSlotId){
+                                $.ajax({
+                                    url: url,
+                                    type: 'PUT',
+                                    data: { type: 'setUgcToProgram', programTimeSlotId: programTimeSlotId, ugcReferenceNo: ugcReferenceNo},
+                                    success: function(response) {
+                                        if(response.message){
+                                            console.log("[Response_Set] message:" + response.message);
+                                            conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
+                                            if(response.message.substring(0,6) != 'Cannot'){
+                                            $('#main_menu ul[class="current"]').attr("class", "select");
+                                            $('#UGCPlayList').attr("class", "current");
+        
+                                            FM.currentContent = FM.UGCPlayList;
+                                            FM.currentContent.showCurrentPageContent();
+                                            }else{
+                                                 if(flag == 0){
+                                                     alert(response.message);
+                                                     flag = 1;
+                                                     }
+                                            }
                                         }
                                     }
-                                }
-                            });
-                        }
-                    });
+                                });
+                            }
+                        });
+                    }
     
                 });
     
