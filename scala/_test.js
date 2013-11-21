@@ -15,7 +15,7 @@ global.logger = logger;
 var scala = require('./scalaMgr');
 var scalaMgr = scala( 'http://192.168.5.189:8080', { username: 'administrator', password: '53768608' } );
 // var scalaMgr = scala( 'http://www.feltmeng.idv.tw:8080', { username: 'administrator', password: '53768608' } );
-//var scalaMgr = scala( 'http://220.128.120.51:8080', { username: 'administrator', password: '28469434' } );
+// var scalaMgr = scala( 'http://220.128.120.51:8080', { username: 'administrator', password: '28469434' } );
 
 setTimeout(function(){
     
@@ -40,6 +40,22 @@ setTimeout(function(){
         }
     };
     scalaMgr.setItemToPlaylist( option, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    } ); */
+    
+    //ScalaMgr APIs : uploadMediaItem()
+    /* var option = 
+    {
+        file: {
+            name : 'test_0.avi',
+            path : 'C:\\tmp\\',
+            savepath : ''
+        }
+    };
+    scalaMgr.uploadMediaItem( option, function(err, res){
         if(err)
             console.dir(err);
         else

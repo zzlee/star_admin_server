@@ -295,6 +295,9 @@ $(document).ready(function(){
 													"s3url":res[i].liveContent[j].url.s3,
 													"longPic":res[i].liveContent[j].url.longPhoto,
 													"_id":res[i].liveContent[j]._id,
+                                                    //
+                                                    "projectId": res[i].liveContent[j].projectId,
+                                                    //
 													"liveTime":res[i].liveContent[j].liveTime,
 													"ugcCensorNo":res[i].ugcCensorNo,
 													"_type":"correct",
@@ -504,121 +507,115 @@ $(document).ready(function(){
 	
 	 
 	/* ------------------------------  最右邊正確紐---------------------------------------------------*/
-	  $("#boxCheckLive.good").click(function(){ //btn for image(only one) and video
-		  //alert("g");
+	$("#boxCheckLive.good").click(function(){ //btn for image(only one) and video
+        //alert("g");
+        
+        if($(this).attr("genre") == "miix_story_raw"){
+            // alert("it's miix_story_raw");
+            var forComfirm=confirm("你按下的是 ***正確***(for video)\n多謝!!");
+            if (forComfirm==true)
+            {
+            }
+            else
+            {
+                return false;
+            }
+							  
+            var _id=$(this).attr("_id");
+            var userID=$(this).val();
+            var s3Url=$(this).attr("s3url");
+            var picType=$(this).attr("_type");
+            var projectId = $(this).attr("projectId");
+            var liveTime=$(this).attr("liveTime");
+            var ugcCensorNo=$(this).attr("ugcCensorNo");
+            
+            console.log("_id: " + _id + 
+                        "\n" + "userID: " + userID + 
+                        "\n" + "projectId: " + projectId + 
+                        "\n" + "liveTime: " + liveTime + 
+                        "\n" + "s3Url: " + s3Url + 
+                        "\n" + "Type: " + picType);
+            
+            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+            $.ajax({
+                url: "/internal/story_cam_controller/available_story_movie",
+                type: "POST",
+                headers : { 'miix_movie_project_id' : projectId, 'record_time' : liveTime },
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
+            
+            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                data: {liveContent_Id:_id,
+                       vjson:{state: picType}},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
+            /* add code to implement "miix_story_raw"*/
 		  
-		  if($(this).attr("genre") == "miix_story_raw"){
-									//alert("it's miix_story_raw");		
-									var forComfirm=confirm("你按下的是 ***正確***(for video)\n多謝!!");
-							  if (forComfirm==true)
-								{
-							 
-								}
-							  else
-								{
-							  
-							   return false;
-								}
-							  
-							  
-								var _id=$(this).attr("_id");
-								var userID=$(this).val();
-								var s3Url=$(this).attr("s3url");
-								var picType=$(this).attr("_type");
-								var longPic=$(this).attr("longPic");
-								var liveTime=$(this).attr("liveTime");
-								var ugcCensorNo=$(this).attr("ugcCensorNo");
+		} else {
+            
+            var forComfirm=confirm("你按下的是 ***正確***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
+            if (forComfirm==true)
+            {
+         
+            }
+            else
+            {
+
+                return false;
+            }
+            
+            var _id=$(this).attr("_id");
+            var userID=$(this).val();
+            var s3Url=$(this).attr("s3url");
+            var picType=$(this).attr("_type");
+            var longPic=$(this).attr("longPic");
+            var liveTime=$(this).attr("liveTime");
+            var ugcCensorNo=$(this).attr("ugcCensorNo");
+            
+            console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
 								
-								console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
-								
-								var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
-								$.ajax({
-									url: url,
-									type: 'PUT',
-									data: {liveContent_Id:_id,
-										   userID:userID,
-										   photoUrl:s3Url,
-										   vjson:{state: picType}},
-									success: function(response) {
-										if(response.message){
-											console.log("[Response] message:" + response.message);
-										}
-									}
-								});
-								
-								var url=DOMAIN+"fbItem/"+userID;
-								$.ajax({
-									url: url,
-									type: 'POST',
-									data: {s3Url: s3Url,
-										   longPic: longPic,
-										   type: picType,
-										   liveTime: liveTime,
-										   ugcCensorNo: ugcCensorNo,
-										   liveContent_Id:_id},
-									success: function(response) {
-										if(response.message){
-											console.log("[Response] message:" + response.message);
-										}
-									}
-								});
-						/* add code to implement "miix_story_raw"*/
-		  
-		  }else{
-		  
-								var forComfirm=confirm("你按下的是 ***正確***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
-							  if (forComfirm==true)
-								{
-							 
-								}
-							  else
-								{
-							  
-							   return false;
-								}
-							  
-							  
-								var _id=$(this).attr("_id");
-								var userID=$(this).val();
-								var s3Url=$(this).attr("s3url");
-								var picType=$(this).attr("_type");
-								var longPic=$(this).attr("longPic");
-								var liveTime=$(this).attr("liveTime");
-								var ugcCensorNo=$(this).attr("ugcCensorNo");
-								
-								console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
-								
-								var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
-								$.ajax({
-									url: url,
-									type: 'PUT',
-									data: {liveContent_Id:_id,
-										   userID:userID,
-										   photoUrl:s3Url,
-										   vjson:{state: picType}},
-									success: function(response) {
-										if(response.message){
-											console.log("[Response] message:" + response.message);
-										}
-									}
-								});
-								
-								var url=DOMAIN+"fbItem/"+userID;
-								$.ajax({
-									url: url,
-									type: 'POST',
-									data: {s3Url: s3Url,
-										   longPic: longPic,
-										   type: picType,
-										   liveTime: liveTime,
-										   ugcCensorNo: ugcCensorNo,
-										   liveContent_Id:_id},
-									success: function(response) {
-										if(response.message){
-											console.log("[Response] message:" + response.message);
-										}
-									}
-								});
+            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                data: {liveContent_Id:_id,
+                       userID:userID,
+                       photoUrl:s3Url,
+                       vjson:{state: picType}},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
+            
+            var url=DOMAIN+"fbItem/"+userID;
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {s3Url: s3Url,
+                       longPic: longPic,
+                       type: picType,
+                       liveTime: liveTime,
+                       ugcCensorNo: ugcCensorNo,
+                       liveContent_Id:_id},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
 		  }
 	
 	    	
@@ -964,9 +961,12 @@ $(document).ready(function(){
             $("input[id='ugcCensor']").show();
             $('#traceWindow').show();
         }
-        else if ( localStorage.role == "OPERATOR" ) {
+        else if ( (localStorage.role == "OPERATOR") || (localStorage.role == "FELTMENG_DEMO") ) {
             $('#createProgramListBtn').hide();
             $("input[id='ugcCensor']").hide();
+            $("th[sensitive='true']").hide();
+            $("td[sensitive='true']").hide();
+            $("div[sensitive='true']").hide();
             $('#pushProgramsBtn').remove();
             $('#traceWindow').hide();
         }
@@ -1438,6 +1438,8 @@ $(document).ready(function(){
         $("[id^='miixPlayList']").hide();
         $("[id^='storyPlayList']").hide();
         $("[id^='UGCList']").show();
+        $("[id^='UGCPlayList']").hide();
+        $("[id^='historyList']").hide();
         $("[id^='highlightList']").hide();
         $("[id^='live_check']").hide();
         FM.currentContent = FM.memberList;

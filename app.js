@@ -181,9 +181,9 @@ async.waterfall([
 //        var ugcModel = db.getDocModel("ugc");
 //        var memberListInfoModel = db.getDocModel("memberListInfo");
 //
-//        memberListInfoModel.find().sort('fb.userName').exec(function(err, memberList){
-//            //console.log('result=');
-//            //console.dir(result);
+//        memberListInfoModel.find({"hot":true}).exec(function(err, memberList){
+//            //console.log('memberList=');
+//            //console.dir(memberList);
 //            
 //            var indexList = [];
 //            for (var i=0; i<memberList.length; i++) {
@@ -195,12 +195,14 @@ async.waterfall([
 //            //console.dir(indexList);
 //            
 //            var iteratorUpdateAMemberInfo = function(anIndex, callback){
-//                memberList[anIndex].miixMovieVideo_count = Math.floor( 5*Math.random() );
-//                memberList[anIndex].fbShare_count = Math.floor( memberList[anIndex].miixMovieVideo_count*0.5 );
-//                memberList[anIndex].doohPlay_count = Math.floor( memberList[anIndex].miixMovieVideo_count*2 );
-//                memberList[anIndex].fbLike_count = Math.floor( memberList[anIndex].miixMovieVideo_count*35*Math.random() );
+//                memberList[anIndex].miixMovieVideo_count = 1+ Math.floor( 3*Math.random()*Math.random()*Math.random() );
+//                memberList[anIndex].doohPlay_count = Math.floor( memberList[anIndex].miixMovieVideo_count*(1+3.1*Math.random()*Math.random()) );
+//                memberList[anIndex].fbLike_count = Math.floor( memberList[anIndex].doohPlay_count*62*Math.random()*Math.random() );
 //                memberList[anIndex].fbComment_count = Math.floor( memberList[anIndex].fbLike_count*0.5*Math.random() );
+//                memberList[anIndex].fbShare_count = Math.floor( memberList[anIndex].doohPlay_count*2.3*Math.random()*Math.random() );
+//
 //                memberList[anIndex].save(callback);
+//                console.log("updated "+anIndex);
 //            };
 //            
 //            async.eachSeries(indexList, iteratorUpdateAMemberInfo, function(err){
@@ -213,6 +215,51 @@ async.waterfall([
 //                }
 //            });
 //        });
+        
+//        //set shine
+//        var db = require('./db.js');
+//        var async = require('async');
+//        var ugcModel = db.getDocModel("ugc");
+//        var memberListInfoModel = db.getDocModel("memberListInfo");
+//
+//        memberListInfoModel.find({"hot":true}).exec(function(err, memberList){
+//            //console.log('memberList=');
+//            //console.dir(memberList);
+//            
+//            var shineList = [];
+//            for (var i=0; i<memberList.length; i++) {
+//                //console.dir(memberList[i]);
+//                if ( ((i%3) == 0) && (i>500) ) {
+//                    shineList.push({index:i, shine:false});
+//                }
+//                else {
+//                    shineList.push({index:i, shine:true});
+//
+//                }
+//                
+//                    
+//                
+//            }
+//            //console.dir(shineList);
+//            
+//            var iteratorUpdateAMemberInfo = function(aShineItem, callback){
+//                memberList[aShineItem.index].shine = aShineItem.shine;
+//
+//                memberList[aShineItem.index].save(callback);
+//                console.log("updated "+aShineItem.index);
+//            };
+//            
+//            async.eachSeries(shineList, iteratorUpdateAMemberInfo, function(err){
+//                
+//                if (!err) {
+//                    console.log('done!');
+//                }
+//                else {
+//                    console.log('error! : '+err);
+//                }
+//            });
+//        });
+
         
         
         callback(null);
