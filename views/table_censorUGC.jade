@@ -53,7 +53,11 @@ form#mainform(action='')
                          td
                              img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
                              label       
-                             img(src='#{ugcCensor.userPhotoUrl}', alt='', width='360')
+                             img(src='#{ugcCensor.userPhotoUrl}', alt='', width='300', style='padding:5px')
+                             if !ugcCensor.url.youtube
+                                input#ugcGenVideoUgcBtn(type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
+                             else
+                                iframe(width='256',height='144', src='#{ugcCensor.url.youtube}')
                              br
                              label #{ugcCensor.fb_userName} 
                       else
@@ -136,7 +140,11 @@ form#mainform(action='')
                          td
                              img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
                              label       
-                             img(src='#{ugcCensor.userPhotoUrl}', alt='', width='360')
+                             img(src='#{ugcCensor.userPhotoUrl}', alt='', width='300', style='padding:5px')
+                             if !ugcCensor.url.youtube
+                                input#ugcGenVideoUgcBtn(type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
+                             else
+                                iframe(width='256',height='144', src='#{ugcCensor.url.youtube}')
                              br
                              label #{ugcCensor.fb_userName} 
                       else

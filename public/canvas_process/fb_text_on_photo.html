@@ -25,6 +25,7 @@
         
         //var source = 'https://s3.amazonaws.com/miix_content/user_project/check_in-5248f77955ebecec1100000b-1380618600000-001-1380618827113/check_in-5248f77955ebecec1100000b-1380618600000-001-1380618827113.jpg';
         var source = option.sourceImage;
+        var longPhoto = option.longPhoto;
         // var icon = 'https://lh5.googleusercontent.com/-qB0YcnpbZI8/Ul0oE5I8juI/AAAAAAAAABM/QVLp-J0zG9A/s0/black_icon.png';
         var ugcProjectId = option.ugcProjectId;
 		
@@ -34,12 +35,14 @@
             // 'wowtaipeiarena': 'https://lh6.googleusercontent.com/-hqkKLjk-brM/UmDvwloXh9I/AAAAAAAAADM/uEju9-TGC9k/s0/wowOnTaipeiArena_black_icon.png'
             // 'wowtaipeiarena': 'https://lh4.googleusercontent.com/-oKi0_PfAs98/Um8enR6D8zI/AAAAAAAAADk/-_d8kt8Gcio/s0/wowOnTaipeiArena_fb_post_card_bg.jpg'
             // 'wowtaipeiarena': 'https://lh4.googleusercontent.com/-4NMUvklFDyw/UnNLHP1gakI/AAAAAAAAAEE/jG5rIryTbJg/s0/wowOnTaipeiArena_fb_bg.jpg'
-            'wowtaipeiarena': 'https://lh5.googleusercontent.com/-Ed1xZ6r7w7c/UnjbFBroNzI/AAAAAAAAAEU/6Rfe_iS4dlc/s0/wowOnTaipeiArena_fb_post_card_2_bg.jpg'
+            // 'wowtaipeiarena': 'https://lh5.googleusercontent.com/-Ed1xZ6r7w7c/UnjbFBroNzI/AAAAAAAAAEU/6Rfe_iS4dlc/s0/wowOnTaipeiArena_fb_post_card_2_bg.jpg'
+            'wowtaipeiarena': 'https://lh4.googleusercontent.com/-ywQ11CkJZ6Y/UorQBucnaZI/AAAAAAAAAEo/1O9nGfFX3wk/s0/wowOnTaipeiArena_revise_bg_1118.jpg'
         };
 
         var canvas = document.getElementById('myCanvas');
         var context = canvas.getContext('2d');
         var imageObj = new Image();
+        var imagePhoto = new Image();
         var imageBg = new Image();
         
         // var content = 'Jeff Chai 於2013年10月1日下午5:21，登上台北小巨蛋天幕！';
@@ -59,14 +62,14 @@
                     context.fillText(decodeURI(option.textContent), 1790.897, 1410.778);
                     break;
                 case 'wowtaipeiarena':
-                    canvas.width = imageBg.width;
-                    canvas.height = imageBg.height;
-                    context.drawImage(imageBg, 0, 0);
-                    context.drawImage(imageObj, 138, 81);
-                    context.font = 'bold 48px 微軟正黑體';
-                    context.fillStyle = 'black';
-                    context.textAlign="right";
-                    context.fillText(decodeURI(option.textContent), 1819.82, 1377.273);
+                    // canvas.width = imageBg.width;
+                    // canvas.height = imageBg.height;
+                    // context.drawImage(imageBg, 0, 0);
+                    // context.drawImage(imageObj, 138, 81);
+                    // context.font = 'bold 48px 微軟正黑體';
+                    // context.fillStyle = 'black';
+                    // context.textAlign="right";
+                    // context.fillText(decodeURI(option.textContent), 1819.82, 1377.273);
                     // canvas.width = imageBg.width;
                     // canvas.height = imageBg.height;
                     // context.drawImage(imageBg, 0, 0);
@@ -75,6 +78,15 @@
                     // context.fillStyle = 'black';
                     // context.textAlign="right";
                     // context.fillText(decodeURI(option.textContent), 1790.897, 1410.778);
+                    canvas.width = imageBg.width;
+                    canvas.height = imageBg.height;
+                    context.drawImage(imageBg, 0, 0);
+                    context.drawImage(imageObj, 118, 115);
+                    context.drawImage(imagePhoto, 206.5, 1335);
+                    context.font = 'bold 48px 微軟正黑體';
+                    context.fillStyle = 'black';
+                    context.textAlign="right";
+                    context.fillText(decodeURI(option.textContent), 1802.82, 1702.273);
                     break;
                 default:
                     break;
@@ -115,8 +127,11 @@
                 case 'wowtaipeiarena':
                     img64Loader(mark_bg.wowtaipeiarena, function(icondata){
                         imageBg.src = icondata;
-                        img64Loader(source, function(sourcedata){
-                            imageObj.src = sourcedata;
+                        img64Loader(longPhoto, function(sourcedata){
+                            imagePhoto.src = sourcedata;
+                            img64Loader(source, function(sourcedata){
+                                imageObj.src = sourcedata;
+                            });
                         });
                     });
                     break;

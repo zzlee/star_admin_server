@@ -117,9 +117,10 @@ var UGCList = [];
 var timeslotStart;
 var timeslotEnd;
 
-var UGCListInfo = function(userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl,arr) {
+var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl,arr) {
     arr.push({
         userPhotoUrl: userPhotoUrl,
+        ugcProjectId: ugcProjectId,
         ugcCensorNo: ugcCensorNo,
         userContent: userContent,
         fb_userName: fb_userName,
@@ -190,13 +191,13 @@ var mappingUGCList = function(data, type, set_cb){
             }
             //UGCListInfo
             if(next == limit - 1) {
-                UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], UGCList);
                 set_cb(null, 'ok'); 
                 next = 0;
                 UGCList = [];
             }
             else{
-                UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2],UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2],UGCList);
                 next += 1;
                 mappingUGCList(data, type, set_cb);
             }
@@ -620,6 +621,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                     accessToken: access_token,
                     type: member.app,
                     source: photoUrl.play,
+                    photo: photoUrl.preview,
                     text: textContent,
                     ugcProjectId: sourceId
                 };

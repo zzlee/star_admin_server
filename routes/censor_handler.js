@@ -7,6 +7,7 @@ var censorMgr = require("../censor_mgr.js");
 var apis = require("../routes/api.js");
 var scheduleMgr = require("../schedule_mgr.js");
 var db = require('../db.js');
+var async = require('async');
 var sessionItemModel = db.getDocModel("sessionItem");
 
 
@@ -392,6 +393,49 @@ FM.censorHandler.updateProgramTimeSlot_get_cb = function(req, res){
             }
         });
     
+};
+
+//PUT /miix_admin/video_ugcs/:projectId
+FM.censorHandler.generateVideoUgc = function(req, res){
+    var ugcProjectId =  req.params.projectId;
+    var miixContentMgr = require('../miix_content_mgr.js');
+    var adminBrowserMgr = require('../admin_browser_mgr.js');
+    var ugcModel = db.getDocModel("ugc");
+    var straceStamp = "";   //TODO: have a trace stamp
+    
+    async.waterfall([
+        function(callback){
+            //get the corresponding UGC info
+            ugcModel.findOne({ 'projectId': ugcProjectId }, '_id ownerId projectId title no', function (errOfFindOne, ugc) {
+                if (!errOfFindOne) {
+                    var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded" 
+                    //console.log("_ugc=");
+                    //console.dir(_ugc);
+                    callback(null, _ugc.projectId, _ugc.ownerId._id,  _ugc.ownerId.fbUserId, _ugc.title, _ugc.no);
+                }
+                else {
+                    callback("Failed to get the corresponding UGC info: "+errOfFindOne, null, null, null, null, null);
+                }
+            });
+        }, 
+        function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, ugcNo, callback){
+            //render this video UGC (Miix movie)
+            adminBrowserMgr.showTrace(null, straceStamp+"開始合成編號"+ugcNo+"的UGC....請等待約15~20分鐘");
+            miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, function(errOfGenerateMiixMoive){
+                if (!errOfGenerateMiixMoive){
+                    adminBrowserMgr.showTrace(null, straceStamp+"成功地合成編號"+ugcNo+"的UGC!");
+                    callback(null);
+                }
+                else {
+                    adminBrowserMgr.showTrace(null, straceStamp+"!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
+                    callback(errOfGenerateMiixMoive);
+                }
+            });
+        }
+    ], function(errOfWaterFall){
+    });
+    
+    res.send(200);
 };
 
 module.exports = FM.censorHandler;
