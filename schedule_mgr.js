@@ -1606,41 +1606,17 @@ var autoCheckProgramAndPushToPlayer = function(){
             }
         });
     }
-    else if(flag === 0){
-        /*  disable
-        //pushEvent
-        var checkDateStart = new Date().getTime();
-        var checkDateEnd = checkDateStart + 40*60*1000;
-		logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]find sessionItemModel in checkDateStart:"+checkDateStart+",checkDateEnd:"+checkDateEnd);
-        sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
-            if(!result){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-            }
-            else if(!result[0]){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-            }
-            else if(!err){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
-//                scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}, player: {name: scalaPlayerName}}, function(res){
-                    scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'}, player: {name: scalaPlayerName}}, function(res){
-                    logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
-
-                });
-            }else{
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
-            }
-            //console.log(err, result);
-        });
-        */
+    else if(flag == 0){
         //Push program to scala
         autoPushProgramToPlayer();
     }
     //flag contorl
-    if(flag === 0)
+    if(flag == 0)
         flag = 1;
     else
         flag = 0;
-    console.log('flag'+flag);
+    
+//    console.log('flag'+flag);
     setTimeout(autoCheckProgramAndPushToPlayer, 6*60*1000);
 
 };
@@ -1754,7 +1730,6 @@ var autoPushProgramToPlayer = function(){
                 // result now equals 'done'
                 if(!errWaterfall){
                     db.updateAdoc(programTimeSlotModel, aProgram._id, {"upload": true}, function(err, res){
-//                        console.log(err+res);
                         callbackIterator(errWaterfall);
                     });
                 }else
@@ -1783,7 +1758,6 @@ var autoPushProgramToPlayer = function(){
                         adminBrowserMgr.showTrace(null, straceStamp+"成功推送"+aProgram.content.uri+"至播放系統!");
                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + web.uri );
                         db.updateAdoc(programTimeSlotModel, aProgram._id, {"upload": true}, function(err, res){
-//                            console.log(err+res);
                             callbackIterator(null);
                         });
                     }
@@ -1813,7 +1787,6 @@ var autoPushProgramToPlayer = function(){
                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
                         adminBrowserMgr.showTrace(null, straceStamp+"成功推送"+aProgram.content.name+"至播放系統!");
                         db.updateAdoc(programTimeSlotModel, aProgram._id, {"upload": true}, function(err, res){
-//                            console.log(err+res);
                             callbackIterator(null);
                         });
                     }
@@ -1832,60 +1805,29 @@ var autoPushProgramToPlayer = function(){
     
     async.waterfall([
                      function(cb1){
-                         //pushEvent
-                         var checkDateStart = new Date().getTime();
-                         var checkDateEnd = checkDateStart + 40*60*1000;
-                         straceStamp = "現在時間"+new Date().toDateString()+' '+new Date().toLocaleTimeString();
-                         cb1(null, null);
-               /*          logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]find sessionItemModel in checkDateStart:"+checkDateStart+",checkDateEnd:"+checkDateEnd);
-                         sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
-                             if(!result){
-                                 logger.info("[schedule_mgr.autoPushProgramToPlayer]sessionItem is null");
-                                 cb1("沒有節目準備上傳", null);
-                             }
-                             else if(!result[0]){
-                                 logger.info("[schedule_mgr.autoPushProgramToPlayer]sessionItem is null");
-                                 cb1("沒有節目準備上傳", null);
-                             }
-                             else if(!err){
-//                                 console.log(result);
-                                 logger.info("[schedule_mgr.autoPushProgramToPlayer]sessionId="+result[0].sessionId);
-                                 sessionId = result[0].sessionId;
-//                                 console.log(result[0].sessionId);
-                                 timeInfos = sessionId.split('-');
-                                 intervalStart = new Date( Number(timeInfos[2]) );
-                                 intervalEnd = new Date( Number(timeInfos[3]) );
-                                 straceStamp = '[推送'+intervalStart.toDateString()+' '+intervalStart.toLocaleTimeString()+'~'+intervalEnd.toDateString()+' '+intervalEnd.toLocaleTimeString()+'的節目] ';
-                                 cb1(null, result[0].sessionId);
-                             }else{
-                                 logger.info("[schedule_mgr.autoPushProgramToPlayer]fail to get sessionItem err="+err);
-                                 cb1("fail to get sessionItem err="+err, null);
-                             }
-                             //console.log(err, result);
-                         });  */
-                     },
-                     function(sessionId, cb2){
                          var checkDateStart = new Date().getTime();
                          var checkDateEnd = checkDateStart + 30*60*1000;
+                         straceStamp = "現在時間"+new Date().toDateString()+' '+new Date().toLocaleTimeString();
+                         
                          //query the programs of this specific session
                          programTimeSlotModel.find({"timeslot.start": {$gte: checkDateStart, $lte: checkDateEnd}, "upload":false, "state": "confirmed"}).sort({"timeStamp":1}).exec(function (err1, _programs) {
-//                         programTimeSlotModel.find({"session": sessionId, "upload":false}).sort({"timeStamp":1}).exec(function (err1, _programs) {
                              if(!_programs){
                                  logger.info("[schedule_mgr]no matched programTimeSlot");
-                                 cb2("沒有節目準備上傳", null);
+                                 cb1("沒有節目準備上傳", null);
                              }
                              else if(!_programs[0]){
                                  logger.info("[schedule_mgr]no matched programTimeSlot");
-                                 cb2("沒有節目準備上傳", null);
+                                 cb1("沒有節目準備上傳", null);
                              }
                              else if (!err1) {
-                                 console.log(_programs);
+//                                 console.log(_programs);
                                  var programs = JSON.parse(JSON.stringify(_programs));
                                  sessionId = _programs[0].session;
                                  timeInfos = sessionId.split('-');
                                  intervalStart = new Date( Number(timeInfos[2]) );
                                  intervalEnd = new Date( Number(timeInfos[3]) );
                                  straceStamp = '[推送'+intervalStart.toDateString()+' '+intervalStart.toLocaleTimeString()+'~'+intervalEnd.toDateString()+' '+intervalEnd.toLocaleTimeString()+'的節目] ';
+                                 adminBrowserMgr.showTrace(null, straceStamp+"節目推送作業開始....");
                                  
                                  //for debugging
                                  logger.info('[scheduleMgr] programs to push (to 3rd-party Content Manager:' );
@@ -1893,10 +1835,10 @@ var autoPushProgramToPlayer = function(){
                                      logger.info(JSON.stringify(programs[i]));
                                  }
                                                     
-                                 cb2(null, programs);
+                                 cb1(null, programs);
                              }
                              else {
-                                 cb2('Failed to query the programs of a specific session: '+err1, null);
+                                 cb1('Failed to query the programs of a specific session: '+err1, null);
                              }                             
                          });
                      },
