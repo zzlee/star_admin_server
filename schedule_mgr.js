@@ -1632,6 +1632,7 @@ var autoCheckProgramAndPushToPlayer = function(){
             //console.log(err, result);
         });
         */
+        //Push program to scala
         autoPushProgramToPlayer();
     }
     //flag contorl
@@ -1834,15 +1835,17 @@ var autoPushProgramToPlayer = function(){
                          //pushEvent
                          var checkDateStart = new Date().getTime();
                          var checkDateEnd = checkDateStart + 40*60*1000;
-                         logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]find sessionItemModel in checkDateStart:"+checkDateStart+",checkDateEnd:"+checkDateEnd);
+                         straceStamp = "現在時間"+new Date().toDateString()+' '+new Date().toLocaleTimeString();
+                         cb1(null, null);
+               /*          logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]find sessionItemModel in checkDateStart:"+checkDateStart+",checkDateEnd:"+checkDateEnd);
                          sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
                              if(!result){
                                  logger.info("[schedule_mgr.autoPushProgramToPlayer]sessionItem is null");
-                                 cb1("sessionItem is null", null);
+                                 cb1("沒有節目準備上傳", null);
                              }
                              else if(!result[0]){
                                  logger.info("[schedule_mgr.autoPushProgramToPlayer]sessionItem is null");
-                                 cb1("sessionItem is null", null);
+                                 cb1("沒有節目準備上傳", null);
                              }
                              else if(!err){
 //                                 console.log(result);
@@ -1859,13 +1862,30 @@ var autoPushProgramToPlayer = function(){
                                  cb1("fail to get sessionItem err="+err, null);
                              }
                              //console.log(err, result);
-                         });
+                         });  */
                      },
                      function(sessionId, cb2){
+                         var checkDateStart = new Date().getTime();
+                         var checkDateEnd = checkDateStart + 30*60*1000;
                          //query the programs of this specific session
-                         programTimeSlotModel.find({"session": sessionId, "upload":false}).sort({"timeStamp":1}).exec(function (err1, _programs) {
-                             if (!err1) {
+                         programTimeSlotModel.find({"timeslot.start": {$gte: checkDateStart, $lte: checkDateEnd}, "upload":false, "state": "confirmed"}).sort({"timeStamp":1}).exec(function (err1, _programs) {
+//                         programTimeSlotModel.find({"session": sessionId, "upload":false}).sort({"timeStamp":1}).exec(function (err1, _programs) {
+                             if(!_programs){
+                                 logger.info("[schedule_mgr]no matched programTimeSlot");
+                                 cb2("沒有節目準備上傳", null);
+                             }
+                             else if(!_programs[0]){
+                                 logger.info("[schedule_mgr]no matched programTimeSlot");
+                                 cb2("沒有節目準備上傳", null);
+                             }
+                             else if (!err1) {
+                                 console.log(_programs);
                                  var programs = JSON.parse(JSON.stringify(_programs));
+                                 sessionId = _programs[0].session;
+                                 timeInfos = sessionId.split('-');
+                                 intervalStart = new Date( Number(timeInfos[2]) );
+                                 intervalEnd = new Date( Number(timeInfos[3]) );
+                                 straceStamp = '[推送'+intervalStart.toDateString()+' '+intervalStart.toLocaleTimeString()+'~'+intervalEnd.toDateString()+' '+intervalEnd.toLocaleTimeString()+'的節目] ';
                                  
                                  //for debugging
                                  logger.info('[scheduleMgr] programs to push (to 3rd-party Content Manager:' );
@@ -1905,7 +1925,6 @@ var autoPushProgramToPlayer = function(){
 
 };
 
-//setTimeout(autoPushProgramToPlayer, 2000);
 
 //test
 //dateTransfer(1377144000000, function(result){
