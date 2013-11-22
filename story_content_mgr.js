@@ -80,10 +80,16 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
     var movieTitle = null;
     var miixMovieFileExtension = "flv";
     
+    var ownerFbProfilePicture = null;
+    
     var getUserIdAndName = function( finish_cb ){
         UGCDB.getOwnerIdByPid( miixMovieProjectID, function( err, _ownerStdID) {
             if (!err) {
                 ownerStdID = _ownerStdID;
+                
+                // temp fb picture
+                ownerFbProfilePicture = 'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c66.66.828.828/s720x720/528252_146750055494664_1746072981_n.jpg';
+                
                 memberDB.getUserNameAndID( ownerStdID, function(err2, result){
                     if (!err2) {
                         ownerFbID = result.fb.userID;
@@ -245,7 +251,7 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
         },
         function(cb4){
             //console.log('step.4 start');
-            aeServerMgr.createStoryMV( miixMovieProjectID, miixMovieFileExtension, ownerStdID, ownerFbID, movieTitle, function(responseParameters){
+            aeServerMgr.createStoryMV( miixMovieProjectID, miixMovieFileExtension, ownerStdID, ownerFbID, movieTitle, ownerFbProfilePicture, recordTime, function(responseParameters){
                 //console.log('step.4 end');
                 logger.info('generating Story MV finished. ');
                 logger.info('res: _commandId='+responseParameters._commandId+' err='+responseParameters.err+' youtube_video_id='+responseParameters.youtube_video_id);
