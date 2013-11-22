@@ -17,3 +17,4 @@ public/contents/temp
 system_configuration.json
 !setup/system_configuration.json
 public/*.apk
+system_configuration_.json
