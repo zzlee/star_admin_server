@@ -260,31 +260,31 @@ async.waterfall([
 //            });
 //        });
 
-        //ugc statistics
-        var db = require('./db.js');
-        var async = require('async');
-        var ugcModel = db.getDocModel("ugc");
-        var fs = require('fs');
-        ugcModel.aggregate(  
-                { $match : { no:{$gte: 3000} } },
-                { $project: { creatYear:{$year: "$createdOn"}, creatMonth:{$month: "$createdOn"},creatDay:{$dayOfMonth: "$createdOn"}  } },
-                { $group: { _id: {y:"$creatYear",m:"$creatMonth",d:"$creatDay"}, ugcsPerDay : { $sum : 1 } } }, 
-                { $sort : { _id: 1 } }, function(err, ugcStatisticsList){
-                    //console.log("ugcStatisticsList=");
-                    //console.dir(ugcStatisticsList);
-                    var outString = "date, ugc count\n";
-                    for (var i=0; i<ugcStatisticsList.length; i++) {
-                        outString += ugcStatisticsList[i]._id.y+"/"+ugcStatisticsList[i]._id.m+"/"+ugcStatisticsList[i]._id.d+", "+ugcStatisticsList[i].ugcsPerDay+"\n";
-                    }
-                    console.log(outString);
-                    fs.writeFile('ugc_statistics.csv', outString, function (err) {
-                        if (err) throw err;
-                        console.log('ugc_statistics.csv is saved!');
-                    });
-                    
-                    
-                });
-
+//        //ugc statistics
+//        var db = require('./db.js');
+//        var async = require('async');
+//        var ugcModel = db.getDocModel("ugc");
+//        var fs = require('fs');
+//        ugcModel.aggregate(  
+//                { $match : { no:{$gte: 3000} } },
+//                { $project: { creatYear:{$year: "$createdOn"}, creatMonth:{$month: "$createdOn"},creatDay:{$dayOfMonth: "$createdOn"}  } },
+//                { $group: { _id: {y:"$creatYear",m:"$creatMonth",d:"$creatDay"}, ugcsPerDay : { $sum : 1 } } }, 
+//                { $sort : { _id: 1 } }, function(err, ugcStatisticsList){
+//                    //console.log("ugcStatisticsList=");
+//                    //console.dir(ugcStatisticsList);
+//                    var outString = "date, ugc count\n";
+//                    for (var i=0; i<ugcStatisticsList.length; i++) {
+//                        outString += ugcStatisticsList[i]._id.y+"/"+ugcStatisticsList[i]._id.m+"/"+ugcStatisticsList[i]._id.d+", "+ugcStatisticsList[i].ugcsPerDay+"\n";
+//                    }
+//                    console.log(outString);
+//                    fs.writeFile('ugc_statistics.csv', outString, function (err) {
+//                        if (err) throw err;
+//                        console.log('ugc_statistics.csv is saved!');
+//                    });
+//                    
+//                    
+//                });
+//
 
         
         
