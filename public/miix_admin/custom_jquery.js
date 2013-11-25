@@ -967,6 +967,7 @@ $(document).ready(function(){
         var historyCheck = settings.url.substring(0,20);
         var highlightCheck = settings.url.substring(0,21);
         var typeCheck = settings.type;
+        var memberCheck = settings.url.substring(0,19);
         
         //== access control ==
         if ( localStorage.role == "SUPER_ADMINISTRATOR" ) {
@@ -986,6 +987,34 @@ $(document).ready(function(){
         }
 
         if(typeCheck == "GET"){
+            /**
+             * MemberList
+             */
+            if(memberCheck == '/miix_admin/members'){
+                $('#member.ownerId').click(function(){
+                    var member = $(this).attr("name").split(',');
+                    var url = DOMAIN + "memberInfo/"+member[3];
+                    var userID = member[1];
+                    var app = member[2];
+                    var memberId = member[0];
+                    console.log(url+','+userID+','+app+','+memberId);
+                    
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: {userID: userID, app: app, memberId: memberId},
+                        success: function(response) {
+                            if(response.message){
+                                console.log("[Response] message:" + response.message);
+                                FM.currentContent = FM.memberList;
+                                FM.currentContent.showCurrentPageContent();
+                            }
+                            
+                        }
+                    });
+                    
+                });
+            }
             /**
              * UGCList
              */
