@@ -9,8 +9,66 @@ var UGCPlayListSubPg = {
             $('#table-content-header').html(res);
             $('#table-content').html('');
             
-            $('#createProgramListBtn').click( UGCPlayListSubPg.loadProgramListTable );
+            $('#createProgramListBtn').click( UGCPlayListSubPg.checkProgramList );
 
+        });
+
+    },
+    
+    checkProgramList: function() {
+        console.log("checkProgramList");
+        var flag = 0;
+        var inputSearchData = {};
+        var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/programTimeSlot";
+        
+        $('#condition-inner input[class="createProgramListBtn"]').each(function(i){
+
+            inputSearchData[$(this).attr("name")] = $(this).val();
+            
+            if($(this).val() == "" && flag == 0){
+                alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00\n順序請填入類別字首(合成影片填入"合",心情填入"心",etc)\nex:2013/08/01 00:00:00,合心打打文');
+                flag = 1; 
+            }
+            console.log(inputSearchData);
+            
+            if(inputSearchData.timeStart && inputSearchData.timeEnd && inputSearchData.playTimeStart && inputSearchData.playTimeEnd && inputSearchData.ugcSequenceText){
+                var checkDate = new Date().getTime()+ 30*60*1000;
+                var playTimeStart = new Date(inputSearchData.playTimeStart).getTime();
+                var playTimeEnd = new Date(inputSearchData.playTimeEnd).getTime();
+                console.log(inputSearchData.playTimeEnd);
+                console.log("checkDate"+checkDate+",playTimeStart"+playTimeStart+",playTimeEnd"+playTimeEnd);
+                if(checkDate >= playTimeStart){
+                    alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
+                    
+                }else{
+                    console.log("GET",url);
+                    intervalOfSelectingUGC = {start: inputSearchData.timeStart, end: inputSearchData.timeEnd};
+                    intervalOfPlanningDoohProgrames = {start: inputSearchData.playTimeStart, end: inputSearchData.playTimeEnd};
+                    $.ajax({
+                        url: url,
+                        type: 'GET',
+                        data: {skip: 0, limit: 1, intervalOfSelectingUGC:{start:inputSearchData.timeStart, end:inputSearchData.timeEnd}, intervalOfPlanningDoohProgrames:{start:inputSearchData.playTimeStart, end:inputSearchData.playTimeEnd}},
+                        success: function(response) {
+                            console.log(response);
+                            if(response.result){
+                                console.log('response ='+response.result);
+                                alert('您輸入的日期已存在排程，請重新輸入!');
+                            }else{
+                                UGCPlayListSubPg.loadProgramListTable();
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown ) {
+                            console.log(errorThrown);
+                            if (jqXHR.response) {
+                                var errMessage = JSON.parse(jqXHR.response).error;
+                                if (errMessage) {
+                                    $('#table-content').html('<br> <br>'+errMessage);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
         });
 
     },
@@ -81,38 +139,49 @@ var UGCPlayListSubPg = {
             }
             
             if(inputSearchData.timeStart && inputSearchData.timeEnd && inputSearchData.playTimeStart && inputSearchData.playTimeEnd && inputSearchData.ugcSequenceText && programSequenceArr){
-                $('#table-content').html('<br> <br>自動配對中，請稍候....');
-                intervalOfSelectingUGC = {start: inputSearchData.timeStart, end: inputSearchData.timeEnd};
-                intervalOfPlanningDoohProgrames = {start: inputSearchData.playTimeStart, end: inputSearchData.playTimeEnd};
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {intervalOfSelectingUGC:{start:inputSearchData.timeStart, end:inputSearchData.timeEnd}, intervalOfPlanningDoohProgrames:{start:inputSearchData.playTimeStart, end:inputSearchData.playTimeEnd}, programSequence:programSequenceArr, originSequence:originSequence},
-                    success: function(response) {
-                        if(response.message){
-                            $('#table-content').html('<br> <br>資料產生中，請稍候....');
-                            console.log("[Response] message:" + JSON.stringify(response.message));
-                            sessionId = response.message;
-                            $('#main_menu ul[class="current"]').attr("class", "select");
-                            $('#UGCPlayList').attr("class", "current");
-
-                            FM.currentContent = FM.UGCPlayList;
-                            FM.currentContent.setExtraParameters({sessionId: sessionId});
-                            //FM.currentContent.showCurrentPageContent(UGCPlayListSubPg.afterProgramListTableIsLoaded);
-                            FM.currentContent.showCurrentPageContent();
-                            programSequenceArr =[];
-                        }
-                    },
-                    error: function(jqXHR, textStatus, errorThrown ) {
-                        console.log(errorThrown);
-                        if (jqXHR.response) {
-                            var errMessage = JSON.parse(jqXHR.response).error;
-                            if (errMessage) {
-                                $('#table-content').html('<br> <br>'+errMessage);
+                var checkDate = new Date().getTime() + 30*60*1000;
+                var playTimeStart = new Date(inputSearchData.playTimeStart).getTime();
+                var playTimeEnd = new Date(inputSearchData.playTimeEnd).getTime();
+                console.log(inputSearchData.playTimeEnd);
+                console.log("checkDate"+checkDate+",playTimeStart"+playTimeStart+",playTimeEnd"+playTimeEnd);
+                if(checkDate >= playTimeStart){
+                    alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
+                    
+                }else{
+                    
+                    $('#table-content').html('<br> <br>自動配對中，請稍候....');
+                    intervalOfSelectingUGC = {start: inputSearchData.timeStart, end: inputSearchData.timeEnd};
+                    intervalOfPlanningDoohProgrames = {start: inputSearchData.playTimeStart, end: inputSearchData.playTimeEnd};
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: {intervalOfSelectingUGC:{start:inputSearchData.timeStart, end:inputSearchData.timeEnd}, intervalOfPlanningDoohProgrames:{start:inputSearchData.playTimeStart, end:inputSearchData.playTimeEnd}, programSequence:programSequenceArr, originSequence:originSequence},
+                        success: function(response) {
+                            if(response.message){
+                                $('#table-content').html('<br> <br>資料產生中，請稍候....');
+                                console.log("[Response] message:" + JSON.stringify(response.message));
+                                sessionId = response.message;
+                                $('#main_menu ul[class="current"]').attr("class", "select");
+                                $('#UGCPlayList').attr("class", "current");
+    
+                                FM.currentContent = FM.UGCPlayList;
+                                FM.currentContent.setExtraParameters({sessionId: sessionId});
+                                //FM.currentContent.showCurrentPageContent(UGCPlayListSubPg.afterProgramListTableIsLoaded);
+                                FM.currentContent.showCurrentPageContent();
+                                programSequenceArr =[];
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown ) {
+                            console.log(errorThrown);
+                            if (jqXHR.response) {
+                                var errMessage = JSON.parse(jqXHR.response).error;
+                                if (errMessage) {
+                                    $('#table-content').html('<br> <br>'+errMessage);
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
             }
         });
 

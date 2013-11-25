@@ -1092,7 +1092,124 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             //push each programs to Scala
             var iteratorPushAProgram = function(aProgram, callbackIterator){
                 
-                    //contentType is "media_item"
+                if (aProgram.contentType == "file" ) {
+                
+                        async.waterfall([
+                                         function(callback){
+                                             //download contents from S3 or get from local
+                                             //var fileName;
+                                             if (aProgram.type == "UGC"){
+                                                if((aProgram.content.fileExtension == 'png')||(aProgram.content.fileExtension == 'jpg')){
+                                                     var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
+                                                     //TODO: make sure that target directory exists
+                                                     var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);
+                                                 }
+                                                 else{
+                                                     var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
+                                                     //TODO: make sure that target directory exists
+                                                     if(typeof(aProgram.content.fileExtension) === 'undefined') {  //TODO: find out the bug, and remove this check
+                                                         //aProgram.content.fileExtension = '.mp4';
+                                                         var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.mp4';
+                                                         var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.mp4');
+                                                     }
+                                                     else {
+                                                         var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension;
+                                                         var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);                                        
+                                                     }
+                                                 }
+                                                 awsS3.downloadFromAwsS3(targetLocalPath, s3Path, function(errS3,resultS3){
+                                                     if (!errS3){
+                                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
+                                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
+                                                         callback(null, targetLocalPath, aProgram.timeslot, aProgram.content.no);
+                                                     }
+                                                     else{
+                                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
+                                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
+                                                         callback('Failed to download from S3 '+s3Path+' :'+errS3, null, null, null);
+                                                     }
+                                                     
+                                                 });
+                                                 //add fb push
+                                               /*  postPreview(aProgram, function(err, res){
+                                                     if(err)
+                                                         logger.info('Post FB message is Error: ' + err);
+                                                     else
+                                                         logger.info('Post FB message is Success: ' + res);
+                                                 });*/
+                                             }
+                                             else {
+                                                 var paddingFilePath = path.join(workingPath, 'public', aProgram.content.dir, aProgram.content.file);
+                                                 callback(null, paddingFilePath, aProgram.timeslot, aProgram.content.no);
+                                             }
+                     
+                                         }, 
+                                         function(fileToPlay, timeslot, contentNo, callback){
+                                             //debugger;
+                                             //push content to Scala
+                                             var option = 
+                                             {
+                                                     file: {
+                                                         name : path.basename(fileToPlay),
+                                                         path : path.dirname(fileToPlay),
+                                                         savepath : ''
+                                                     }
+                                             };
+                                             scalaMgr.uploadMediaItem( option, function(errScala, resultScala){
+                                                 if (!errScala){
+                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                                     adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
+                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                                     callback(null, fileToPlay);
+                                                 }
+                                                 else{
+                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                                     adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
+                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                                     callback('Failed to push content to Scala :'+errScala, null);
+                                                 }
+                                             });
+                                         /*    var option = 
+                                             {
+                                                 playlist: { name: 'OnDaScreen'+'-'+arrayOfsessionId[2]+'-'+arrayOfsessionId[3]},
+                                                 playTime: {
+                                                     start: timeslot.start,
+                                                     end: timeslot.end,
+                                                     duration: timeslot.playDuration/1000  //sec    
+                                                 },
+                                                 file: {
+                                                     name : path.basename(fileToPlay),
+                                                     path : path.dirname(fileToPlay),
+                                                     savepath : ''
+                                                 }
+                                             };*/
+                                       /*      scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
+                                                 if (!errScala){
+                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                                     adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
+                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                                     callback(null, fileToPlay);
+                                                 }
+                                                 else{
+                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                                     adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
+                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                                     callback('Failed to push content to Scala :'+errScala, null);
+                                                 }
+                                             });*/
+                                             
+                                             //callback(null, fileToPlay);
+                                         },
+                                         function(filePlayed, callback){
+                                             //TODO: delete downloaded contents from local drive
+                                             callback(null,'done');
+                                         }, 
+                                     ], function (errWaterfall, resultWaterfall) {
+                                         // result now equals 'done' 
+                                         callbackIterator(errWaterfall);
+                                     });
+                                     
+                    }else
                         callbackIterator(null);
                 
             };

@@ -39,6 +39,7 @@ sheculeMgr.init(censorMgr);
 censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, pageType, cb){
     var start;
     var end;
+    var limit;
 
     if(condition){
         //for UGC page
@@ -652,6 +653,36 @@ censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
     });
 };
 
+censorMgr.getProgramTimeSlotList = function(condition, sort, pageLimit, pageSkip, cb){
+    var limit;
+
+    if ( pageLimit ) {
+        FMDB.listOfdocModels(programTimeSlotModel, condition ,null, {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, programTimeSlotList){
+            if(!err) {
+                if(programTimeSlotList){
+                    if(pageSkip < programTimeSlotList.length && pageLimit < programTimeSlotList.length)
+                        limit = pageLimit;
+                    else 
+                        limit = programTimeSlotList.length;
+    
+                    if(limit > 0){ 
+                        cb(null, programTimeSlotList);
+                    }else
+                        cb(err, null);
+                }else
+                    cb(err, null);
+            }
+            else {
+                logger.error('[censorMgr_db.listOfUGCs]', err);
+                cb(err, null);
+            }
+        });
+
+    }else
+        cb(null, null);
+};
+
+
 /**
  *  Render story MV.
  * 
@@ -701,3 +732,12 @@ module.exports = censorMgr;
 //console.log('--'+err, result);
 //});
 
+//var condition={"timeslot.start":{$gte:1385110800000,$lte:1385112600000}};
+//var sort;
+//var limit=1;
+//var skip=0;
+//censorMgr.getProgramTimeSlotList(condition, sort, limit, skip, function(err, programTimeSlotList){
+//    if(programTimeSlotList){
+//        console.log('--'+err, programTimeSlotList.length);
+//    }
+//});

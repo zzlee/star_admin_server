@@ -66,7 +66,7 @@ $(document).ready(function(){
     FM.historyList = new PageList( 'historyList', 15, '/miix_admin/sessions/ ');
     FM.highlightList = new PageList( 'highlightList', 10, '/miix_admin/highlight');
 	/*----------------------------- live check start  by Joy----------------------------------*/
-    FM.live_check = new PageList( 'live_check',10,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',function(res){
+    FM.live_check = new PageList( 'live_check',10,'/miix_admin/doohs/'+DEFAULT_DOOH+'/liveContent',function(res){
 				console.dir(res);
 				$('#table-content').html("");
 				var form=$("<form>");
@@ -474,7 +474,7 @@ $(document).ready(function(){
 	    	
 	    	console.log("programTimeSlot_id:"+_id+"\nfbUserId:"+fbUserId+"\nliveState:"+liveState);
 	    	
-	    	var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+	    	var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/programTimeSlot";
 	    	$.ajax({
                url: url,
                type: 'PUT',
@@ -536,7 +536,7 @@ $(document).ready(function(){
                         "\n" + "s3Url: " + s3Url + 
                         "\n" + "Type: " + picType);
             
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+            var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
             $.ajax({
                 url: "/internal/story_cam_controller/available_story_movie",
                 type: "POST",
@@ -548,7 +548,7 @@ $(document).ready(function(){
                 }
             });
             
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+            var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
             $.ajax({
                 url: url,
                 type: 'PUT',
@@ -585,7 +585,7 @@ $(document).ready(function(){
             
             console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
 								
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+            var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
             $.ajax({
                 url: url,
                 type: 'PUT',
@@ -647,7 +647,7 @@ $(document).ready(function(){
 				return false;
 		    }
 	    	
-	    	var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+	    	var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
 	    	$.ajax({
                url: url,
                type: 'PUT',
@@ -710,7 +710,7 @@ $(document).ready(function(){
 	    	
 	    	console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
 	    	
-	    	var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+	    	var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
 	    	$.ajax({
                 url: url,
                 type: 'PUT',
@@ -1224,10 +1224,8 @@ $(document).ready(function(){
     
             if(playlistCheck == '/miix_admin/doohs'){
                 
-                console.log(sessionId);
-                var arrayOfSessionId = sessionId.split('-');
-                console.log(arrayOfSessionId[2]);
-                console.log(arrayOfSessionId[3]);
+                if(sessionId)
+                    var arrayOfSessionId = sessionId.split('-');
                 
                 $('#PlayList.ugcCensorNoSetBtn').click(function(){
                     console.log('PlayList.ugcCensorNoSetBtn');
@@ -1235,10 +1233,13 @@ $(document).ready(function(){
                     var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
                     var programTimeSlotId = $(this).attr("name");
                     var ugcReferenceNo;
-                    var checkDate = new Date().getTime() + 60*60*1000;
+                    var checkDate = new Date().getTime() + 30*60*1000;
                     console.log(checkDate+','+arrayOfSessionId[2]);
-                    if(checkDate <= arrayOfSessionId[2]){
-                        alert("播出時間:"+arrayOfSessionId[2]+"，此節目已排入序列無法異動，有更改需求請洽工程師!");
+                    var showDateStart = new Date(Number(arrayOfSessionId[2]));
+                    var showDateEnd = new Date(Number(arrayOfSessionId[3]));
+                    if(checkDate >= arrayOfSessionId[2]){
+//                        alert("播出時間:"+ showDateStart.toDateString()+' '+showDateStart.toLocaleTimeString() +'~'+ showDateEnd.toDateString()+' '+showDateEnd.toLocaleTimeString()+"，此節目已排入節目清單無法異動，有更改之需求請洽工程師!");
+                        alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
                     }else{
                         $('input[class="#PlayList.ugcCensorNoSetBtn"]').each(function(){
                             
@@ -1285,24 +1286,32 @@ $(document).ready(function(){
                         flag = 1; 
                     }
                     if(programTimeSlotId && sessionId){
-                        $.ajax({
-                            url: url,
-                            type: 'PUT',
-                            data: { type:'removeUgcfromProgramAndAutoSetNewOne', programTimeSlotId: programTimeSlotId},
-                            success: function(response) {
-                                if(response.message){
-                                    console.log("[Response] message:" + response.message);
-                                    conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
-    
-                                    $('#main_menu ul[class="current"]').attr("class", "select");
-                                    $('#UGCPlayList').attr("class", "current");
-    
-                                    FM.currentContent = FM.UGCPlayList;
-                                    FM.currentContent.showCurrentPageContent();
-    
+                        var checkDate = new Date().getTime() + 30*60*1000;
+                        console.log(checkDate+','+arrayOfSessionId[2]);
+                        var showDateStart = new Date(Number(arrayOfSessionId[2]));
+                        var showDateEnd = new Date(Number(arrayOfSessionId[3]));
+                        if(checkDate >= arrayOfSessionId[2]){
+                            alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
+                        }else{
+                            $.ajax({
+                                url: url,
+                                type: 'PUT',
+                                data: { type:'removeUgcfromProgramAndAutoSetNewOne', programTimeSlotId: programTimeSlotId},
+                                success: function(response) {
+                                    if(response.message){
+                                        console.log("[Response] message:" + response.message);
+                                        conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
+        
+                                        $('#main_menu ul[class="current"]').attr("class", "select");
+                                        $('#UGCPlayList').attr("class", "current");
+        
+                                        FM.currentContent = FM.UGCPlayList;
+                                        FM.currentContent.showCurrentPageContent();
+        
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                 });
     
@@ -1314,26 +1323,35 @@ $(document).ready(function(){
                         flag = 1; 
                     }
                     if(sessionId){
-                        $.ajax({
-                            url: url,
-                            type: 'PUT',
-                            data: {
-                            intervalOfSelectingUGC : intervalOfSelectingUGC,
-                            intervalOfPlanningDoohProgrames :intervalOfPlanningDoohProgrames,
-                            originSequence :originSequence
-                            },
-                            success: function(response) {
-                                if(response.message){
-                                    console.log("[Response] message:" + response.message);
-                                }
-                                //$('#underPushingText').html('上傳成功!!');
-                            },
-                            error: function(jqXHR, textStatus, errorThrown) {
-                                //$('#underPushingText').html('上傳失敗： '+textStatus+" "+errorThrown);
-                            }
-                        });
-                        $('#pushProgramsBtn').hide();
-                        //$('#table-content').append($('<p>').attr("id","underPushingText").html('上傳至播放系統中，請稍候....'));
+                        var checkDate = new Date().getTime() + 30*60*1000;
+                        console.log(checkDate+','+arrayOfSessionId[2]);
+                        var showDateStart = new Date(Number(arrayOfSessionId[2]));
+                        var showDateEnd = new Date(Number(arrayOfSessionId[3]));
+                        if(checkDate >= arrayOfSessionId[2]){
+                            alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
+//                            alert("播出時間:"+ showDateStart.toDateString()+' '+showDateStart.toLocaleTimeString() +'~'+ showDateEnd.toDateString()+' '+showDateEnd.toLocaleTimeString()+"，此節目已排入節目清單無法異動，有更改之需求請洽工程師!");
+                        }else{
+                            $.ajax({
+                                    url: url,
+                                    type: 'PUT',
+                                    data: {
+                                    intervalOfSelectingUGC : intervalOfSelectingUGC,
+                                    intervalOfPlanningDoohProgrames :intervalOfPlanningDoohProgrames,
+                                    originSequence :originSequence
+                                    },
+                                    success: function(response) {
+                                        if(response.message){
+                                            console.log("[Response] message:" + response.message);
+                                        }
+                                        //$('#underPushingText').html('上傳成功!!');
+                                    },
+                                    error: function(jqXHR, textStatus, errorThrown) {
+                                        //$('#underPushingText').html('上傳失敗： '+textStatus+" "+errorThrown);
+                                    }
+                                });
+                                $('#pushProgramsBtn').hide();
+                                //$('#table-content').append($('<p>').attr("id","underPushingText").html('上傳至播放系統中，請稍候....'));
+                        }
                     }
                 });            
     
