@@ -18,3 +18,5 @@ system_configuration.json
 !setup/system_configuration.json
 public/*.apk
 system_configuration_.json
+program_play_statistics.csv
+ugc_and_users_statistics.csv
