@@ -357,7 +357,60 @@ async.waterfall([
 //        });
 
         
-        
+//        //statistics: new members 
+//        var db = require('./db.js');
+//        var async = require('async');
+//        var memberModel = db.getDocModel("member");
+//        var fs = require('fs');
+//                        
+//        var o = {};
+//        
+//        o.map = function(){ 
+//            var memberCreatedOn = this._id.getTimestamp();
+//            var memberCreatedDateObj = {y:memberCreatedOn.getFullYear(), m:memberCreatedOn.getMonth()+1, d:memberCreatedOn.getDate() };
+//            emit(memberCreatedDateObj, {count:1}); 
+//        };
+//        
+//        o.reduce = function(key, countObjVals){ 
+//            reducedVal = { count: 0 };
+//
+//            for (var idx = 0; idx < countObjVals.length; idx++) {
+//                reducedVal.count += countObjVals[idx].count;
+//            }
+//            
+//            return reducedVal;
+//        };
+//        
+//        //o.query = { "type":'UGC',  "timeslot.start":{$gte:(new Date('2013/11/18')).getTime(), $lt:(new Date()).getTime()} }; 
+//                
+//        o.out = { replace: 'tempOutput' };
+//
+//        memberModel.mapReduce(o, function (err, model) {
+//            model.find().sort({_id:1}).exec(function (err, result) {
+//                if (!err){
+//                    //console.log('result=');
+//                    //console.dir(result);
+//                    
+//                    var outString = "date, new member count\n";
+//                    for (var i=0; i<result.length; i++) {
+//                        outString += result[i]._id.y+"/"+result[i]._id.m+"/"+result[i]._id.d+", "+result[i].value.count+"\n";
+//                    }
+//                    console.log(outString);
+//                    fs.writeFile('new_member_statistics.csv', outString, function (err) {
+//                        if (err) throw err;
+//                        console.log('new_member_statistics.csv is saved!');
+//                    });
+//
+//                }
+//                else {
+//                    console.log("err=");
+//                    console.dir(err);
+//                }
+//                
+//            });
+//        });
+
+      
         
         callback(null);
     }
