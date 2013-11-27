@@ -1741,7 +1741,7 @@ var autoCheckProgramAndPushToPlayer = function(){
 /**
  * delay time for scala connect
  */
-setTimeout(autoCheckProgramAndPushToPlayer, 2000);
+//setTimeout(autoCheckProgramAndPushToPlayer, 2000);
 
 
 var autoPushProgramToPlayer = function(){

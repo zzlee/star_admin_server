@@ -346,5 +346,5 @@ exports.init = function() {
     
     app.put('/miix_admin/video_ugcs/:projectId', routes.censorHandler.generateVideoUgc);
     
-    app.get('/miix_admin/doohs/:doohId/programTimeSlot', routes.censorHandler.getProgramTimeSlot_get_cb);
+    app.get('/miix_admin/doohs/:doohId/programTimeSlot', routes.censorHandler.checkProgramTimeSlot_get_cb);
 };

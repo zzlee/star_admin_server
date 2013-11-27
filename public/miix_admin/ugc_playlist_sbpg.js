@@ -50,11 +50,11 @@ var UGCPlayListSubPg = {
                         data: {skip: 0, limit: 1, intervalOfSelectingUGC:{start:inputSearchData.timeStart, end:inputSearchData.timeEnd}, intervalOfPlanningDoohProgrames:{start:inputSearchData.playTimeStart, end:inputSearchData.playTimeEnd}},
                         success: function(response) {
                             console.log(response);
-                            if(response.result){
-                                console.log('response ='+response.result);
-                                alert('您輸入的日期已存在排程，請重新輸入!');
-                            }else{
+                            if(response.result == "ok"){
                                 UGCPlayListSubPg.loadProgramListTable();
+                            }else{
+                                console.log('response ='+response.result);
+                                alert('您輸入的時間已存在排程，請重新輸入!');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown ) {

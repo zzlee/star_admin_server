@@ -316,7 +316,7 @@ FM.censorHandler.getLiveContentList_get_cb = function(req, res){
             "state": "confirmed"
     };
     sort = {
-    		"timeslot.start":-1,
+            "timeslot.start":-1,
             "content.no":-1
     };
     if(req.query.condition)   
@@ -438,7 +438,7 @@ FM.censorHandler.generateVideoUgc = function(req, res){
     res.send(200);
 };
 
-FM.censorHandler.getProgramTimeSlot_get_cb = function(req, res){
+FM.censorHandler.checkProgramTimeSlot_get_cb = function(req, res){
 
     var intervalOfPlanningDoohProgramesStart = new Date(req.query.intervalOfPlanningDoohProgrames.start).getTime() ;
     var intervalOfPlanningDoohProgramesEnd = new Date(req.query.intervalOfPlanningDoohProgrames.end).getTime();
@@ -447,46 +447,18 @@ FM.censorHandler.getProgramTimeSlot_get_cb = function(req, res){
     }
 
     var condition;
-    var sort;
-    var limit;
-    var skip;
-    //default
+    
     condition = {
-            "timeslot.start":{$gt: intervalOfPlanningDoohProgramesStart,$lt: intervalOfPlanningDoohProgramesEnd},
-            "state": "confirmed"
-    };
-    sort = {
-    };
+            "intervalOfPlanningDoohProgramesStart": intervalOfPlanningDoohProgramesStart,
+            "intervalOfPlanningDoohProgramesEnd": intervalOfPlanningDoohProgramesEnd
+            };
 
-    if(req.query.condition)   
-        condition = req.query.condition;
-    if(req.query.sort) 
-        sort = req.query.sort;
-
-    limit = req.query.limit;
-    skip = req.query.skip;
-
-    censorMgr.getProgramTimeSlotList(condition, sort, limit, skip, function(err, programTimeSlotList){
-        if (!err){
-            if(!programTimeSlotList){
-                condition = {
-                        "timeslot.end":{$gt: intervalOfPlanningDoohProgramesStart,$lt: intervalOfPlanningDoohProgramesEnd},
-                        "state": "confirmed"
-                };
-                censorMgr.getProgramTimeSlotList(condition, sort, limit, skip, function(err, programTimeSlotList){
-                    if (!err){
-                        res.send(200, {result: programTimeSlotList});
-                    }
-                    else{
-                        res.send(400, {error: err});
-                    }
-                });
-
-            }else
-                res.send(200, {result: programTimeSlotList});
+    censorMgr.checkProgramTimeSlotList(condition, function(errOfCheckProgramTimeSlotList, resOfCheckProgramTimeSlotList){
+        if (!errOfCheckProgramTimeSlotList){
+            res.send(200, {result: resOfCheckProgramTimeSlotList});
         }
         else{
-            res.send(400, {error: err});
+            res.send(200, {result: errOfCheckProgramTimeSlotList});
         }
     });
 

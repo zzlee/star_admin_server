@@ -138,6 +138,11 @@ FM.storyCamControllerHandler.availableStreetPhotos = function(req, res){
             filePath: res[0],
             programInterval: res[1]
         };
+        if(option.filePath.length == 0)
+        {
+            logger.info('Get live photo file is failed: ' + recordTime);
+            return;
+        }
         if(option.programInterval.count == 0)
         {
             logger.info('Get live photo owner is failed: ' + recordTime);
@@ -301,6 +306,8 @@ var updateLivePhotoContent = function( programList, list, update_cb ){
     var part = 0;
     
     var schema = function(program, livePhotoUrl, livePhotoList, schema_cb){
+        
+        logger.info('update LivePhoto Content ,program= '+program+',livePhotoUrl='+livePhotoUrl+',livePhotoList='+livePhotoList);
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var ugc = result[0];
             var liveContentId = livePhotoUrl.split('/');

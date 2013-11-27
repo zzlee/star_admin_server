@@ -1368,6 +1368,7 @@ $(document).ready(function(){
                     $.get('/miix_admin/table_censorPlayList_head.html', function(res){
                         
                         sessionId = sessionItemInfoArray[0];
+                        console.log(sessionId);
                         
                         $('#table-content-header').html(res);
                         $('#timeStartText').val( sessionItemInfoArray[1]);

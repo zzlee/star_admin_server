@@ -682,6 +682,70 @@ censorMgr.getProgramTimeSlotList = function(condition, sort, pageLimit, pageSkip
         cb(null, null);
 };
 
+censorMgr.checkProgramTimeSlotList = function(condition, cb){
+    
+    var iteratorCheckProgramTimeSlot = function(data, cbOfIteratorCheckProgramTimeSlot){
+//        console.log(data.timeslot.start + ',' +condition.intervalOfPlanningDoohProgramesStart+ ','+ data.timeslot.end);
+//        console.log(data.timeslot.start + ',' +condition.intervalOfPlanningDoohProgramesEnd+ ','+ data.timeslot.end);
+        //播放時間在其他排程節目內
+        if( (data.timeslot.start < condition.intervalOfPlanningDoohProgramesStart) &&
+                (condition.intervalOfPlanningDoohProgramesStart < data.timeslot.end) ){
+            cbOfIteratorCheckProgramTimeSlot("not ok");
+        }else if( (data.timeslot.start < condition.intervalOfPlanningDoohProgramesEnd) &&
+               (condition.intervalOfPlanningDoohProgramesEnd < data.timeslot.end) ){
+            cbOfIteratorCheckProgramTimeSlot("not ok");
+        //播放時間內有已排程節目
+        }else if( (condition.intervalOfPlanningDoohProgramesStart < data.timeslot.end) &&
+                (data.timeslot.start < condition.intervalOfPlanningDoohProgramesEnd) ){
+             cbOfIteratorCheckProgramTimeSlot("not ok");
+        }else if( (condition.intervalOfPlanningDoohProgramesStart < data.timeslot.end) &&
+                (data.timeslot.start < condition.intervalOfPlanningDoohProgramesEnd) ){
+             cbOfIteratorCheckProgramTimeSlot("not ok");
+        //正確沒有重複排程
+        }else
+            cbOfIteratorCheckProgramTimeSlot(null);  
+    };
+    
+    async.waterfall([
+                     function(cb1){
+//                         var checkTime = new Date().getTime();
+                         var checkTime = condition.intervalOfPlanningDoohProgramesStart - 3*60*60*1000;
+                         logger.info('[censorMgr.checkProgramTimeSlotList] checkTime = '+checkTime);
+                         FMDB.listOfdocModels(programTimeSlotModel, {"timeslot.start": {$gte:checkTime}, state: 'confirmed'} ,null, null, function(err, programTimeSlotList){
+                             if(!err) {
+                                 logger.info('[censorMgr.checkProgramTimeSlotList] programTimeSlotList = '+programTimeSlotList);
+                                 cb1(null, programTimeSlotList);
+                             }
+                             else {
+                                 logger.error('[censorMgr.checkProgramTimeSlotList.listOfdocModels]', err);
+                                 cb1(err, null);
+                             }
+                         });
+                     },
+                     function(programTimeSlotList, cb2){
+//                         console.log(programTimeSlotList);
+                         if(!programTimeSlotList){
+                             cb2(null, "ok");
+                             
+                         }else if(!programTimeSlotList[0]){
+                             cb2(null, "ok");
+                         }else{
+                             async.eachSeries(programTimeSlotList, iteratorCheckProgramTimeSlot, function(errEachSeries, resEachSeries){
+                                 cb2(errEachSeries, resEachSeries);
+                             });
+                         }
+                         
+                         
+                     }
+                         
+                 ], function(err, res){
+                        if(!err)
+                            cb(null, "ok");
+                        else
+                            cb(err, null);
+                 });
+    
+};
 
 /**
  *  Render story MV.
