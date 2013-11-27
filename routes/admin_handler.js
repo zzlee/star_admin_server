@@ -202,6 +202,24 @@ FM.admin.storyPlayList_get_cb = function(req, res){
      
 };
 
+FM.admin.updateMemberInfo_get_cb = function(req, res){
+
+    var memberId = req.body.memberId;
+    var userID = req.body.userID;
+    var app = req.body.app;
+    var memberInfoId = req.params.memberInfoId;
+
+    admincache_mgr.updateMemberInfo(memberId, userID, app, memberInfoId, function(err, result){
+            if (!err){
+                res.send(200, {message: result});
+            }
+            else{
+                res.send(400, {error: err});
+            }
+        });
+    
+};
+
 
 FM.admin.listSize_get_cb = function(req, res){
     if (req.query.listType == 'memberList'){

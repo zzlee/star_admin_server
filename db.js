@@ -250,7 +250,8 @@ FM.DB = (function(){
             fbShare_count: {type: Number, min: 0, default: 0},         //FB分享次數
             app: {type: String, enum: appGenre, default: 'ondascreen'},
             hot: {type: Boolean, default: false},
-            shine: {type: Boolean, default: true}
+            shine: {type: Boolean, default: true},
+            ownerId: {_id: ObjectID}
         }); //  memberListInfo collection
         
         var MiixPlayListInfoSchema = new Schema({

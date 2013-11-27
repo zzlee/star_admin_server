@@ -484,7 +484,7 @@ $(document).ready(function(){
                	 },
                success: function(response) {
                    if(response.message){
-                       console.log("[Response] message:" + response.message);
+                       console.log("[Response] message: PUT"+ url + ':'  + response.message);
                    }
                }
            });
@@ -497,10 +497,24 @@ $(document).ready(function(){
 					  ugcCensorNo: ugcCensorNo},
                success: function(response) {
                    if(response.message){
-                       console.log("[Response] message:" + response.message);
+                       console.log("[Response] message: POST"+ url + ':' + response.message);
                    }
                }
            });
+	    	
+            var url = DOMAIN + "user_content_attribute";
+            var mustPlay = true;
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                data: {no: ugcCensorNo, vjson:{mustPlay: mustPlay}},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message: PUT"+ url + ':' + response.message);
+                    }
+                }
+            });
+	    	
 	    	
 	    });
 	//--------- end 最左邊 fail-----------
@@ -953,6 +967,7 @@ $(document).ready(function(){
         var historyCheck = settings.url.substring(0,20);
         var highlightCheck = settings.url.substring(0,21);
         var typeCheck = settings.type;
+        var memberCheck = settings.url.substring(0,19);
         
         //== access control ==
         if ( localStorage.role == "SUPER_ADMINISTRATOR" ) {
@@ -972,6 +987,34 @@ $(document).ready(function(){
         }
 
         if(typeCheck == "GET"){
+            /**
+             * MemberList
+             */
+            if(memberCheck == '/miix_admin/members'){
+                $('#member.ownerId').click(function(){
+                    var member = $(this).attr("name").split(',');
+                    var url = DOMAIN + "memberInfo/"+member[3];
+                    var userID = member[1];
+                    var app = member[2];
+                    var memberId = member[0];
+                    console.log(url+','+userID+','+app+','+memberId);
+                    
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: {userID: userID, app: app, memberId: memberId},
+                        success: function(response) {
+                            if(response.message){
+                                console.log("[Response] message:" + response.message);
+                                FM.currentContent = FM.memberList;
+                                FM.currentContent.showCurrentPageContent();
+                            }
+                            
+                        }
+                    });
+                    
+                });
+            }
             /**
              * UGCList
              */
@@ -1368,7 +1411,8 @@ $(document).ready(function(){
                     $.get('/miix_admin/table_censorPlayList_head.html', function(res){
                         
                         sessionId = sessionItemInfoArray[0];
-                        console.log(sessionId);
+
+                        console.log("sessionId = "+sessionId);
                         
                         $('#table-content-header').html(res);
                         $('#timeStartText').val( sessionItemInfoArray[1]);
