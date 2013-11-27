@@ -945,62 +945,63 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             });
         },
         function(programs, cb1_1){
-            //render Miix moive if it is not yet rendered
-            
-            if ( systemConfig.RENDER_MIIX_MOVIE_IF_IT_IS_NOT_YET_RENDERED ) {
-                var miixContentMgr = require('./miix_content_mgr.js');
-                
-                var iteratorRenderMiixMovie = function(aProgram, callbackIterator){
-                    
-                    //console.log("aProgram=");
-                    //console.dir(aProgram);
-                    //TODO: find a way to check aProgram.content.url.youtube does not exist
-                    if ( (aProgram.contentType == "file") && (aProgram.contentGenre == "miix_it") && (!aProgram.content.url) ) {
-                        async.waterfall([
-                            function(callback){
-                                //get the corresponding UGC info
-                                ugcModel.findOne({ 'projectId': aProgram.content.projectId }, '_id ownerId projectId title no', function (errOfFindOne, ugc) {
-                                    if (!errOfFindOne) {
-                                        var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded" 
-                                        //console.log("_ugc=");
-                                        //console.dir(_ugc);
-                                        callback(null, _ugc.projectId, _ugc.ownerId._id,  _ugc.ownerId.fbUserId, _ugc.title, _ugc.no);
-                                    }
-                                    else {
-                                        callback("Failed to get the corresponding UGC info: "+errOfFindOne, null, null, null, null, null);
-                                    }
-                                });
-                            }, 
-                            function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, ugcNo, callback){
-                                //render this video UGC (Miix movie)
-                                adminBrowserMgr.showTrace(null, straceStamp+"開始合成編號"+ugcNo+"的UGC....請等待約5~15分鐘");
-                                miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, function(errOfGenerateMiixMoive){
-                                    if (!errOfGenerateMiixMoive){
-                                        adminBrowserMgr.showTrace(null, straceStamp+"成功地合成編號"+ugcNo+"的UGC!");
-                                        callback(null);
-                                    }
-                                    else {
-                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
-                                        callback(errOfGenerateMiixMoive);
-                                    }
-                                });
-                            }
-                        ], function(errOfWaterFall){
-                            callbackIterator(errOfWaterFall);
-                        });
-                    }
-                    else {
-                        callbackIterator(null);
-                    }
-                };
-                async.eachSeries(programs, iteratorRenderMiixMovie, function(errEachSeries){
-                    cb1_1(errEachSeries, programs);
-                });
-                
-            }
-            else {
-                cb1_1(null, programs);
-            }
+//            //render Miix moive if it is not yet rendered
+//            
+//            if ( systemConfig.RENDER_MIIX_MOVIE_IF_IT_IS_NOT_YET_RENDERED ) {
+//                var miixContentMgr = require('./miix_content_mgr.js');
+//                
+//                var iteratorRenderMiixMovie = function(aProgram, callbackIterator){
+//                    
+//                    //console.log("aProgram=");
+//                    //console.dir(aProgram);
+//                    //TODO: find a way to check aProgram.content.url.youtube does not exist
+//                    if ( (aProgram.contentType == "file") && (aProgram.contentGenre == "miix_it") && (!aProgram.content.url) ) {
+//                        async.waterfall([
+//                            function(callback){
+//                                //get the corresponding UGC info
+//                                ugcModel.findOne({ 'projectId': aProgram.content.projectId }, '_id ownerId projectId title no', function (errOfFindOne, ugc) {
+//                                    if (!errOfFindOne) {
+//                                        var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded" 
+//                                        //console.log("_ugc=");
+//                                        //console.dir(_ugc);
+//                                        callback(null, _ugc.projectId, _ugc.ownerId._id,  _ugc.ownerId.fbUserId, _ugc.title, _ugc.no);
+//                                    }
+//                                    else {
+//                                        callback("Failed to get the corresponding UGC info: "+errOfFindOne, null, null, null, null, null);
+//                                    }
+//                                });
+//                            }, 
+//                            function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, ugcNo, callback){
+//                                //render this video UGC (Miix movie)
+//                                adminBrowserMgr.showTrace(null, straceStamp+"開始合成編號"+ugcNo+"的UGC....請等待約15~20分鐘");
+//                                miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, function(errOfGenerateMiixMoive){
+//                                    if (!errOfGenerateMiixMoive){
+//                                        adminBrowserMgr.showTrace(null, straceStamp+"成功地合成編號"+ugcNo+"的UGC!");
+//                                        callback(null);
+//                                    }
+//                                    else {
+//                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
+//                                        callback(errOfGenerateMiixMoive);
+//                                    }
+//                                });
+//                            }
+//                        ], function(errOfWaterFall){
+//                            callbackIterator(errOfWaterFall);
+//                        });
+//                    }
+//                    else {
+//                        callbackIterator(null);
+//                    }
+//                };
+//                async.eachSeries(programs, iteratorRenderMiixMovie, function(errEachSeries){
+//                    cb1_1(errEachSeries, programs);
+//                });
+//                
+//            }
+//            else {
+//                cb1_1(null, programs);
+//            }
+            cb1_1(null, programs);
             
         },
         function(programs, cb2){
@@ -1041,7 +1042,19 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     else
                         play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日上午'+showTime(start.getHours())+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours())+':'+showTime(end.getMinutes());
                     
-                    message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                    // message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                    
+                    switch(member.app.toLowerCase())
+                    {
+                        case 'ondascreen':
+                            message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                            break;
+                        case 'wowtaipeiarena':
+                            message = '你的No.' + ugc.no + '作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧!';
+                            break;
+                        default:
+                            break;
+                    } 
                     
                     async.parallel([
                         function(push_cb){
@@ -1132,7 +1145,26 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
     
                         }, 
                         function(fileToPlay, timeslot, contentNo, callback){
-                            //debugger;
+                            //remove the "mustPlay" flag 
+                            ugcModel.findOne({"no":contentNo}).exec(function(err, ugcItem){
+                                if (ugcItem.mustPlay) {
+                                    ugcItem.mustPlay = false;
+                                    ugcItem.save(function(errOfSave){
+                                        if (!errOfSave) {
+                                            callback(null, fileToPlay, timeslot, contentNo);
+                                        }
+                                        else {
+                                            callback("Failed to update mustPlay flag: "+errOfSave, null, null, null);
+                                        }
+                                    });
+                                }
+                                else {
+                                    callback(null, fileToPlay, timeslot, contentNo);
+                                }
+                                
+                            });
+                        },
+                        function(fileToPlay, timeslot, contentNo, callback){
                             //push content to Scala
                             var option = 
                             {

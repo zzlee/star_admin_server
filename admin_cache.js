@@ -40,7 +40,8 @@ FM.ADMINCACHE = (function(){
                         fbLike_count: result[3][0].totalLikes,
                         fbComment_count: result[3][0].totalComments,
                         fbShare_count: result[3][0].totalShares,
-                        app: data[next].app
+                        app: data[next].app,
+                        ownerId: data[next]._id
                 };
 
                 var field = "fb.userID app";
@@ -378,7 +379,7 @@ FM.ADMINCACHE = (function(){
 
                 var memberList = [];
 
-                var memberListInfo = function(fb_id, fb_name, email, mp_number, miixMovieVideo_count, doohPlay_count, movieViewed_count, fbLike_count, fbComment_count, fbShare_count, app, arr) {
+                var memberListInfo = function(fb_id, fb_name, email, mp_number, miixMovieVideo_count, doohPlay_count, movieViewed_count, fbLike_count, fbComment_count, fbShare_count, app, ownerId, _id, arr) {
                     arr.push({ 
                         fb: { userID: fb_id, userName: fb_name },
                         email: email,                        
@@ -389,7 +390,9 @@ FM.ADMINCACHE = (function(){
                         fbLikeCount: fbLike_count,           
                         fbCommentCount: fbComment_count,     
                         fbShareCount: fbShare_count,
-                        app: app
+                        app: app,
+                        ownerId: ownerId,
+                        _id: _id
                     });
                 };
 
@@ -398,12 +401,12 @@ FM.ADMINCACHE = (function(){
 
                 var setMemberList = function(data, set_cb){
                     if(next == limit-1) {
-                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count, data[next].fbShare_count, data[next].app, memberList);               
+                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count, data[next].fbShare_count, data[next].app, data[next].ownerId, data[next]._id, memberList);               
                         next = 0;
                         set_cb(null, 'OK');
                     }
                     else {
-                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count, data[next].fbShare_count, data[next].app, memberList);               
+                        memberListInfo(data[next].fb.userID, data[next].fb.userName, data[next].email, data[next].mPhone, data[next].miixMovieVideo_count, data[next].doohPlay_count, data[next].movieViewed_count, data[next].fbLike_count, data[next].fbComment_count, data[next].fbShare_count, data[next].app, data[next].ownerId, data[next]._id, memberList);               
                         next += 1;
                         setMemberList(data, set_cb);
                     }
@@ -417,7 +420,7 @@ FM.ADMINCACHE = (function(){
                     }
                 }
                 else{
-                    FMDB.listOfdocModels( memberListInfos,null,'fb.userName fb.userID _id email mPhone miixMovieVideo_count doohPlay_count movieViewed_count fbLike_count fbComment_count fbShare_count app', {sort:'fb.userName',limit: _limit, skip: _skip}, function(err, result){
+                    FMDB.listOfdocModels( memberListInfos, {miixMovieVideo_count:{$gte:1}, shine:true},'fb.userName fb.userID _id email mPhone miixMovieVideo_count doohPlay_count movieViewed_count fbLike_count fbComment_count fbShare_count app ownerId', {sort:'fb.userName',limit: _limit, skip: _skip}, function(err, result){
                         if(err) logger.error('[db.listOfMemebers]', err);
                         if(result){
 
@@ -441,6 +444,22 @@ FM.ADMINCACHE = (function(){
                     });
                 }
 
+            },
+            updateMemberInfo : function(memberId, userID, app, memberInfoId, cb){
+
+                member_mgr.getTotalCommentsLikesSharesOnFB(memberId, userID, app, function(err, result){
+                    if(!err){
+                        FMDB.updateAdoc(memberListInfos, memberInfoId, {"fbLike_count": result[0].totalLikes, "fbComment_count": result[0].totalComments, "fbShare_count": result[0].totalShares}, function(err, result){
+                            if(!err){
+                                cb(null, "done");
+                            }else{
+                                cb(err, null);
+                            }
+
+                        });
+                    }
+                });
+                
             },
             /**     Member End     **/
 

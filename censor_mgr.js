@@ -117,9 +117,10 @@ var UGCList = [];
 var timeslotStart;
 var timeslotEnd;
 
-var UGCListInfo = function(userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl,arr) {
+var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl,arr) {
     arr.push({
         userPhotoUrl: userPhotoUrl,
+        ugcProjectId: ugcProjectId,
         ugcCensorNo: ugcCensorNo,
         userContent: userContent,
         fb_userName: fb_userName,
@@ -190,13 +191,13 @@ var mappingUGCList = function(data, type, set_cb){
             }
             //UGCListInfo
             if(next == limit - 1) {
-                UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], UGCList);
                 set_cb(null, 'ok'); 
                 next = 0;
                 UGCList = [];
             }
             else{
-                UGCListInfo(userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2],UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2],UGCList);
                 next += 1;
                 mappingUGCList(data, type, set_cb);
             }
@@ -333,7 +334,7 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
                     cb(err,null);
                 }
                 if(result){
-                    cb(null,'success');
+                    cb(null, 'done');
 //                  console.log('updateAdoc_result'+result);
                 }
             });
@@ -348,7 +349,7 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
  */
 censorMgr.getUGCListLite = function(condition, cb){
 
-    FMDB.listOfdocModels( UGCs,{'createdOn' : {$gte: condition.start, $lt: condition.end}, 'rating': {$gte: 'A' , $lte: 'E' }},'_id genre contentGenre projectId fileExtension no ownerId url mustPlay', {sort :{'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1}}, function(err, result){
+    FMDB.listOfdocModels( UGCs,{ $or: [ {'createdOn' : {$gte: condition.start, $lt: condition.end}}, {'mustPlay':true}], 'rating': {$gte: 'A' , $lte: 'E' }},'_id genre contentGenre projectId fileExtension no ownerId url mustPlay', {sort :{'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1}}, function(err, result){
         if(err) {
             logger.error('[censorMgr.getUGCListLite]', err);
             cb(err, null);
@@ -495,7 +496,7 @@ censorMgr.updateLiveContents = function(liveContent_Id, vjson, cb){
             cb(err,null);
         }
         if(result){
-            cb(null,'successful');
+            cb(null, 'done');
             logger.info('[updateLiveContents_updateAdoc] successful', liveContent_Id);
           //console.log('updateAdoc_result'+result);
         }
@@ -568,14 +569,44 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
             
         var textContent = fb_name + ' 於' + playTime + '，登上台北小巨蛋天幕！';
 
-        if(type == 'correct') {
-            message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
-                      '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
-        }
-        else {
-            message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
-                      '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
-        }
+        // if(type == 'correct') {
+            // message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
+                      // '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
+        // }
+        // else {
+            // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                      // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
+        // }
+        
+        switch(member.app.toLowerCase())
+        {
+            case 'ondascreen':
+                if(type == 'correct') {
+                    message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
+                              '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
+                }
+                else {
+                    // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                              // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
+                    message = '您的試鏡編號' + ugcCensorNo + '作品已順利播出，但很遺憾的，實拍照片未能順利拍攝。' + 
+                              '我們將儘快安排再次播出，希望能為您留下精彩的影像。';
+                }
+                break;
+            case 'wowtaipeiarena':
+                if(type == 'correct') {
+                    message = '你的No.' + ugcCensorNo + '作品，在' + playTime + 
+                              '，登上小巨蛋天幕，感謝你的精采作品，快到 我的投稿/哇!紀錄 裡瞧瞧實拍照!';
+                }
+                else {
+                    // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                              // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
+                    message = '您的No.' + ugcCensorNo + '作品已順利播出，但很遺憾的，實拍照片未能順利拍攝。' + 
+                              '我們將儘快安排再次播出，希望能為您留下精彩的影像。';
+                }
+                break;
+            default:
+                break;
+        } 
         
         async.waterfall([
             function(push_cb){
@@ -590,6 +621,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                     accessToken: access_token,
                     type: member.app,
                     source: photoUrl.play,
+                    photo: photoUrl.preview,
                     text: textContent,
                     ugcProjectId: sourceId
                 };
@@ -613,7 +645,7 @@ censorMgr.updateProgramTimeSlots = function(programTimeSlot_Id, vjson, cb){
             cb(err,null);
         }
         if(result){
-            cb(null,'successful');
+            cb(null, 'done');
             logger.info('[updateProgramTimeSlots_updateAdoc] successful', programTimeSlot_Id);
 //          console.log('updateAdoc_result'+result);
         }

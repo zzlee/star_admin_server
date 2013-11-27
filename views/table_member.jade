@@ -7,7 +7,7 @@ form#mainform(action='')
           th.table-header-repeat.line-left(width='140')
             a(href='') App
           th.table-header-repeat.line-left(width='160')
-            a(href='') 已製作內容數
+            a(href='') 已製作UGC數
           th.table-header-repeat.line-left(width='160')
             a(href='') DOOH刊登次數
           th.table-header-repeat.line-left(width='140')
@@ -16,6 +16,8 @@ form#mainform(action='')
             a(href='') FB留言數
           th.table-header-repeat.line-left(width='140')
             a(href='') FB分享數
+          th.table-header-repeat.line-left(width='140')
+            a(href='') 
         
         if(memberList)
             each member, i in memberList
@@ -28,6 +30,8 @@ form#mainform(action='')
                       td #{member.fbLikeCount}
                       td #{member.fbCommentCount}
                       td #{member.fbShareCount}
+                      td
+                         input#member.ownerId(type='button', class='updateMemberInfo', value='更新', name='#{member.ownerId},#{member.fb.userID},#{member.app},#{member._id}')
                 else
                     tr.alternate-row
                       td #{member.fb.userName}
@@ -37,3 +41,5 @@ form#mainform(action='')
                       td #{member.fbLikeCount}
                       td #{member.fbCommentCount}
                       td #{member.fbShareCount}
+                      td
+                         input#member.ownerId(type='button', class='updateMemberInfo', value='更新', name='#{member.ownerId},#{member.fb.userID},#{member.app},#{member._id}')
