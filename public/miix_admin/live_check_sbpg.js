@@ -29,7 +29,7 @@ var liveCheckSubPg = {
 
         for(var i=0;i<res.length;i++){  
                 
-            if(i%2==0){
+            if(i%2===0){
                 var tr=$("<tr>").attr({class:"live_alternate-row"});
             }else{
                 var tr=$("<tr>").attr({class:""});
@@ -112,274 +112,267 @@ var liveCheckSubPg = {
             }
 
             
-                    for(var j=0;j<res[i].liveContent.length;j++){               
+            for(var j=0;j<res[i].liveContent.length;j++){               
                     
-                        var div_live = $("<div>");
+                var div_live = $("<div>");
                     
-                    if(res[i].liveContent[j].url.livePhotos){        //determine livePhotos or not (choose 1/5)
-                            for(var k=0;k<res[i].liveContent[j].url.livePhotos.length;k++){
-                
-                                    var span_img = $("<span>").attr({                                                                   
-                                                        });
-                                                      
-                                    var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.livePhotos[k],
-                                                      target:"_blank"});                                      
-                                    var inner_img = $("<img>").attr({src:res[i].liveContent[j].url.livePhotos[k],
-                                                                       width:350,
-                                                                       height:200,
-                                                                       id:"testMove",
-                                                                       class:"ho",
-                                                                       style:"margin-bottom:10px"
-                                                                   
-                                                                  });   
-                                                      
-                                      var boxForChoose = $("<input>").attr({
-                                      style:"margin-left:10px;margin-right:10px;",
-                                          type:"radio",
-                                        id:"boxCheckLive",
-                                        class:"chooseOne",
-                                        name:"yo",
-                                        value:res[i].liveContent[j].ownerId.userID, //user id
-                                        "s3url":res[i].liveContent[j].url.livePhotos[k], //五選一
-                                        "longPic":res[i].liveContent[j].url.longPhoto, //長條圖
-                                        "_id":res[i].liveContent[j]._id, //_id
-                                        "liveTime":res[i].liveContent[j].liveTime,
-                                        "ugcCensorNo":res[i].ugcCensorNo,
-                                        "_type":"correct"});
-
-                        
-                                        linkS3.append(inner_img);
-                                        span_img.append(linkS3);
-                                        span_img.append(boxForChoose);
-                                        div_live.append(span_img);  
-                                        
-                                        if(k==3){
-                                        div_live.append("<br>");
-                                        }
-                                }
-                                
-                            var tr_4=$("<tr>").html(div_live);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
-                      
-                        }else{
-                        /*---------------------------------- when genre is   "miix_story_raw"----------------------------------------*/
-                                      if(res[i].liveContent[j].genre == "miix_story_raw"){
-                                                    var videoSrc = res[i].liveContent[j].url.s3;
-                                                    if(videoSrc[0] != 'h')
-                                                        videoSrc = 'https://s3.amazonaws.com/miix_content/' + videoSrc;
-                                                    
-                                                    var sourceTag=$("<source>").attr({
-                                                                                // src:'https://s3.amazonaws.com/miix_content/'+res[i].liveContent[j].url.s3,
-                                                                                // src:res[i].liveContent[j].url.s3,
-                                                                                src: videoSrc,
-                                                                                type: "video/mp4",
-                                                                            });
-                                                    var videoTag = $("<video>").attr({
-                                                                                 controls:"",
-                                                                                 width:500,
-                                                                                 height:500
-                                                                                });
-                                                    videoTag.append(sourceTag);
-                                                    var tr_4=$("<tr>").html(videoTag);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
-                                                    
-                        /*----------------------------------ends when genre is   "miix_story_raw"----------------------------------------*/
-                                      }else{
-                                      
-                                      
-                      /*---------------------------------- when genre is   "miix_image_live_photo" (非五選一 舊版)----------------------------------------*/
-                                                    var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.s3,
-                                                                          target:"_blank"});
-                                                    var live_img=$("<img>").attr({src:res[i].liveContent[j].url.s3,
-                                                                               width:"330",
-                                                                               height:"200"});
-                                                
-                                                    linkS3.append(live_img);
-                                                    var tr_4=$("<tr>").html(linkS3);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
-                     /*----------------------------------ends  when genre is   "miix_image_live_photo" (非五選一 舊版)----------------------------------------*/
-                                      }
-                    
-                            }
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                            var post_live_time=new Date(parseInt(res[i].liveContent[j].liveTime));
-                            var post_year=post_live_time.getFullYear();
-                            var post_month=post_live_time.getMonth()+1;
-                            var post_date=post_live_time.getDate();
-                            var post_hours=post_live_time.getHours();
-                            var post_minutes=post_live_time.getMinutes();
-                            var timeString=post_year+"/"+post_month+"/"+post_date+"  "+post_hours+":"+post_minutes;
-                            var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].liveContent[j].no+"          │   "+timeString); //sp是編號+日期
-                            var boxForm = $("<form>").attr({style:"display: inline-block;vertical-align:400%"});
-                            var boxInput = $("<input>").attr({type:"radio",
-                                                              name:"yo",
-                                                              value:"ha",
-                                                              checked:"checked"});
-                                                      
-                            /*------------------------- live content(one image)  or  video btn-----------------------------------------------*/                           
-                            var boxInput2 = $("<input>").attr({type:"radio",
-                                id:"boxCheckLive",
-                                class:"good",
-                                name:"yo",
-                                value:res[i].liveContent[j].ownerId.userID,
-                                "s3url":res[i].liveContent[j].url.s3,
-                                "longPic":res[i].liveContent[j].url.longPhoto,
-                                "_id":res[i].liveContent[j]._id,
-                                //
-                                "projectId": res[i].liveContent[j].projectId,
-                                //
-                                "liveTime":res[i].liveContent[j].liveTime,
-                                "ugcCensorNo":res[i].ugcCensorNo,
-                                "_type":"correct",
-                                "genre":res[i].liveContent[j].genre
-                                });
-                            /*------------------------- ends live content(one image)  or  video btn -----------------------------------------------*/       
-                            
-                            
-                             //---------------------- deprecated--------------------------------------------    
-                            var boxInput3 = $("<input>").attr({type:"radio",
-                                id:"boxCheckLive",
-                                class:"bad",
-                                name:"yo",
-                                value:res[i].liveContent[j].ownerId.userID,
-                                "s3url":res[i].liveContent[j].url.s3,
-                                "longPic":res[i].liveContent[j].url.longPhoto,
-                                "_id":res[i].liveContent[j]._id,
-                                "liveTime":res[i].liveContent[j].liveTime,
-                                "ugcCensorNo":res[i].ugcCensorNo,
-                                "_type":"incorrect"});
-                            //-------------------------------------------------------------------------
-                    
-                            if(!res[i].liveContent[j].url.livePhotos){  //determine livePhotos or not to show radio button
-                                    if(res[i].liveContent[j].state=="correct"){ //for "miix_story_raw" or  "miix_image_live_photo"(非五選一)
-                                        boxInput2.attr({checked:"checked"});
-                                        
-                                        boxInput2.hide();
-                                        boxInput3.hide();
-                                        boxInput.hide();
-                                        
-                                        
-                                        
-                                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-                                        boxForm.append(boxInput);
-                                        boxForm.append("");
-                                        boxForm.append("<br>");
-                                        
-                                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-                                        boxForm.append(boxInput2);
-                                        
-                                        if(res[i].liveContent[j].genre == "miix_story_raw"){
-                                            boxForm.append("<b style='color:blue'>成功(影片)(done)<b>");
-                                        }else{
-                                            boxForm.append("<b style='color:blue'>成功(done)<b>");
-                                        }
-                                        
-                                        boxForm.append("<br>");
-                                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-                                        boxForm.append(boxInput3);
-                                        boxForm.append("");
-                                        /* ends of radio box */
-                                        tr_4.prepend(sp); //編號日期連接liveimg
-                                        tr.append(tr_4);
-                                        tr.append(boxForm);
-                                        boxForm.appendTo(tr_4)
-                                        tr.append("<br>");
-                                        tr.append("<hr>");
-                                        tr.append("<br>");
-                                    }else if(res[i].liveContent[j].state=="incorrect"){
-                                        
-                                        //--------------- deprecated --------------
-                                        boxInput3.attr({checked:"checked"});
-                                        boxInput2.hide();
-                                        boxInput3.hide();
-                                        boxInput.hide();
-                                        
-                                        
-                                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-                                        boxForm.append(boxInput);
-                                        boxForm.append("");
-                                        boxForm.append("<br>");
-                                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-                                        boxForm.append(boxInput2);
-                                        boxForm.append("");
-                                        boxForm.append("<br>");
-                                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-                                        boxForm.append(boxInput3);
-                                        boxForm.append("<b style='color:red'>失敗(done)<b>");
-                                        /* ends of radio box */
-                                        tr_4.prepend(sp);
-                                        tr.append(tr_4);
-                                        tr.append(boxForm);
-                                        boxForm.appendTo(tr_4)
-                                        tr.append("<br>");
-                                        tr.append("<hr>");
-                                        tr.append("<br>");
-                                        //---------------------------------------------
-                                    }else{
-                                            boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-                                            boxForm.append(boxInput);
-                                            boxForm.append("default");
-                                            boxForm.append("<br>");
-                                            boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-                                            boxForm.append(boxInput2);
-                                            boxForm.append("正確");
-                                            
-                                            tr_4.prepend(sp);
-                                            tr.append(tr_4);
-                                            tr.append(boxForm);
-                                            boxForm.appendTo(tr_4)
-                                            tr.append("<br>");
-                                        
-                                         if(j!=res[i].liveContent.length-1){
-                                            tr.append("<hr>");
-                                         }
-                                        
-                                        tr.append("<br>");
-                                    }
-
-                            }else{//for 1/5
-                    
-                                        if(res[i].liveContent[j].state=="correct"){
-                                            
-                                                var chooseResult=$("<a>").attr({href:res[i].liveContent[j].url.s3,
-                                                                  target:"_blank"});                    
-                                                var selectedImg = $("<img>").attr({src:res[i].liveContent[j].url.s3,
-                                                                                  width:500,height:250});
-                                                chooseResult.append(selectedImg);                         
-                                                tr_4.html("");
-                                                tr_4.append(chooseResult);
-                                                tr_4.append("<b style='color:blue'>五選一(done)<b>");
-                                                tr_4.prepend(sp);
-                                                tr.append(tr_4);
-                                                tr.append("<br>");
-                                                
-                                                 if(j!=res[i].liveContent.length-1){
-                                                    tr.append("<hr>");
-                                                 }
-                                            
-                                                tr.append("<br>");
-                                        }else{
-                                                boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
-                                                    
-                                                        tr_4.prepend(sp);
-                                                        tr.append(tr_4);
-                                                        tr.append("<br>");
-                                                        
-                                                         if(j!=res[i].liveContent.length-1){
-                                                            tr.append("<hr>");
-                                                         }
-                                                        
-                                                        tr.append("<br>");
-                                        }
-                            }
+                if(res[i].liveContent[j].url.livePhotos){        //determine livePhotos or not (choose 1/5)
+                    for(var k=0;k<res[i].liveContent[j].url.livePhotos.length;k++){
         
-                }
+                        var span_img = $("<span>").attr({                                                                   
+                                            });
+                                          
+                        var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.livePhotos[k],
+                                          target:"_blank"});                                      
+                        var inner_img = $("<img>").attr({src:res[i].liveContent[j].url.livePhotos[k],
+                                                           width:350,
+                                                           height:200,
+                                                           id:"testMove",
+                                                           class:"ho",
+                                                           style:"margin-bottom:10px"
+                                                       
+                                                      });   
+                                          
+                        var boxForChoose = $("<input>").attr({
+                            style:"margin-left:10px;margin-right:10px;",
+                            type:"radio",
+                            id:"boxCheckLive",
+                            class:"chooseOne",
+                            name:"yo",
+                            value:res[i].liveContent[j].ownerId.userID, //user id
+                            "s3url":res[i].liveContent[j].url.livePhotos[k], //五選一
+                            "longPic":res[i].liveContent[j].url.longPhoto, //長條圖
+                            "_id":res[i].liveContent[j]._id, //_id
+                            "liveTime":res[i].liveContent[j].liveTime,
+                            "ugcCensorNo":res[i].ugcCensorNo,
+                            "_type":"correct"
+                        });
 
+            
+                        linkS3.append(inner_img);
+                        span_img.append(linkS3);
+                        span_img.append(boxForChoose);
+                        div_live.append(span_img);  
+                        
+                        if(k==3){
+                            div_live.append("<br>");
+                        }
+                    }
+                        
+                    var tr_4=$("<tr>").html(div_live);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+              
+                }
+                else {
+                    if(res[i].liveContent[j].genre == "miix_story_raw"){
+                        /*---------------------------------- when genre is   "miix_story_raw"----------------------------------------*/
+                        var videoSrc = res[i].liveContent[j].url.s3;
+                        if(videoSrc[0] != 'h')
+                            videoSrc = 'https://s3.amazonaws.com/miix_content/' + videoSrc;
+                        
+                        var sourceTag=$("<source>").attr({
+                                                    // src:'https://s3.amazonaws.com/miix_content/'+res[i].liveContent[j].url.s3,
+                                                    // src:res[i].liveContent[j].url.s3,
+                                                    src: videoSrc,
+                                                    type: "video/mp4",
+                                                });
+                        var videoTag = $("<video>").attr({
+                                                     controls:"",
+                                                     width:500,
+                                                     height:500
+                                                    });
+                        videoTag.append(sourceTag);
+                        var tr_4=$("<tr>").html(videoTag);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+                                                
+                        /*----------------------------------ends when genre is   "miix_story_raw"----------------------------------------*/
+                    }
+                    else{
+                        /*---------------------------------- when genre is   "miix_image_live_photo" (非五選一 舊版)----------------------------------------*/
+                                                var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.s3,
+                                                                      target:"_blank"});
+                                                var live_img=$("<img>").attr({src:res[i].liveContent[j].url.s3,
+                                                                           width:"330",
+                                                                           height:"200"});
+                                            
+                                                linkS3.append(live_img);
+                                                var tr_4=$("<tr>").html(linkS3);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+                        /*----------------------------------ends  when genre is   "miix_image_live_photo" (非五選一 舊版)----------------------------------------*/
+                    }
+                
+                }
+                    
+                var post_live_time=new Date(parseInt(res[i].liveContent[j].liveTime));
+                var post_year=post_live_time.getFullYear();
+                var post_month=post_live_time.getMonth()+1;
+                var post_date=post_live_time.getDate();
+                var post_hours=post_live_time.getHours();
+                var post_minutes=post_live_time.getMinutes();
+                var timeString=post_year+"/"+post_month+"/"+post_date+"  "+post_hours+":"+post_minutes;
+                var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].liveContent[j].no+"          │   "+timeString); //sp是編號+日期
+                var boxForm = $("<form>").attr({style:"display: inline-block;vertical-align:400%"});
+                var boxInput = $("<input>").attr({type:"radio",
+                                                  name:"yo",
+                                                  value:"ha",
+                                                  checked:"checked"});
+                                          
+                /*------------------------- live content(one image)  or  video btn-----------------------------------------------*/                           
+                var boxInput2 = $("<input>").attr({type:"radio",
+                    id:"boxCheckLive",
+                    class:"good",
+                    name:"yo",
+                    value:res[i].liveContent[j].ownerId.userID,
+                    "s3url":res[i].liveContent[j].url.s3,
+                    "longPic":res[i].liveContent[j].url.longPhoto,
+                    "_id":res[i].liveContent[j]._id,
+                    //
+                    "projectId": res[i].liveContent[j].projectId,
+                    //
+                    "liveTime":res[i].liveContent[j].liveTime,
+                    "ugcCensorNo":res[i].ugcCensorNo,
+                    "_type":"correct",
+                    "genre":res[i].liveContent[j].genre
+                });
+                /*------------------------- ends live content(one image)  or  video btn -----------------------------------------------*/       
+                
+                
+                 //---------------------- deprecated--------------------------------------------    
+                var boxInput3 = $("<input>").attr({type:"radio",
+                    id:"boxCheckLive",
+                    class:"bad",
+                    name:"yo",
+                    value:res[i].liveContent[j].ownerId.userID,
+                    "s3url":res[i].liveContent[j].url.s3,
+                    "longPic":res[i].liveContent[j].url.longPhoto,
+                    "_id":res[i].liveContent[j]._id,
+                    "liveTime":res[i].liveContent[j].liveTime,
+                    "ugcCensorNo":res[i].ugcCensorNo,
+                    "_type":"incorrect"});
+                //-------------------------------------------------------------------------
+        
+                if(!res[i].liveContent[j].url.livePhotos){  //determine livePhotos or not to show radio button
+                    if(res[i].liveContent[j].state=="correct"){ //for "miix_story_raw" or  "miix_image_live_photo"(非五選一)
+                        boxInput2.attr({checked:"checked"});
+                        
+                        boxInput2.hide();
+                        boxInput3.hide();
+                        boxInput.hide();
+                        
+                        
+                        
+                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                        boxForm.append(boxInput);
+                        boxForm.append("");
+                        boxForm.append("<br>");
+                        
+                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                        boxForm.append(boxInput2);
+                        
+                        if(res[i].liveContent[j].genre == "miix_story_raw"){
+                            boxForm.append("<b style='color:blue'>成功(影片)(done)<b>");
+                        }else{
+                            boxForm.append("<b style='color:blue'>成功(done)<b>");
+                        }
+                        
+                        boxForm.append("<br>");
+                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                        boxForm.append(boxInput3);
+                        boxForm.append("");
+                        /* ends of radio box */
+                        tr_4.prepend(sp); //編號日期連接liveimg
+                        tr.append(tr_4);
+                        tr.append(boxForm);
+                        boxForm.appendTo(tr_4)
+                        tr.append("<br>");
+                        tr.append("<hr>");
+                        tr.append("<br>");
+                    }else if(res[i].liveContent[j].state=="incorrect"){
+                        
+                        //--------------- deprecated --------------
+                        boxInput3.attr({checked:"checked"});
+                        boxInput2.hide();
+                        boxInput3.hide();
+                        boxInput.hide();
+                        
+                        
+                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                        boxForm.append(boxInput);
+                        boxForm.append("");
+                        boxForm.append("<br>");
+                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                        boxForm.append(boxInput2);
+                        boxForm.append("");
+                        boxForm.append("<br>");
+                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                        boxForm.append(boxInput3);
+                        boxForm.append("<b style='color:red'>失敗(done)<b>");
+                        /* ends of radio box */
+                        tr_4.prepend(sp);
+                        tr.append(tr_4);
+                        tr.append(boxForm);
+                        boxForm.appendTo(tr_4)
+                        tr.append("<br>");
+                        tr.append("<hr>");
+                        tr.append("<br>");
+                        //---------------------------------------------
+                    }else{
+                            boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                            boxForm.append(boxInput);
+                            boxForm.append("default");
+                            boxForm.append("<br>");
+                            boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                            boxForm.append(boxInput2);
+                            boxForm.append("正確");
+                            
+                            tr_4.prepend(sp);
+                            tr.append(tr_4);
+                            tr.append(boxForm);
+                            boxForm.appendTo(tr_4)
+                            tr.append("<br>");
+                        
+                         if(j!=res[i].liveContent.length-1){
+                            tr.append("<hr>");
+                         }
+                        
+                        tr.append("<br>");
+                    }
+
+                }else{//for 1/5
+        
+                    if(res[i].liveContent[j].state=="correct"){
+                        
+                        var chooseResult=$("<a>").attr({href:res[i].liveContent[j].url.s3,
+                                          target:"_blank"});                    
+                        var selectedImg = $("<img>").attr({src:res[i].liveContent[j].url.s3,
+                                                          width:500,height:250});
+                        chooseResult.append(selectedImg);                         
+                        tr_4.html("");
+                        tr_4.append(chooseResult);
+                        tr_4.append("<b style='color:blue'>五選一(done)<b>");
+                        tr_4.prepend(sp);
+                        tr.append(tr_4);
+                        tr.append("<br>");
+                        
+                        if(j!=res[i].liveContent.length-1){
+                           tr.append("<hr>");
+                        }
+                    
+                        tr.append("<br>");
+                    }else{
+                        boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                            
+                        tr_4.prepend(sp);
+                        tr.append(tr_4);
+                        tr.append("<br>");
+                        
+                        if(j!=res[i].liveContent.length-1){
+                           tr.append("<hr>");
+                        }
+                        
+                        tr.append("<br>");
+                    }
+                }
         
             }
+        }
 
 
         //-------------for fail 最左邊--------------------------------------
@@ -387,17 +380,7 @@ var liveCheckSubPg = {
           //alert("g");
           
           
-          var forComfirm=confirm("你按下的是 ***失敗***\n辛苦囉 ~~~!!");
-          if (forComfirm==true)
-            {
-          // alert("good");
-            }
-          else
-            {
-           //alert("><");
-           return false;
-            }
-          
+            var forComfirm=confirm("你按下的是 ***失敗***\n辛苦囉 ~~~!!");
           
             var _id=$(this).attr("programTimeSlot_id");
             var liveState="incorrect";
@@ -409,31 +392,31 @@ var liveCheckSubPg = {
             
             var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
             $.ajax({
-               url: url,
-               type: 'PUT',
-               data: {programTimeSlot_Id:_id,
-                   fbUserId:fbUserId,
-                   vjson:{liveState: liveState}
-                 },
-               success: function(response) {
-                   if(response.message){
-                       console.log("[Response] message: PUT"+ url + ':'  + response.message);
-                   }
-               }
-           });
+                url: url,
+                type: 'PUT',
+                data: {programTimeSlot_Id:_id,
+                    fbUserId:fbUserId,
+                    vjson:{liveState: liveState}
+                },
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message: PUT"+ url + ':'  + response.message);
+                    }
+                }
+            });
             
             var url=DOMAIN+"fbItem/"+ownerId_id;
             $.ajax({
                url: url,
                type: 'POST',
                data: {type:liveState,
-                      ugcCensorNo: ugcCensorNo},
+                   ugcCensorNo: ugcCensorNo},
                success: function(response) {
                    if(response.message){
                        console.log("[Response] message: POST"+ url + ':' + response.message);
                    }
                }
-           });
+            });
             
             var url = DOMAIN + "user_content_attribute";
             var mustPlay = true;
@@ -632,17 +615,7 @@ var liveCheckSubPg = {
         /* ------------------------------ deprecated (最右邊失敗鈕)---------------------------------------------------*/
         $("#boxCheckLive.bad").click(function(){
         
-          var forComfirm=confirm("你按下的是 ***失敗***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
-          if (forComfirm==true)
-            {
-           //alert("good");
-            }
-          else
-            {
-           //alert("><");
-          return false;
-            }
-          
+            var forComfirm=confirm("你按下的是 ***失敗***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
           
             var _id=$(this).attr("_id");
             var userID=$(this).val();
@@ -669,49 +642,49 @@ var liveCheckSubPg = {
                 }
             });
             
-              var url=DOMAIN+"fbItem/"+userID;
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {s3Url: s3Url,
-                           longPic: longPic,
-                           type: picType,
-                           liveTime: liveTime,
-                           ugcCensorNo: ugcCensorNo},
-                    success: function(response) {
-                        if(response.message){
-                            console.log("[Response] message:" + response.message);
-                        }
+            var url=DOMAIN+"fbItem/"+userID;
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {s3Url: s3Url,
+                       longPic: longPic,
+                       type: picType,
+                       liveTime: liveTime,
+                       ugcCensorNo: ugcCensorNo},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
                     }
-                });
+                }
+            });
             
             
         });
         /* ------------------------------ends deprecated---------------------------------------------------*/
         
         $.get('/miix_admin/table_censorHistoryList_head.html', function(res){
-          $('#table-content-header').html(res);
-         // $('#table-content').html('');
+            $('#table-content-header').html(res);
+            // $('#table-content').html('');
         
-          $('#createHistoryProgramListBtn').click(function(){
-             // $('#table-content').html('');
-              var flag = 0;
-              var inputSearchData = {};
-        
-              $('#condition-inner input[class="createHistoryProgramListBtn"]').each(function(i){
-        
-                  inputSearchData[$(this).attr("name")] = $(this).val();
-                  if($(this).val() == "" && flag == 0){
-                      alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00');
-                      flag = 1; 
-                  }else{
-                      conditions = inputSearchData;
-                  }
-              });
-              FM.currentContent = FM.live_check;
-              FM.currentContent.showCurrentPageContent();   
-        
-          });
+            $('#createHistoryProgramListBtn').click(function(){
+                // $('#table-content').html('');
+                var flag = 0;
+                var inputSearchData = {};
+          
+                $('#condition-inner input[class="createHistoryProgramListBtn"]').each(function(i){
+          
+                    inputSearchData[$(this).attr("name")] = $(this).val();
+                    if($(this).val() == "" && flag == 0){
+                        alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00');
+                        flag = 1; 
+                    }else{
+                        conditions = inputSearchData;
+                    }
+                });
+                FM.currentContent = FM.live_check;
+                FM.currentContent.showCurrentPageContent();   
+          
+            });
         });
         
     
