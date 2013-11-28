@@ -142,6 +142,8 @@ var liveCheckSubPg = {
                             value:res[i].liveContent[j].ownerId.userID, //user id
                             "s3url":res[i].liveContent[j].url.livePhotos[k], //五選一
                             "longPic":res[i].liveContent[j].url.longPhoto, //長條圖
+                            "programTimeSlot_id":res[i].programTimeSlot_id,
+                            "fbUserId":res[i].fbUserId,
                             "_id":res[i].liveContent[j]._id, //_id
                             "liveTime":res[i].liveContent[j].liveTime,
                             "ugcCensorNo":res[i].ugcCensorNo,
@@ -440,114 +442,155 @@ var liveCheckSubPg = {
         $("#boxCheckLive.good").click(function(){ //btn for image(only one) and video
         //alert("g");
         
-        if($(this).attr("genre") == "miix_story_raw"){
-            // alert("it's miix_story_raw");
-            var forComfirm=confirm("你按下的是 ***正確***(for video)\n多謝!!");
-            if (forComfirm==true)
-            {
-            }
-            else
-            {
-                return false;
-            }
-                              
-            var _id=$(this).attr("_id");
-            var userID=$(this).val();
-            var s3Url=$(this).attr("s3url");
-            var picType=$(this).attr("_type");
-            var projectId = $(this).attr("projectId");
-            var liveTime=$(this).attr("liveTime");
-            var ugcCensorNo=$(this).attr("ugcCensorNo");
-            
-            console.log("_id: " + _id + 
-                        "\n" + "userID: " + userID + 
-                        "\n" + "projectId: " + projectId + 
-                        "\n" + "liveTime: " + liveTime + 
-                        "\n" + "s3Url: " + s3Url + 
-                        "\n" + "Type: " + picType);
-            
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
-            $.ajax({
-                url: "/internal/story_cam_controller/available_story_movie",
-                type: "POST",
-                headers : { 'miix_movie_project_id' : projectId, 'record_time' : liveTime },
-                success: function(response) {
-                    if(response.message){
-                        console.log("[Response] message:" + response.message);
-                    }
+            if($(this).attr("genre") == "miix_story_raw"){
+                // alert("it's miix_story_raw");
+                var forComfirm=confirm("你按下的是 ***正確***(for video)\n多謝!!");
+                if (forComfirm==true)
+                {
                 }
-            });
-            
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
-            $.ajax({
-                url: url,
-                type: 'PUT',
-                data: {liveContent_Id:_id,
-                       vjson:{state: picType}},
-                success: function(response) {
-                    if(response.message){
-                        console.log("[Response] message:" + response.message);
-                    }
+                else
+                {
+                    return false;
                 }
-            });
-            /* add code to implement "miix_story_raw"*/
-          
-        } else {
+                                  
+                var _id=$(this).attr("_id");
+                var userID=$(this).val();
+                var s3Url=$(this).attr("s3url");
+                var picType=$(this).attr("_type");
+                var projectId = $(this).attr("projectId");
+                var liveTime=$(this).attr("liveTime");
+                var ugcCensorNo=$(this).attr("ugcCensorNo");
+                
+                console.log("_id: " + _id + 
+                            "\n" + "userID: " + userID + 
+                            "\n" + "projectId: " + projectId + 
+                            "\n" + "liveTime: " + liveTime + 
+                            "\n" + "s3Url: " + s3Url + 
+                            "\n" + "Type: " + picType);
+                
+                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+                $.ajax({
+                    url: "/internal/story_cam_controller/available_story_movie",
+                    type: "POST",
+                    headers : { 'miix_movie_project_id' : projectId, 'record_time' : liveTime },
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message:" + response.message);
+                        }
+                    }
+                });
+                
+                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: {liveContent_Id:_id,
+                           vjson:{state: picType}},
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message:" + response.message);
+                        }
+                    }
+                });
+                
+                
+                var programTimeSlot_id=$(this).attr("programTimeSlot_id");
+                var liveState="correct";
+                var fbUserId=$(this).attr("fbUserId");
+                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: {programTimeSlot_Id:programTimeSlot_id,
+                        fbUserId:fbUserId,
+                        vjson:{liveState: liveState}
+                    },
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message: PUT"+ url + ':'  + response.message);
+                        }
+                    }
+                });
+                
+                /* add code to implement "miix_story_raw"*/
+                
+                
+              
+            } else {
+                
+                var forComfirm=confirm("你按下的是 ***正確***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
+                if (forComfirm==true)
+                {
+             
+                }
+                else
+                {
             
-            var forComfirm=confirm("你按下的是 ***正確***\n送出就沒有後悔的餘地\n觀棋不語真君子，起手無回大丈夫\n多謝!!");
-            if (forComfirm==true)
-            {
-         
+                    return false;
+                }
+                
+                var _id=$(this).attr("_id");
+                var userID=$(this).val();
+                var s3Url=$(this).attr("s3url");
+                var picType=$(this).attr("_type");
+                var longPic=$(this).attr("longPic");
+                var liveTime=$(this).attr("liveTime");
+                var ugcCensorNo=$(this).attr("ugcCensorNo");
+                
+                console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
+                                    
+                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: {liveContent_Id:_id,
+                           userID:userID,
+                           photoUrl:s3Url,
+                           vjson:{state: picType}},
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message:" + response.message);
+                        }
+                    }
+                });
+                
+                var url=DOMAIN+"fbItem/"+userID;
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {s3Url: s3Url,
+                           longPic: longPic,
+                           type: picType,
+                           liveTime: liveTime,
+                           ugcCensorNo: ugcCensorNo,
+                           liveContent_Id:_id},
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message:" + response.message);
+                        }
+                    }
+                });
+                
+                var programTimeSlot_id=$(this).attr("programTimeSlot_id");
+                var liveState="correct";
+                var fbUserId=$(this).attr("fbUserId");
+                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: {programTimeSlot_Id:programTimeSlot_id,
+                        fbUserId:fbUserId,
+                        vjson:{liveState: liveState}
+                    },
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message: PUT"+ url + ':'  + response.message);
+                        }
+                    }
+                });
+
             }
-            else
-            {
-        
-                return false;
-            }
             
-            var _id=$(this).attr("_id");
-            var userID=$(this).val();
-            var s3Url=$(this).attr("s3url");
-            var picType=$(this).attr("_type");
-            var longPic=$(this).attr("longPic");
-            var liveTime=$(this).attr("liveTime");
-            var ugcCensorNo=$(this).attr("ugcCensorNo");
-            
-            console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
-                                
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
-            $.ajax({
-                url: url,
-                type: 'PUT',
-                data: {liveContent_Id:_id,
-                       userID:userID,
-                       photoUrl:s3Url,
-                       vjson:{state: picType}},
-                success: function(response) {
-                    if(response.message){
-                        console.log("[Response] message:" + response.message);
-                    }
-                }
-            });
-            
-            var url=DOMAIN+"fbItem/"+userID;
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: {s3Url: s3Url,
-                       longPic: longPic,
-                       type: picType,
-                       liveTime: liveTime,
-                       ugcCensorNo: ugcCensorNo,
-                       liveContent_Id:_id},
-                success: function(response) {
-                    if(response.message){
-                        console.log("[Response] message:" + response.message);
-                    }
-                }
-            });
-          }
-        
             
         });
         /* ------------------------------ end 最右邊正確紐---------------------------------------------------*/
@@ -576,38 +619,57 @@ var liveCheckSubPg = {
             
             var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
             $.ajax({
-               url: url,
-               type: 'PUT',
-               data: {liveContent_Id:_id,
-                   userID:userID,
-                   photoUrl:s3Url,
-                   vjson:{state: picType,
-                          "url.s3": s3Url,
-                         }
-                     },
-               success: function(response) {
-                   if(response.message){
-                       console.log("[Response] message:" + response.message);
-                   }
-               }
+                url: url,
+                type: 'PUT',
+                data: {liveContent_Id:_id,
+                    userID:userID,
+                    photoUrl:s3Url,
+                    vjson:{state: picType,
+                           "url.s3": s3Url,
+                          }
+                      },
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
             });
             
             var url=DOMAIN+"fbItem/"+userID;
             $.ajax({
-               url: url,
-               type: 'POST',
-               data: {s3Url: s3Url,
-                   longPic: longPic,
-                   type: picType,
-                       liveTime: liveTime,
-                       ugcCensorNo: ugcCensorNo,
-                       liveContent_Id:_id},
-               success: function(response) {
-                   if(response.message){
-                       console.log("[Response] message:" + response.message);
-                   }
-               }
-           });
+                url: url,
+                type: 'POST',
+                data: {s3Url: s3Url,
+                    longPic: longPic,
+                    type: picType,
+                        liveTime: liveTime,
+                        ugcCensorNo: ugcCensorNo,
+                        liveContent_Id:_id},
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
+            
+            var programTimeSlot_id=$(this).attr("programTimeSlot_id");
+            var liveState="correct";
+            var fbUserId=$(this).attr("fbUserId");
+            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                data: {programTimeSlot_Id:programTimeSlot_id,
+                    fbUserId:fbUserId,
+                    vjson:{liveState: liveState}
+                },
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message: PUT"+ url + ':'  + response.message);
+                    }
+                }
+            });
+
             
         });
         /* ------------------------------ end 五選一紐---------------------------------------------------*/
