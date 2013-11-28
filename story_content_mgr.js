@@ -82,13 +82,21 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
     
     var ownerFbProfilePicture = null;
     
+    var getUserFBProfilePicture = function( getPic_cb ){
+        var condition = { "projectId": miixMovieProjectID };
+        ugcModel.find(condition, 'fbProfilePicture', function(err, doc){
+            ownerFbProfilePicture = doc[0].fbProfilePicture;
+            getPic_cb(null);
+        });
+    };
+    
     var getUserIdAndName = function( finish_cb ){
         UGCDB.getOwnerIdByPid( miixMovieProjectID, function( err, _ownerStdID) {
             if (!err) {
                 ownerStdID = _ownerStdID;
                 
                 // temp fb picture
-                ownerFbProfilePicture = 'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c66.66.828.828/s720x720/528252_146750055494664_1746072981_n.jpg';
+                // ownerFbProfilePicture = 'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c66.66.828.828/s720x720/528252_146750055494664_1746072981_n.jpg';
                 
                 memberDB.getUserNameAndID( ownerStdID, function(err2, result){
                     if (!err2) {
@@ -248,6 +256,9 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
                 //console.log('step.5 end');
                 cb5(err5);
             });
+        },
+        function(cb6){
+            getUserFBProfilePicture(cb6);
         },
         function(cb4){
             //console.log('step.4 start');

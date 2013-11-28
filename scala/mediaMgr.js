@@ -5,14 +5,51 @@ var media = (function() {
     var connectMgr = require('./connectMgr.js');
     var rest = require('restler');
     var fs = require('fs');
+    
+    var mediaType = null;
+    
+    var typeController = function(){};
 
     var _private = {
         init : function( file, init_cb ) {
             connectMgr.checkCollision('media.init', function(status){
-                adapter.post('/ContentManager/api/rest/fileupload/init?token=' + token, {
+                
+                var fileType = file.name.toString().split('.');
+                    fileType = fileType[fileType.length - 1];
+                
+                switch( fileType.toLowerCase() )
+                {
+                    case 'bmp':
+                        mediaType = 'image/bmp';
+                        break;
+                    case 'jpg':
+                        mediaType = 'image/jpeg';
+                        break;
+                    case 'png':
+                        mediaType = 'image/png';
+                        break;
+                    case 'wmv':
+                        mediaType = 'video/x-ms-wmv';
+                        break;
+                    case 'mp4':
+                        mediaType = 'video/mp4';
+                        break;
+                    case 'avi':
+                        mediaType = 'video/avi';
+                        break;
+                    case 'flv':
+                        mediaType = 'video/x-flv';
+                        break;
+                    default:
+                        mediaType = '';
+                        break;
+                }
+                
+                // adapter.post('/ContentManager/api/rest/fileupload/init?token=' + token, {
+                adapter.post('/ContentManager/api/rest/fileupload/init', {
                     filename: file.name,
                     filepath: file.savepath,
-                    //uploadType: file.type
+                    uploadType: "media_item"
                 }, function( err, req, res, obj ){
                     init_cb( obj.uuid );
                 });
@@ -23,16 +60,21 @@ var media = (function() {
             _private.init( file, function( uuid ){
                 var connect = adapter.url.href + 'ContentManager/api/rest/fileupload/part/' + uuid + '/0';
                 fs.readFile( file.path + '\\' + file.name, function (err, data){
+                    
                     connectMgr.checkCollision('media.upload', function(status){
+                        
                         rest.post(connect, {
                             multipart: true,
                             token: token,
                             'Content-Length': new Buffer(data).length,
                             data: {
                                 'token': token,
-                                'video[file]': rest.file( file.path + '\\' + file.name, null, data.length, null, '' )
+                                // 'video[file]': rest.file( file.path + '\\' + file.name, null, data.length, null, '' )
+                                // 'video[message]': 'upload by feltmeng',
+                                // 'video[file]': rest.file( file.path + '\\' + file.name, null, data.length, null, mediaType )
+                                'file': rest.file( file.path + '\\' + file.name, null, data.length, null, mediaType )
                             }
-                        }).on('complete', function(data) {
+                        }).once('complete', function(data) {
                             // if(data.value == 'Done') upload_cb(null, 'OK');
                             // else upload_cb('FILE_UPLOAD_FAILED', null);
                             upload_cb(null, 'OK');
