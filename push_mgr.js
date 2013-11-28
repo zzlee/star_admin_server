@@ -8,6 +8,9 @@ FM.pushMgr = (function() {
 	var uInstance = null;
 
 	function constructor() {
+	    var async = require('async');
+	    var db = require('./db.js');
+
 		/**
 		 * Google Cloud Messaging, a.k.a., GCM. GCM sender_ID: 701982981612 API
 		 * Key: AIzaSyDn_H-0W251CKUjDCl-EkBLV0GunnWwpZ4
@@ -183,7 +186,7 @@ FM.pushMgr = (function() {
 			},
 			
             sendMessageToDeviceByMemberId : function(memberId, message, cbOfSendMessageToDeviceByMemberId){
-                 memberDB = require("./member.js");
+                 var memberDB = require("./member.js");
 
                  memberDB.getDeviceTokenById(memberId, function(err, result){
                      if(err){
@@ -213,12 +216,61 @@ FM.pushMgr = (function() {
                  });
 
             },
+            
+            sendMessageToAllMemberByApp : function(message, app, cbOfSendMessageToDeviceByMemberId){
+                var memberModel = db.getDocModel("member");
+                var condition = null;
+                if(app)
+                    condition = {"app": app};
+                
+                var iteratorSendMessageToDeviceByMemberId = function(data, cbOfIteratorSendMessageToDeviceByMemberId){
+                    console.log(data._id, message);
+                    cbOfIteratorSendMessageToDeviceByMemberId(null);
+//                    FM.pushMgr.getInstance().sendMessageToDeviceByMemberId( data._id, message, function(err, result){
+//                        console.log(err, result);
+//                    });
+
+                };
+                
+                async.waterfall([
+                              function(callback1){
+                                  memberModel.find(condition).exec(function(err, memberList){
+                                      if(!err){
+                                          callback1(null, memberList);
+                                      }else{
+                                          callback1(err, null);
+                                      }
+                                  });
+                              },
+                              function(memberList, callback2){
+                                  console.log(memberList.length);
+                                  async.eachSeries(memberList, iteratorSendMessageToDeviceByMemberId, function(errOfEachSeries){
+                                      if (!errOfEachSeries) {
+                                          callback2(null);
+                                      }
+                                      else{
+                                          callback2(null);
+                                      }
+                                  });
+                                  
+                                  
+                              }
+                              ],
+                              function(err, results){
+                    
+                              });
+
+
+           },
             /** TEST */
             _testkaiser: function(){
                 var userNo = 1234;
-                var memberId = '526107a409900bbc02000005';
+                var memberId = '526107a409900bbc02000005';// 176 / kaiser
                 var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
-                this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
+//                this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
+//                        console.log(err, result);
+//                });
+                this.sendMessageToAllMemberByApp( message, "wowtaipeiarena", function(err, result){
                         console.log(err, result);
                 });
             },
@@ -237,5 +289,5 @@ FM.pushMgr = (function() {
 })();
 
 /* TEST */
-// FM.pushMgr.getInstance()._testkaiser();
+ FM.pushMgr.getInstance()._testkaiser();
 module.exports = FM.pushMgr.getInstance();
