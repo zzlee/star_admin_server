@@ -1424,17 +1424,25 @@ scheduleMgr.removeUgcfromProgramAndAutoSetNewOne = function(sessionId, programTi
     var candidateUgcList = [];
     var selectedUgc = null;
     var indexOfLatCandidatUgcCache = 0;
+    var intervalOfSelectingUGC = null;
     
     
     async.series([
+                  function(cb00){
+                      //get the interval of selecting UGC
+                      
+                      
+                      cb00(null);
+                  },
                   function(cb0){
                       //get the sorted UGC list
+                      //TODO: better using sessionId to query to get the interval of selecting UGC of this session 
                       var sessionIdInfoArray = sessionId.split('-');
-                      var interval = {start: Number(sessionIdInfoArray[0]), end: Number(sessionIdInfoArray[1]) };
+                      var intervalOfSelectingUGC = {start: Number(sessionIdInfoArray[0]), end: Number(sessionIdInfoArray[1]) };
                       
                       //TODO: call the real censorMgr
-//                      censorMgr_getUGCList_fake(interval, function(err0, _sortedUgcList ){
-                          censorMgr.getUGCListLite(interval, function(err0, _sortedUgcList ){
+//                      censorMgr_getUGCList_fake(intervalOfSelectingUGC, function(err0, _sortedUgcList ){
+                          censorMgr.getUGCListLite(intervalOfSelectingUGC, function(err0, _sortedUgcList ){
                           if (!err0) {
                               sortedUgcList = _sortedUgcList;
                               //console.log('sortedUgcList=');

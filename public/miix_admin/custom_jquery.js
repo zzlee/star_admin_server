@@ -58,15 +58,15 @@ $(document).ready(function(){
 
 //Main Page 
 $(document).ready(function(){
-    FM.memberList = new PageList( 'memberList', 8, '/miix_admin/members');
-    FM.miixPlayList = new PageList( 'miixMovieList', 10, '/miix_admin/miix_movies');
-    FM.storyPlayList = new PageList( 'storyMovieList', 8, '/miix_admin/story_movies');
-    FM.UGCList = new PageList( 'ugcCensorMovieList', 10, '/miix_admin/ugc_censor'); 
-    FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 10, '/miix_admin/doohs/'+DEFAULT_DOOH+'/timeslots');
-    FM.historyList = new PageList( 'historyList', 15, '/miix_admin/sessions/ ');
-    FM.highlightList = new PageList( 'highlightList', 10, '/miix_admin/highlight');
+    FM.memberList = new PageList( 'memberList', 8, '/miix_admin/members', null, null);
+    FM.miixPlayList = new PageList( 'miixMovieList', 10, '/miix_admin/miix_movies', null, null);
+    FM.storyPlayList = new PageList( 'storyMovieList', 8, '/miix_admin/story_movies', null, null);
+    FM.UGCList = new PageList( 'ugcCensorMovieList', 10, '/miix_admin/ugc_censor', null, null); 
+    FM.UGCPlayList = new PageList( 'ugcCensorPlayList', 10, '/miix_admin/doohs/'+DEFAULT_DOOH+'/timeslots', UGCPlayListSubPg.afterProgramListTableIsLoaded, null);
+    FM.historyList = new PageList( 'historyList', 15, '/miix_admin/sessions/ ', null, null);
+    FM.highlightList = new PageList( 'highlightList', 10, '/miix_admin/highlight', null, null);
 	/*----------------------------- live check start  by Joy----------------------------------*/
-    FM.live_check = new PageList( 'live_check',10,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',function(res){
+    FM.live_check = new PageList( 'live_check',10,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',null, function(res){
 				console.dir(res);
 				$('#table-content').html("");
 				var form=$("<form>");
@@ -216,8 +216,8 @@ $(document).ready(function(){
 
 											
 															linkS3.append(inner_img);
-														 span_img.append(linkS3);
-														 span_img.append(boxForChoose);
+                                                            span_img.append(linkS3);
+                                                            span_img.append(boxForChoose);
 															div_live.append(span_img);	
 															
 															if(k==3){
@@ -1033,7 +1033,7 @@ $(document).ready(function(){
                     });
                     if(inputSearchData != null){
                         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
-                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
                         FM.UGCList.setConditions(conditions);
                         $('#main_menu ul[class="current"]').attr("class", "select");
                         $('#UGCList').attr("class", "current");
@@ -1048,7 +1048,7 @@ $(document).ready(function(){
                     conditions = 'norating';
                     if(conditions != null){
                         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
-                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
                         FM.UGCList.setConditions(conditions);
                         $('#main_menu ul[class="current"]').attr("class", "select");
                         $('#UGCList').attr("class", "current");
@@ -1063,7 +1063,7 @@ $(document).ready(function(){
                     conditions = 'rating';
                     if(conditions != null){
                         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
-                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
                         FM.UGCList.setConditions(conditions);
                         $('#main_menu ul[class="current"]').attr("class", "select");
                         $('#UGCList').attr("class", "current");
@@ -1077,7 +1077,7 @@ $(document).ready(function(){
                 $('#ugcSearchAllBtn').click(function(){
                     $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
                     conditions = {};
-                    FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                    FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
                     FM.UGCList.setConditions(conditions);
                     $('#main_menu ul[class="current"]').attr("class", "select");
                     $('#UGCList').attr("class", "current");
@@ -1102,7 +1102,7 @@ $(document).ready(function(){
                     });
                     if(conditions != null){
                         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
-                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor');
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
                         FM.UGCList.setConditions(conditions);
                         $('#main_menu ul[class="current"]').attr("class", "select");
                         $('#UGCList').attr("class", "current");
@@ -1267,108 +1267,6 @@ $(document).ready(function(){
     
             if(playlistCheck == '/miix_admin/doohs'){
                 
-                $('#PlayList.ugcCensorNoSetBtn').click(function(){
-                    console.log('PlayList.ugcCensorNoSetBtn');
-                    var flag = 0;
-                    var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
-                    var programTimeSlotId = $(this).attr("name");
-                    var ugcReferenceNo;
-    
-                    $('input[class="#PlayList.ugcCensorNoSetBtn"]').each(function(){
-                        
-                        ugcReferenceNo = $(this).val();
-                        
-                        if(ugcReferenceNo && programTimeSlotId){
-                            $.ajax({
-                                url: url,
-                                type: 'PUT',
-                                data: { type: 'setUgcToProgram', programTimeSlotId: programTimeSlotId, ugcReferenceNo: ugcReferenceNo},
-                                success: function(response) {
-                                    if(response.message){
-                                        console.log("[Response_Set] message:" + response.message);
-                                        conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
-                                        if(response.message.substring(0,6) != 'Cannot'){
-                                        $('#main_menu ul[class="current"]').attr("class", "select");
-                                        $('#UGCPlayList').attr("class", "current");
-    
-                                        FM.currentContent = FM.UGCPlayList;
-                                        FM.currentContent.showCurrentPageContent();
-                                        }else{
-                                             if(flag == 0){
-                                                 alert(response.message);
-                                                 flag = 1;
-                                                 }
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    });
-    
-                });
-    
-                $('#PlayList.ugcCensorNoRemoveBtn').click(function(){
-                    console.log('PlayList.ugcCensorNoRemoveBtn');
-                    var flag = 0;
-                    var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
-                    var programTimeSlotId = $(this).attr("name");
-    
-                    if(sessionId === null && flag == 0){
-                        alert('Session Id not exist!!');
-                        flag = 1; 
-                    }
-                    if(programTimeSlotId && sessionId){
-                        $.ajax({
-                            url: url,
-                            type: 'PUT',
-                            data: { type:'removeUgcfromProgramAndAutoSetNewOne', programTimeSlotId: programTimeSlotId},
-                            success: function(response) {
-                                if(response.message){
-                                    console.log("[Response] message:" + response.message);
-                                    conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
-    
-                                    $('#main_menu ul[class="current"]').attr("class", "select");
-                                    $('#UGCPlayList').attr("class", "current");
-    
-                                    FM.currentContent = FM.UGCPlayList;
-                                    FM.currentContent.showCurrentPageContent();
-    
-                                }
-                            }
-                        });
-                    }
-                });
-    
-                $('#pushProgramsBtn').click(function(){
-                    var flag = 0;
-                    var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/ProgramsTo3rdPartyContentMgr/"+sessionId;
-                    if(sessionId === null && flag == 0){
-                        alert('Session Id not exist!!');
-                        flag = 1; 
-                    }
-                    if(sessionId){
-                        $.ajax({
-                            url: url,
-                            type: 'PUT',
-                            data: {
-                            intervalOfSelectingUGC : intervalOfSelectingUGC,
-                            intervalOfPlanningDoohProgrames :intervalOfPlanningDoohProgrames,
-                            originSequence :originSequence
-                            },
-                            success: function(response) {
-                                if(response.message){
-                                    console.log("[Response] message:" + response.message);
-                                }
-                                //$('#underPushingText').html('上傳成功!!');
-                            },
-                            error: function(jqXHR, textStatus, errorThrown) {
-                                //$('#underPushingText').html('上傳失敗： '+textStatus+" "+errorThrown);
-                            }
-                        });
-                        $('#pushProgramsBtn').hide();
-                        //$('#table-content').append($('<p>').attr("id","underPushingText").html('上傳至播放系統中，請稍候....'));
-                    }
-                });            
     
             }// End of PlayList
             
