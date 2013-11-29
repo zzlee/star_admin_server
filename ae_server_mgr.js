@@ -60,7 +60,8 @@ aeServerMgr.createMiixMovie = function(movieProjectID, ownerStdID, ownerFbID, mo
 };
 
 //use long polling to ask AE Server to create Story movie
-aeServerMgr.createStoryMV = function(movieProjectID, miixMovieFileExtension, ownerStdID, ownerFbID, movieTitle, createMovie_cb) {
+// aeServerMgr.createStoryMV = function(movieProjectID, miixMovieFileExtension, ownerStdID, ownerFbID, movieTitle, createMovie_cb) {
+aeServerMgr.createStoryMV = function(movieProjectID, miixMovieFileExtension, ownerStdID, ownerFbID, movieTitle, ownerFbProfilePicture, ugc_play_time, createMovie_cb) {
 
 	var starAeServerID = systemConfig.DEFAULT_AE_SERVER;
 	
@@ -85,6 +86,8 @@ aeServerMgr.createStoryMV = function(movieProjectID, miixMovieFileExtension, own
                     ownerStdID: ownerStdID,
                     ownerFbID: ownerFbID,
                     movieTitle: movieTitle,
+                    ownerFbProfilePicture: ownerFbProfilePicture,
+                    ugc_play_time: ugc_play_time,
                     ytAccessToken: ytAccessToken 
                 };
 

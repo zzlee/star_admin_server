@@ -196,10 +196,10 @@ async.waterfall([
 //            
 //            var iteratorUpdateAMemberInfo = function(anIndex, callback){
 //                memberList[anIndex].miixMovieVideo_count = 1+ Math.floor( 3*Math.random()*Math.random()*Math.random() );
-//                memberList[anIndex].doohPlay_count = Math.floor( memberList[anIndex].miixMovieVideo_count*(1+3.1*Math.random()*Math.random()) );
-//                memberList[anIndex].fbLike_count = Math.floor( memberList[anIndex].doohPlay_count*62*Math.random()*Math.random() );
-//                memberList[anIndex].fbComment_count = Math.floor( memberList[anIndex].fbLike_count*0.5*Math.random() );
-//                memberList[anIndex].fbShare_count = Math.floor( memberList[anIndex].doohPlay_count*2.3*Math.random()*Math.random() );
+//                memberList[anIndex].doohPlay_count = Math.floor( memberList[anIndex].miixMovieVideo_count*(1+3.3*Math.random()*Math.random()) );
+//                memberList[anIndex].fbLike_count = Math.floor( memberList[anIndex].doohPlay_count*66*Math.random()*Math.random() );
+//                memberList[anIndex].fbComment_count = Math.floor( memberList[anIndex].fbLike_count*0.7*Math.random() );
+//                memberList[anIndex].fbShare_count = Math.floor( memberList[anIndex].doohPlay_count*2.5*Math.random()*Math.random() );
 //
 //                memberList[anIndex].save(callback);
 //                console.log("updated "+anIndex);
@@ -229,7 +229,7 @@ async.waterfall([
 //            var shineList = [];
 //            for (var i=0; i<memberList.length; i++) {
 //                //console.dir(memberList[i]);
-//                if ( ((i%3) == 0) && (i>500) ) {
+//                if ( ((i%3) == 0) && (i>900) ) {
 //                    shineList.push({index:i, shine:false});
 //                }
 //                else {
@@ -260,7 +260,157 @@ async.waterfall([
 //            });
 //        });
 
+
+//        //statistics: UGC counts per day & users generating UGC per day
+//        var db = require('./db.js');
+//        var async = require('async');
+//        var ugcModel = db.getDocModel("ugc");
+//        var fs = require('fs');
+//        ugcModel.aggregate(  
+//                { $match : { no:{$gte: 3000} } },
+//                { $project: { creatYear:{$year: "$createdOn"}, creatMonth:{$month: "$createdOn"},creatDay:{$dayOfMonth: "$createdOn"}, owner: "$ownerId.fbUserId" } },
+//                { $group: { _id: {y:"$creatYear",m:"$creatMonth",d:"$creatDay"}, ugcsPerDay : { $sum : 1 } , usersPerDay : { $addToSet : "$owner" } } }, 
+//                { $sort : { _id: 1 } }, function(err, ugcStatisticsList){
+//            if (!err) {
+//                //console.log("ugcStatisticsList=");
+//                //console.dir(ugcStatisticsList);
+//                var outString = "date, ugc submitter count, ugc count\n";
+//                for (var i=0; i<ugcStatisticsList.length; i++) {
+//                    outString += ugcStatisticsList[i]._id.y+"/"+ugcStatisticsList[i]._id.m+"/"+ugcStatisticsList[i]._id.d+", "+ugcStatisticsList[i].usersPerDay.length+", "+ugcStatisticsList[i].ugcsPerDay+"\n";
+//                }
+//                //console.log(outString);
+//                fs.writeFile('ugc_and_users_statistics.csv', outString, function (err) {
+//                    if (err) throw err;
+//                    console.log('ugc_and_users_statistics.csv is saved!');
+//                });
+//            }
+//            else {
+//                console.log("err=");
+//                console.dir(err);
+//            }
+//        });
+
+//        //statistics: program fail rate statistics
+//        var db = require('./db.js');
+//        var async = require('async');
+//        var programTimeSlotModel = db.getDocModel("programTimeSlot");
+//        var fs = require('fs');
+//        
+//        var o = {};
+//         
+//        o.map = function(){ 
+//            var programTime = new Date(this.timeslot.start);
+//            var programDateString = programTime.getFullYear()+'/'+String(programTime.getMonth()+1)+'/'+programTime.getDate();
+//            var programDateObj = {y:programTime.getFullYear(), m:programTime.getMonth()+1, d:programTime.getDate() };
+//            var fail = 0;
+//            if ( (this.liveState == 'incorrect') ) {
+//                //console.log('this.liveState='+this.liveState);
+//                fail = 1;
+//            }
+//            emit(programDateObj, {count:1, failCount:fail}); 
+//        };
+//        
+//        o.reduce = function(key, countObjVals){ 
+//            reducedVal = { count: 0, failCount: 0 };
+//
+//            for (var idx = 0; idx < countObjVals.length; idx++) {
+//                reducedVal.count += countObjVals[idx].count;
+//                reducedVal.failCount += countObjVals[idx].failCount;
+//            }
+//            
+//            return reducedVal;
+//        };
+//        
+//        //o.query = { "type":'UGC', "timeslot.start":{$gte: 1383235200000 } };
+//        o.query = { "type":'UGC',  "timeslot.start":{$gte:(new Date('2013/11/18')).getTime(), $lt:(new Date()).getTime()} }; 
+//        
+//        o.finalize = function (key, reducedVal) {
+//            reducedVal.failRate = Math.round(reducedVal.failCount/reducedVal.count*100)+"%";
+//            return reducedVal;
+//        };
+//        
+//        o.out = { replace: 'tempOutput' };
+//
+//        programTimeSlotModel.mapReduce(o, function (err, model) {
+//            model.find().sort({_id:1}).exec(function (err, result) {
+//                if (!err){
+//                    //console.log('result=');
+//                    //console.dir(result);
+//                    
+//                    var outString = "date, programs played, live content fails, fail rate\n";
+//                    for (var i=0; i<result.length; i++) {
+//                        outString += result[i]._id.y+"/"+result[i]._id.m+"/"+result[i]._id.d+", "+result[i].value.count+", "+result[i].value.failCount+", "+result[i].value.failRate+"\n";
+//                    }
+//                    //console.log(outString);
+//                    fs.writeFile('program_play_statistics.csv', outString, function (err) {
+//                        if (err) throw err;
+//                        console.log('program_play_statistics.csv is saved!');
+//                    });
+//
+//                }
+//                else {
+//                    console.log("err=");
+//                    console.dir(err);
+//                }
+//                
+//            });
+//        });
+
         
+//        //statistics: new members 
+//        var db = require('./db.js');
+//        var async = require('async');
+//        var memberModel = db.getDocModel("member");
+//        var fs = require('fs');
+//                        
+//        var o = {};
+//        
+//        o.map = function(){ 
+//            var memberCreatedOn = this._id.getTimestamp();
+//            var memberCreatedDateObj = {y:memberCreatedOn.getFullYear(), m:memberCreatedOn.getMonth()+1, d:memberCreatedOn.getDate() };
+//            emit(memberCreatedDateObj, {count:1}); 
+//        };
+//        
+//        o.reduce = function(key, countObjVals){ 
+//            reducedVal = { count: 0 };
+//
+//            for (var idx = 0; idx < countObjVals.length; idx++) {
+//                reducedVal.count += countObjVals[idx].count;
+//            }
+//            
+//            return reducedVal;
+//        };
+//        
+//        //o.query = { "type":'UGC',  "timeslot.start":{$gte:(new Date('2013/11/18')).getTime(), $lt:(new Date()).getTime()} }; 
+//                
+//        o.out = { replace: 'tempOutput' };
+//
+//        memberModel.mapReduce(o, function (err, model) {
+//            model.find().sort({_id:1}).exec(function (err, result) {
+//                if (!err){
+//                    //console.log('result=');
+//                    //console.dir(result);
+//                    
+//                    var outString = "date, new member count\n";
+//                    for (var i=0; i<result.length; i++) {
+//                        outString += result[i]._id.y+"/"+result[i]._id.m+"/"+result[i]._id.d+", "+result[i].value.count+"\n";
+//                    }
+//                    console.log(outString);
+//                    fs.writeFile('new_member_statistics.csv', outString, function (err) {
+//                        if (err) throw err;
+//                        console.log('new_member_statistics.csv is saved!');
+//                    });
+//
+//                }
+//                else {
+//                    console.log("err=");
+//                    console.dir(err);
+//                }
+//                
+//            });
+//        });
+
+      
         
         callback(null);
     }
