@@ -599,7 +599,7 @@ function scalaMgr( url, account ){
             },
             function(callback){
                 contractor.playlist.list( { sort: 'name', limit: 1, fields: 'id,name', search: option.playlist.play }, function(err, playlist){
-                    console.dir(playlist);
+                    //console.dir(playlist);
                     callback(null, playlist);
                 });
             },
