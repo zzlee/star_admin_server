@@ -446,12 +446,43 @@ FM.facebookMgr = (function(){
                 });
             },
             
-          //kaiser
+            //kaiser
             getUserProfilePicture: function(fb_id, app, cb){
                 
                 var path = "/"+fb_id+"/?fields=picture.height(720).width(720)";
                 
                 switch(app){
+                case "wowtaipeiarena":
+                    var qs = { "access_token": app_access_token_WowTaipeiarena};
+                    break;
+                default:
+                    var qs = { "access_token": app_access_token_OnDaScreen};
+                break;
+                }
+                
+                request({
+                    method: 'GET',
+                    uri:  fb_url + path,
+                    qs: qs,
+                    json: true,
+                    
+                }, function(error, response, body){
+                    if(error){
+                        cb(error, null);
+                    }else if(body.error){
+                        cb(body, null);
+                    }else{
+                        cb(null, body);
+                    }
+                });
+            },
+            
+            // jeff
+            getUserProfilePictureAndCustomSize: function(fb_id, app, size, cb){
+                
+                var path = "/"+fb_id+"/?fields=picture.height(" + size.height + ").width(" + size.width + ")";
+                
+                switch(app.toLowerCase()){
                 case "wowtaipeiarena":
                     var qs = { "access_token": app_access_token_WowTaipeiarena};
                     break;

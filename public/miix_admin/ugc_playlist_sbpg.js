@@ -98,7 +98,6 @@ var UGCPlayListSubPg = {
 
                             FM.currentContent = FM.UGCPlayList;
                             FM.currentContent.setExtraParameters({sessionId: sessionId});
-                            //FM.currentContent.showCurrentPageContent(UGCPlayListSubPg.afterProgramListTableIsLoaded);
                             FM.currentContent.showCurrentPageContent();
                             programSequenceArr =[];
                         }
@@ -120,7 +119,7 @@ var UGCPlayListSubPg = {
     
     afterProgramListTableIsLoaded: function() {
         $('#PlayList.ugcCensorNoSetBtn').click(function(){
-            console.log("PlayList.ugcCensorNoSetBtn");
+            console.log('PlayList.ugcCensorNoSetBtn');
             var flag = 0;
             var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
             var programTimeSlotId = $(this).attr("name");
@@ -161,7 +160,7 @@ var UGCPlayListSubPg = {
         });
 
         $('#PlayList.ugcCensorNoRemoveBtn').click(function(){
-            console.log("PlayList.ugcCensorNoRemoveBtn");
+            console.log('PlayList.ugcCensorNoRemoveBtn');
             var flag = 0;
             var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
             var programTimeSlotId = $(this).attr("name");
@@ -196,7 +195,7 @@ var UGCPlayListSubPg = {
         $('#pushProgramsBtn').click(function(){
             var flag = 0;
             var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/ProgramsTo3rdPartyContentMgr/"+sessionId;
-            if(sessionId === null && flag == 0){
+            if(sessionId === null && flag === 0){
                 alert('Session Id not exist!!');
                 flag = 1; 
             }
@@ -223,6 +222,7 @@ var UGCPlayListSubPg = {
                 //$('#table-content').append($('<p>').attr("id","underPushingText").html('上傳至播放系統中，請稍候....'));
             }
         });            
+
 
     }
         
