@@ -197,6 +197,8 @@ var UGCPlayListSubPg = {
             var programTimeSlotId = $(this).attr("name");
             var ugcReferenceNo;
             var checkDate = new Date().getTime() + 30*60*1000;
+            if(sessionId)
+                var arrayOfSessionId = sessionId.split('-');
             console.log(checkDate+','+arrayOfSessionId[2]);
             var showDateStart = new Date(Number(arrayOfSessionId[2]));
             var showDateEnd = new Date(Number(arrayOfSessionId[3]));
@@ -250,6 +252,7 @@ var UGCPlayListSubPg = {
             }
             if(programTimeSlotId && sessionId){
                 var checkDate = new Date().getTime() + 30*60*1000;
+                var arrayOfSessionId = sessionId.split('-');
                 console.log(checkDate+','+arrayOfSessionId[2]);
                 var showDateStart = new Date(Number(arrayOfSessionId[2]));
                 var showDateEnd = new Date(Number(arrayOfSessionId[3]));
@@ -287,6 +290,7 @@ var UGCPlayListSubPg = {
             }
             if(sessionId){
                 var checkDate = new Date().getTime() + 30*60*1000;
+                var arrayOfSessionId = sessionId.split('-');
                 console.log(checkDate+','+arrayOfSessionId[2]);
                 var showDateStart = new Date(Number(arrayOfSessionId[2]));
                 var showDateEnd = new Date(Number(arrayOfSessionId[3]));
