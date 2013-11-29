@@ -1,5 +1,5 @@
 //PageList object implementation
-function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction){
+function PageList( listType, rowsPerPage, urlToGetListContent, drawPageCallback, drawPageFunction){
     var _this = this;
     this.currentPage = 1;
     this.rowsPerPage = rowsPerPage;
@@ -8,6 +8,7 @@ function PageList( listType, rowsPerPage, urlToGetListContent, drawPageFunction)
     this.listType = listType;
     this.extraParameters = null;
     this.conditions = null;
+    this.drawPageCallback = drawPageCallback;
     this.drawPageFunction = drawPageFunction;
     
     //TODO: have a cleaner way to get the list size
@@ -80,44 +81,44 @@ PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
         }
     ],
     function(err){
-        if (cbOfShowPageContent){
-            cbOfShowPageContent(err);
+        if (_this.drawPageCallback){
+            _this.drawPageCallback(err);
         }
     });
 };
 
-PageList.prototype.showCurrentPageContent = function(cb){
-    this.showPageContent(this.currentPage, cb);
+PageList.prototype.showCurrentPageContent = function(){
+    this.showPageContent(this.currentPage);
 };
 
 
-PageList.prototype.showNextPageContent = function(cb){
+PageList.prototype.showNextPageContent = function(){
     if (this.currentPage < this.totalPageNumber){
         this.currentPage++;
-        this.showCurrentPageContent(cb);
+        this.showCurrentPageContent();
     }
 };
 
-PageList.prototype.showPreviousPageContent = function(cb){
+PageList.prototype.showPreviousPageContent = function(){
     if (this.currentPage > 1){
         this.currentPage--;
-        this.showCurrentPageContent(cb);
+        this.showCurrentPageContent();
     }
 
 };
 
-PageList.prototype.showFirstPageContent = function(cb){
-    this.showPageContent(1, cb);
+PageList.prototype.showFirstPageContent = function(){
+    this.showPageContent(1);
 };
 
 PageList.prototype.showLastPageContent = function(cb){
-    this.showPageContent(this.totalPageNumber, cb);
+    this.showPageContent(this.totalPageNumber);
 };
 
-PageList.prototype.setRowsPerPage = function(newRowsPerPage, cb ){
+PageList.prototype.setRowsPerPage = function(newRowsPerPage ){
     var keyRow = this.rowsPerPage*(this.currentPage-1)+1;
     var newPage = Math.ceil(keyRow/newRowsPerPage); 
     this.rowsPerPage = newRowsPerPage;
-    this.showPageContent(newPage, cb);
+    this.showPageContent(newPage);
 };
 
