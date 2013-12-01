@@ -1,4 +1,4 @@
-var liveCheckSubPg = {
+﻿var liveCheckSubPg = {
     loadLiveCheckTable: function(res){
         console.dir(res);
         $('#table-content').html("");
@@ -75,6 +75,17 @@ var liveCheckSubPg = {
 
             var td_4=$("<td>").html("hi");
             var FailboxForm = $("<form>").attr({style:"display: inline-block;vertical-align:400%"});
+            
+            if ( res[i].canBeFoundInPlayerLog == "YES" ) {
+                FailboxForm.append("<p style='color:blue'>Player<br>有播放紀錄</p><br>");
+            }
+            else if ( res[i].canBeFoundInPlayerLog == "NO" ) {
+                FailboxForm.append("<p><b style='color:orange'>Player<br>無播放紀錄</b></p><br>");
+            }
+            else {
+                FailboxForm.append("<p style='color:purple'>仍未匯入Player的log</p><br>");
+            }
+            
             var FailboxInput = $("<input>").attr({
                      type:"radio",
                      id:"failbox",

@@ -1,4 +1,4 @@
-
+﻿
 var censorMgr = {};
 
 var async = require('async');
@@ -464,7 +464,7 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
     }
         var liveContentList = [];
 
-        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, fbUserId, programTimeSlot_id, ownerId_id, arr) {
+        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, fbUserId, programTimeSlot_id, ownerId_id, canBeFoundInPlayerLog, arr) {
             arr.push({
                 ugcCensorNo: ugcCensorNo,
                 liveContent: liveContent,
@@ -473,13 +473,14 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
                 liveState: liveState,
                 fbUserId: fbUserId,
                 programTimeSlot_id: programTimeSlot_id,
-                ownerId_id: ownerId_id
+                ownerId_id: ownerId_id,
+                canBeFoundInPlayerLog: canBeFoundInPlayerLog
             });
         };  
         var mappingLiveContentList = function(data, cbOfMappingLiveContentList){
             userLiveContentModel.find({'liveTime': {$gte: data.timeslot.start, $lt: data.timeslot.end}, "sourceId": data.content.projectId}).exec(function(err, result){
                 if(!err){
-                    LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, liveContentList);
+                    LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, liveContentList);
                     cbOfMappingLiveContentList(null); 
                 }else{
                     cbOfMappingLiveContentList(err); 
