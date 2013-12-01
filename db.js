@@ -211,6 +211,7 @@ FM.DB = (function(){
             planner: {type: String}, //The id of planner who plans this session of creating program timeslots
             state: {type: String, enum: programTimeSlotState, default: 'not_confirmed'}, //The state of the program timeslot
             contentGenre: {type: String, enum: ugcContentGenre},  //miix_it, cultural_and_creative, mood, or check_in
+            canBeFoundInPlayerLog: {type: String},
             liveState: {type: String, enum: liveContentState, default: 'not_checked'}
         }); 
         
