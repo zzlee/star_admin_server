@@ -86,29 +86,38 @@
                 FailboxForm.append("<p style='color:purple'>仍未匯入Player的log</p><br>");
             }
             
-            var FailboxInput = $("<input>").attr({
-                     type:"radio",
-                     id:"failbox",
-                     class:"bad",
-                     "fbUserId":res[i].fbUserId,
-                     "programTimeSlot_id":res[i].programTimeSlot_id,
-                     "ugcCensorNo":res[i].ugcCensorNo,
-                     "liveState":res[i].liveState,
-                     "ownerId_id":res[i].ownerId_id
-                                                 });
+            var FailboxInputForNotPlayed = $("<input>").attr({
+                     type: "radio",
+                     name: "badLiveContentRadioBtn_"+i,
+                     class: "badLiveContentRadioBtn",
+                     issueGenre: "NOT_PLAYED",
+                     fbUserId: res[i].fbUserId,
+                     programTimeSlot_id: res[i].programTimeSlot_id,
+                     ugcCensorNo: res[i].ugcCensorNo,
+                     liveState: res[i].liveState,
+                     ownerId_id: res[i].ownerId_id
+            });
+            
 
-            FailboxForm.append(FailboxInput);
+            FailboxForm.append($("<div>").append(FailboxInputForNotPlayed).append("没播出"));
 
 
             //---------  'fail' checkbox  click--------------
 
-            if(res[i].liveState=="incorrect"){
-                FailboxInput.hide();
-                FailboxForm.append("<b style='color:red'>失敗(done)<b>");
-
-            }else{
-                FailboxForm.append("失敗")
+            if( res[i].liveState!="not_checked" ){
+                $("input[name='badLiveContentRadioBtn_"+i+"']").hide();
+                
+                //FailboxForm.append("<b style='color:red'>失敗(done)<b>");
             }
+
+            
+//            if(res[i].liveState=="incorrect"){
+//                FailboxInput.hide();
+//                FailboxForm.append("<b style='color:red'>失敗(done)<b>");
+//
+//            }else{
+//                FailboxForm.append("失敗")
+//            }
             //----------------end 'fail' checkbox  click-----
 
             tbody.append(tr);
