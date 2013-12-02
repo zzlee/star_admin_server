@@ -392,7 +392,7 @@ var liveCheckSubPg = {
             
             console.log("programTimeSlot_id:"+_id+"\nfbUserId:"+fbUserId+"\nliveState:"+liveState);
             
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+            var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/programTimeSlot";
             $.ajax({
                 url: url,
                 type: 'PUT',
@@ -468,7 +468,7 @@ var liveCheckSubPg = {
                             "\n" + "s3Url: " + s3Url + 
                             "\n" + "Type: " + picType);
                 
-                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
                 $.ajax({
                     url: "/internal/story_cam_controller/available_story_movie",
                     type: "POST",
@@ -480,7 +480,7 @@ var liveCheckSubPg = {
                     }
                 });
                 
-                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
                 $.ajax({
                     url: url,
                     type: 'PUT',
@@ -497,7 +497,7 @@ var liveCheckSubPg = {
                 var programTimeSlot_id=$(this).attr("programTimeSlot_id");
                 var liveState="correct";
                 var fbUserId=$(this).attr("fbUserId");
-                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/programTimeSlot";
                 $.ajax({
                     url: url,
                     type: 'PUT',
@@ -539,7 +539,7 @@ var liveCheckSubPg = {
                 
                 console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
                                     
-                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
                 $.ajax({
                     url: url,
                     type: 'PUT',
@@ -574,7 +574,7 @@ var liveCheckSubPg = {
                 var programTimeSlot_id=$(this).attr("programTimeSlot_id");
                 var liveState="correct";
                 var fbUserId=$(this).attr("fbUserId");
-                var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/programTimeSlot";
                 $.ajax({
                     url: url,
                     type: 'PUT',
@@ -617,7 +617,7 @@ var liveCheckSubPg = {
                 return false;
             }
             
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+            var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
             $.ajax({
                 url: url,
                 type: 'PUT',
@@ -655,7 +655,7 @@ var liveCheckSubPg = {
             var programTimeSlot_id=$(this).attr("programTimeSlot_id");
             var liveState="correct";
             var fbUserId=$(this).attr("fbUserId");
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/programTimeSlot";
+            var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/programTimeSlot";
             $.ajax({
                 url: url,
                 type: 'PUT',
@@ -689,7 +689,7 @@ var liveCheckSubPg = {
             
             console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
             
-            var url=DOMAIN+"dooh/"+DEFAULT_DOOH+"/liveContent";
+            var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
             $.ajax({
                 url: url,
                 type: 'PUT',

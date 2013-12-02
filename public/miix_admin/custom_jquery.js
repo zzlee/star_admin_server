@@ -66,7 +66,7 @@ $(document).ready(function(){
     FM.historyList = new PageList( 'historyList', 15, '/miix_admin/sessions/ ', null, null);
     FM.highlightList = new PageList( 'highlightList', 10, '/miix_admin/highlight', null, null);
 	/*----------------------------- live check start  by Joy----------------------------------*/
-    FM.live_check = new PageList( 'live_check',10,'/miix_admin/dooh/'+DEFAULT_DOOH+'/liveContent',null, liveCheckSubPg.loadLiveCheckTable ); 
+    FM.live_check = new PageList( 'live_check',10,'/miix_admin/doohs/'+DEFAULT_DOOH+'/liveContent',null, liveCheckSubPg.loadLiveCheckTable ); 
     /*-----------------------------end live check----------------------------------*/
     
 
