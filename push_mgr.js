@@ -195,6 +195,9 @@ FM.pushMgr = (function() {
                          FM_LOG('[pus_mgr.sendMessageToDeviceByMemberId] error = result is null'+err);
                          cbOfSendMessageToDeviceByMemberId(err, result);
                      }else if(result.deviceToken){
+                         //createMessage for message center
+                         FM.pushMgr.getInstance().createMessage(memberId, message, function(err, res){});
+                         
                          FM_LOG("deviceToken Array: " + JSON.stringify(result.deviceToken) );
                          for( var devicePlatform in result.deviceToken){
                              var deviceTokenCheck = result.deviceToken[devicePlatform];
@@ -233,9 +236,6 @@ FM.pushMgr = (function() {
 						cbOfCreateMessage("new message save to db error: "+err, null);
 					}
 				});
-		           console.log(err, res);
-					
-				});
 			
 			},
 			
@@ -258,8 +258,8 @@ FM.pushMgr = (function() {
             /** TEST */
             _testkaiser: function(){
                 var userNo = 1234;
-                var memberId = '5254fd20df0ff4b00e00000e';
-                var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
+                var memberId = '528f374a31a360bc0e000005';
+                var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
                 this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
                         console.log(err, result);
                 });
