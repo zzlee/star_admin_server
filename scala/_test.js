@@ -156,5 +156,17 @@ setTimeout(function(){
     scalaMgr.pushEvent( option, function(res){
         console.log(res);
     }); */
+    
+    //ScalaMgr APIs : dumpPlaylist()
+    /* var option = { 
+        playlist: { name: 'OnDaScreen' },
+        logger: { name: 'playlist.log' }
+    };
+    scalaMgr.dumpPlaylist( option, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
         
 }, 2000);
