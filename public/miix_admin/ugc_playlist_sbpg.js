@@ -42,6 +42,7 @@ var UGCPlayListSubPg = {
                     
                 }else{
                     console.log("GET",url);
+                    $('#table-content').html('<br> <br>檢查中，請稍候....');
                     intervalOfSelectingUGC = {start: inputSearchData.timeStart, end: inputSearchData.timeEnd};
                     intervalOfPlanningDoohProgrames = {start: inputSearchData.playTimeStart, end: inputSearchData.playTimeEnd};
                     $.ajax({
