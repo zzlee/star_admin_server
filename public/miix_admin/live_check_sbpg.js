@@ -86,29 +86,81 @@
                 FailboxForm.append("<p style='color:purple'>仍未匯入Player的log</p><br>");
             }
             
-            var FailboxInputForNotPlayed = $("<input>").attr({
+            var FailboxInputForSourceNotPlayed = $("<input>").attr({
                      type: "radio",
                      name: "badLiveContentRadioBtn_"+i,
                      class: "badLiveContentRadioBtn",
-                     issueGenre: "NOT_PLAYED",
+                     value: "没播出",
                      fbUserId: res[i].fbUserId,
                      programTimeSlot_id: res[i].programTimeSlot_id,
                      ugcCensorNo: res[i].ugcCensorNo,
                      liveState: res[i].liveState,
                      ownerId_id: res[i].ownerId_id
             });
-            
 
-            FailboxForm.append($("<div>").append(FailboxInputForNotPlayed).append("没播出"));
+            var FailboxInputForNotGenerated = $("<input>").attr({
+                type: "radio",
+                name: "badLiveContentRadioBtn_"+i,
+                class: "badLiveContentRadioBtn",
+                value: "有播出但live照片没產生",
+                fbUserId: res[i].fbUserId,
+                programTimeSlot_id: res[i].programTimeSlot_id,
+                ugcCensorNo: res[i].ugcCensorNo,
+                liveState: res[i].liveState,
+                ownerId_id: res[i].ownerId_id
+            });
+
+            var FailboxInputForNotCorrect = $("<input>").attr({
+                type: "radio",
+                name: "badLiveContentRadioBtn_"+i,
+                class: "badLiveContentRadioBtn",
+                value: "有播出但live照片拍錯",
+                fbUserId: res[i].fbUserId,
+                programTimeSlot_id: res[i].programTimeSlot_id,
+                ugcCensorNo: res[i].ugcCensorNo,
+                liveState: res[i].liveState,
+                ownerId_id: res[i].ownerId_id
+            });
+            
+            var FailboxInputForBadExposure = $("<input>").attr({
+                type: "radio",
+                name: "badLiveContentRadioBtn_"+i,
+                class: "badLiveContentRadioBtn",
+                value: "有播出但live照片曝光不正確",
+                fbUserId: res[i].fbUserId,
+                programTimeSlot_id: res[i].programTimeSlot_id,
+                ugcCensorNo: res[i].ugcCensorNo,
+                liveState: res[i].liveState,
+                ownerId_id: res[i].ownerId_id
+            });
+
+            var FailboxInputForOtherFailReason = $("<input>").attr({
+                type: "radio",
+                name: "badLiveContentRadioBtn_"+i,
+                class: "badLiveContentRadioBtn",
+                value: "其他失敗原因",
+                fbUserId: res[i].fbUserId,
+                programTimeSlot_id: res[i].programTimeSlot_id,
+                ugcCensorNo: res[i].ugcCensorNo,
+                liveState: res[i].liveState,
+                ownerId_id: res[i].ownerId_id
+            });
+            
+            
+            FailboxForm.append($("<div>").append(FailboxInputForSourceNotPlayed).append("没播出"));
+            FailboxForm.append($("<div>").append(FailboxInputForNotGenerated).append("有播出但live照片没產生"));
+            FailboxForm.append($("<div>").append(FailboxInputForNotCorrect).append("有播出但live照片拍錯"));
+            FailboxForm.append($("<div>").append(FailboxInputForBadExposure).append("有播出但live照片曝光不正確"));
+            FailboxForm.append($("<div>").append(FailboxInputForOtherFailReason).append("其他失敗原因"));
 
 
             //---------  'fail' checkbox  click--------------
 
-            if( res[i].liveState!="not_checked" ){
-                $("input[name='badLiveContentRadioBtn_"+i+"']").hide();
-                
-                //FailboxForm.append("<b style='color:red'>失敗(done)<b>");
-            }
+//            if( res[i].liveState!="not_checked" ){
+//                $("input[name='badLiveContentRadioBtn_"+i+"']").hide();
+//                
+//                //FailboxForm.append("<b style='color:red'>失敗(done)<b>");
+//            }
 
             
 //            if(res[i].liveState=="incorrect"){
@@ -398,7 +450,7 @@
 
 
         //-------------for fail 最左邊--------------------------------------
-        $("#failbox.bad").click(function(){
+        $(".badLiveContentRadioBtn").click(function(){
           //alert("g");
           
           
