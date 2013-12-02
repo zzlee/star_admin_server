@@ -1131,12 +1131,12 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                                                      
                                                  });
                                                  //add fb push
-                                               /*  postPreview(aProgram, function(err, res){
+                                                 postPreview(aProgram, function(err, res){
                                                      if(err)
                                                          logger.info('Post FB message is Error: ' + err);
                                                      else
                                                          logger.info('Post FB message is Success: ' + res);
-                                                 });*/
+                                                 });
                                              }
                                              else {
                                                  var paddingFilePath = path.join(workingPath, 'public', aProgram.content.dir, aProgram.content.file);
