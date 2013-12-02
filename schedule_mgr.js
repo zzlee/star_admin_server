@@ -38,6 +38,8 @@ var DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING = 2*1000; //2 sec.
 var TIME_INTERVAL_RANKIGN = [{startHour: 17, endHour: 23},  //start with the time interval with highest ranking
                              {startHour: 8, endHour: 16},
                              {startHour: 0, endHour: 7}];
+
+
 var censorMgr = null;
 
 var programPlanningPattern =(function(){    
@@ -112,6 +114,36 @@ var paddingContent =(function(){
             } 
         }
     };
+})();
+
+var periodicalHighPriorityEvents =(function(){ 
+    
+    var TIME_INTERVALS = [ { startMinute: 0, endMinute: 10}, { startMinute: 30, endMinute: 35} ]; //in minutes
+    
+    return {
+        isConflictedWith: function(timeIntervalToCheck) {
+            
+            
+            var ti = {};
+            ti.startMinute = (new Date(timeIntervalToCheck.start)).getMinutes();
+            ti.endMinute = (new Date(timeIntervalToCheck.end)).getMinutes();
+            
+            for (var i=0; i<TIME_INTERVALS.length; i++){
+                
+                //NOTE: this check below is NOT able to handle the time interval like 4:55~5:05
+                if ((   ( TIME_INTERVALS[i].startMinute <= ti.startMinute ) && ( ti.startMinute <= TIME_INTERVALS[i].endMinute )  ) ||
+                    (   ( TIME_INTERVALS[i].startMinute <= ti.endMinute ) && ( ti.endMinute <= TIME_INTERVALS[i].endMinute )  ) ||
+                    (   ( TIME_INTERVALS[i].startMinute <= ti.startMinute ) && ( ti.endMinute <= TIME_INTERVALS[i].endMinute )  ) ||
+                    (   ( ti.startMinute <= TIME_INTERVALS[i].startMinute ) && ( TIME_INTERVALS[i].endMinute <= ti.endMinute )  )      ) {
+                    
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+    };
+    
 })();
         
 //for test
@@ -617,12 +649,29 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                     async.whilst(
                         function () { return timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end; },
                         function (cb_whilst) {
-                            // add time slots of a micro timeslot (of the same content genre) to db
-                            var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
-                            generateTimeSlotsOfMicroInterval(inteval, function(err1){
+                            // try to avoid the conflicts with high-priority events
+                            var intervalChecked = 0;
+                            while ( periodicalHighPriorityEvents.isConflictedWith({ start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  }) && 
+                                    (timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) &&
+                                    (intervalChecked < 60*60*1000) ) {
                                 timeToAddTimeSlot += programPeriod;
-                                cb_whilst(err1);
-                            });
+                                intervalChecked += programPeriod;
+                            }
+                            
+                            if (timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) {
+                                // add time slots of a micro timeslot (of the same content genre) to db
+                                var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
+                                generateTimeSlotsOfMicroInterval(inteval, function(err1){
+                                    timeToAddTimeSlot += programPeriod;
+                                    
+                                    cb_whilst(err1);
+                                });
+                            }
+                            else {
+                                //no time slot to add to db
+                                cb_whilst(null);
+                            }
+                            
                         },
                         function (err2) {
                             interationDone_cb(err2);
