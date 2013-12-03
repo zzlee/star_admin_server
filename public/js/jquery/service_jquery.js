@@ -2,10 +2,6 @@
  * FeltMeng.com
  */
 
-$.ajaxSetup({  
-    async : false  
-});
-
 var customerServiceItemId = null;
 var condition = null;
 var DOMAIN = "/miix_service/";
@@ -19,6 +15,11 @@ $(document).ready(function(){
     $.get(url, {type :type}, function(res){
         if (!res.err){
             $('div.tab_container').html(res);
+            
+            $('#product-table tbody tr').click( function() {
+                customerServiceItemId = this.id;
+                reloadList();
+            });
         }
     });
     $('div.message_list').html('');
@@ -43,16 +44,13 @@ $(document).ready(function(){
                 data: {_id: customerServiceItemId, answer: $(this).attr("value")},
                 success: function(response) {
                     if(response.message){
-//                        console.log("[Response] message:" + response.message);
+                        reloadTable();
+                        reloadList();
                     }
                 }
             });
 
-            /**
-             * reload  table and list
-             */
-            reloadTable();
-            reloadList();
+
         });
     });
 
@@ -69,11 +67,17 @@ $(document).keyup(function (e) {
             var url = DOMAIN + "customer_service_items";
             var fb_userName = $(this).attr("value");
             var type = 'table';
-            condition = {fb_userName: fb_userName};
+            
+            if(!fb_userName){
+                condition = null;
+            }else
+                condition = {fb_userName: fb_userName};
             if(fb_userName != 'Quick Search'){
                 $.get(url, {type :type, condition:condition}, function(res){
                     if (!res.err){
                         $('div.tab_container').html(res);
+                        
+                        reloadTable();
                     }
                 });
             }
@@ -92,15 +96,12 @@ $(document).keyup(function (e) {
                     data: {_id: $(this).attr("name"), vjson:{remarks: $(this).attr("value")}},
                     success: function(response) {
                         if(response.message){
-//                            console.log("[Response] message:" + response.message);
+                            reloadTable();
                         }
                     }
                 });
-                /**
-                 * reload  table
-                 */
-                condition = null;
-                reloadTable();
+
+
             }
         });
 
@@ -108,46 +109,26 @@ $(document).keyup(function (e) {
 
 });
 
-/**
- * ajax
- */ 
-$(document).ajaxComplete(function(event,request, settings) {
-    serviceCheck = settings.url.substring(0,36);
 
-    if(serviceCheck == '/miix_service/customer_service_items'){
-        $('#product-table tbody tr').click( function() {
-            customerServiceItemId = this.id;
-            reloadList();
-        });
-
-        $(document).keyup(function (e) {
-                $('#service._idRemarks').each(function(){
-                    if($(this).attr("value")){
-                        var url = DOMAIN + "questions";
-                        $.ajax({
-                            url: url,
-                            type: 'PUT',
-                            data: {_id: $(this).attr("name"), vjson:{remarks: $(this).attr("value")}},
-                            success: function(response) {
-                                if(response.message){
-//                                    console.log("[Response] message:" + response.message);
-                                }
-                            }
-                        });
-                    }
-                });
-        });
-
-    }
-
-});
 
 function reloadTable(){
     url = DOMAIN + "customer_service_items";
     var type = 'table';
+    
+    if(condition){
+        if(condition.fb_userName == 'Quick Search')
+            condition = null;
+    }
     $.get(url, {type :type, condition:condition}, function(res){
         if (!res.err){
             $('div.tab_container').html(res);
+            
+            $('#product-table tbody tr').click( function() {
+                customerServiceItemId = this.id;
+                reloadList();
+            });
+            
+
         }
     });
 };

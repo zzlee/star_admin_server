@@ -304,7 +304,7 @@ exports.init = function() {
      */
     app.get('/miix_admin/highlight', routes.censorHandler.getHighlightUGCList_get_cb);
     
-    app.get('/miix_admin/dooh/:doohId/liveContent', routes.censorHandler.getLiveContentList_get_cb);
+    app.get('/miix_admin/doohs/:doohId/liveContent', routes.censorHandler.getLiveContentList_get_cb);
 //    app.get('/miix_admin/dooh/:doohId/liveContent', function(req, res){
 //        var liveContentList =[{
 //            liveContent: [{
@@ -338,13 +338,16 @@ exports.init = function() {
 //        res.send(200, liveContentList)
 //    });
     
-    app.put('/miix_admin/dooh/:doohId/liveContent', routes.censorHandler.updateLiveContents_get_cb);
+    app.put('/miix_admin/doohs/:doohId/liveContent', routes.censorHandler.updateLiveContents_get_cb);
     
     app.post('/miix_admin/fbItem/:memberId', routes.censorHandler.postMessageAndPicture_get_cb);
     
-    app.put('/miix_admin/dooh/:doohId/programTimeSlot', routes.censorHandler.updateProgramTimeSlot_get_cb);
+    app.put('/miix_admin/doohs/:doohId/programTimeSlot', routes.censorHandler.updateProgramTimeSlot_get_cb);
     
     app.put('/miix_admin/video_ugcs/:projectId', routes.censorHandler.generateVideoUgc);
-    
+
     app.put('/miix_admin/memberInfo/:memberInfoId', routes.admin.updateMemberInfo_get_cb);
+    
+    app.get('/miix_admin/doohs/:doohId/programTimeSlot', routes.censorHandler.checkProgramTimeSlot_get_cb);
+
 };
