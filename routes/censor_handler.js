@@ -316,7 +316,7 @@ FM.censorHandler.getLiveContentList_get_cb = function(req, res){
             "state": "confirmed"
     };
     sort = {
-    		"timeslot.start":-1,
+            "timeslot.start":-1,
             "content.no":-1
     };
     if(req.query.condition)   
@@ -436,6 +436,32 @@ FM.censorHandler.generateVideoUgc = function(req, res){
     });
     
     res.send(200);
+};
+
+FM.censorHandler.checkProgramTimeSlot_get_cb = function(req, res){
+
+    var intervalOfPlanningDoohProgramesStart = new Date(req.query.intervalOfPlanningDoohProgrames.start).getTime() ;
+    var intervalOfPlanningDoohProgramesEnd = new Date(req.query.intervalOfPlanningDoohProgrames.end).getTime();
+    if(intervalOfPlanningDoohProgramesEnd - intervalOfPlanningDoohProgramesStart < 10*60*1000){
+        intervalOfPlanningDoohProgramesEnd = intervalOfPlanningDoohProgramesStart + 10*60*1000;
+    }
+
+    var condition;
+    
+    condition = {
+            "intervalOfPlanningDoohProgramesStart": intervalOfPlanningDoohProgramesStart,
+            "intervalOfPlanningDoohProgramesEnd": intervalOfPlanningDoohProgramesEnd
+            };
+
+    censorMgr.checkProgramTimeSlotList(condition, function(errOfCheckProgramTimeSlotList, resOfCheckProgramTimeSlotList){
+        if (!errOfCheckProgramTimeSlotList){
+            res.send(200, {result: resOfCheckProgramTimeSlotList});
+        }
+        else{
+            res.send(200, {result: errOfCheckProgramTimeSlotList});
+        }
+    });
+
 };
 
 module.exports = FM.censorHandler;

@@ -212,7 +212,8 @@ FM.DB = (function(){
             state: {type: String, enum: programTimeSlotState, default: 'not_confirmed'}, //The state of the program timeslot
             contentGenre: {type: String, enum: ugcContentGenre},  //miix_it, cultural_and_creative, mood, or check_in
             canBeFoundInPlayerLog: {type: String},
-            liveState: {type: String, enum: liveContentState, default: 'not_checked'}
+            liveState: {type: String, enum: liveContentState, default: 'not_checked'},
+            upload: {type: Boolean, default: false}
         }); 
         
         var CandidateUgcCacheSchema = new Schema({

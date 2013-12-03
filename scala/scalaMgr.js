@@ -15,6 +15,7 @@
  */
 function scalaMgr( url, account ){
     
+    var fs = require('fs');
     var assert = require('assert');
     var async = require('async');
     var restify = require('restify').createJsonClient({url: url});
@@ -579,6 +580,34 @@ function scalaMgr( url, account ){
     };
     
     /**
+     * Dump playlist data.
+     * 
+     */
+    var dumpPlaylist = function( option, dump_cb ){
+        
+        var playlist_name = option.playlist.name;
+        var filepath = option.logger.name;
+        
+        var file = fs.createWriteStream(filepath, { 
+            flags: 'a+',
+            encoding: 'utf-8',
+            mode: 0777 
+        });
+        
+        contractor.playlist.list( { sort: 'name', limit: 1, search: playlist_name }, function(err, playlist){
+            
+            var content = 
+            {
+                playlist : playlist.list[0],
+                timestamp : new Date()
+            };
+            file.write( JSON.stringify(content) + '\n' );
+            dump_cb(err, 'done');
+        });
+        
+    };
+    
+    /**
      * Push event list to all playlist in server.
      * 
      * @param {object} option Input setting of playlist, subplaylist and player.
@@ -698,6 +727,7 @@ function scalaMgr( url, account ){
         validProgramExpired: validProgramExpired,
         removePlaylist: removePlaylist,
         clearMedia: clearMedia,
+        dumpPlaylist: dumpPlaylist,
         contractor: contractor,   //test
     };
 }
