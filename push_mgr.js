@@ -6,6 +6,8 @@ var DEBUG = true, FM_LOG = (DEBUG) ? function(str) {
 
 FM.pushMgr = (function() {
 	var uInstance = null;
+	var db = require('./db.js');
+	var messageModel = db.getDocModel("message");
 
 	function constructor() {
 	    var async = require('async');
@@ -196,6 +198,9 @@ FM.pushMgr = (function() {
                          FM_LOG('[pus_mgr.sendMessageToDeviceByMemberId] error = result is null'+err);
                          cbOfSendMessageToDeviceByMemberId(err, result);
                      }else if(result.deviceToken){
+                         //createMessage for message center
+                         FM.pushMgr.getInstance().createMessage(memberId, message, function(err, res){});
+                         
                          FM_LOG("deviceToken Array: " + JSON.stringify(result.deviceToken) );
                          for( var devicePlatform in result.deviceToken){
                              var deviceTokenCheck = result.deviceToken[devicePlatform];
@@ -216,7 +221,42 @@ FM.pushMgr = (function() {
                  });
 
             },
-            
+
+			createMessage : function(memberId,  message, cbOfCreateMessage){
+				var jsonOfNewMessage = {
+					content: message,
+					ownerId: {_id: memberId},
+				}
+				
+				var newMessage = new messageModel(jsonOfNewMessage);
+				newMessage.save(function(err, res){
+					if(!err) {
+						logger.info('[createMessage] done ,memberId: ', memberId);
+						cbOfCreateMessage(null, "done");
+					}
+					else{
+						logger.error('[createMessage] error', err);
+						cbOfCreateMessage("new message save to db error: "+err, null);
+					}
+				});
+			
+			},
+			
+			updateMessage : function(messageId,  vjson, cbOfUpdateMessage){
+				
+				db.updateAdoc(messageModel, messageId, vjson, function(err, result){
+					if(!err) {
+						logger.info('[updateMessage_updateAdoc] done ,messageId: ', messageId);
+						cbOfUpdateMessage(null,'done');
+					}
+					else{
+						logger.error('[updateMessage_updateAdoc] error: ', err);
+						cbOfUpdateMessage(err,null);
+					}
+				});
+			
+			},
+			
             sendMessageToAllMemberByApp : function(message, app, cbOfSendMessageToDeviceByMemberId){
                 var memberModel = db.getDocModel("member");
                 var condition = null;
@@ -224,12 +264,11 @@ FM.pushMgr = (function() {
                     condition = {"app": app};
                 
                 var iteratorSendMessageToDeviceByMemberId = function(data, cbOfIteratorSendMessageToDeviceByMemberId){
-                    console.log(data._id, message);
+//                    console.log(data._id, message);
                     cbOfIteratorSendMessageToDeviceByMemberId(null);
 //                    FM.pushMgr.getInstance().sendMessageToDeviceByMemberId( data._id, message, function(err, result){
 //                        console.log(err, result);
 //                    });
-
                 };
                 
                 async.waterfall([
@@ -243,7 +282,7 @@ FM.pushMgr = (function() {
                                   });
                               },
                               function(memberList, callback2){
-                                  console.log(memberList.length);
+//                                  console.log(memberList.length);
                                   async.eachSeries(memberList, iteratorSendMessageToDeviceByMemberId, function(errOfEachSeries){
                                       if (!errOfEachSeries) {
                                           callback2(null);
@@ -252,27 +291,25 @@ FM.pushMgr = (function() {
                                           callback2(null);
                                       }
                                   });
-                                  
-                                  
                               }
                               ],
                               function(err, results){
                     
                               });
 
-
            },
+			
             /** TEST */
             _testkaiser: function(){
                 var userNo = 1234;
-                var memberId = '526107a409900bbc02000005';// 176 / kaiser
-                var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
-//                this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
-//                        console.log(err, result);
-//                });
-                this.sendMessageToAllMemberByApp( message, "wowtaipeiarena", function(err, result){
+                var memberId = '528f374a31a360bc0e000005';
+                var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
+                this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
                         console.log(err, result);
                 });
+				// this.saveMessageToDataBase( memberId, message, function(err, result){
+					// console.log(err, result);
+                // });
             },
 		};// end return
 	}
@@ -289,5 +326,5 @@ FM.pushMgr = (function() {
 })();
 
 /* TEST */
- FM.pushMgr.getInstance()._testkaiser();
+// FM.pushMgr.getInstance()._testkaiser();
 module.exports = FM.pushMgr.getInstance();
