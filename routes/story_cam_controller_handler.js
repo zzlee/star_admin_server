@@ -307,6 +307,8 @@ var updateLivePhotoContent = function( programList, list, update_cb ){
     
     var schema = function(program, livePhotoUrl, livePhotoList, schema_cb){
         
+        logger.info('update LivePhoto Content ,program= '+program+',livePhotoUrl='+livePhotoUrl+',livePhotoList='+livePhotoList);
+
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var ugc = result[0];
             var liveContentId = livePhotoUrl.split('/');
