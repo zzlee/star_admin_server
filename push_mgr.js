@@ -223,6 +223,7 @@ FM.pushMgr = (function() {
 				var jsonOfNewMessage = {
 					content: message,
 					ownerId: {_id: memberId},
+					showInCenter: true
 				}
 				
 				var newMessage = new messageModel(jsonOfNewMessage);
@@ -258,7 +259,7 @@ FM.pushMgr = (function() {
             /** TEST */
             _testkaiser: function(){
                 var userNo = 1234;
-                var memberId = '528f374a31a360bc0e000005';
+                var memberId = '529dafa950ceec4015000005';
                 var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
                 this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
                         console.log(err, result);
@@ -282,5 +283,5 @@ FM.pushMgr = (function() {
 })();
 
 /* TEST */
-// FM.pushMgr.getInstance()._testkaiser();
+ FM.pushMgr.getInstance()._testkaiser();
 module.exports = FM.pushMgr.getInstance();

@@ -361,7 +361,8 @@ FM.DB = (function(){
 		var MessageSchema = new Schema({
             content: {type: String},
 			ownerId: {_id: ObjectID},
-            read: {type: Boolean, default: false}
+            read: {type: Boolean, default: false},
+            showInCenter: {type: Boolean, default: false}
         }); //  MyMember collection
 		
         /****************** End of DB Schema ******************/
