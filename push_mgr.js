@@ -283,5 +283,5 @@ FM.pushMgr = (function() {
 })();
 
 /* TEST */
- FM.pushMgr.getInstance()._testkaiser();
+// FM.pushMgr.getInstance()._testkaiser();
 module.exports = FM.pushMgr.getInstance();
