@@ -125,8 +125,10 @@ var periodicalHighPriorityEvents =(function(){
             
             
             var ti = {};
-            ti.startMinute = (new Date(timeIntervalToCheck.start)).getMinutes();
-            ti.endMinute = (new Date(timeIntervalToCheck.end)).getMinutes();
+            var startDateObj = new Date(timeIntervalToCheck.start);
+            var endDateObj = new Date(timeIntervalToCheck.end);
+            ti.startMinute = startDateObj.getMinutes();
+            ti.endMinute = endDateObj.getMinutes()+(endDateObj.getHours()-startDateObj.getHours())*60;
             
             for (var i=0; i<TIME_INTERVALS.length; i++){
                 
