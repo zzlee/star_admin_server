@@ -48,4 +48,12 @@ FM.authorizationHandler.updateDeviceToken = function(req, res) {
 	
 };
 
+FM.authorizationHandler.connectServerStatus = function(req, res){
+	//Make sure the client side can connect star_server
+	logger.info('[GET ' + req.path + '] is called');
+	res.send({"state":"normal","message":"Successful"});
+	//If our server or mongodb don't work, need to send the msg to client side
+	//res.send({"state":"maintenance","message":"維護時間：13:30~14:00，造成您的困擾深感抱歉。"});
+};
+
 module.exports = FM.authorizationHandler;
