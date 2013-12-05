@@ -1,5 +1,6 @@
 //winston
-var winston = require('winston');
+// var winston = require('winston');
+var winston = require('D:\\nodejs_project\\star_admin_server\\node_modules\\winston\\lib\\winston.js');
 var fs = require('fs');
 if(!fs.existsSync('./log')) fs.mkdirSync('log');
 
@@ -139,7 +140,7 @@ setTimeout(function(){
     //ScalaMgr APIs : clearMedia()
     /* var option =
     {
-        search: 'google'
+        search: 'web_test'
     };
     scalaMgr.clearMedia( option, function(err, res){
         if(err)
@@ -155,6 +156,18 @@ setTimeout(function(){
     };
     scalaMgr.pushEvent( option, function(res){
         console.log(res);
+    }); */
+    
+    //ScalaMgr APIs : dumpPlaylist()
+    /* var option = { 
+        playlist: { name: 'OnDaScreen' },
+        logger: { name: 'playlist.log' }
+    };
+    scalaMgr.dumpPlaylist( option, function(err, res){
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
     }); */
         
 }, 2000);
