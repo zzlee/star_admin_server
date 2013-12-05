@@ -22,7 +22,7 @@ var programTimeSlotModel = db.getDocModel("programTimeSlot");
 var ugcModel = db.getDocModel("ugc");
 var memberModel = db.getDocModel("member");
 var execFile = require('child_process').execFile;
-var recordTime = '';
+// var recordTime = '';
     
 //POST /internal/story_cam_controller/available_story_movie
 FM.storyCamControllerHandler.availableStoryMovie_post_cb = function(req, res) {
@@ -44,7 +44,7 @@ FM.storyCamControllerHandler.availableStoryMovie_post_cb = function(req, res) {
 FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
 
     logger.info('get story cam report: ' + req.params.playTime);    
-    recordTime = req.params.playTime;
+    var recordTime = req.params.playTime;
     
     var live_video = function( option, liveVideo_cb ){
         
@@ -57,7 +57,7 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
         async.waterfall([
             function( setting_cb ){ videoSetting( program, setting_cb ); },
             function( target, categories_cb ){ videoCategoriesByUser( file, target, categories_cb ); },
-            function( target, update_cb ){ updateLiveVideoContent( program, target, update_cb ); },
+            function( target, update_cb ){ updateLiveVideoContent( recordTime, program, target, update_cb ); },
             function( status, renderLive_cb ){
                 // var projectId = list.awsS3[0].split('/');
                 // projectId = projectId[projectId.length-1].split('__')[0];
@@ -107,7 +107,7 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
 FM.storyCamControllerHandler.availableStreetPhotos = function(req, res){
     
     logger.info('get story cam report: ' + req.params.playTime);
-    recordTime = req.params.playTime;
+    var recordTime = req.params.playTime;
     
     var live_photo = function(option, livePhoto_cb){
         
@@ -118,10 +118,10 @@ FM.storyCamControllerHandler.availableStreetPhotos = function(req, res){
             program = option.programInterval;
         
         async.waterfall([
-            function( setting_cb ){ targetSetting( program, file, setting_cb ); },
+            function( setting_cb ){ targetSetting( recordTime, program, file, setting_cb ); },
             function( target, categories_cb ){ photoCategoriesByUser( file, target, categories_cb ); },
             function( target, assign_cb){ assignPhotoToProject( program, target, assign_cb ); },
-            function( swarm, update_cb ){ updateLivePhotoContent( program, swarm, update_cb ); },
+            function( swarm, update_cb ){ updateLivePhotoContent( recordTime, program, swarm, update_cb ); },
         ], function( err, res ){
             // (err)?console.dir(err):console.dir(res);
             livePhoto_cb( err, res );
@@ -168,8 +168,8 @@ var findMember = function( recordTime, type, find_cb ){
     var count = 0;
     var schema = {};
     var query = { 
-        "timeslot.start": {$lte: recordTime}, 
-        "timeslot.end": {$gte: recordTime}, 
+        "timeslot.start": {$lte: parseInt(recordTime)}, 
+        "timeslot.end": {$gte: parseInt(recordTime)}, 
         // "type": "UGC",
     };
     
@@ -180,12 +180,24 @@ var findMember = function( recordTime, type, find_cb ){
         query.type = type;
     }
     
+    logger.info('Query programTimeSlot condition: ' + JSON.stringify(query));
+    
     programTimeSlotModel.find(query).sort({timeStamp:1}).exec(function (_err, result) {
-        for(var i=0; i<result.length; i++)
-            (result[i].type == 'UGC') ? count++ : '';
-        schema.count = count;
-        schema.list = result;
-        find_cb(_err, schema);
+        
+        if(result.length > 0) {
+            for(var i=0; i<result.length; i++)
+                (result[i].type == 'UGC') ? count++ : '';
+            schema.count = count;
+            schema.list = result;
+            find_cb(_err, schema);
+        }
+        else {
+            schema.count = 0;
+            schema.list = null;
+            find_cb(_err, schema);
+            // return;
+        }
+        
     });
 };
 
@@ -206,7 +218,7 @@ var getLivePhoto = function( recordTime, report_cb ){
     
 };
 
-var targetSetting = function( programInterval, sourceList, setting_cb ){
+var targetSetting = function( recordTime, programInterval, sourceList, setting_cb ){
     //[contentGenre]-[ownerId._id]-[time stamp]-[record time]
     var folder_path = 'user_project/';
     var naming = function(program, no, naming_cb){
@@ -301,7 +313,7 @@ var assignPhotoToProject = function( programInterval, targetList, assign_cb ){
     
 };
 
-var updateLivePhotoContent = function( programList, list, update_cb ){
+var updateLivePhotoContent = function( recordTime, programList, list, update_cb ){
     
     var part = 0;
     
@@ -410,7 +422,7 @@ var videoCategoriesByUser = function( source, target, video_categories_cb ){
     
 };
 
-var updateLiveVideoContent = function( programList, target, video_update_cb ) {
+var updateLiveVideoContent = function( recordTime, programList, target, video_update_cb ) {
     
     var schema = function(program, liveVideoUrl, schema_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {

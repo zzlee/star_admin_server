@@ -15,10 +15,20 @@
  */
 function scalaMgr( url, account ){
     
-    var fs = require('fs');
     var assert = require('assert');
     var async = require('async');
     var restify = require('restify').createJsonClient({url: url});
+    var ml = require('multi-loggers');
+    var fs = require('fs');
+    if(!fs.existsSync('./log')) fs.mkdirSync('log');
+    
+    var scalaLogger = new ml.init({
+        transports : [
+            new ml.logger.setting({ method : 'connect', file : './log/connect.log' }),
+            new ml.logger.setting({ method : 'action', file : './log/action.log' }),
+        ]
+    });
+    global.scalaLogger = scalaLogger;
     
     var pushFlag = false;
     
@@ -115,6 +125,7 @@ function scalaMgr( url, account ){
         };
         contractor.schedule.findTimeslots(option, function(list){
             if(typeof(list.timeslots) === 'undefined') {
+                scalaLogger.action('no find timeslot');
                 timeslot_cb('no find timeslot', null);
             }
             else {
@@ -141,7 +152,10 @@ function scalaMgr( url, account ){
                             }
                         });
                     }
-                    if(i == list.timeslots.length-1) timeslot_cb(null, result);
+                    if(i == list.timeslots.length-1) {
+                        scalaLogger.action('get timeslot is successfully, info: ' + JSON.stringify(result));
+                        timeslot_cb(null, result);
+                    }
                 }
             }
         });
@@ -202,8 +216,14 @@ function scalaMgr( url, account ){
             }
         ],function(err, result){
             limit = 0;
-            if(!err) reportStatus_cb(null, result);
-            else reportStatus_cb(err, null);
+            if(!err) {
+                scalaLogger.action('set item to playlist is successfully, media name is ' + setting.media.name);
+                reportStatus_cb(null, result);
+            }
+            else {
+                scalaLogger.action('set item to playlist is failed, media name is ' + setting.media.name);
+                reportStatus_cb(err, null);
+            }
         });
     };
     
@@ -254,8 +274,14 @@ function scalaMgr( url, account ){
             }
         ], function (err, result) {
             limit = 0;
-            if(!err) reportStatus_cb(null, result);
-            else reportStatus_cb(err, null);
+            if(!err) {
+                scalaLogger.action('set webpage to playlist is successfully, web page name is ' + setting.media.name);
+                reportStatus_cb(null, result);
+            }
+            else {
+                scalaLogger.action('set webpage to playlist is failed, web page name is ' + setting.media.name);
+                reportStatus_cb(err, null);
+            }
         });
     };
     
@@ -334,9 +360,11 @@ function scalaMgr( url, account ){
                 //step.4 - update playlist item by playlist item id
                 contractor.playlist.updatePlaylistItemScheduleById(setting, function(err, res){
                     if(err){
+                        scalaLogger.action('push media to playlist is failed, media file name is ' + setting.media.name);
                         reportPlaylistItem_cb(err, null);
                         return;
                     }
+                    scalaLogger.action('push media to playlist is successfully, media file name is ' + setting.media.name);
                     reportPlaylistItem_cb(err, { 
                         media: setting.media,
                         playlist: { id: setting.playlist.id, name: setting.playlist.name },
@@ -367,9 +395,12 @@ function scalaMgr( url, account ){
         contractor.media.fileupload(file, function(err, status){
             // upload_cb(null, status);
             contractor.media.list({search: media.name}, function(err, res){ 
-                if(typeof(res.list) === 'undefined')
+                if(typeof(res.list) === 'undefined') {
+                    scalaLogger.action('no media info response, file name is ' + media.name);
                     upload_cb('NO_MEDIA_INFO', null);
+                }
                 else {
+                    scalaLogger.action('upload media is successfully, file name is ' + media.name);
                     media.id = res.list[0].id;
                     upload_cb(null, { media: media });
                 }
@@ -389,14 +420,17 @@ function scalaMgr( url, account ){
             (typeof(option.playlist.name) === 'undefined')?playlistName = 'OnDaScreen':playlistName = option.playlist.name;
             
         contractor.playlist.list({ search: playlistName }, function(err, playlistInfo){
-            if(err)
+            if(err) {
+                scalaLogger.action('pull playlist item is error: ' + JSON.stringify(err));
                 pull_cb(err, null);
+            }
             else {
                 cutOffPlaylistItem(option.playlistItem, playlistInfo.list[0].playlistItems, function(afterPlaylistItems){
                     playlistInfo.list[0].playlistItems = afterPlaylistItems;
                     contractor.playlist.update({
                         playlist: { id: playlistInfo.list[0].id, content: playlistInfo.list[0] },
                     }, function(report){
+                        scalaLogger.action('pull playlist item is successfully, info: ' + JSON.stringify(report));
                         pull_cb(null, report);
                     });
                 });
@@ -414,8 +448,10 @@ function scalaMgr( url, account ){
             option = { playlist: { name: 'OnDaScreen' } }
         }
         contractor.playlist.list({ search: option.playlist.name }, function(err, res){
-            if(err)
+            if(err) {
+                scalaLogger.action('clear playlist is error: not find playlist');
                 clear_cb(err, null);
+            }
             else {
                 res.list[0].playlistItems = [];
                 var updateOption = {
@@ -424,6 +460,7 @@ function scalaMgr( url, account ){
                 contractor.playlist.update({
                     playlist: { id: res.list[0].id, content: res.list[0] },
                 }, function(res){
+                    scalaLogger.action('clear all playlist item is successfully, playlist name is ' + option.playlist.name);
                     clear_cb(null, res);
                 });
             }
@@ -455,6 +492,7 @@ function scalaMgr( url, account ){
             //(err)?console.dir(err):console.dir(res);
             if(err)
             {
+                scalaLogger.action('valid program expired is error, info: ' + JSON.stringify(err));
                 validExpired_cb(err, null);
                 return;
             }
@@ -463,6 +501,7 @@ function scalaMgr( url, account ){
 
                 if(typeof(playlist.playlistItems) === 'undefined')
                 {
+                    scalaLogger.action('valid program expired is not find item');
                     valid_cb(null, { message: 'no item.' });
                     return;
                 }
@@ -485,6 +524,7 @@ function scalaMgr( url, account ){
                 contractor.playlist.update({
                     playlist: { id: playlist.id, content: playlist },
                 }, function(report){
+                    scalaLogger.action('valid program expired is successfully, info: ' + JSON.stringify(report));
                     valid_cb(null, report);
                 });
             };
@@ -530,8 +570,10 @@ function scalaMgr( url, account ){
             },
         ], function(err, res){
             var playlist = res[0];
-            if(playlist.count == 0)
+            if(playlist.count == 0) {
+                scalaLogger.action('remove playlist is error: no find playlist');
                 remove_cb(err, 'no find playlist');
+            }
             else {
                 var execute = [];
                 for(var i=0; i<playlist.count; i++)
@@ -539,7 +581,15 @@ function scalaMgr( url, account ){
                     eventConsole(playlist.list[i].id, execute);
                 }
                 async.series(execute, function(err, res){
-                    (err)?remove_cb(err, null):remove_cb(null, 'done');
+                    // (err)?remove_cb(err, null):remove_cb(null, 'done');
+                    if(err) {
+                        scalaLogger.action('remove playlist is error: ' + JSON.stringify(err));
+                        remove_cb(err, null);
+                    }
+                    else {
+                        scalaLogger.action('remove playlist is successfully, playlist name: ' + option.search);
+                        remove_cb(null, 'done');
+                    }
                 });
             }
         });
@@ -564,8 +614,10 @@ function scalaMgr( url, account ){
             },
         ], function(err, res){
             var media = res[0];
-            if(media.count == 0)
+            if(media.count == 0) {
+                scalaLogger.action('clear media is error: not find media');
                 clear_cb(err, 'no find media');
+            }
             else {
                 var execute = [];
                 for(var i=0; i<media.count; i++)
@@ -573,7 +625,15 @@ function scalaMgr( url, account ){
                     eventConsole(media.list[i].id, execute);
                 }
                 async.series(execute, function(err, res){
-                    (err)?clear_cb(err, null):clear_cb(null, 'done');
+                    // (err)?clear_cb(err, null):clear_cb(null, 'done');
+                    if(err) {
+                        scalaLogger.action('clear media is error: ' + JSON.stringify(err));
+                        clear_cb(err, null);
+                    }
+                    else {
+                        scalaLogger.action('clear media is successfully, media name: ' + option.search);
+                        clear_cb(null, 'done');
+                    }
                 });
             }
         });
@@ -602,6 +662,12 @@ function scalaMgr( url, account ){
                 timestamp : new Date()
             };
             file.write( JSON.stringify(content) + '\n' );
+            
+            if(err)
+                scalaLogger.action('dump playlist info is error');
+            else
+                scalaLogger.action('dump playlist info is successfully');
+            
             dump_cb(err, 'done');
         });
         
@@ -663,6 +729,7 @@ function scalaMgr( url, account ){
                         else playerName = option.player.name;
                         contractor.player.findPlayerIdByName(playerName, function(err, playerId){
                             contractor.player.pushProgram({"ids": [playerId]}, function(res){
+                                scalaLogger.action('push event by content manager to player');
                                 reportPush_cb(res);
                             });
                         });
@@ -672,14 +739,17 @@ function scalaMgr( url, account ){
             
             var detect = function(target, type){
                 if((typeof(target) === 'undefined')) {
+                    scalaLogger.action('no find "' + type + '" playlist: no result array');
                     reportPush_cb('no find "' + type + '" playlist: no result array');
                     return;
                 }
                 else if((typeof(target.list) === 'undefined')) {
+                    scalaLogger.action('no find "' + type + '" playlist: no playlist');
                     reportPush_cb('no find "' + type + '" playlist: no playlist');
                     return;
                 }
                 else if((typeof(target.list[0]) === 'undefined')) {
+                    scalaLogger.action('no find "' + type + '" playlist: no playlist to array');
                     reportPush_cb('no find "' + type + '" playlist: no playlist to array');
                     return;
                 }
@@ -711,6 +781,10 @@ function scalaMgr( url, account ){
                 });
             },
         ], function(err, res){
+            if(err)
+                scalaLogger.action();
+            else
+                scalaLogger.action();
         });
         
     };
