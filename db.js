@@ -43,7 +43,7 @@ FM.DB = (function(){
                 //web_page
                 //media_item: the media item that has already stored in Media of Scala's Content Manager
             programTimeSlotState = 'not_confirmed confirmed'.split(' '),
-            liveContentState = 'not_checked correct incorrect'.split(' '),
+            liveContentState = 'not_checked correct source_not_played not_generated incorrect bad_exposure other_fail'.split(' '),
             appGenre = 'ondascreen wowtaipeiarena'.split(' '),
             
             adminRole = 'SUPER_ADMINISTRATOR FELTMENG_ADMINISTRATOR FELTMENG_DEMO OPERATOR'.split(' '),

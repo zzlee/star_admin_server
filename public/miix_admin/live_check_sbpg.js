@@ -90,7 +90,7 @@
                      type: "radio",
                      name: "badLiveContentRadioBtn_"+i,
                      class: "badLiveContentRadioBtn",
-                     value: "没播出",
+                     value: "source_not_played",
                      fbUserId: res[i].fbUserId,
                      programTimeSlot_id: res[i].programTimeSlot_id,
                      ugcCensorNo: res[i].ugcCensorNo,
@@ -102,7 +102,7 @@
                 type: "radio",
                 name: "badLiveContentRadioBtn_"+i,
                 class: "badLiveContentRadioBtn",
-                value: "有播出但live照片没產生",
+                value: "not_generated",
                 fbUserId: res[i].fbUserId,
                 programTimeSlot_id: res[i].programTimeSlot_id,
                 ugcCensorNo: res[i].ugcCensorNo,
@@ -114,7 +114,7 @@
                 type: "radio",
                 name: "badLiveContentRadioBtn_"+i,
                 class: "badLiveContentRadioBtn",
-                value: "有播出但live照片拍錯",
+                value: "incorrect",
                 fbUserId: res[i].fbUserId,
                 programTimeSlot_id: res[i].programTimeSlot_id,
                 ugcCensorNo: res[i].ugcCensorNo,
@@ -126,7 +126,7 @@
                 type: "radio",
                 name: "badLiveContentRadioBtn_"+i,
                 class: "badLiveContentRadioBtn",
-                value: "有播出但live照片曝光不正確",
+                value: "bad_exposure",
                 fbUserId: res[i].fbUserId,
                 programTimeSlot_id: res[i].programTimeSlot_id,
                 ugcCensorNo: res[i].ugcCensorNo,
@@ -138,7 +138,7 @@
                 type: "radio",
                 name: "badLiveContentRadioBtn_"+i,
                 class: "badLiveContentRadioBtn",
-                value: "其他失敗原因",
+                value: "other_fail",
                 fbUserId: res[i].fbUserId,
                 programTimeSlot_id: res[i].programTimeSlot_id,
                 ugcCensorNo: res[i].ugcCensorNo,
@@ -148,9 +148,9 @@
             
             
             FailboxForm.append($("<div>").append(FailboxInputForSourceNotPlayed).append("没播出"));
-            FailboxForm.append($("<div>").append(FailboxInputForNotGenerated).append("有播出但live照片没產生"));
-            FailboxForm.append($("<div>").append(FailboxInputForNotCorrect).append("有播出但live照片拍錯"));
-            FailboxForm.append($("<div>").append(FailboxInputForBadExposure).append("有播出但live照片曝光不正確"));
+            FailboxForm.append($("<div>").append(FailboxInputForNotGenerated).append("有播出，但live照片没拍"));
+            FailboxForm.append($("<div>").append(FailboxInputForNotCorrect).append("有播出，但live照片拍錯"));
+            FailboxForm.append($("<div>").append(FailboxInputForBadExposure).append("有播出live照片拍對，但曝光不正確"));
             FailboxForm.append($("<div>").append(FailboxInputForOtherFailReason).append("其他失敗原因"));
 
 
@@ -454,10 +454,10 @@
           //alert("g");
           
           
-            var forComfirm=confirm("你按下的是 ***失敗***\n辛苦囉 ~~~!!");
+            var forComfirm=confirm("您按下的是 ***失敗***\n辛苦囉 ~~~!!");
           
             var _id=$(this).attr("programTimeSlot_id");
-            var liveState="incorrect";
+            var liveState=$(this).val();
             var ugcCensorNo=$(this).attr("ugcCensorNo");
             var fbUserId=$(this).attr("fbUserId");
             var ownerId_id=$(this).attr("ownerId_id");
