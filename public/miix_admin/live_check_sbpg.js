@@ -86,72 +86,86 @@
                 FailboxForm.append("<p style='color:purple'>仍未匯入Player的log</p><br>");
             }
             
-            var FailboxInputForSourceNotPlayed = $("<input>").attr({
-                     type: "radio",
-                     name: "badLiveContentRadioBtn_"+i,
-                     class: "badLiveContentRadioBtn",
-                     value: "source_not_played",
-                     fbUserId: res[i].fbUserId,
-                     programTimeSlot_id: res[i].programTimeSlot_id,
-                     ugcCensorNo: res[i].ugcCensorNo,
-                     liveState: res[i].liveState,
-                     ownerId_id: res[i].ownerId_id
-            });
-
-            var FailboxInputForNotGenerated = $("<input>").attr({
-                type: "radio",
-                name: "badLiveContentRadioBtn_"+i,
-                class: "badLiveContentRadioBtn",
-                value: "not_generated",
-                fbUserId: res[i].fbUserId,
-                programTimeSlot_id: res[i].programTimeSlot_id,
-                ugcCensorNo: res[i].ugcCensorNo,
-                liveState: res[i].liveState,
-                ownerId_id: res[i].ownerId_id
-            });
-
-            var FailboxInputForNotCorrect = $("<input>").attr({
-                type: "radio",
-                name: "badLiveContentRadioBtn_"+i,
-                class: "badLiveContentRadioBtn",
-                value: "incorrect",
-                fbUserId: res[i].fbUserId,
-                programTimeSlot_id: res[i].programTimeSlot_id,
-                ugcCensorNo: res[i].ugcCensorNo,
-                liveState: res[i].liveState,
-                ownerId_id: res[i].ownerId_id
-            });
+//            var FailboxInputForSourceNotPlayed = $("<input>").attr({
+//                     type: "radio",
+//                     name: "badLiveContentRadioBtn_"+i,
+//                     class: "badLiveContentRadioBtn",
+//                     value: "source_not_played",
+//                     fbUserId: res[i].fbUserId,
+//                     programTimeSlot_id: res[i].programTimeSlot_id,
+//                     ugcCensorNo: res[i].ugcCensorNo,
+//                     liveState: res[i].liveState,
+//                     ownerId_id: res[i].ownerId_id
+//            });
+//
+//            var FailboxInputForNotGenerated = $("<input>").attr({
+//                type: "radio",
+//                name: "badLiveContentRadioBtn_"+i,
+//                class: "badLiveContentRadioBtn",
+//                value: "not_generated",
+//                fbUserId: res[i].fbUserId,
+//                programTimeSlot_id: res[i].programTimeSlot_id,
+//                ugcCensorNo: res[i].ugcCensorNo,
+//                liveState: res[i].liveState,
+//                ownerId_id: res[i].ownerId_id
+//            });
+//
+//            var FailboxInputForNotCorrect = $("<input>").attr({
+//                type: "radio",
+//                name: "badLiveContentRadioBtn_"+i,
+//                class: "badLiveContentRadioBtn",
+//                value: "incorrect",
+//                fbUserId: res[i].fbUserId,
+//                programTimeSlot_id: res[i].programTimeSlot_id,
+//                ugcCensorNo: res[i].ugcCensorNo,
+//                liveState: res[i].liveState,
+//                ownerId_id: res[i].ownerId_id
+//            });
+//            
+//            var FailboxInputForBadExposure = $("<input>").attr({
+//                type: "radio",
+//                name: "badLiveContentRadioBtn_"+i,
+//                class: "badLiveContentRadioBtn",
+//                value: "bad_exposure",
+//                fbUserId: res[i].fbUserId,
+//                programTimeSlot_id: res[i].programTimeSlot_id,
+//                ugcCensorNo: res[i].ugcCensorNo,
+//                liveState: res[i].liveState,
+//                ownerId_id: res[i].ownerId_id
+//            });
+//
+//            var FailboxInputForOtherFailReason = $("<input>").attr({
+//                type: "radio",
+//                name: "badLiveContentRadioBtn_"+i,
+//                class: "badLiveContentRadioBtn",
+//                value: "other_fail",
+//                fbUserId: res[i].fbUserId,
+//                programTimeSlot_id: res[i].programTimeSlot_id,
+//                ugcCensorNo: res[i].ugcCensorNo,
+//                liveState: res[i].liveState,
+//                ownerId_id: res[i].ownerId_id
+//            });
+//            
+//            
+//            FailboxForm.append($("<div>").append(FailboxInputForSourceNotPlayed).append("没播出"));
+//            FailboxForm.append($("<div>").append(FailboxInputForNotGenerated).append("有播出，但live照片没拍"));
+//            FailboxForm.append($("<div>").append(FailboxInputForNotCorrect).append("有播出，但live照片拍錯"));
+//            FailboxForm.append($("<div>").append(FailboxInputForBadExposure).append("有播出live照片拍對，但曝光不正確"));
+//            FailboxForm.append($("<div>").append(FailboxInputForOtherFailReason).append("其他失敗原因"));
             
-            var FailboxInputForBadExposure = $("<input>").attr({
-                type: "radio",
-                name: "badLiveContentRadioBtn_"+i,
+            var failLiveContentSelect = $("<select>").attr({
                 class: "badLiveContentRadioBtn",
-                value: "bad_exposure",
                 fbUserId: res[i].fbUserId,
                 programTimeSlot_id: res[i].programTimeSlot_id,
                 ugcCensorNo: res[i].ugcCensorNo,
                 liveState: res[i].liveState,
                 ownerId_id: res[i].ownerId_id
-            });
-
-            var FailboxInputForOtherFailReason = $("<input>").attr({
-                type: "radio",
-                name: "badLiveContentRadioBtn_"+i,
-                class: "badLiveContentRadioBtn",
-                value: "other_fail",
-                fbUserId: res[i].fbUserId,
-                programTimeSlot_id: res[i].programTimeSlot_id,
-                ugcCensorNo: res[i].ugcCensorNo,
-                liveState: res[i].liveState,
-                ownerId_id: res[i].ownerId_id
-            });
+            }).html('<option value="not_checked">--</option>' +
+                    '<option value="source_not_played">没播出</option>'
+            );
             
+            FailboxForm.append(failLiveContentSelect);
             
-            FailboxForm.append($("<div>").append(FailboxInputForSourceNotPlayed).append("没播出"));
-            FailboxForm.append($("<div>").append(FailboxInputForNotGenerated).append("有播出，但live照片没拍"));
-            FailboxForm.append($("<div>").append(FailboxInputForNotCorrect).append("有播出，但live照片拍錯"));
-            FailboxForm.append($("<div>").append(FailboxInputForBadExposure).append("有播出live照片拍對，但曝光不正確"));
-            FailboxForm.append($("<div>").append(FailboxInputForOtherFailReason).append("其他失敗原因"));
 
 
             //---------  'fail' checkbox  click--------------
@@ -450,7 +464,8 @@
 
 
         //-------------for fail 最左邊--------------------------------------
-        $(".badLiveContentRadioBtn").click(function(){
+//        $(".badLiveContentRadioBtn").click(function(){
+        $(".badLiveContentRadioBtn").change(function(){
           //alert("g");
           
           
