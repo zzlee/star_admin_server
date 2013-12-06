@@ -153,20 +153,32 @@
 //            FailboxForm.append($("<div>").append(FailboxInputForBadExposure).append("有播出live照片拍對，但曝光不正確"));
 //            FailboxForm.append($("<div>").append(FailboxInputForOtherFailReason).append("其他失敗原因"));
             
+            var failLiveContentSelectionDiv = $("<div>").attr({id: "failLiveContentSelectionDiv_"+i}).appendTo(FailboxForm);
+            var failLiveContentBtn = $("<input>").attr({type: "radio", rowIndex: i});
+            failLiveContentSelectionDiv.append(failLiveContentBtn).append("失敗");
+                        
             var failLiveContentSelect = $("<select>").attr({
-                class: "badLiveContentRadioBtn",
+                class: "badLiveContentCombobox",
                 fbUserId: res[i].fbUserId,
                 programTimeSlot_id: res[i].programTimeSlot_id,
                 ugcCensorNo: res[i].ugcCensorNo,
                 liveState: res[i].liveState,
                 ownerId_id: res[i].ownerId_id
             }).html('<option value="not_checked">--</option>' +
-                    '<option value="source_not_played">没播出</option>'
+                    '<option value="source_not_played">没播出</option>' +
+                    '<option value="not_generated">有播出但照片没拍</option>' +
+                    '<option value="incorrect">有播出但照片拍錯</option>' +
+                    '<option value="bad_exposure">拍對了但曝光不正確</option>' +
+                    '<option value="other_fail">其他失敗原因</option>' 
             );
             
-            FailboxForm.append(failLiveContentSelect);
-            
+            failLiveContentBtn.click(function(){
+                var divClicked = $("#failLiveContentSelectionDiv_"+$(this).attr("rowIndex"));
+                divClicked.html("");
+                divClicked.append("請選擇失敗原因：<br>").append(failLiveContentSelect);
+            });
 
+            
 
             //---------  'fail' checkbox  click--------------
 
@@ -464,8 +476,8 @@
 
 
         //-------------for fail 最左邊--------------------------------------
-//        $(".badLiveContentRadioBtn").click(function(){
-        $(".badLiveContentRadioBtn").change(function(){
+//        $(".badLiveContentCombobox").click(function(){
+        $(".badLiveContentCombobox").change(function(){
           //alert("g");
           
           
