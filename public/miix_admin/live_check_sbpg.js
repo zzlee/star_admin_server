@@ -89,16 +89,48 @@
 
             
             var failedLiveContentSelectionDiv = $("<div>").attr({id: "failedLiveContentSelectionDiv_"+i}).appendTo(FailboxForm);
-            var failedLiveContentBtn = $("<input>").attr({
-                class:"failedLiveContentRadioBtn", 
-                type: "radio",
-                fbUserId: res[i].fbUserId,
-                programTimeSlot_id: res[i].programTimeSlot_id,
-                ugcCensorNo: res[i].ugcCensorNo,
-                liveState: res[i].liveState,
-                ownerId_id: res[i].ownerId_id,
-                rowIndex: i});
-            failedLiveContentSelectionDiv.append(failedLiveContentBtn).append("失敗");
+            
+            if (res[i].liveState == "not_checked") {
+                var failedLiveContentBtn = $("<input>").attr({
+                    class:"failedLiveContentRadioBtn", 
+                    type: "radio",
+                    fbUserId: res[i].fbUserId,
+                    programTimeSlot_id: res[i].programTimeSlot_id,
+                    ugcCensorNo: res[i].ugcCensorNo,
+                    liveState: res[i].liveState,
+                    ownerId_id: res[i].ownerId_id,
+                    rowIndex: i
+                });
+                failedLiveContentSelectionDiv.append(failedLiveContentBtn).append("失敗");
+
+            }
+            else if (res[i].liveState == "correct") {
+                failedLiveContentSelectionDiv.html("<b style='color:blue'>成功(done)</b>");
+            }
+            else {
+                var failedLiveContentSelect = $("<select>").attr({
+                    class: "failedLiveContentCombobox",
+                    fbUserId: res[i].fbUserId,
+                    programTimeSlot_id: res[i].programTimeSlot_id,
+                    ugcCensorNo: res[i].ugcCensorNo,
+                    liveState: res[i].liveState,
+                    ownerId_id: res[i].ownerId_id,
+                    rowIndex: i
+                }).html('<option value="not_checked">--</option>' +
+                        '<option value="source_not_played">没播出</option>' +
+                        '<option value="not_generated">有播出但照片没拍</option>' +
+                        '<option value="incorrect">有播出但照片拍錯</option>' +
+                        '<option value="bad_exposure">拍對了但曝光不正確</option>' //+
+//                        '<option value="other_fail">其他失敗原因</option>' 
+                );
+                
+                failedLiveContentSelect.val(res[i].liveState);
+                failedLiveContentSelect.prop('disabled', true);
+                failedLiveContentSelectionDiv.append(failedLiveContentSelect);
+
+                
+            }
+            
                         
             
 
@@ -772,7 +804,7 @@
         });
         /* ------------------------------ends deprecated---------------------------------------------------*/
         
-        $.get('/miix_admin/table_censorHistoryList_head.html', function(res){
+        $.get('/miix_admin/table_censorLiveCheck_head.html', function(res){
             $('#table-content-header').html(res);
             // $('#table-content').html('');
         
