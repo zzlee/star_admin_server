@@ -134,7 +134,7 @@ var liveCheckSubPg = {
                                                       });   
 													  
 													  
-						  /* START get time string, and number*/
+						  /* START get time string, and number for after clcik*/
 								var post_live_time=new Date(parseInt(res[i].liveContent[j].liveTime));
 								var post_year=post_live_time.getFullYear();
 								var post_month=post_live_time.getMonth()+1;
@@ -142,8 +142,7 @@ var liveCheckSubPg = {
 								var post_hours=post_live_time.getHours();
 								var post_minutes=post_live_time.getMinutes();
 								var timeString=post_year+"/"+post_month+"/"+post_date+"  "+post_hours+":"+post_minutes;
-								var sp=$("<span>").attr({style:"vertical-align:460%"}).html(res[i].liveContent[j].no+"          │   "+timeString); //sp是編號+日期
-						  /*END get time string, and number*/
+						  /*END get time string, and number  for after clcik*/
 						  
                         var boxForChoose = $("<input>").attr({
                             style:"margin-left:10px;margin-right:10px;",
@@ -160,8 +159,8 @@ var liveCheckSubPg = {
                             "liveTime":res[i].liveContent[j].liveTime,
                             "ugcCensorNo":res[i].ugcCensorNo,
                             "_type":"correct",
-							"timeString":timeString,
-							"no":res[i].liveContent[j].no
+							"timeString":timeString, // for after click
+							"no":res[i].liveContent[j].no // for after click
                         });
 
             
@@ -613,8 +612,6 @@ var liveCheckSubPg = {
             console.log($(this));
             var forComfirm=confirm("你選了五張中最讚的張，請確定好之後送出!");
           
-          
-          
             var _id=$(this).attr("_id");
             var userID=$(this).val();
             var s3Url=$(this).attr("s3url");
@@ -622,46 +619,22 @@ var liveCheckSubPg = {
             var longPic=$(this).attr("longPic");
             var liveTime=$(this).attr("liveTime");
             var ugcCensorNo=$(this).attr("ugcCensorNo");
-			var timeString = $(this).attr("timeString");
-			var no = $(this).attr("no");
+			var timeString = $(this).attr("timeString"); //for change content after click
+			var no = $(this).attr("no");  //for change content after click
             
             console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
-            if (forComfirm==true)
-            {
-									$('#'+_id).html(
-										$("<a>").attr({href:s3Url, target:"_blank"}).append(
-											$("<img>").attr({src:s3Url,width:500,height:250})
-										)
-										
-										
-									//$("<b>").attr({style:'color:blue'}).appendTo('#'+_id)
-									/*
-									var chooseResult=$("<a>").attr({href:res[i].liveContent[j].url.s3,
-																  target:"_blank"});                    
-												var selectedImg = $("<img>").attr({src:res[i].liveContent[j].url.s3,
-																				  width:500,height:250});
-												chooseResult.append(selectedImg);                         
-												tr_4.html("");
-												tr_4.append(chooseResult);
-												tr_4.append("<b style='color:blue'>五選一(done)<b>");
-												tr_4.prepend(sp);
-												tr.append(tr_4);
-												tr.append("<br>");
-												
-												if(j!=res[i].liveContent.length-1){
-												   tr.append("<hr>");
-												}
-											
-												tr.append("<br>");
-									*/
-
-							
-							);
-							$("<b>").attr({style:'color:blue'}).text('五選一(done)').appendTo('#'+_id);
-							$("<span>").attr({style:"vertical-align:460%"}).html(no+"          │   "+timeString).prependTo('#'+_id);
-			
-            }else
-            {
+            
+            if (forComfirm==true) {
+        	/*START change content after click*/
+				$('#'+_id).html(
+					$("<a>").attr({href:s3Url, target:"_blank"}).append(
+						$("<img>").attr({src:s3Url,width:500,height:250})
+					)
+				);
+				$("<b>").attr({style:'color:blue'}).text('五選一(done)').appendTo('#'+_id);
+				$("<span>").attr({style:"vertical-align:460%"}).html(no+"          │   "+timeString).prependTo('#'+_id);
+			/*END change content after click*/
+            }else{
                 return false;
             }
             
@@ -669,7 +642,6 @@ var liveCheckSubPg = {
             $.ajax({
                 url: url,
                 type: 'PUT',
-				async:false,
                 data: {liveContent_Id:_id,
                     userID:userID,
                     photoUrl:s3Url,
@@ -688,7 +660,6 @@ var liveCheckSubPg = {
             $.ajax({
                 url: url,
                 type: 'POST',
-				async:false,
                 data: {s3Url: s3Url,
                     longPic: longPic,
                     type: picType,
@@ -709,7 +680,6 @@ var liveCheckSubPg = {
             $.ajax({
                 url: url,
                 type: 'PUT',
-				async:false,
                 data: {programTimeSlot_Id:programTimeSlot_id,
                     fbUserId:fbUserId,
                     vjson:{liveState: liveState}
@@ -724,9 +694,7 @@ var liveCheckSubPg = {
 						
 					});
                 }
-            });
-
-            
+            });           
         });
         /* ------------------------------ end 五選一紐---------------------------------------------------*/
         
