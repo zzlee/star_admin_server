@@ -581,6 +581,8 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                           // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
             // }
             
+            var message = null;
+            
             switch(member.app.toLowerCase())
             {
                 case 'ondascreen':
@@ -588,7 +590,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                         message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
                                   '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
                     }
-                    else {
+                    else if ( (type != 'other_fail') && (type != 'not_checked') ) {
                         // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
                                   // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
                         message = '您的試鏡編號' + ugcCensorNo + '作品已順利播出，但很遺憾的，實拍照片未能順利拍攝。' + 
@@ -600,7 +602,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                         message = '你的No.' + ugcCensorNo + '作品，在' + playTime + 
                                   '，登上小巨蛋天幕，感謝你的精采作品，快到 我的投稿/哇!紀錄 裡瞧瞧實拍照!';
                     }
-                    else {
+                    else if ( (type != 'other_fail') && (type != 'not_checked') ) {
                         // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
                                   // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
                         message = '您的No.' + ugcCensorNo + '作品已順利播出，但很遺憾的，實拍照片未能順利拍攝。' + 
@@ -613,10 +615,12 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
             
             async.waterfall([
                 function(push_cb){
-                    pushMgr.sendMessageToDeviceByMemberId(member._id, message, function(err, res){
-                        logger.info('push played notification to user, member id is ' + member._id);
-                        push_cb(err, res);
-                    });
+                    if (message) {
+                        pushMgr.sendMessageToDeviceByMemberId(member._id, message, function(err, res){
+                            logger.info('push played notification to user, member id is ' + member._id);
+                            push_cb(err, res);
+                        });
+                    }
                 }
             ], function(err, res){
                 if(type == 'correct'){
