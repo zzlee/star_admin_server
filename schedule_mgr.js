@@ -1765,64 +1765,6 @@ var dateTransfer = function(date, cbOfDateTransfer){
     cbOfDateTransfer(tempDate);
 };
 
-var flag = 0;
-var autoCheckProgramAndPushToPlayer = function(){
-
-    if(flag == 1){
-        //validProgramExpired
-        var option =
-        {
-                search: "OnDaScreen"
-        };
-		logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] validProgramExpired start");
-        scalaMgr.validProgramExpired(option, function(err, res){
-            if(!err){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
-            }else{
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
-            }
-        });
-    }
-    else if(flag == 0){
-        //Push program to scala
-        var checkDateStart = new Date().getTime();
-        var checkDateEnd = checkDateStart + 40*60*1000;
-        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]find sessionItemModel in checkDateStart:"+checkDateStart+",checkDateEnd:"+checkDateEnd);
-        sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
-            if(!result){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-            }
-            else if(!result[0]){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-            }
-            else if(!err){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
-                scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}, player: {name: scalaPlayerName}}, function(res){
-                    logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
-
-                });
-            }else{
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
-            }
-            //console.log(err, result);
-        });
-    }
-    //flag contorl
-    if(flag == 0)
-        flag = 1;
-    else
-        flag = 0;
-    
-//    console.log('flag'+flag);
-    setTimeout(autoCheckProgramAndPushToPlayer, 6*60*1000);
-
-};
-/**
- * delay time for scala connect
- */
-setTimeout(autoCheckProgramAndPushToPlayer, 2000);
-
-
 
 //test
 //dateTransfer(1377144000000, function(result){
