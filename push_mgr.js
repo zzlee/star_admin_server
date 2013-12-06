@@ -6,6 +6,8 @@ var DEBUG = true, FM_LOG = (DEBUG) ? function(str) {
 
 FM.pushMgr = (function() {
 	var uInstance = null;
+	var db = require('./db.js');
+	var messageModel = db.getDocModel("message");
 
 	function constructor() {
 		/**
@@ -193,6 +195,9 @@ FM.pushMgr = (function() {
                          FM_LOG('[pus_mgr.sendMessageToDeviceByMemberId] error = result is null'+err);
                          cbOfSendMessageToDeviceByMemberId(err, result);
                      }else if(result.deviceToken){
+                         //createMessage for message center
+                         FM.pushMgr.getInstance().createMessage(memberId, message, function(err, res){});
+                         
                          FM_LOG("deviceToken Array: " + JSON.stringify(result.deviceToken) );
                          for( var devicePlatform in result.deviceToken){
                              var deviceTokenCheck = result.deviceToken[devicePlatform];
@@ -213,14 +218,55 @@ FM.pushMgr = (function() {
                  });
 
             },
+			
+			createMessage : function(memberId,  message, cbOfCreateMessage){
+				var jsonOfNewMessage = {
+					content: message,
+					ownerId: {_id: memberId},
+					showInCenter: true
+				}
+				
+				var newMessage = new messageModel(jsonOfNewMessage);
+				newMessage.save(function(err, res){
+					if(!err) {
+						logger.info('[createMessage] done ,memberId: ', memberId);
+						cbOfCreateMessage(null, "done");
+					}
+					else{
+						logger.error('[createMessage] error', err);
+						cbOfCreateMessage("new message save to db error: "+err, null);
+					}
+				});
+			
+			},
+			
+			updateMessage : function(messageId,  vjson, cbOfUpdateMessage){
+				
+				db.updateAdoc(messageModel, messageId, vjson, function(err, result){
+					if(!err) {
+						logger.info('[updateMessage_updateAdoc] done ,messageId: ', messageId);
+						cbOfUpdateMessage(null,'done');
+					}
+					else{
+						logger.error('[updateMessage_updateAdoc] error: ', err);
+						cbOfUpdateMessage(err,null);
+					}
+				});
+			
+			},
+			
+			
             /** TEST */
             _testkaiser: function(){
                 var userNo = 1234;
-                var memberId = '526107a409900bbc02000005';
-                var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
+                var memberId = '529dafa950ceec4015000005';
+                var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
                 this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
                         console.log(err, result);
                 });
+				// this.saveMessageToDataBase( memberId, message, function(err, result){
+					// console.log(err, result);
+                // });
             },
 		};// end return
 	}
