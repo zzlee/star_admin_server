@@ -153,30 +153,19 @@
 //            FailboxForm.append($("<div>").append(FailboxInputForBadExposure).append("有播出live照片拍對，但曝光不正確"));
 //            FailboxForm.append($("<div>").append(FailboxInputForOtherFailReason).append("其他失敗原因"));
             
-            var failLiveContentSelectionDiv = $("<div>").attr({id: "failLiveContentSelectionDiv_"+i}).appendTo(FailboxForm);
-            var failLiveContentBtn = $("<input>").attr({type: "radio", rowIndex: i});
-            failLiveContentSelectionDiv.append(failLiveContentBtn).append("失敗");
-                        
-            var failLiveContentSelect = $("<select>").attr({
-                class: "badLiveContentCombobox",
+            var failedLiveContentSelectionDiv = $("<div>").attr({id: "failedLiveContentSelectionDiv_"+i}).appendTo(FailboxForm);
+            var failedLiveContentBtn = $("<input>").attr({
+                class:"failedLiveContentRadioBtn", 
+                type: "radio",
                 fbUserId: res[i].fbUserId,
                 programTimeSlot_id: res[i].programTimeSlot_id,
                 ugcCensorNo: res[i].ugcCensorNo,
                 liveState: res[i].liveState,
-                ownerId_id: res[i].ownerId_id
-            }).html('<option value="not_checked">--</option>' +
-                    '<option value="source_not_played">没播出</option>' +
-                    '<option value="not_generated">有播出但照片没拍</option>' +
-                    '<option value="incorrect">有播出但照片拍錯</option>' +
-                    '<option value="bad_exposure">拍對了但曝光不正確</option>' +
-                    '<option value="other_fail">其他失敗原因</option>' 
-            );
+                ownerId_id: res[i].ownerId_id,
+                rowIndex: i});
+            failedLiveContentSelectionDiv.append(failedLiveContentBtn).append("失敗");
+                        
             
-            failLiveContentBtn.click(function(){
-                var divClicked = $("#failLiveContentSelectionDiv_"+$(this).attr("rowIndex"));
-                divClicked.html("");
-                divClicked.append("請選擇失敗原因：<br>").append(failLiveContentSelect);
-            });
 
             
 
@@ -473,67 +462,92 @@
         
             }
         }
+        
+        
+        
 
 
         //-------------for fail 最左邊--------------------------------------
-//        $(".badLiveContentCombobox").click(function(){
-        $(".badLiveContentCombobox").change(function(){
-          //alert("g");
-          
-          
-            var forComfirm=confirm("您按下的是 ***失敗***\n辛苦囉 ~~~!!");
-          
-            var _id=$(this).attr("programTimeSlot_id");
-            var liveState=$(this).val();
-            var ugcCensorNo=$(this).attr("ugcCensorNo");
-            var fbUserId=$(this).attr("fbUserId");
-            var ownerId_id=$(this).attr("ownerId_id");
+        $(".failedLiveContentRadioBtn").click( function(){
+            var failedLiveContentSelect = $("<select>").attr({
+                class: "failedLiveContentCombobox",
+                fbUserId: $(this).attr("fbUserId"),
+                programTimeSlot_id: $(this).attr("programTimeSlot_id"),
+                ugcCensorNo: $(this).attr("ugcCensorNo"),
+                liveState: $(this).attr("liveState"),
+                ownerId_id: $(this).attr("ownerId_id")
+            }).html('<option value="not_checked">--</option>' +
+                    '<option value="source_not_played">没播出</option>' +
+                    '<option value="not_generated">有播出但照片没拍</option>' +
+                    '<option value="incorrect">有播出但照片拍錯</option>' +
+                    '<option value="bad_exposure">拍對了但曝光不正確</option>' +
+                    '<option value="other_fail">其他失敗原因</option>' 
+            );
+
             
-            console.log("programTimeSlot_id:"+_id+"\nfbUserId:"+fbUserId+"\nliveState:"+liveState);
+            var divClicked = $("#failedLiveContentSelectionDiv_"+$(this).attr("rowIndex"));
+            divClicked.html("");
+            divClicked.append("請選擇失敗原因：<br>").append(failedLiveContentSelect);
             
-            var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/programTimeSlot";
-            $.ajax({
-                url: url,
-                type: 'PUT',
-                data: {programTimeSlot_Id:_id,
-                    fbUserId:fbUserId,
-                    vjson:{liveState: liveState}
-                },
-                success: function(response) {
-                    if(response.message){
-                        console.log("[Response] message: PUT"+ url + ':'  + response.message);
+            failedLiveContentSelect.change(function(){
+                var forComfirm=confirm("您按下的是 ***失敗***\n辛苦囉 ~~~!!");
+              
+                var _id=$(this).attr("programTimeSlot_id");
+                var liveState=$(this).val();
+                var ugcCensorNo=$(this).attr("ugcCensorNo");
+                var fbUserId=$(this).attr("fbUserId");
+                var ownerId_id=$(this).attr("ownerId_id");
+                
+                console.log("programTimeSlot_id:"+_id+"\nfbUserId:"+fbUserId+"\nliveState:"+liveState);
+                
+                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/programTimeSlot";
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: {programTimeSlot_Id:_id,
+                        fbUserId:fbUserId,
+                        vjson:{liveState: liveState}
+                    },
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message: PUT"+ url + ':'  + response.message);
+                        }
                     }
-                }
-            });
-            
-            var url=DOMAIN+"fbItem/"+ownerId_id;
-            $.ajax({
-               url: url,
-               type: 'POST',
-               data: {type:liveState,
-                   ugcCensorNo: ugcCensorNo},
-               success: function(response) {
-                   if(response.message){
-                       console.log("[Response] message: POST"+ url + ':' + response.message);
+                });
+                
+                var url=DOMAIN+"fbItem/"+ownerId_id;
+                $.ajax({
+                   url: url,
+                   type: 'POST',
+                   data: {type:liveState,
+                       ugcCensorNo: ugcCensorNo},
+                   success: function(response) {
+                       if(response.message){
+                           console.log("[Response] message: POST"+ url + ':' + response.message);
+                       }
                    }
-               }
-            });
-            
-            var url = DOMAIN + "user_content_attribute";
-            var mustPlay = true;
-            $.ajax({
-                url: url,
-                type: 'PUT',
-                data: {no: ugcCensorNo, vjson:{mustPlay: mustPlay}},
-                success: function(response) {
-                    if(response.message){
-                        console.log("[Response] message: PUT"+ url + ':' + response.message);
+                });
+                
+                var url = DOMAIN + "user_content_attribute";
+                var mustPlay = true;
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: {no: ugcCensorNo, vjson:{mustPlay: mustPlay}},
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message: PUT"+ url + ':' + response.message);
+                        }
                     }
-                }
+                });
+                
+                
             });
-            
+
             
         });
+
+
         //--------- end 最左邊 fail-----------
         
         
