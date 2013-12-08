@@ -1,4 +1,7 @@
 ﻿var liveCheckSubPg = {
+    
+    isInDataMantenanceMode: false,
+        
     loadLiveCheckTable: function(res){
         console.dir(res);
         $('#table-content').html("");
@@ -125,7 +128,9 @@
                 );
                 
                 failedLiveContentSelect.val(res[i].liveState);
-                failedLiveContentSelect.prop('disabled', true);
+                if ( !liveCheckSubPg.isInDataMantenanceMode ) {
+                    failedLiveContentSelect.prop('disabled', true);
+                }
                 failedLiveContentSelectionDiv.append(failedLiveContentSelect);
 
                 
@@ -482,31 +487,36 @@
                     }
                 });
                 
-                var url=DOMAIN+"fbItem/"+ownerId_id;
-                $.ajax({
-                   url: url,
-                   type: 'POST',
-                   data: {type:liveState,
-                       ugcCensorNo: ugcCensorNo},
-                   success: function(response) {
-                       if(response.message){
-                           console.log("[Response] message: POST"+ url + ':' + response.message);
+                if ( !liveCheckSubPg.isInDataMantenanceMode ){
+                    //do the following actions only if it is not in the data maintenance mode
+                    var url=DOMAIN+"fbItem/"+ownerId_id;
+                    $.ajax({
+                       url: url,
+                       type: 'POST',
+                       data: {type:liveState,
+                           ugcCensorNo: ugcCensorNo},
+                       success: function(response) {
+                           if(response.message){
+                               console.log("[Response] message: POST"+ url + ':' + response.message);
+                           }
                        }
-                   }
-                });
-                
-                var url = DOMAIN + "user_content_attribute";
-                var mustPlay = true;
-                $.ajax({
-                    url: url,
-                    type: 'PUT',
-                    data: {no: ugcCensorNo, vjson:{mustPlay: mustPlay}},
-                    success: function(response) {
-                        if(response.message){
-                            console.log("[Response] message: PUT"+ url + ':' + response.message);
+                    });
+                    
+                    var url = DOMAIN + "user_content_attribute";
+                    var mustPlay = true;
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: {no: ugcCensorNo, vjson:{mustPlay: mustPlay}},
+                        success: function(response) {
+                            if(response.message){
+                                console.log("[Response] message: PUT"+ url + ':' + response.message);
+                            }
                         }
-                    }
-                });
+                    });
+
+                }
+                
                 
                 
             });
@@ -807,6 +817,26 @@
         $.get('/miix_admin/table_censorLiveCheck_head.html', function(res){
             $('#table-content-header').html(res);
             // $('#table-content').html('');
+            
+            if ( liveCheckSubPg.isInDataMantenanceMode ) {
+                $("#checkboxDataMaintenanceMode").prop('checked', true);
+            }
+            else {
+                $("#checkboxDataMaintenanceMode").prop('checked', false);
+            }
+
+            $("#checkboxDataMaintenanceMode").click(function(){
+                if ( $("#checkboxDataMaintenanceMode").is(":checked") ) {
+                    liveCheckSubPg.isInDataMantenanceMode = true;
+                }
+                else {
+                    liveCheckSubPg.isInDataMantenanceMode = false;
+                }
+                
+                $('#live_check').click();
+                
+            });
+
         
             $('#createHistoryProgramListBtn').click(function(){
                 // $('#table-content').html('');
@@ -828,6 +858,8 @@
           
             });
         });
+        
+        
         
     
     }
