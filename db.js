@@ -359,6 +359,13 @@ FM.DB = (function(){
             apply: {type: Boolean, default: false}
         }); //  MyMember collection
 		
+		var MessageSchema = new Schema({
+            content: {type: String},
+			ownerId: {_id: ObjectID},
+            read: {type: Boolean, default: false},
+            showInCenter: {type: Boolean, default: false}
+        }); //  MyMember collection
+		
         /****************** End of DB Schema ******************/
 		
         var Member = connection.model('Member', MemberSchema, 'member'),
@@ -377,7 +384,8 @@ FM.DB = (function(){
             CustomerServiceItem = connection.model('CustomerServiceItem', CustomerServiceItemSchema, 'customerServiceItem'),
             SessionItem = connection.model('SessionItem', SessionItemSchema, 'sessionItem'),
             UserLiveContent = connection.model('UserLiveContent', UserLiveContentSchema, 'userLiveContent'),
-            MyMember = connection.model('MyMember', MyMemberSchema, 'myMember');
+            MyMember = connection.model('MyMember', MyMemberSchema, 'myMember'),
+			Message = connection.model('Message', MessageSchema, 'message');
            
             
         var dbModels = [];
@@ -398,6 +406,7 @@ FM.DB = (function(){
         dbModels["sessionItem"] = SessionItem;
         dbModels["userLiveContent"] = UserLiveContent;
         dbModels["myMember"] = MyMember;
+		dbModels["message"] = Message;
         
         //???? nobody uses it, so this section can be removed? 
         var dbSchemas = [];
@@ -508,6 +517,9 @@ FM.DB = (function(){
                         break;
                     case 'myMember':
                         return MyMember;
+                        break;
+					case 'message':
+                        return Message;
                         break;
                     default:
                         throw new error('DB Cannot find this Collection: ' + collection);
