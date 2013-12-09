@@ -459,7 +459,7 @@
             
             var divClicked = $("#failedLiveContentSelectionDiv_"+$(this).attr("rowIndex"));
             divClicked.html("");
-            divClicked.append("請選擇失敗原因：<br>").append(failedLiveContentSelect);
+            divClicked.append("<div id='pleaseChooseTextDiv'>請選擇失敗原因：</div>").append(failedLiveContentSelect);
             
             failedLiveContentSelect.change(function(){
                 var forComfirm=confirm("您按下的是 ***失敗***\n辛苦囉 ~~~!!");
@@ -481,6 +481,11 @@
                         vjson:{liveState: liveState}
                     },
                     success: function(response) {
+                        $("#pleaseChooseTextDiv").remove();
+                        if ( !liveCheckSubPg.isInDataMantenanceMode ) {
+                            failedLiveContentSelect.prop('disabled', true);
+                        }
+                        
                         if(response.message){
                             console.log("[Response] message: PUT"+ url + ':'  + response.message);
                         }
