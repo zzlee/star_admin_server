@@ -77,9 +77,9 @@ setTimeout(function(){
     
     //ScalaMgr APIs : pullPlaylistItem()
     /* var option = {
-        playlistItem: { id: 35 },
-        playlist: { name: 'lastModified' }
-    };    
+        playlistItem: { id: 47 },
+        playlist: { id: 9, name: 'test_1' } // you can only input id or name
+    };   
     scalaMgr.pullPlaylistItem(option, function(err, res){
         if(err)
             console.dir(err);
