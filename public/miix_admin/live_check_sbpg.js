@@ -191,7 +191,18 @@
                                                            style:"margin-bottom:10px"
                                                        
                                                       });   
-                                          
+													  
+													  
+						  /* START get time string, and number for after clcik*/
+								var post_live_time=new Date(parseInt(res[i].liveContent[j].liveTime));
+								var post_year=post_live_time.getFullYear();
+								var post_month=post_live_time.getMonth()+1;
+								var post_date=post_live_time.getDate();
+								var post_hours=post_live_time.getHours();
+								var post_minutes=post_live_time.getMinutes();
+								var timeString=post_year+"/"+post_month+"/"+post_date+"  "+post_hours+":"+post_minutes;
+						  /*END get time string, and number  for after clcik*/
+						  
                         var boxForChoose = $("<input>").attr({
                             style:"margin-left:10px;margin-right:10px;",
                             type:"radio",
@@ -206,7 +217,9 @@
                             "_id":res[i].liveContent[j]._id, //_id
                             "liveTime":res[i].liveContent[j].liveTime,
                             "ugcCensorNo":res[i].ugcCensorNo,
-                            "_type":"correct"
+                            "_type":"correct",
+							"timeString":timeString, // for after click
+							"no":res[i].liveContent[j].no // for after click
                         });
 
             
@@ -220,7 +233,7 @@
                         }
                     }
                         
-                    var tr_4=$("<tr>").html(div_live);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
+                    var tr_4=$("<tr>").attr({'id':res[i].liveContent[j]._id}).html(div_live);//"live ugc, 編號+日期+圖+按鈕(靠右的))"
               
                 }
                 else {
@@ -459,7 +472,7 @@
             
             var divClicked = $("#failedLiveContentSelectionDiv_"+$(this).attr("rowIndex"));
             divClicked.html("");
-            divClicked.append("請選擇失敗原因：<br>").append(failedLiveContentSelect);
+            divClicked.append("<div id='pleaseChooseTextDiv'>請選擇失敗原因：</div>").append(failedLiveContentSelect);
             
             failedLiveContentSelect.change(function(){
                 var forComfirm=confirm("您按下的是 ***失敗***\n辛苦囉 ~~~!!");
@@ -481,6 +494,11 @@
                         vjson:{liveState: liveState}
                     },
                     success: function(response) {
+                        $("#pleaseChooseTextDiv").remove();
+                        if ( !liveCheckSubPg.isInDataMantenanceMode ) {
+                            failedLiveContentSelect.prop('disabled', true);
+                        }
+                        
                         if(response.message){
                             console.log("[Response] message: PUT"+ url + ':'  + response.message);
                         }
@@ -523,6 +541,36 @@
 
             
         });
+        
+        if ( liveCheckSubPg.isInDataMantenanceMode ){
+            $('.failedLiveContentCombobox').change(function(){
+               
+                var _id=$(this).attr("programTimeSlot_id");
+                var liveState=$(this).val();
+                var ugcCensorNo=$(this).attr("ugcCensorNo");
+                var fbUserId=$(this).attr("fbUserId");
+                var ownerId_id=$(this).attr("ownerId_id");
+                
+                console.log("programTimeSlot_id:"+_id+"\nfbUserId:"+fbUserId+"\nliveState:"+liveState);
+                
+                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/programTimeSlot";
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: {programTimeSlot_Id:_id,
+                        fbUserId:fbUserId,
+                        vjson:{liveState: liveState}
+                    },
+                    success: function(response) {
+                        
+                        if(response.message){
+                            console.log("[Response] message: PUT"+ url + ':'  + response.message);
+                        }
+                    }
+                });
+            });
+
+        }
 
 
         //--------- end 最左邊 fail-----------
@@ -689,8 +737,6 @@
             console.log($(this));
             var forComfirm=confirm("你選了五張中最讚的張，請確定好之後送出!");
           
-          
-          
             var _id=$(this).attr("_id");
             var userID=$(this).val();
             var s3Url=$(this).attr("s3url");
@@ -698,12 +744,22 @@
             var longPic=$(this).attr("longPic");
             var liveTime=$(this).attr("liveTime");
             var ugcCensorNo=$(this).attr("ugcCensorNo");
+			var timeString = $(this).attr("timeString"); //for change content after click
+			var no = $(this).attr("no");  //for change content after click
             
             console.log("_id:"+_id+"\nuserID:"+userID+"\ns3Url:"+s3Url+"\nType:"+picType);
-            if (forComfirm==true)
-            {
-            }else
-            {
+            
+            if (forComfirm==true) {
+        	/*START change content after click*/
+				$('#'+_id).html(
+					$("<a>").attr({href:s3Url, target:"_blank"}).append(
+						$("<img>").attr({src:s3Url,width:500,height:250})
+					)
+				);
+				$("<b>").attr({style:'color:blue'}).text('五選一(done)').appendTo('#'+_id);
+				$("<span>").attr({style:"vertical-align:460%"}).html(no+"          │   "+timeString).prependTo('#'+_id);
+			/*END change content after click*/
+            }else{
                 return false;
             }
             
@@ -757,10 +813,13 @@
                     if(response.message){
                         console.log("[Response] message: PUT"+ url + ':'  + response.message);
                     }
+					
+					$.get(DOMAIN,function(){
+						console.log("test");
+						
+					});
                 }
-            });
-
-            
+            });           
         });
         /* ------------------------------ end 五選一紐---------------------------------------------------*/
         

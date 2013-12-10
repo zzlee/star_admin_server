@@ -100,7 +100,9 @@ app.use(express.methodOverride());
 
 /* Must put this before app.router. */
 app.use( function (req, res, next) {
-    res.locals.user = req.session.user;
+    if (res.locals) {
+        res.locals.user = req.session.user;
+    }    
     next(); // Please Don't forget next(), otherwise suspending;
 });  
 //-- end of session management ? --

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FeltMeng.com
  */
 
@@ -644,6 +644,32 @@ $(document).ready(function(){
         }
         else{
             $("#pageNoInput").val( FM.currentContent.currentPage);
+        }
+    });
+    
+    var ctrlIsDown = false;
+    
+    
+    $(document.activeElement).keyup(function( event ) {
+        //console.log("keyup event.which="+event.which);
+        if ( event.which == 17 ) {  //ctrl key
+            ctrlIsDown = false;
+        }
+        else if ( ctrlIsDown && (event.which == 33) ) {
+            //console.log('ctrl+pageUp pressed!');
+            FM.currentContent.showPreviousPageContent();
+        }
+
+        else if ( ctrlIsDown && (event.which == 34) ) {
+            //console.log('ctrl+pageDown pressed!');
+            FM.currentContent.showNextPageContent();
+        }
+    });
+
+    $(document.activeElement).keydown(function( event ) {
+        //console.log("keydown event.which="+event.which);
+        if ( event.which == 17 ) {  //ctrl key
+            ctrlIsDown = true;
         }
     });
 
