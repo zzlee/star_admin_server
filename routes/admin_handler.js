@@ -220,9 +220,8 @@ FM.admin.updateMemberInfo_get_cb = function(req, res){
     
 };
 
-/* Joy */
+/* For search fb name by Joy */
 FM.admin.getIdByName_get_cb = function(req, res){
-   // console.log(req.query.FBName);
     var reqFBName = req.query.FBName;
     var db = require('../db.js');
     var members = db.getDocModel("member");
@@ -231,6 +230,7 @@ FM.admin.getIdByName_get_cb = function(req, res){
             'fb.userName':reqFBName
     };
     
+    /* 1 userName may have many ids, use loop below to collect all id for client side*/
     members.find(condition, null, null, function(err,result){
         if(!err) {
             var idObj=[];
@@ -251,7 +251,7 @@ FM.admin.getIdByName_get_cb = function(req, res){
         }
     });
 };
-
+/* END For search fb name by Joy */
 
 FM.admin.listSize_get_cb = function(req, res){
     if (req.query.listType == 'memberList'){
