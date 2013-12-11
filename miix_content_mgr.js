@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @fileoverview Implementation of miixContentMgr
  */
 var fs = require('fs');
@@ -48,29 +48,58 @@ miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbI
         //console.dir(responseParameters);
         
         if ( responseParameters ) {
+            logger.info("aeServerMgr.createMiixMovie(): responseParameters= "+JSON.stringify(responseParameters));
+            
+            var ugcModel = db.getDocModel("ugc");
             var aeServerID = responseParameters.ae_server_id;
             var youtubeVideoID = responseParameters.youtube_video_id;
-            //var movieProjectID = responseParameters.movie_project_id;
-            //var ownerStdID = responseParameters.owner_std_id;
-            //var ownerFbID = responseParameters.owner_fb_id;
-            //var movieTitle = responseParameters.movie_title;
+            var s3Path = responseParameters.s3_path;
+            var s3PathOfVideoForDooh = responseParameters.s3_path_of_video_for_dooh;
             var fileExtension = responseParameters.movie_file_extension;
+            
+            //post to FB; update video DB; push notification to mobile client 
+            var youTubeUrl, s3Url, s3UrlOfVideoForDooh;
+            if ( youtubeVideoID ) {
+                youTubeUrl = "http://www.youtube.com/embed/"+youtubeVideoID;
+            }
+            else {
+                youTubeUrl = null;
+            }
+            
+            if ( s3Path ) {
+                s3Url = "https://s3.amazonaws.com/miix_content"+s3Path;
+            }
+            else {
+                s3Url = null;
+            }
+
+            if ( s3PathOfVideoForDooh ) {
+                s3UrlOfVideoForDooh = "https://s3.amazonaws.com/miix_content"+s3PathOfVideoForDooh;
+            }
+            else {
+                s3UrlOfVideoForDooh = null;
+            }
+            
+            
+            
+            var url = {"youtube":youTubeUrl, "s3":s3Url, "s3OfVideoForDooh": s3UrlOfVideoForDooh  };           
+            var vjson = {"title": movieTitle,
+                         "ownerId": {"_id": ownerStdID, "userID": ownerFbID},
+                         "url": url,
+                         "genre":"miix",
+                         "aeId": aeServerID,
+                         "projectId": movieProjectID,
+                         "mediaType": mediaType,
+                         "fileExtension": fileExtension
+                         };
+            fmapi._fbPostUGCThenAdd(vjson); //TODO: split these tasks to different rolls; add a callback to _fbPostUGCThenAdd()
+            
+
             
             
             if ( responseParameters.err == 'null' || (!responseParameters.err) ) {
-                //post to FB; update video DB; push notification to mobile client 
-                var url = {"youtube":"http://www.youtube.com/embed/"+youtubeVideoID};			
-                var vjson = {"title": movieTitle,
-                             "ownerId": {"_id": ownerStdID, "userID": ownerFbID},
-                             "url": url,
-                             "genre":"miix",
-                             "aeId": aeServerID,
-                             "projectId": movieProjectID,
-                             "mediaType": mediaType,
-                             "fileExtension": fileExtension
-                             };
-                fmapi._fbPostUGCThenAdd(vjson); //TODO: split these tasks to different rolls; add a callback to _fbPostUGCThenAdd()
-                logger.info("aeServerMgr.createMiixMovie(): responseParameters= "+JSON.stringify(responseParameters));
+                
+                
                 if (cbOfGenerateMiixMoive) {
                     cbOfGenerateMiixMoive(null);
                 }
