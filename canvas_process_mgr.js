@@ -6,7 +6,7 @@
 var spawn = require('child_process').spawn;
 var fs = require('fs');
 var EventEmitter = require('events').EventEmitter;
-var fbReportListener = new EventEmitter();
+// var fbReportListener = new EventEmitter();
 
 var canvasProcessMgr = {};
 
@@ -14,8 +14,8 @@ canvasProcessMgr.markTextAndIcon = function( option, markText_cb ){
     _private.mark( option.accessToken, option.type, option.source, option.photo, option.text, option.ugcProjectId, markText_cb );
 };
 
-canvasProcessMgr.markTextToPreview = function( option, markText_cb ){
-    _private.mark_preview( option.accessToken, option.type, option.text, option.ugcProjectId, markText_cb );
+canvasProcessMgr.markTextToPreview = function( options, markText_cb ){
+    _private.mark_preview( options, markText_cb );
 };
 
 // canvasProcessMgr.reportTrigger = function( report ){
@@ -45,16 +45,19 @@ var _private = {
             });
         });
     },
-    mark_preview : function( accessToken, type, textContent, ugcProjectId, mark_preview_cb) {
+    // mark_preview : function( accessToken, type, textContent, ugcProjectId, mark_preview_cb) {
+    mark_preview : function( options, mark_preview_cb) {
 
         var mark_preview_url = 'http://127.0.0.1/canvas_process/fb_text_on_photo_preview.html';
         
         var chrome = spawn('chrome.exe', 
                            [mark_preview_url + 
-                           '?accessToken=' + accessToken + 
-                           '&type=' + type + 
-                           '&textContent=' + textContent +
-                           '&ugcProjectId=' + ugcProjectId]);
+                           '?accessToken=' + options.accessToken + 
+                           '&type=' + options.type + 
+                           '&name=' + options.name + 
+                           '&time=' + options.time + 
+                           // '&textContent=' + textContent +
+                           '&ugcProjectId=' + options.ugcProjectId]);
         
         chrome.stdout.on('data', function (data) { /* console.log('stdout: ' + data); */ });
         chrome.stderr.on('data', function (data) { /* console.log('stderr: ' + data); */ });
