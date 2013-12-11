@@ -379,33 +379,81 @@ function scalaMgr( url, account ){
      * Upload Media Item.
      * 
      */
-    var uploadMediaItem = function(option, upload_cb){
+    var uploadMediaItem = function(option, limit, upload_cb){
     
         var file = option.file;
         
-        if( !file.name ) upload_cb('No_File_Name', null);
-        if( !file.path ) upload_cb('No_File_Path', null);
+        if( !file.name ) {
+            upload_cb('No_File_Name', null);
+            return;
+        }
+        if( !file.path ) {
+            upload_cb('No_File_Path', null);
+            return;
+        }
         
+        if( typeof(limit) === 'function' ) {
+            upload_cb = limit;
+            limit = 3;
+        }
+        
+        var count = 0;
         var media = 
         {
             id: '',
             name: file.name
         };
         
-        contractor.media.fileupload(file, function(err, status){
-            // upload_cb(null, status);
-            contractor.media.list({search: media.name}, function(err, res){ 
-                if(typeof(res.list) === 'undefined') {
-                    scalaLogger.action('no media info response, file name is ' + media.name);
-                    upload_cb('NO_MEDIA_INFO', null);
-                }
-                else {
-                    scalaLogger.action('upload media is successfully, file name is ' + media.name);
-                    media.id = res.list[0].id;
-                    upload_cb(null, { media: media });
-                }
+        var upload = function( file, media, info_cb ) {
+            contractor.media.fileupload(file, function(err, status){
+                contractor.media.list({search: media.name}, function(err, res){ 
+                    if( typeof(res.list) === 'undefined' ) {
+                        scalaLogger.action('no media info response, file name is ' + media.name);
+                        info_cb('NO_MEDIA_INFO', null);
+                    }
+                    else {
+                        if( res.list[0].status != 'OK' ) {
+                            scalaLogger.action('upload media is failed, file name is ' + media.name + ', please re-upload.');
+                            info_cb('REUPLOAD', null);
+                        }
+                        else {
+                            scalaLogger.action('upload media is successfully, file name is ' + media.name);
+                            media.id = res.list[0].id;
+                            info_cb(null, { media: media });
+                        }
+                    }
+                });
             });
-        });
+        };
+        
+        async.whilst(
+            function () { return count < limit; },
+            function (callback) {
+                upload(file, media, function(err, res) {
+                    if( err ) {
+                        count++;
+                        if(count != limit)
+                            setTimeout(callback, 200);
+                        else
+                            callback(err);
+                    }
+                    else {
+                        callback(res);
+                        count = limit;
+                    }
+                });
+            },
+            function (report) {
+                //excute
+                if( count < limit ) {
+                    upload_cb(null, report);
+                }
+                if( count == limit ) {
+                    upload_cb(err, null);
+                }
+            }
+        );
+        
     };
     
     /**
