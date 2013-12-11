@@ -2,6 +2,10 @@
 form#mainform(action='')
 
     #condition-inner
+      label 查詢fb人名
+      input(class='ugcSearchFBBtn', type='text' ,name='ugcSearchFBText' ,onfocus='this.value=\'\'')
+      input#ugcSearchFBBtn(type='button', class='ugcSearch', value='搜尋')
+      br
       label 查詢影片
       input(class='ugcSearchBtn', type='text' ,name='ugcSearchText' ,onfocus='this.value=\'\'')
       input#ugcSearchBtn(type='button', class='ugcSearch', value='搜尋')

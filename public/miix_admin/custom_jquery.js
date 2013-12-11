@@ -68,8 +68,7 @@ $(document).ready(function(){
 	/*----------------------------- live check start  by Joy----------------------------------*/
     FM.live_check = new PageList( 'live_check',10,'/miix_admin/doohs/'+DEFAULT_DOOH+'/liveContent',null, liveCheckSubPg.loadLiveCheckTable ); 
     /*-----------------------------end live check----------------------------------*/
-    
-
+   
     $('#memberListBtn').click( memberListSubPg.loadPage );
 
 
@@ -299,16 +298,39 @@ $(document).ready(function(){
              */
             if(censorCheck == '/miix_admin/ugc_censor'){
                 /**
-                 * 查詢影片 click
+                 * 查詢FB NAME BY    JOY
                  */
                 var conditions;
+                
+                $('#ugcSearchFBBtn').click(function(){
+                    $.get('/miix_admin/getIdByName', {token: localStorage.token,FBName: $('.ugcSearchFBBtn').val() },function(res) {
+                        var inputSearchData = {};
+                        $('#condition-inner input[class="ugcSearchFBBtn"]').each(function(){
+                            inputSearchData = {'ownerId.userID':{ $in: res.nameToId}};
+                            conditions = inputSearchData;
+                        });
+                        if(inputSearchData != null){
+                            $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
+                            FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
+                            FM.UGCList.setConditions(conditions);
+                            $('#main_menu ul[class="current"]').attr("class", "select");
+                            $('#UGCList').attr("class", "current");
+                            FM.currentContent = FM.UGCList;
+                            FM.currentContent.showCurrentPageContent();
+                        }
+                        console.log(res);
+                    });
+                });
+                
+                /**
+                 * 查詢影片 click
+                 */
                 
                 $('#ugcSearchBtn').click(function(){
                     var inputSearchData = {};
                     $('#condition-inner input[class="ugcSearchBtn"]').each(function(){
                         inputSearchData = {'no':$(this).val()};
                         conditions = inputSearchData;
-                        
                     });
                     if(inputSearchData != null){
                         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
