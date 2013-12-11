@@ -642,25 +642,34 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                     //add time slots in this available time interval
                     var timeToAddTimeSlot = anAvailableTimeInterval.interval.start;
                     var programPeriod;
-                    if (anAvailableTimeInterval.cycleDuration > DEFAULT_PROGRAM_PERIOD){
-                        programPeriod = anAvailableTimeInterval.cycleDuration;
-                    }
-                    else {
-                        programPeriod = DEFAULT_PROGRAM_PERIOD;
-                    }
+                    
+                    //TODO: switch back when the cycleDuration info can be correctly retrieved from Scala 
+//                    if (anAvailableTimeInterval.cycleDuration > DEFAULT_PROGRAM_PERIOD){
+//                        programPeriod = anAvailableTimeInterval.cycleDuration;
+//                    }
+//                    else {
+//                        programPeriod = DEFAULT_PROGRAM_PERIOD;
+//                        
+//                    }
+                    //before the cycleDuration info can be correctly retrieved from Scala, use DEFAULT_PROGRAM_PERIOD for now
+                    programPeriod = DEFAULT_PROGRAM_PERIOD;
+                    
                     async.whilst(
-                        function () { return timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end; },
+                        //function () { return timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end; },
+                        function () { return timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end; },
                         function (cb_whilst) {
                             // try to avoid the conflicts with high-priority events
                             var intervalChecked = 0;
                             while ( periodicalHighPriorityEvents.isConflictedWith({ start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  }) && 
-                                    (timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) &&
+                                    //(timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) &&
+                                    (timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end) &&
                                     (intervalChecked < 60*60*1000) ) {
                                 timeToAddTimeSlot += programPeriod;
                                 intervalChecked += programPeriod;
                             }
                             
-                            if (timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) {
+                            //if (timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) {
+                            if (timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end) {
                                 // add time slots of a micro timeslot (of the same content genre) to db
                                 var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
                                 generateTimeSlotsOfMicroInterval(inteval, function(err1){
