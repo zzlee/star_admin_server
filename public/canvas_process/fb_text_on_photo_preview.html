@@ -28,7 +28,8 @@
         // var preview_bg = 'https://lh5.googleusercontent.com/-b2N5Zoh80zA/UmDRrkjCtlI/AAAAAAAAACA/xs-KambbtxM/s0/wowOnTaipeiArena_preview_bg.jpg';
         var preview_bg = {
             'ondascreen': 'https://lh6.googleusercontent.com/-ZbVtdu-FvQo/UmDfZdcYUFI/AAAAAAAAACU/1UYWOtakhtc/s0/ondascreen_preview_bg.jpg',
-            'wowtaipeiarena': 'https://lh5.googleusercontent.com/-b2N5Zoh80zA/UmDRrkjCtlI/AAAAAAAAACA/xs-KambbtxM/s0/wowOnTaipeiArena_preview_bg.jpg'
+            // 'wowtaipeiarena': 'https://lh5.googleusercontent.com/-b2N5Zoh80zA/UmDRrkjCtlI/AAAAAAAAACA/xs-KambbtxM/s0/wowOnTaipeiArena_preview_bg.jpg'
+            'wowtaipeiarena': 'https://lh6.googleusercontent.com/-XLoq345gM-g/Uqg5jFwdoKI/AAAAAAAAAE8/zO7NBoAz3vk/s0/wowOnTaipeiArena_preview_2_bg.jpg'
         };
         
         
@@ -39,19 +40,50 @@
         // var content = '哇！Jeff Chai 即將2013年10月1日上午5:40~5:50之間，登上小巨蛋！';
 
         imageObj.onload = function() {
-            canvas.width = imageObj.width;
-            canvas.height = imageObj.height;
-            context.drawImage(imageObj, 0, 0);
-            
-            context.font = 'bold 24px 微軟正黑體';
-            context.fillStyle = 'white';
-            context.textAlign="right";
-            context.fillText(decodeURI(option.textContent), canvas.width-157, 724);
+            switch(option.type.toLowerCase())
+            {
+                case 'ondascreen':
+                    canvas.width = imageObj.width;
+                    canvas.height = imageObj.height;
+                    context.drawImage(imageObj, 0, 0);
+                    
+                    context.font = 'bold 24px 微軟正黑體';
+                    context.fillStyle = 'white';
+                    context.textAlign="right";
+                    
+                    var textContent = '哇！' + decodeURI(option.name) + 
+                                      '即將' + decodeURI(option.time) + 
+                                      '之間，登上小巨蛋！';
+                    
+                    context.fillText(textContent, canvas.width-157, 724);
 
-            context.save();
-            // alert(canvas.toDataURL());
-            textImageComplete(option.accessToken, canvas.toDataURL());
-            
+                    context.save();
+                    // alert(canvas.toDataURL());
+                    textImageComplete(option.accessToken, canvas.toDataURL());
+                    break;
+                case 'wowtaipeiarena':
+                    canvas.width = imageObj.width;
+                    canvas.height = imageObj.height;
+                    context.drawImage(imageObj, 0, 0);
+                    context.font = 'bold 26px 微軟正黑體';
+                    context.fillStyle = 'white';
+                    // context.textAlign="right";
+                    
+                    var textContent_1 = '哇！' + decodeURI(option.name) + '的作品，即將在',
+                        textContent_2 = decodeURI(option.time),
+                        textContent_3 = '在小巨蛋播出，快到現場瞧瞧！';
+                    
+                    context.fillText(textContent_1, 113, 90);
+                    context.fillText(textContent_2, 113, 130);
+                    context.fillText(textContent_3, 113, 170);
+                    
+                    context.save();
+                    // alert(canvas.toDataURL());
+                    textImageComplete(option.accessToken, canvas.toDataURL());
+                    break;
+                default:
+                    break;
+            }
         };
         
         var textImageComplete = function(access_token, data){
