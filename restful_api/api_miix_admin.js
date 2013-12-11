@@ -15,9 +15,10 @@ exports.init = function() {
     app.get('/miix_admin/story_movies', routes.authorizationHandler.checkAuth, routes.admin.storyPlayList_get_cb);
     app.get('/miix_admin/list_size', routes.authorizationHandler.checkAuth, routes.admin.listSize_get_cb);
     app.get('/miix_admin/ugc_censor', routes.authorizationHandler.checkAuth, routes.censorHandler.getUGCList_get_cb); //審查名單
-
     app.get('/miix_admin/user_content_items', routes.censorHandler.getUGCList_get_cb);
     app.put('/miix_admin/user_content_attribute', routes.censorHandler.setUGCAttribute_get_cb);
+    /* for search Fb name by Joy*/
+    app.get('/miix_admin/getIdByName', routes.authorizationHandler.checkAuth,routes.admin.getIdByName_get_cb);
 
 
     /**
@@ -349,5 +350,9 @@ exports.init = function() {
     app.put('/miix_admin/memberInfo/:memberInfoId', routes.admin.updateMemberInfo_get_cb);
     
     app.get('/miix_admin/doohs/:doohId/programTimeSlot', routes.censorHandler.checkProgramTimeSlot_get_cb);
+    
+    
+    
+    
 
 };
