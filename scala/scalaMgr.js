@@ -413,29 +413,71 @@ function scalaMgr( url, account ){
      */
     var pullPlaylistItem = function(option, pull_cb){
     
-        var playlistName = '';
-        if(typeof(option.playlist) === 'undefined')
+        var playlistName = null,
+            playlistId = null;
+        
+        if(typeof(option.playlistItem) === 'undefined') {
+            pull_cb('NO_INPUT_PLAYLIST_ITEM_ID', null);
+            return;
+        }
+        
+        if(typeof(option.playlist) === 'undefined') {
             playlistName = 'OnDaScreen';
-        else
-            (typeof(option.playlist.name) === 'undefined')?playlistName = 'OnDaScreen':playlistName = option.playlist.name;
-            
-        contractor.playlist.list({ search: playlistName }, function(err, playlistInfo){
-            if(err) {
-                scalaLogger.action('pull playlist item is error: ' + JSON.stringify(err));
-                pull_cb(err, null);
+        }
+        else {
+            if(typeof(option.playlist.name) === 'undefined') { 
+                playlistName = 'OnDaScreen'; 
             }
             else {
-                cutOffPlaylistItem(option.playlistItem, playlistInfo.list[0].playlistItems, function(afterPlaylistItems){
-                    playlistInfo.list[0].playlistItems = afterPlaylistItems;
-                    contractor.playlist.update({
-                        playlist: { id: playlistInfo.list[0].id, content: playlistInfo.list[0] },
-                    }, function(report){
-                        scalaLogger.action('pull playlist item is successfully, info: ' + JSON.stringify(report));
-                        pull_cb(null, report);
-                    });
-                });
+                playlistName = option.playlist.name;
             }
-        });
+            if(typeof(option.playlist.id) !== 'undefined') { playlistId = option.playlist.id; }
+        }
+        
+        if(playlistId == null) {
+            contractor.playlist.list({ search: playlistName }, function(err, playlistInfo){
+                if(err) {
+                    scalaLogger.action('pull playlist item is error: ' + JSON.stringify(err));
+                    pull_cb(err, null);
+                }
+                else {
+                    cutOffPlaylistItem(option.playlistItem, playlistInfo.list[0].playlistItems, function(afterPlaylistItems){
+                        playlistInfo.list[0].playlistItems = afterPlaylistItems;
+                        contractor.playlist.update({
+                            playlist: { id: playlistInfo.list[0].id, content: playlistInfo.list[0] },
+                        }, function(report){
+                            scalaLogger.action('pull playlist item is successfully, info: ' + JSON.stringify(report));
+                            pull_cb(null, report);
+                        });
+                    });
+                }
+            });
+        }
+        else {
+            var query =
+            {
+                filters: encodeURIComponent("{'id':{'values':[" + playlistId + "]}}")
+            };
+            contractor.playlist.list(query, function(err, playlistInfo) {
+                // console.dir(playlistInfo);
+                // pull_cb(err, playlistInfo);
+                if(err) {
+                    scalaLogger.action('pull playlist item is error: ' + JSON.stringify(err));
+                    pull_cb(err, null);
+                }
+                else {
+                    cutOffPlaylistItem(option.playlistItem, playlistInfo.list[0].playlistItems, function(afterPlaylistItems){
+                        playlistInfo.list[0].playlistItems = afterPlaylistItems;
+                        contractor.playlist.update({
+                            playlist: { id: playlistInfo.list[0].id, content: playlistInfo.list[0] },
+                        }, function(report){
+                            scalaLogger.action('pull playlist item is successfully, info: ' + JSON.stringify(report));
+                            pull_cb(null, report);
+                        });
+                    });
+                }
+            });
+        }
     };
     
     /**
