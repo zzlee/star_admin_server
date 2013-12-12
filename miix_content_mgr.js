@@ -37,92 +37,250 @@ var miixContentMgr = {};
  */
 miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbID, movieTitle, cbOfGenerateMiixMoive) {
     
+    var ugcModel = db.getDocModel("ugc");
+    var errDuringProcessing = null;
+    var urls = null;
+    var vjsonToUpdate = null;
+    
     //console.log('generateMiixMoive is called.');
     //var mediaType = "MP4";
     var mediaType = "H.264";
     //var mediaType = "FLV";
     
-    aeServerMgr.createMiixMovie( movieProjectID, ownerStdID, ownerFbID, movieTitle, mediaType, function(responseParameters){
-        
-        //console.log('[aeServerMgr.createMiixMovie()] responseParameters=');
-        //console.dir(responseParameters);
-        
-        if ( responseParameters ) {
-            logger.info("aeServerMgr.createMiixMovie(): responseParameters= "+JSON.stringify(responseParameters));
-            
-            var ugcModel = db.getDocModel("ugc");
-            var aeServerID = responseParameters.ae_server_id;
-            var youtubeVideoID = responseParameters.youtube_video_id;
-            var s3Path = responseParameters.s3_path;
-            var s3PathOfVideoForDooh = responseParameters.s3_path_of_video_for_dooh;
-            var fileExtension = responseParameters.movie_file_extension;
-            
-            //post to FB; update video DB; push notification to mobile client 
-            var youTubeUrl, s3Url, s3UrlOfVideoForDooh;
-            if ( youtubeVideoID ) {
-                youTubeUrl = "http://www.youtube.com/embed/"+youtubeVideoID;
-            }
-            else {
-                youTubeUrl = null;
-            }
-            
-            if ( s3Path ) {
-                s3Url = "https://s3.amazonaws.com/miix_content"+s3Path;
-            }
-            else {
-                s3Url = null;
-            }
-
-            if ( s3PathOfVideoForDooh ) {
-                s3UrlOfVideoForDooh = "https://s3.amazonaws.com/miix_content"+s3PathOfVideoForDooh;
-            }
-            else {
-                s3UrlOfVideoForDooh = null;
-            }
-            
-            
-            
-            var url = {"youtube":youTubeUrl, "s3":s3Url, "s3OfVideoForDooh": s3UrlOfVideoForDooh  };           
-            var vjson = {"title": movieTitle,
-                         "ownerId": {"_id": ownerStdID, "userID": ownerFbID},
-                         "url": url,
-                         "genre":"miix",
-                         "aeId": aeServerID,
-                         "projectId": movieProjectID,
-                         "mediaType": mediaType,
-                         "fileExtension": fileExtension
-                         };
-            fmapi._fbPostUGCThenAdd(vjson); //TODO: split these tasks to different rolls; add a callback to _fbPostUGCThenAdd()
-            
-
-            
-            
-            if ( responseParameters.err == 'null' || (!responseParameters.err) ) {
-                
-                
-                if (cbOfGenerateMiixMoive) {
-                    cbOfGenerateMiixMoive(null);
+    async.waterfall([
+        function(callback){
+            //check the url of this UGC
+            ugcModel.findOne({"projectId": movieProjectID}, 'projectId url', function (errOfFindOne, _ugc) {
+                if (!errOfFindOne){
+                    var ugc = JSON.parse(JSON.stringify(_ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded"
+                    urls = ugc.url;
+                    callback(null);
                 }
-                
-            }
-            else {
-                logger.error("aeServerMgr.createMiixMovie() returns responseParameters with error! responseParameters.err="+responseParameters.err);
-                if (cbOfGenerateMiixMoive) {
-                    cbOfGenerateMiixMoive("aeServerMgr.createMiixMovie() returns responseParameters with error! responseParameters.err="+responseParameters.err);
+                else {
+                    callback("Fail to query UGC db: "+errOfFindOne);
                 }
-
+            });
+            
+        },
+        function(callback){
+            //render the Miix movie according to the missing urls
+            var hasS3Url = false;
+            if (urls) {
+                if (urls.s3) {
+                    hasS3Url = true;
+                }
             }
             
-        }
-        else {
-            logger.error("aeServerMgr.createMiixMovie() returns invalid responseParameters! responseParameters="+responseParameters);
-            if (cbOfGenerateMiixMoive) {
-                cbOfGenerateMiixMoive("aeServerMgr.createMiixMovie() returns invalid responseParameters! responseParameters="+responseParameters);
-            }
+            if (!hasS3Url ){
+                //ask AE server to generate the UGC from scratch
+                aeServerMgr.createMiixMovie( movieProjectID, ownerStdID, ownerFbID, movieTitle, mediaType, function(responseParameters){
+                    
+                    if ( responseParameters ) {
+                        logger.info("aeServerMgr.createMiixMovie(): responseParameters= "+JSON.stringify(responseParameters));
+                        
+                        var aeServerID = responseParameters.ae_server_id;
+                        var youtubeVideoID = responseParameters.youtube_video_id;
+                        var s3Path = responseParameters.s3_path;
+                        var s3PathOfVideoForDooh = responseParameters.s3_path_of_video_for_dooh;
+                        var fileExtension = responseParameters.movie_file_extension;
+                        errDuringProcessing = responseParameters.err;
+                        
+                        //post to FB; update video DB; push notification to mobile client 
+                        var youTubeUrl, s3Url, s3UrlOfVideoForDooh;
+                        if ( youtubeVideoID ) {
+                            youTubeUrl = "http://www.youtube.com/embed/"+youtubeVideoID;
+                        }
+                        else {
+                            youTubeUrl = null;
+                        }
+                        
+                        if ( s3Path ) {
+                            s3Url = "https://s3.amazonaws.com/miix_content"+s3Path;
+                        }
+                        else {
+                            s3Url = null;
+                        }
 
+                        if ( s3PathOfVideoForDooh ) {
+                            s3UrlOfVideoForDooh = "https://s3.amazonaws.com/miix_content"+s3PathOfVideoForDooh;
+                        }
+                        else {
+                            s3UrlOfVideoForDooh = null;
+                        }
+                        
+                        var url = {"youtube":youTubeUrl, "s3":s3Url, "s3OfVideoForDooh": s3UrlOfVideoForDooh  };
+                        vjsonToUpdate = {
+                            "url": url,
+                            "aeId": aeServerID,
+                            "mediaType": mediaType,
+                            "fileExtension": fileExtension
+                        };
+                    }
+                    
+                    callback(null);
+                });
+            }
+            else {
+                //TODO:download the Miix video from S3 and then upload it Youtube
+                console.log("TODO:download the Miix video from S3 and then upload it Youtube");
+                
+                errDuringProcessing = "failed to upload to Youtube";
+                
+                vjsonToUpdate = {
+                    "url": urls
+                };
+                
+                callback(null);
+            }
+            
+            ugcModel.findOneAndUpdate({"projectId": movieProjectID}, {$set: {"processingState":"under_generating"}}, function(errOfFindOneAndUpdate){
+                if (errOfFindOneAndUpdate){
+                    logger.error("Failed to update processingState of UGC "+movieProjectID+": "+errOfFindOneAndUpdate);
+                }
+            });
+        },
+        function( callback){
+            //update the UGC db
+            var ugcProcessingState = null;
+            if ( (!vjsonToUpdate.url.youtube) || errDuringProcessing) {
+                ugcProcessingState = "generating_failed";
+            }
+            else {
+                ugcProcessingState = "complete";
+            }
+            vjsonToUpdate.processingState = ugcProcessingState;
+            ugcModel.findOneAndUpdate({"projectId": movieProjectID}, {$set: vjsonToUpdate}, function(errOfFindOneAndUpdate){
+                if (!errOfFindOneAndUpdate) {
+                    if (ugcProcessingState === "complete") {
+                        //TODO: send push notification to the UGC owner
+                        console.log("TODO: send push notification to the UGC owner");
+                        
+                        callback(null);
+                    }
+                    else {
+                        callback("Failed to generate or process UGC: "+errDuringProcessing);
+                    }
+                }
+                else {
+                    callback("Failed to update back to db for generated UGC: "+errOfFindOneAndUpdate);
+                }
+            });
         }
-        
+    ],
+    function(errOfWaterfall ){
+        if (cbOfGenerateMiixMoive) {
+            cbOfGenerateMiixMoive(errOfWaterfall);
+        }
     });
+    
+    
+    
+    
+    //--- deprecated
+    
+//    aeServerMgr.createMiixMovie( movieProjectID, ownerStdID, ownerFbID, movieTitle, mediaType, function(responseParameters){
+//        
+//        //console.log('[aeServerMgr.createMiixMovie()] responseParameters=');
+//        //console.dir(responseParameters);
+//        
+//        if ( responseParameters ) {
+//            logger.info("aeServerMgr.createMiixMovie(): responseParameters= "+JSON.stringify(responseParameters));
+//            
+//            var aeServerID = responseParameters.ae_server_id;
+//            var youtubeVideoID = responseParameters.youtube_video_id;
+//            var s3Path = responseParameters.s3_path;
+//            var s3PathOfVideoForDooh = responseParameters.s3_path_of_video_for_dooh;
+//            var fileExtension = responseParameters.movie_file_extension;
+//            
+//            //post to FB; update video DB; push notification to mobile client 
+//            var youTubeUrl, s3Url, s3UrlOfVideoForDooh;
+//            if ( youtubeVideoID ) {
+//                youTubeUrl = "http://www.youtube.com/embed/"+youtubeVideoID;
+//            }
+//            else {
+//                youTubeUrl = null;
+//            }
+//            
+//            if ( s3Path ) {
+//                s3Url = "https://s3.amazonaws.com/miix_content"+s3Path;
+//            }
+//            else {
+//                s3Url = null;
+//            }
+//
+//            if ( s3PathOfVideoForDooh ) {
+//                s3UrlOfVideoForDooh = "https://s3.amazonaws.com/miix_content"+s3PathOfVideoForDooh;
+//            }
+//            else {
+//                s3UrlOfVideoForDooh = null;
+//            }
+//            
+//            
+//            
+//            var url = {"youtube":youTubeUrl, "s3":s3Url, "s3OfVideoForDooh": s3UrlOfVideoForDooh  };     
+//            //console.log("url");
+//            //console.dir(url);
+//            
+////            var vjson = {"title": movieTitle,
+////                         "ownerId": {"_id": ownerStdID, "userID": ownerFbID},
+////                         "url": url,
+////                         "genre":"miix",
+////                         "aeId": aeServerID,
+////                         "projectId": movieProjectID,
+////                         "mediaType": mediaType,
+////                         "fileExtension": fileExtension
+////                         };
+////            fmapi._fbPostUGCThenAdd(vjson); //TODO: split these tasks to different rolls; add a callback to _fbPostUGCThenAdd()
+//            
+//            var vjsonToUpdate = {
+//                    "url": url,
+//                    "aeId": aeServerID,
+//                    "mediaType": mediaType,
+//                    "fileExtension": fileExtension
+//                    };
+//            ugcModel.findOneAndUpdate({"projectId": movieProjectID}, {$set: vjsonToUpdate}, function(errOfFindOneAndUpdate){
+//                
+//            });
+//
+//            
+//
+//            
+//            
+//            if ( responseParameters.err == 'null' || (!responseParameters.err) ) {
+//                ugcModel.findOneAndUpdate({"projectId": movieProjectID}, {$set: {processingState:"complete"}});
+//                
+//                if (cbOfGenerateMiixMoive) {
+//                    cbOfGenerateMiixMoive(null);
+//                }
+//                
+//            }
+//            else {
+//                ugcModel.findOneAndUpdate({"projectId": movieProjectID}, {$set: {processingState:"generating_failed"}});
+//                
+//                logger.error("aeServerMgr.createMiixMovie() returns responseParameters with error! responseParameters.err="+responseParameters.err);
+//                if (cbOfGenerateMiixMoive) {
+//                    cbOfGenerateMiixMoive("aeServerMgr.createMiixMovie() returns responseParameters with error! responseParameters.err="+responseParameters.err);
+//                }
+//
+//            }
+//            
+//        }
+//        else {
+//            logger.error("aeServerMgr.createMiixMovie() returns invalid responseParameters! responseParameters="+responseParameters);
+//            if (cbOfGenerateMiixMoive) {
+//                cbOfGenerateMiixMoive("aeServerMgr.createMiixMovie() returns invalid responseParameters! responseParameters="+responseParameters);
+//            }
+//
+//        }
+//        
+//    });
+//    
+//
+//    ugcModel.findOneAndUpdate({"projectId": movieProjectID}, {$set: {"processingState":"under_generating"}}, function(errOfFindOneAndUpdate){
+//        if (errOfFindOneAndUpdate){
+//            logger.error("Failed to update processingState of UGC "+movieProjectID+": "+errOfFindOneAndUpdate);
+//        }
+//    });
     
 };
 

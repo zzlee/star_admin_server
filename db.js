@@ -123,7 +123,7 @@ FM.DB = (function(){
             fb_id: {type: String}, //ID of the corresponding FB feed 
             title: {type: String},
             description: {type: String},
-            url: { youtube: String, tudou: String, s3: String },  //  Youtube, Tudou
+            url: { youtube: String, tudou: String, s3: String, s3OfVideoForDooh: String },  //  Youtube, Tudou
             doohPreviewUrl: {type: String}, 
             userRawContent: [userContentSchema], //content is either the URL of S3 storing user's image/video file or the text content 
             ownerId: { _id:ObjectID, userID: String, fbUserId: String }, //userID is used to be owner's fb id, and is now DEPRECATED in Miix 2.0
