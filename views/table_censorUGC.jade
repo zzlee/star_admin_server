@@ -2,6 +2,14 @@
 form#mainform(action='')
 
     #condition-inner
+      label 類別    :  
+      label      合成影片
+       input(type='radio', name='searchByGenre', value = 'miix_it')
+      label      心情
+       input(type='radio', name='searchByGenre', value = 'mood')
+      label      文創
+       input(type='radio', name='searchByGenre', value = 'cultural_and_creative')
+      br
       label 查詢fb人名
       input(class='ugcSearchFBBtn', type='text' ,name='ugcSearchFBText' ,onfocus='this.value=\'\'')
       input#ugcSearchFBBtn(type='button', class='ugcSearch', value='搜尋')
