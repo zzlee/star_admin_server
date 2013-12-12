@@ -424,7 +424,11 @@ FM.DB = (function(){
             
         function connectDB(){
                 try{
-                    mongoose.connect(systemConfig.HOST_MONGO_DB_SERVER_URL+'/'+DB);
+                    var options = {
+                            user: systemConfig.HOST_MONGO_DB_USER_NAME,
+                            pass: systemConfig.HOST_MONGO_DB_PASSWORD
+                        };
+                    mongoose.connect(systemConfig.HOST_MONGO_DB_SERVER_URL+'/'+DB, options);
                     return mongoose.connection;
                 }catch(err){
                     logger.info('Connect DB failed: '+err);
