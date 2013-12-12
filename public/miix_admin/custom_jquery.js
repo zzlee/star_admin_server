@@ -297,6 +297,29 @@ $(document).ready(function(){
              * UGCList
              */
             if(censorCheck == '/miix_admin/ugc_censor'){
+			
+				/**
+                 * search by genre  JOY
+                 */
+			
+				$($('input:radio[name=searchByGenre]')).click(function(){
+					var inputSearchData = {};
+                    $('input:radio[name=searchByGenre]:checked').each(function(){
+                        inputSearchData = {'contentGenre':$(this).val()};
+                        conditions = inputSearchData;
+                    });
+                    if(inputSearchData != null){
+                        $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
+                        FM.UGCList.setConditions(conditions);
+                        $('#main_menu ul[class="current"]').attr("class", "select");
+                        $('#UGCList').attr("class", "current");
+                        FM.currentContent = FM.UGCList;
+                        FM.currentContent.showCurrentPageContent();
+                    }
+				});
+				
+				
                 /**
                  * 查詢FB NAME BY    JOY
                  */
