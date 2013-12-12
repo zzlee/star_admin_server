@@ -11,6 +11,7 @@ var aeServerMgr = require(workingPath+'/ae_server_mgr.js');
 var doohMgr = require(workingPath+'/dooh_mgr.js');
 var memberDB = require(workingPath+'/member.js');
 var UGCDB = require(workingPath+'/ugc.js');
+var youtubeMgr = require( workingPath+'/youtube_mgr.js' );
 var memberDB = require("./member.js");
 var awsS3 = require('./aws_s3.js');
 var fmapi = require(workingPath+'/routes/api.js');   //TODO:: find a better name
@@ -40,6 +41,7 @@ miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbI
     var ugcModel = db.getDocModel("ugc");
     var errDuringProcessing = null;
     var urls = null;
+    var fileExtension = null;
     var vjsonToUpdate = null;
     
     //console.log('generateMiixMoive is called.');
@@ -50,10 +52,11 @@ miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbI
     async.waterfall([
         function(callback){
             //check the url of this UGC
-            ugcModel.findOne({"projectId": movieProjectID}, 'projectId url', function (errOfFindOne, _ugc) {
+            ugcModel.findOne({"projectId": movieProjectID}, 'url fileExtension', function (errOfFindOne, _ugc) {
                 if (!errOfFindOne){
                     var ugc = JSON.parse(JSON.stringify(_ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded"
                     urls = ugc.url;
+                    fileExtension = ugc.fileExtension;
                     callback(null);
                 }
                 else {
@@ -121,16 +124,68 @@ miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbI
                 });
             }
             else {
-                //TODO:download the Miix video from S3 and then upload it Youtube
-                console.log("TODO:download the Miix video from S3 and then upload it Youtube");
+                //download the Miix video from S3 and then upload it to Youtube
+                console.log("download the Miix video from S3 and then upload it Youtube... ");
+                var movieFileForPhone = null;
+                var ytAccessToken = null;
                 
-                errDuringProcessing = "failed to upload to Youtube";
-                
-                vjsonToUpdate = {
-                    "url": urls
-                };
-                
-                callback(null);
+                async.waterfall([
+                    function(callback){
+                        //download the Miix video from S3 to temp folder
+                        movieFileForPhone = path.join(workingPath, "public/contents/temp", movieProjectID+"__phone."+fileExtension);
+                        var s3Path =  '/user_project/' + movieProjectID + '/'+ movieProjectID+'_phone'+'.'+fileExtension;
+                        awsS3.downloadFromAwsS3(movieFileForPhone, s3Path, function(errOfDownloadFromAwsS3,result){
+                            if (!errOfDownloadFromAwsS3){
+                                logger.info('Successfully download from S3 ' + s3Path);
+                                callback(null);
+                            }
+                            else{
+                                logger.info('Failed to download from S3 ' + s3Path);
+                                callback('Failed to download from S3 ' + s3Path +": "+errOfDownloadFromAwsS3);
+                            }
+                        });
+                    },
+                    function(callback){
+                        //get Youtube token
+                        youtubeMgr.getAccessToken(function(token){
+                            if (token) {
+                                ytAccessToken = token;
+                                callback(null);
+                            }
+                            else {
+                                callback("Failed to get Youtube token");
+                            }
+                        });                       
+                    },
+                    function(callback){
+                        //upload the Miix video to Youtube
+                        youtubeMgr.uploadVideoWithRetry( ytAccessToken, movieFileForPhone, movieTitle, movieProjectID, function(result) {
+                            if (result.err) {
+                                logger.error('Miix movie is failed to be uploaded to Youtube');
+                                callback("Failed to upload Miix movie ["+movieProjectID+"] to YouTube: "+result.err, null);
+                            }
+                            else {
+                                logger.info('Miix movie is successfully uploaded to Youtube.  youtubeVideoID='+result.youtubeVideoID);
+                                callback(null, result.youtubeVideoID);
+                            }
+                        });
+                        
+                    },
+                    function(callback){
+                        //TODO:delete the Miix video from temp folder
+                        callback(null);
+                    }
+                ],
+                function(errOfWaterfall2 ){
+                    if (errOfWaterfall2) {
+                         errDuringProcessing = "Failed to re-upload vidoe to Youtube: "+errOfWaterfall2;
+                    }
+                    
+                    vjsonToUpdate = {
+                        "url": urls
+                    };
+                    callback(null);
+                });
             }
             
             ugcModel.findOneAndUpdate({"projectId": movieProjectID}, {$set: {"processingState":"under_generating"}}, function(errOfFindOneAndUpdate){
