@@ -321,7 +321,12 @@ var playlist = (function() {
             playEndTime += ':'; 
             playEndTime += (playEnd.getMinutes() >= 10)?playEnd.getMinutes():('0'+playEnd.getMinutes());
             
-            _private.list({ search : option.playlist.name }, function(err, listInfo){
+            var query = 
+                (!option.playlist.filters)
+                  ? { search: option.playlist.name }
+                  : { filters: option.playlist.filters };
+            
+            _private.list(query, function(err, listInfo){
                 //setting play date to playlist content.
                 for(var i=0; i<listInfo.list[0].playlistItems.length; i++){
                     if(option.playlistItem.id == listInfo.list[0].playlistItems[i].id){

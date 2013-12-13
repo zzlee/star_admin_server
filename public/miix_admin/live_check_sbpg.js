@@ -541,6 +541,36 @@
 
             
         });
+        
+        if ( liveCheckSubPg.isInDataMantenanceMode ){
+            $('.failedLiveContentCombobox').change(function(){
+               
+                var _id=$(this).attr("programTimeSlot_id");
+                var liveState=$(this).val();
+                var ugcCensorNo=$(this).attr("ugcCensorNo");
+                var fbUserId=$(this).attr("fbUserId");
+                var ownerId_id=$(this).attr("ownerId_id");
+                
+                console.log("programTimeSlot_id:"+_id+"\nfbUserId:"+fbUserId+"\nliveState:"+liveState);
+                
+                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/programTimeSlot";
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: {programTimeSlot_Id:_id,
+                        fbUserId:fbUserId,
+                        vjson:{liveState: liveState}
+                    },
+                    success: function(response) {
+                        
+                        if(response.message){
+                            console.log("[Response] message: PUT"+ url + ':'  + response.message);
+                        }
+                    }
+                });
+            });
+
+        }
 
 
         //--------- end 最左邊 fail-----------

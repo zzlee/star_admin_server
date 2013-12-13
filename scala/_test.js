@@ -89,8 +89,8 @@ setTimeout(function(){
     
     //ScalaMgr APIs : pushMediaToPlaylist()
     /* var setting = {
-        media: { name: 'Jeff' },
-        playlist:{ name: 'Audio' },
+        media: { name: 'Algorithm' },
+        playlist:{ name: 'test_1' },
         playTime: { start: '2013-08-27 10:00:00', end: '2013-08-27 22:00:00', duration: 50 }
     };    
     scalaMgr.pushMediaToPlaylist(setting, function(err, res){
@@ -111,7 +111,7 @@ setTimeout(function(){
     //ScalaMgr APIs : setWebpageToPlaylist()
     /* var option = 
     {
-        //playlist: { name: 'last' },
+        playlist: { name: 'last' },
         playTime: { start: '2013-07-22 18:00:00', end: '2013-07-22 19:00:00', duration: 50 },
         webpage: {
             name: 'web_test',
