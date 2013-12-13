@@ -642,25 +642,34 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                     //add time slots in this available time interval
                     var timeToAddTimeSlot = anAvailableTimeInterval.interval.start;
                     var programPeriod;
-                    if (anAvailableTimeInterval.cycleDuration > DEFAULT_PROGRAM_PERIOD){
-                        programPeriod = anAvailableTimeInterval.cycleDuration;
-                    }
-                    else {
-                        programPeriod = DEFAULT_PROGRAM_PERIOD;
-                    }
+                    
+                    //TODO: switch back when the cycleDuration info can be correctly retrieved from Scala 
+//                    if (anAvailableTimeInterval.cycleDuration > DEFAULT_PROGRAM_PERIOD){
+//                        programPeriod = anAvailableTimeInterval.cycleDuration;
+//                    }
+//                    else {
+//                        programPeriod = DEFAULT_PROGRAM_PERIOD;
+//                        
+//                    }
+                    //before the cycleDuration info can be correctly retrieved from Scala, use DEFAULT_PROGRAM_PERIOD for now
+                    programPeriod = DEFAULT_PROGRAM_PERIOD;
+                    
                     async.whilst(
-                        function () { return timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end; },
+                        //function () { return timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end; },
+                        function () { return timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end; },
                         function (cb_whilst) {
                             // try to avoid the conflicts with high-priority events
                             var intervalChecked = 0;
                             while ( periodicalHighPriorityEvents.isConflictedWith({ start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  }) && 
-                                    (timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) &&
+                                    //(timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) &&
+                                    (timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end) &&
                                     (intervalChecked < 60*60*1000) ) {
                                 timeToAddTimeSlot += programPeriod;
                                 intervalChecked += programPeriod;
                             }
                             
-                            if (timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) {
+                            //if (timeToAddTimeSlot+anAvailableTimeInterval.cycleDuration <= anAvailableTimeInterval.interval.end) {
+                            if (timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end) {
                                 // add time slots of a micro timeslot (of the same content genre) to db
                                 var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
                                 generateTimeSlotsOfMicroInterval(inteval, function(err1){
@@ -1122,10 +1131,14 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                             switch(option.type.toLowerCase())
                             {
                                 case 'ondascreen':
-                                    option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                    // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                    option.name = fb_name;
+                                    option.time = play_time;
                                     break;
                                 case 'wowtaipeiarena':
-                                    option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                    // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                    option.name = fb_name;
+                                    option.time = play_time;
                                     break;
                                 default:
                                     break;
@@ -1764,64 +1777,6 @@ var dateTransfer = function(date, cbOfDateTransfer){
 //  console.log(yyyy+'/'+mm+'/'+dd+' '+time);
     cbOfDateTransfer(tempDate);
 };
-
-var flag = 0;
-var autoCheckProgramAndPushToPlayer = function(){
-
-    if(flag == 1){
-        //validProgramExpired
-        var option =
-        {
-                search: "OnDaScreen"
-        };
-		logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] validProgramExpired start");
-        scalaMgr.validProgramExpired(option, function(err, res){
-            if(!err){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer] scalaMgr.validProgramExpired "+res);
-            }else{
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer error]scalaMgr.validProgramExpired "+err);
-            }
-        });
-    }
-    else if(flag == 0){
-        //Push program to scala
-        var checkDateStart = new Date().getTime();
-        var checkDateEnd = checkDateStart + 40*60*1000;
-        logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]find sessionItemModel in checkDateStart:"+checkDateStart+",checkDateEnd:"+checkDateEnd);
-        sessionItemModel.find({'intervalOfPlanningDoohProgrames.start': {$gte: checkDateStart, $lt: checkDateEnd}}).exec(function(err, result){
-            if(!result){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-            }
-            else if(!result[0]){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]sessionItem is null");
-            }
-            else if(!err){
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer.scalaMgr.pushEvent]pushEvent start; play name = OnDaScreen"+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end);
-                scalaMgr.pushEvent( {playlist: {search:'FM', play:'OnDaScreen'+'-'+result[0].intervalOfPlanningDoohProgrames.start+'-'+result[0].intervalOfPlanningDoohProgrames.end}, player: {name: scalaPlayerName}}, function(res){
-                    logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]scalaMgr.pushEvent res="+res);
-
-                });
-            }else{
-                logger.info("[schedule_mgr.autoCheckProgramAndPushToPlayer]fail to get sessionItem err="+err);
-            }
-            //console.log(err, result);
-        });
-    }
-    //flag contorl
-    if(flag == 0)
-        flag = 1;
-    else
-        flag = 0;
-    
-//    console.log('flag'+flag);
-    setTimeout(autoCheckProgramAndPushToPlayer, 6*60*1000);
-
-};
-/**
- * delay time for scala connect
- */
-setTimeout(autoCheckProgramAndPushToPlayer, 2000);
-
 
 
 //test

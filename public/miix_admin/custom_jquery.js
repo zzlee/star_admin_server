@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FeltMeng.com
  */
 
@@ -68,8 +68,7 @@ $(document).ready(function(){
 	/*----------------------------- live check start  by Joy----------------------------------*/
     FM.live_check = new PageList( 'live_check',10,'/miix_admin/doohs/'+DEFAULT_DOOH+'/liveContent',null, liveCheckSubPg.loadLiveCheckTable ); 
     /*-----------------------------end live check----------------------------------*/
-    
-
+   
     $('#memberListBtn').click( memberListSubPg.loadPage );
 
 
@@ -298,17 +297,63 @@ $(document).ready(function(){
              * UGCList
              */
             if(censorCheck == '/miix_admin/ugc_censor'){
+			
+				/**
+                 * search by genre  JOY
+                 */
+			
+				$($('input:radio[name=searchByGenre]')).click(function(){
+					var inputSearchData = {};
+                    $('input:radio[name=searchByGenre]:checked').each(function(){
+                        inputSearchData = {'contentGenre':$(this).val()};
+                        conditions = inputSearchData;
+                    });
+                    if(inputSearchData != null){
+                        $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
+                        FM.UGCList.setConditions(conditions);
+                        $('#main_menu ul[class="current"]').attr("class", "select");
+                        $('#UGCList').attr("class", "current");
+                        FM.currentContent = FM.UGCList;
+                        FM.currentContent.showCurrentPageContent();
+                    }
+				});
+				
+				
+                /**
+                 * 查詢FB NAME BY    JOY
+                 */
+                var conditions;
+                
+                $('#ugcSearchFBBtn').click(function(){
+                    $.get('/miix_admin/getIdByName', {token: localStorage.token,FBName: $('.ugcSearchFBBtn').val() },function(res) {
+                        var inputSearchData = {};
+                        $('#condition-inner input[class="ugcSearchFBBtn"]').each(function(){
+                            inputSearchData = {'ownerId.userID':{ $in: res.nameToId}};
+                            conditions = inputSearchData;
+                        });
+                        if(inputSearchData != null){
+                            $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
+                            FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
+                            FM.UGCList.setConditions(conditions);
+                            $('#main_menu ul[class="current"]').attr("class", "select");
+                            $('#UGCList').attr("class", "current");
+                            FM.currentContent = FM.UGCList;
+                            FM.currentContent.showCurrentPageContent();
+                        }
+                        console.log(res);
+                    });
+                });
+                
                 /**
                  * 查詢影片 click
                  */
-                var conditions;
                 
                 $('#ugcSearchBtn').click(function(){
                     var inputSearchData = {};
                     $('#condition-inner input[class="ugcSearchBtn"]').each(function(){
                         inputSearchData = {'no':$(this).val()};
                         conditions = inputSearchData;
-                        
                     });
                     if(inputSearchData != null){
                         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
@@ -512,7 +557,7 @@ $(document).ready(function(){
                 /**
                  * generate video UGC btn
                  */
-                $("input[id='ugcGenVideoUgcBtn']").click(function(){
+                $(".ugcGenVideoUgcBtn").click(function(){
                     //alert($(this).attr('projectId'));
                     $.ajax({
                         url: '/miix_admin/video_ugcs/'+$(this).attr('projectId'),
@@ -535,7 +580,8 @@ $(document).ready(function(){
                         }
                     });
                     
-                    $(this).hide();
+                    $("#miixVideoStateDiv_"+$(this).attr('rowIndex')).html("<label>正在產生拉洋片...</label>");
+                    //$(this).hide();
                 });
     
             }// End of UGCList
@@ -644,6 +690,32 @@ $(document).ready(function(){
         }
         else{
             $("#pageNoInput").val( FM.currentContent.currentPage);
+        }
+    });
+    
+    var ctrlIsDown = false;
+    
+    
+    $(document.activeElement).keyup(function( event ) {
+        //console.log("keyup event.which="+event.which);
+        if ( event.which == 17 ) {  //ctrl key
+            ctrlIsDown = false;
+        }
+        else if ( ctrlIsDown && (event.which == 33) ) {
+            //console.log('ctrl+pageUp pressed!');
+            FM.currentContent.showPreviousPageContent();
+        }
+
+        else if ( ctrlIsDown && (event.which == 34) ) {
+            //console.log('ctrl+pageDown pressed!');
+            FM.currentContent.showNextPageContent();
+        }
+    });
+
+    $(document.activeElement).keydown(function( event ) {
+        //console.log("keydown event.which="+event.which);
+        if ( event.which == 17 ) {  //ctrl key
+            ctrlIsDown = true;
         }
     });
 
