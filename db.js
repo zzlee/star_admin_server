@@ -157,7 +157,8 @@ FM.DB = (function(){
             }],
             highlight: {type: Boolean, default: false},
             hot: {type: Boolean, default: false},
-            fbProfilePicture: {type: String}
+            fbProfilePicture: {type: String},
+            forMRTReview: {type:Boolean, default: false}
         }); //  UGC collection
         
         var CommentSchema = new Schema({

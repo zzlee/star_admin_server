@@ -554,6 +554,33 @@ $(document).ready(function(){
                     });
                 });
                 
+                $('#ugcCensor.ugcCensorMRT').click(function(){
+                    
+                    var url = DOMAIN + "user_content_attribute";
+                    var no = $(this).attr("name");
+                    var forMRTReview = null;
+                    
+                    if($(this).val() == 'true'){
+                        forMRTReview = false;
+                        console.log(forMRTReview);
+                    }
+                    if($(this).val() == 'false'){
+                        forMRTReview = true; 
+                        console.log(forMRTReview);
+                    }
+    
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: {no: no, vjson:{forMRTReview: forMRTReview}},
+                        success: function(response) {
+                            if(response.message){
+                                console.log("[Response] message:" + response.message);
+                            }
+                        }
+                    });
+                });
+                
                 /**
                  * generate video UGC btn
                  */

@@ -80,7 +80,7 @@ censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, pageType, 
     }
 
     if ( pageLimit && pageSkip ) {
-        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent highlight url', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
+        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay forMRTReview userRawContent highlight url', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
             if(err) {
                 logger.error('[censorMgr_db.listOfUGCs]', err);
                 cb(err, null);
@@ -118,7 +118,7 @@ var UGCList = [];
 var timeslotStart;
 var timeslotEnd;
 
-var UGCListInfo = function(tsLiveStateCount,tsUGCCount,ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl,arr) {
+var UGCListInfo = function(tsLiveStateCount,tsUGCCount,ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay,forMRTReview, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl,arr) {
     arr.push({
         tsLiveStateCount: tsLiveStateCount,
         tsUGCCount:tsUGCCount,
@@ -134,6 +134,7 @@ var UGCListInfo = function(tsLiveStateCount,tsUGCCount,ugcProjectId, userPhotoUr
         rating: rating,
         contentGenre: contentGenre,
         mustPlay: mustPlay,
+        forMRTReview:forMRTReview,
         timeslotStart: timeslotStart,
         timeslotEnd: timeslotEnd,
         timeStamp: timeStamp,
@@ -195,13 +196,13 @@ var mappingUGCList = function(data, type, set_cb){
             }
             //UGCListInfo
             if(next == limit - 1) {
-                UGCListInfo(result[3],result[4],data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], UGCList);
+                UGCListInfo(result[3],result[4],data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay,data[next].forMRTReview, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], UGCList);
                 set_cb(null, 'ok'); 
                 next = 0;
                 UGCList = [];
             }
             else{
-                UGCListInfo(result[3],result[4],data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2],UGCList);
+                UGCListInfo(result[3],result[4],data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, data[next].forMRTReview,timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2],UGCList);
                 next += 1;
                 mappingUGCList(data, type, set_cb);
             }
@@ -337,6 +338,11 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
         vjson = {highlight : true};
     else if(vjson.highlight == 'false')
         vjson = {highlight : false};
+
+    if(vjson.forMRTReview == 'true')
+        vjson = {forMRTReview : true};
+    else if(vjson.forMRTReview == 'false')
+        vjson = {forMRTReview : false};
 
 
     UGC_mgr.getOwnerIdByNo(no, function(err, result){

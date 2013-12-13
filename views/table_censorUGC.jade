@@ -47,6 +47,8 @@ form#mainform(action='')
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 審核
           th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') mrt
+          th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 本次必登
 
         if(ugcCensorMovieList)
@@ -132,6 +134,11 @@ form#mainform(action='')
                              |   F
                              br
                          .clear
+                      td
+                        if(ugcCensor.forMRTReview == true)					  
+                          input#ugcCensor.ugcCensorMRT(type='checkbox', value='#{ugcCensor.forMRTReview}', name='#{ugcCensor.ugcCensorNo}', checked)
+                        else
+                          input#ugcCensor.ugcCensorMRT(type='checkbox', value='#{ugcCensor.forMRTReview}', name='#{ugcCensor.ugcCensorNo}')
                       td
                         if(ugcCensor.mustPlay == true)					  
                           input#ugcCensor.ugcCensorNoMP(type='checkbox', value='#{ugcCensor.mustPlay}', name='#{ugcCensor.ugcCensorNo}', checked)
@@ -220,6 +227,11 @@ form#mainform(action='')
                              |   F
                              br
                          .clear
+                      td
+                        if(ugcCensor.forMRTReview == true)					  
+                          input#ugcCensor.ugcCensorMRT(type='checkbox', value='#{ugcCensor.forMRTReview}', name='#{ugcCensor.ugcCensorNo}', checked)
+                        else
+                          input#ugcCensor.ugcCensorMRT(type='checkbox', value='#{ugcCensor.forMRTReview}', name='#{ugcCensor.ugcCensorNo}')
                       td 
                         if(ugcCensor.mustPlay == true)					  
                           input#ugcCensor.ugcCensorNoMP(type='checkbox', value='#{ugcCensor.mustPlay}', name='#{ugcCensor.ugcCensorNo}', checked)
