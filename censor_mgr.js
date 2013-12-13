@@ -80,7 +80,7 @@ censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, pageType, 
     }
 
     if ( pageLimit && pageSkip ) {
-        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent highlight url processingState', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
+        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent highlight url processingState fbProfilePicture', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
             if(err) {
                 logger.error('[censorMgr_db.listOfUGCs]', err);
                 cb(err, null);
@@ -193,13 +193,13 @@ var mappingUGCList = function(data, type, set_cb){
             }
             //UGCListInfo
             if(next == limit - 1) {
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
                 set_cb(null, 'ok'); 
                 next = 0;
                 UGCList = [];
             }
             else{
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
                 next += 1;
                 mappingUGCList(data, type, set_cb);
             }
