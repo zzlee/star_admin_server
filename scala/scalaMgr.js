@@ -142,7 +142,7 @@ function scalaMgr( url, account ){
                             //console.log(list.timeslots[i].endDate);
                             if((option.date.getTime() <= timeslotDeadline.getTime()) && (status == 'OK')){
                                 result.push({
-                                    //playlist: list.timeslots[i].playlist.name,
+                                    playlist: { id: list.timeslots[i].playlist.id, name: list.timeslots[i].playlist.name },
                                     interval: {
                                         start: timeToInt(oneday, list.timeslots[i].startTime),
                                         end: timeToInt(oneday, list.timeslots[i].endTime)
@@ -289,7 +289,7 @@ function scalaMgr( url, account ){
      * Push media to playlist item.
      *
      */
-    var pushMediaToPlaylist = function(option, reportPlaylistItem_cb){
+    var pushMediaToPlaylist = function(option, limit, push_cb){
         
         var playlistName = '';
         if(typeof(option.playlist) === 'undefined')
@@ -304,38 +304,65 @@ function scalaMgr( url, account ){
             playlistItem: { id: 0 }
         };
         
-        var findPlaylistItemId = function(setting, findPlaylistItemId_cb){
-            contractor.item.addItemToPlaylist(setting, function(err, res){
-                contractor.playlist.list({search: setting.playlist.name}, function(err, res){
-                    setting.playlist.content = res.list;
-                    for(var i=0; i<res.list[0].playlistItems.length; i++) {
-                        if(res.list[0].playlistItems[i].media.name.match(setting.media.name))
-                            setting.playlistItem.id = Math.max(setting.playlistItem.id, res.list[0].playlistItems[i].id);
+        var playStart = new Date(setting.playTime.start),
+            playEnd = new Date(setting.playTime.end);
+            
+        var playStartDate = playStart.getFullYear() + '-' + (playStart.getMonth() + 1) + '-' + playStart.getDate(),
+            playEndDate = playEnd.getFullYear() + '-' + (playEnd.getMonth() + 1) + '-' + playEnd.getDate();
+        
+        var playStartTime = '', playEndTime = '';
+        playStartTime += (playStart.getHours() >= 10)?playStart.getHours():('0'+playStart.getHours());
+        playStartTime += ':'; 
+        playStartTime += (playStart.getMinutes() >= 10)?playStart.getMinutes():('0' + playStart.getMinutes());
+        
+        playEndTime += (playEnd.getHours() >= 10)?playEnd.getHours():('0'+playEnd.getHours());
+        playEndTime += ':'; 
+        playEndTime += (playEnd.getMinutes() >= 10)?playEnd.getMinutes():('0'+playEnd.getMinutes());
+        
+        if(typeof(limit) === 'function') {
+            push_cb = limit;
+            limit = 3;
+        }
+        var count = 0;
+        
+        var checker = function( id, itemId, check_cb) {
+            var query = {
+                filters: encodeURIComponent("{'id':{'values':[" + id + "]}}")
+            };
+            contractor.playlist.list(query, function(err, playlist) {
+                for(var i=0; i<playlist.list[0].playlistItems.length; i++) {
+                    if( (item.id == setting.playlistItem.id) && (!item.useValidRange) ) {
+                        check_cb(false);
+                        return;
                     }
-                    findPlaylistItemId_cb(err, setting);
-                });
+                    if( i == playlist.list[0].playlistItems.length-1 ) {
+                        check_cb(true);
+                    }
+                }
             });
         };
         
         async.series([
-            function(step1){
+            function(step1) {
                 //step.1 - get media info
                 contractor.media.list({search: setting.media.name}, function(err, res){ 
                     if(typeof(res.list) === 'undefined')
                         step1('NO_MEDIA_INFO', null);
                     else {
                         setting.media.id = res.list[0].id;
+                        setting.media.name = res.list[0].name;
                         step1(null, 'done');
                     }
                 });
             },
-            function(step2){
+            function(step2) {
                 //step.2 - get playlist info and if not have playlist then create one.
                 isExistedOfPlaylist(setting.playlist.name, function(status){
                     if(!status.exist) {
                         contractor.playlist.create({ name: setting.playlist.name }, function(err, res){
                             isExistedOfPlaylist(setting.playlist.name, function(status){
                                 setting.playlist.id = status.id;
+                                setting.playlist.name = status.name;
                                 step2(null, 'done');
                             });
                         });
@@ -346,66 +373,148 @@ function scalaMgr( url, account ){
                     }
                 });
             },
-        ], function(err, step3){
-            //step.3 - find out playlist item id
-            if(err){
-                reportPlaylistItem_cb(err, null);
-                return;
-            }
-            findPlaylistItemId(setting, function(err, res){
-                if(err){
-                    reportPlaylistItem_cb(err, null);
-                    return;
-                }
-                //step.4 - update playlist item by playlist item id
-                contractor.playlist.updatePlaylistItemScheduleById(setting, function(err, res){
-                    if(err){
-                        scalaLogger.action('push media to playlist is failed, media file name is ' + setting.media.name);
-                        reportPlaylistItem_cb(err, null);
-                        return;
-                    }
-                    scalaLogger.action('push media to playlist is successfully, media file name is ' + setting.media.name);
-                    reportPlaylistItem_cb(err, { 
-                        media: setting.media,
-                        playlist: { id: setting.playlist.id, name: setting.playlist.name },
-                        playlistItem: setting.playlistItem 
+            function(step3) {
+                var query = {
+                    filters: encodeURIComponent("{'id':{'values':[" + setting.playlist.id + "]}}")
+                };
+                contractor.item.addItemToPlaylist(setting, function(err, res){
+                    contractor.playlist.list(query, function(err, res){
+                        setting.playlist.content = res.list;
+                        for(var i=0; i<res.list[0].playlistItems.length; i++) {
+                            if(res.list[0].playlistItems[i].media) {
+                                if(res.list[0].playlistItems[i].media.name.match(setting.media.name))
+                                    setting.playlistItem.id = Math.max(setting.playlistItem.id, res.list[0].playlistItems[i].id);
+                            }
+                        }
+                        step3(null, 'done');
                     });
                 });
-            });
+            },
+            function(step4) {
+                setting.playlist.filters = encodeURIComponent("{'id':{'values':[" + setting.playlist.id + "]}}")
+                //step.4 - update playlist item by playlist item id
+                contractor.playlist.updatePlaylistItemScheduleById(setting, function(err, res){
+                    step4(null, 'done');
+                });
+            },
+        ], function(err, res) {
+            // step.5 - check playlistItem update status
+            async.whilst(
+                function () { return count < limit; },
+                function (callback) {
+                    checker(setting.playlist.id, setting.playlistItem.id, function(status) {
+                        if(!status) {
+                            contractor.playlist.updatePlaylistItemScheduleById(setting, function(err, res){
+                                count++;
+                                if(count != limit)
+                                    setTimeout(callback, 200);
+                                else
+                                    callback(status);
+                            });
+                        }
+                        else {
+                            callback(status);
+                            count = limit;
+                        }
+                    });
+                },
+                function (report) {
+                    if( count < limit ) {
+                        push_cb(null, { 
+                            media: setting.media,
+                            playlist: { id: setting.playlist.id, name: setting.playlist.name },
+                            playlistItem: setting.playlistItem 
+                        });
+                    }
+                    if( count == limit ) {
+                        push_cb(err, null);
+                    }
+                }
+            );
+            
         });
+        
     };
     
     /**
      * Upload Media Item.
      * 
      */
-    var uploadMediaItem = function(option, upload_cb){
+    var uploadMediaItem = function(option, limit, upload_cb){
     
         var file = option.file;
         
-        if( !file.name ) upload_cb('No_File_Name', null);
-        if( !file.path ) upload_cb('No_File_Path', null);
+        if( !file.name ) {
+            upload_cb('No_File_Name', null);
+            return;
+        }
+        if( !file.path ) {
+            upload_cb('No_File_Path', null);
+            return;
+        }
         
+        if( typeof(limit) === 'function' ) {
+            upload_cb = limit;
+            limit = 3;
+        }
+        
+        var count = 0;
         var media = 
         {
             id: '',
             name: file.name
         };
         
-        contractor.media.fileupload(file, function(err, status){
-            // upload_cb(null, status);
-            contractor.media.list({search: media.name}, function(err, res){ 
-                if(typeof(res.list) === 'undefined') {
-                    scalaLogger.action('no media info response, file name is ' + media.name);
-                    upload_cb('NO_MEDIA_INFO', null);
-                }
-                else {
-                    scalaLogger.action('upload media is successfully, file name is ' + media.name);
-                    media.id = res.list[0].id;
-                    upload_cb(null, { media: media });
-                }
+        var upload = function( file, media, info_cb ) {
+            contractor.media.fileupload(file, function(err, status){
+                contractor.media.list({search: media.name}, function(err, res){ 
+                    if( typeof(res.list) === 'undefined' ) {
+                        scalaLogger.action('no media info response, file name is ' + media.name);
+                        info_cb('NO_MEDIA_INFO', null);
+                    }
+                    else {
+                        if( res.list[0].status != 'OK' ) {
+                            scalaLogger.action('upload media is failed, file name is ' + media.name + ', please re-upload.');
+                            info_cb('REUPLOAD', null);
+                        }
+                        else {
+                            scalaLogger.action('upload media is successfully, file name is ' + media.name);
+                            media.id = res.list[0].id;
+                            info_cb(null, { media: media });
+                        }
+                    }
+                });
             });
-        });
+        };
+        
+        async.whilst(
+            function () { return count < limit; },
+            function (callback) {
+                upload(file, media, function(err, res) {
+                    if( err ) {
+                        count++;
+                        if(count != limit)
+                            setTimeout(callback, 200);
+                        else
+                            callback(err);
+                    }
+                    else {
+                        callback(res);
+                        count = limit;
+                    }
+                });
+            },
+            function (report) {
+                //excute
+                if( count < limit ) {
+                    upload_cb(null, report);
+                }
+                if( count == limit ) {
+                    upload_cb(err, null);
+                }
+            }
+        );
+        
     };
     
     /**
@@ -413,29 +522,71 @@ function scalaMgr( url, account ){
      */
     var pullPlaylistItem = function(option, pull_cb){
     
-        var playlistName = '';
-        if(typeof(option.playlist) === 'undefined')
+        var playlistName = null,
+            playlistId = null;
+        
+        if(typeof(option.playlistItem) === 'undefined') {
+            pull_cb('NO_INPUT_PLAYLIST_ITEM_ID', null);
+            return;
+        }
+        
+        if(typeof(option.playlist) === 'undefined') {
             playlistName = 'OnDaScreen';
-        else
-            (typeof(option.playlist.name) === 'undefined')?playlistName = 'OnDaScreen':playlistName = option.playlist.name;
-            
-        contractor.playlist.list({ search: playlistName }, function(err, playlistInfo){
-            if(err) {
-                scalaLogger.action('pull playlist item is error: ' + JSON.stringify(err));
-                pull_cb(err, null);
+        }
+        else {
+            if(typeof(option.playlist.name) === 'undefined') { 
+                playlistName = 'OnDaScreen'; 
             }
             else {
-                cutOffPlaylistItem(option.playlistItem, playlistInfo.list[0].playlistItems, function(afterPlaylistItems){
-                    playlistInfo.list[0].playlistItems = afterPlaylistItems;
-                    contractor.playlist.update({
-                        playlist: { id: playlistInfo.list[0].id, content: playlistInfo.list[0] },
-                    }, function(report){
-                        scalaLogger.action('pull playlist item is successfully, info: ' + JSON.stringify(report));
-                        pull_cb(null, report);
-                    });
-                });
+                playlistName = option.playlist.name;
             }
-        });
+            if(typeof(option.playlist.id) !== 'undefined') { playlistId = option.playlist.id; }
+        }
+        
+        if(playlistId == null) {
+            contractor.playlist.list({ search: playlistName }, function(err, playlistInfo){
+                if(err) {
+                    scalaLogger.action('pull playlist item is error: ' + JSON.stringify(err));
+                    pull_cb(err, null);
+                }
+                else {
+                    cutOffPlaylistItem(option.playlistItem, playlistInfo.list[0].playlistItems, function(afterPlaylistItems){
+                        playlistInfo.list[0].playlistItems = afterPlaylistItems;
+                        contractor.playlist.update({
+                            playlist: { id: playlistInfo.list[0].id, content: playlistInfo.list[0] },
+                        }, function(report){
+                            scalaLogger.action('pull playlist item is successfully, info: ' + JSON.stringify(report));
+                            pull_cb(null, report);
+                        });
+                    });
+                }
+            });
+        }
+        else {
+            var query =
+            {
+                filters: encodeURIComponent("{'id':{'values':[" + playlistId + "]}}")
+            };
+            contractor.playlist.list(query, function(err, playlistInfo) {
+                // console.dir(playlistInfo);
+                // pull_cb(err, playlistInfo);
+                if(err) {
+                    scalaLogger.action('pull playlist item is error: ' + JSON.stringify(err));
+                    pull_cb(err, null);
+                }
+                else {
+                    cutOffPlaylistItem(option.playlistItem, playlistInfo.list[0].playlistItems, function(afterPlaylistItems){
+                        playlistInfo.list[0].playlistItems = afterPlaylistItems;
+                        contractor.playlist.update({
+                            playlist: { id: playlistInfo.list[0].id, content: playlistInfo.list[0] },
+                        }, function(report){
+                            scalaLogger.action('pull playlist item is successfully, info: ' + JSON.stringify(report));
+                            pull_cb(null, report);
+                        });
+                    });
+                }
+            });
+        }
     };
     
     /**

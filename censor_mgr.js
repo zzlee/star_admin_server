@@ -80,7 +80,7 @@ censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, pageType, 
     }
 
     if ( pageLimit && pageSkip ) {
-        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent highlight url', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
+        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent highlight url processingState fbProfilePicture', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
             if(err) {
                 logger.error('[censorMgr_db.listOfUGCs]', err);
                 cb(err, null);
@@ -118,8 +118,10 @@ var UGCList = [];
 var timeslotStart;
 var timeslotEnd;
 
-var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl,arr) {
+var UGCListInfo = function(tsLiveStateCount,tsUGCCount,ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, arr) {
     arr.push({
+        tsLiveStateCount: tsLiveStateCount,
+        tsUGCCount:tsUGCCount,
         userPhotoUrl: userPhotoUrl,
         ugcProjectId: ugcProjectId,
         ugcCensorNo: ugcCensorNo,
@@ -138,7 +140,8 @@ var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent,
         programTimeSlotId: programTimeSlotId,
         highlight: highlight,
         url: url,
-        liveContentUrl: liveContentUrl
+        liveContentUrl: liveContentUrl,
+        processingState: processingState
     });
 };
 var mappingUGCList = function(data, type, set_cb){
@@ -192,13 +195,14 @@ var mappingUGCList = function(data, type, set_cb){
             }
             //UGCListInfo
             if(next == limit - 1) {
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], UGCList);
+
+                UGCListInfo(result[3],result[4],data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
                 set_cb(null, 'ok'); 
                 next = 0;
                 UGCList = [];
             }
             else{
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], result[0], data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2],UGCList);
+                UGCListInfo(result[3], result[4], data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
                 next += 1;
                 mappingUGCList(data, type, set_cb);
             }
@@ -262,6 +266,17 @@ var mappingUGCList = function(data, type, set_cb){
                             }else
                                 callback(null, 'not highlight');
 
+                        },
+                        function(callback){ // get count of programTimeSlot's liveState is correct for UGCLIST by Joy
+                            programTimeSlotModel.count({"content.no":data[next].no,"liveState":"correct"}).exec(function(err,result){
+                                callback(null,result);
+                            });
+                            
+                        },
+                        function(callback){ // get count of programTimeSlot's (without other conditions) for UGCLIST by Joy
+                            programTimeSlotModel.count({"content.no":data[next].no}).exec(function(err,result){
+                              callback(null,result);
+                          });
                         }
                         ], toDo);
     
@@ -590,6 +605,10 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                         message = fb_name + '於' + playTime + '，登上台北天幕LED，特此感謝您精采的作品！\n' + 
                                   '上大螢幕APP 粉絲團: https://www.facebook.com/OnDaScreen';
                     }
+                    else if (type == 'source_not_played') {
+                        message = '很遺憾的，您的試鏡編號' + ugcCensorNo + '作品，因故被取消登上小巨蛋。' + 
+                        '查明若非不當內容，將儘快通知您新的播出時間。造成不便請見諒。';
+                    }
                     else if ( (type != 'other_fail') && (type != 'not_checked') ) {
                         // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
                                   // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
@@ -601,6 +620,10 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                     if(type == 'correct') {
                         message = '你的No.' + ugcCensorNo + '作品，在' + playTime + 
                                   '，登上小巨蛋天幕，感謝你的精采作品，快到 我的投稿/哇!紀錄 裡瞧瞧實拍照!';
+                    }
+                    else if (type == 'source_not_played') {
+                        message = '很遺憾的，您的No.' + ugcCensorNo + '作品，因故被取消登上小巨蛋。' + 
+                        '查明若非不當內容，將儘快通知您新的播出時間。造成不便請見諒。';
                     }
                     else if ( (type != 'other_fail') && (type != 'not_checked') ) {
                         // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+

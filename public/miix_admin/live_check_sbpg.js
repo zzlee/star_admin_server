@@ -305,6 +305,21 @@
                     "_type":"correct",
                     "genre":res[i].liveContent[j].genre
                 });
+                
+                var storyMvGenBtn = $("<input>").attr({type:"button",
+                    class:"storyMvGenBtn",
+                    value: "產生story MV",
+                    "ownerId":res[i].liveContent[j].ownerId.userID,
+                    "s3url":res[i].liveContent[j].url.s3,
+                    "longPic":res[i].liveContent[j].url.longPhoto,
+                    "_id":res[i].liveContent[j]._id,
+                    "projectId": res[i].liveContent[j].projectId,
+                    "liveTime":res[i].liveContent[j].liveTime,
+                    "ugcCensorNo":res[i].ugcCensorNo,
+                    "_type":"correct",
+                    "genre":res[i].liveContent[j].genre
+                });
+
                 /*------------------------- ends live content(one image)  or  video btn -----------------------------------------------*/       
                 
                 
@@ -395,7 +410,8 @@
                             boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
                             boxForm.append(boxInput2);
                             boxForm.append("正確");
-                            
+                            boxForm.append("<br>");
+                            boxForm.append(storyMvGenBtn);                            
                             tr_4.prepend(sp);
                             tr.append(tr_4);
                             tr.append(boxForm);
@@ -606,17 +622,6 @@
                             "\n" + "s3Url: " + s3Url + 
                             "\n" + "Type: " + picType);
                 
-                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
-                $.ajax({
-                    url: "/internal/story_cam_controller/available_story_movie",
-                    type: "POST",
-                    headers : { 'miix_movie_project_id' : projectId, 'record_time' : liveTime },
-                    success: function(response) {
-                        if(response.message){
-                            console.log("[Response] message:" + response.message);
-                        }
-                    }
-                });
                 
                 var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
                 $.ajax({
@@ -729,6 +734,24 @@
 
             }
             
+            
+        });
+        
+        // button to gen story MV
+        $(".storyMvGenBtn").click(function(){
+            var projectId = $(this).attr("projectId");
+            var liveTime=$(this).attr("liveTime");
+
+            $.ajax({
+                url: "/internal/story_cam_controller/available_story_movie",
+                type: "POST",
+                headers : { 'miix_movie_project_id' : projectId, 'record_time' : liveTime },
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
             
         });
         /* ------------------------------ end 最右邊正確紐---------------------------------------------------*/
