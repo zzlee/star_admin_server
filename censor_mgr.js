@@ -118,8 +118,10 @@ var UGCList = [];
 var timeslotStart;
 var timeslotEnd;
 
-var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, arr) {
+var UGCListInfo = function(tsLiveStateCount,tsUGCCount,ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, arr) {
     arr.push({
+        tsLiveStateCount: tsLiveStateCount,
+        tsUGCCount:tsUGCCount,
         userPhotoUrl: userPhotoUrl,
         ugcProjectId: ugcProjectId,
         ugcCensorNo: ugcCensorNo,
@@ -193,13 +195,14 @@ var mappingUGCList = function(data, type, set_cb){
             }
             //UGCListInfo
             if(next == limit - 1) {
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
+
+                UGCListInfo(result[3],result[4],data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
                 set_cb(null, 'ok'); 
                 next = 0;
                 UGCList = [];
             }
             else{
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
+                UGCListInfo(result[3], result[4], data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
                 next += 1;
                 mappingUGCList(data, type, set_cb);
             }
@@ -263,6 +266,17 @@ var mappingUGCList = function(data, type, set_cb){
                             }else
                                 callback(null, 'not highlight');
 
+                        },
+                        function(callback){ // get count of programTimeSlot's liveState is correct for UGCLIST by Joy
+                            programTimeSlotModel.count({"content.no":data[next].no,"liveState":"correct"}).exec(function(err,result){
+                                callback(null,result);
+                            });
+                            
+                        },
+                        function(callback){ // get count of programTimeSlot's (without other conditions) for UGCLIST by Joy
+                            programTimeSlotModel.count({"content.no":data[next].no}).exec(function(err,result){
+                              callback(null,result);
+                          });
                         }
                         ], toDo);
     
