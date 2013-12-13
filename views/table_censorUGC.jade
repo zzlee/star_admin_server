@@ -58,12 +58,18 @@ form#mainform(action='')
                              img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
                              label       
                              img(src='#{ugcCensor.userPhotoUrl}', alt='', width='300', style='padding:5px')
-                             if !ugcCensor.url.youtube
-                                input#ugcGenVideoUgcBtn(type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
-                             else
-                                iframe(width='256',height='144', src='#{ugcCensor.url.youtube}')
-                             br
-                             label #{ugcCensor.fb_userName} 
+                             div(id='miixVideoStateDiv_#{i}', style='display:inline')
+                                if ugcCensor.url.youtube
+                                    iframe(width='256',height='144', src='#{ugcCensor.url.youtube}')
+                                else
+                                    case ugcCensor.processingState
+                                        when 'under_generating'
+                                            label 正在產生拉洋片...
+                                        when 'generating_failed'
+                                            label 上回產生拉洋片失敗!!　
+                                            input#ugcGenVideoUgcBtn(type='button', value='重新產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
+                                        when 'not_generated'
+                                            input#ugcGenVideoUgcBtn(type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
                       else
                          td
                              a(href='#{ugcCensor.url.s3}',target='_blank')  
@@ -145,12 +151,18 @@ form#mainform(action='')
                              img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
                              label       
                              img(src='#{ugcCensor.userPhotoUrl}', alt='', width='300', style='padding:5px')
-                             if !ugcCensor.url.youtube
-                                input#ugcGenVideoUgcBtn(type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
-                             else
-                                iframe(width='256',height='144', src='#{ugcCensor.url.youtube}')
-                             br
-                             label #{ugcCensor.fb_userName} 
+                             div(id='miixVideoStateDiv_#{i}', style='display:inline')
+                                if ugcCensor.url.youtube
+                                    iframe(width='256',height='144', src='#{ugcCensor.url.youtube}')
+                                else
+                                    case ugcCensor.processingState
+                                        when 'under_generating'
+                                            label 正在產生拉洋片...
+                                        when 'generating_failed'
+                                            label 上回產生拉洋片失敗!!　
+                                            input#ugcGenVideoUgcBtn(type='button', value='重新產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
+                                        when 'not_generated'
+                                            input#ugcGenVideoUgcBtn(type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
                       else
                          td
                              a(href='#{ugcCensor.url.s3}',target='_blank')  

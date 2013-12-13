@@ -34,7 +34,7 @@ FM.DB = (function(){
                 //cultural_and_creative: a.k.a. 文創
                 //mood: a.k.a. 心情
                 //check_in: a.k.a. 打卡
-            ugcProcessingState = 'under_generating generating_failed complete'.split(' '),
+            ugcProcessingState = 'not_generated under_generating generating_failed complete'.split(' '),
             questionGenre = 'account publish sign_in others'.split(' '),
             
             programTimeSlotType = 'UGC padding'.split(' '),
@@ -156,7 +156,7 @@ FM.DB = (function(){
             }],
             highlight: {type: Boolean, default: false},
             hot: {type: Boolean, default: false},
-            processingState: {type: String, enum: ugcProcessingState},
+            processingState: {type: String, enum: ugcProcessingState, default:"not_generated"},
             fbProfilePicture: {type: String}
         }); //  UGC collection
         
