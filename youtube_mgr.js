@@ -224,7 +224,7 @@ FM.youtubeMgr.uploadVideoWithRetry = function( ytAccessToken, videoFile, videoTi
     var i = 0, tryMax = 3;
     var uploadVideoToYoutubeSteps = function() {
         
-        youtubeMgr.uploadVideo( ytAccessToken, videoFile, videoTitle, movieProjectID, function(result) {
+        FM.youtubeMgr.uploadVideo( ytAccessToken, videoFile, videoTitle, movieProjectID, function(result) {
             if (result.err) {
                 if ( i < tryMax ) {
                     setTimeout(function(){ 

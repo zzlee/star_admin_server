@@ -134,7 +134,7 @@ miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbI
                         //download the Miix video from S3 to temp folder
                         movieFileForPhone = path.join(workingPath, "public/contents/temp", movieProjectID+"__phone."+fileExtension);
                         var s3Path =  '/user_project/' + movieProjectID + '/'+ movieProjectID+'_phone'+'.'+fileExtension;
-                        awsS3.downloadFromAwsS3(movieFileForPhone, s3Path, function(errOfDownloadFromAwsS3,result){
+                        awsS3.downloadFromAwsS3(movieFileForPhone, s3Path, function(errOfDownloadFromAwsS3, result){
                             if (!errOfDownloadFromAwsS3){
                                 logger.info('Successfully download from S3 ' + s3Path);
                                 callback(null);
@@ -162,17 +162,23 @@ miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbI
                         youtubeMgr.uploadVideoWithRetry( ytAccessToken, movieFileForPhone, movieTitle, movieProjectID, function(result) {
                             if (result.err) {
                                 logger.error('Miix movie is failed to be uploaded to Youtube');
-                                callback("Failed to upload Miix movie ["+movieProjectID+"] to YouTube: "+result.err, null);
+                                callback("Failed to upload Miix movie ["+movieProjectID+"] to YouTube: "+result.err);
                             }
                             else {
                                 logger.info('Miix movie is successfully uploaded to Youtube.  youtubeVideoID='+result.youtubeVideoID);
-                                callback(null, result.youtubeVideoID);
+                                urls.youtube = "http://www.youtube.com/embed/"+result.youtubeVideoID;
+                                callback(null);
                             }
                         });
                         
                     },
                     function(callback){
                         //TODO:delete the Miix video from temp folder
+                        fs.unlink(movieFileForPhone, function(errOfUnlink){
+                            if (errOfUnlink) {
+                                logger.error("Failed to remove "+movieFileForPhone+"from temp folder.");
+                            }
+                        });
                         callback(null);
                     }
                 ],
@@ -208,7 +214,7 @@ miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbI
                 if (!errOfFindOneAndUpdate) {
                     if (ugcProcessingState === "complete") {
                         //TODO: send push notification to the UGC owner
-                        console.log("TODO: send push notification to the UGC owner");
+                        //console.log("TODO: send push notification to the UGC owner");
                         
                         callback(null);
                     }
@@ -595,7 +601,6 @@ miixContentMgr.addMiixImage = function(imgBase64, imgDoohPreviewBase64, ugcProje
     var ugcS3Path = null;
     var ugcDoohPreviewS3Path = null;
     var ugcS3Url = null;    
-    debugger;
     
     async.series([
         function(callback){
