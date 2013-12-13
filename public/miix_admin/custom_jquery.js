@@ -534,7 +534,7 @@ $(document).ready(function(){
                 /**
                  * generate video UGC btn
                  */
-                $("input[id='ugcGenVideoUgcBtn']").click(function(){
+                $(".ugcGenVideoUgcBtn").click(function(){
                     //alert($(this).attr('projectId'));
                     $.ajax({
                         url: '/miix_admin/video_ugcs/'+$(this).attr('projectId'),
@@ -557,7 +557,8 @@ $(document).ready(function(){
                         }
                     });
                     
-                    $(this).hide();
+                    $("#miixVideoStateDiv_"+$(this).attr('rowIndex')).html("<label>正在產生拉洋片...</label>");
+                    //$(this).hide();
                 });
     
             }// End of UGCList

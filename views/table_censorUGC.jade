@@ -67,9 +67,9 @@ form#mainform(action='')
                                             label 正在產生拉洋片...
                                         when 'generating_failed'
                                             label 上回產生拉洋片失敗!!　
-                                            input#ugcGenVideoUgcBtn(type='button', value='重新產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
+                                            input(class='ugcGenVideoUgcBtn', type='button', value='重新產生拉洋片', projectId='#{ugcCensor.ugcProjectId}', rowIndex='#{i}')
                                         when 'not_generated'
-                                            input#ugcGenVideoUgcBtn(type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
+                                            input(class='ugcGenVideoUgcBtn', type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}', rowIndex='#{i}')
                       else
                          td
                              a(href='#{ugcCensor.url.s3}',target='_blank')  
@@ -160,9 +160,9 @@ form#mainform(action='')
                                             label 正在產生拉洋片...
                                         when 'generating_failed'
                                             label 上回產生拉洋片失敗!!　
-                                            input#ugcGenVideoUgcBtn(type='button', value='重新產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
+                                            input(class='ugcGenVideoUgcBtn', type='button', value='重新產生拉洋片', projectId='#{ugcCensor.ugcProjectId}', rowIndex='#{i}')
                                         when 'not_generated'
-                                            input#ugcGenVideoUgcBtn(type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}')
+                                            input(class='ugcGenVideoUgcBtn', type='button', value='產生拉洋片', projectId='#{ugcCensor.ugcProjectId}', rowIndex='#{i}')
                       else
                          td
                              a(href='#{ugcCensor.url.s3}',target='_blank')  
