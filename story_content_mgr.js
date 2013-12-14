@@ -1,4 +1,4 @@
-var storyContentMgr = {};
+﻿var storyContentMgr = {};
 
 var async = require('async');
 var workingPath = process.cwd();
@@ -284,6 +284,7 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
                             "genre":"miix_story",
                             "aeId": aeServerID,
                             "projectId":storyMovieProjectID,
+                            "sourceId": miixMovieProjectID,
                             "liveTime":parseInt(recordTime)
                         };
                         //add story MV notification

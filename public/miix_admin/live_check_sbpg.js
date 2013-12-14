@@ -259,6 +259,15 @@
                                                 
                         /*----------------------------------ends when genre is   "miix_story_raw"----------------------------------------*/
                     }
+                    else if(res[i].liveContent[j].genre == "miix_story"){
+                        var iframeTag = $("<iframe>").attr({
+                                width: 500, 
+                                height: 281, 
+                                src: res[i].liveContent[j].url.youtube
+                                   
+                        });
+                        var tr_4=$("<tr>").html(iframeTag);
+                    }
                     else{
                         /*---------------------------------- when genre is   "miix_image_live_photo" (非五選一 舊版)----------------------------------------*/
                                                 var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.s3,
@@ -403,6 +412,23 @@
                         tr.append("<br>");
                         //---------------------------------------------
                     }else{
+                        if ( res[i].liveContent[j].genre == "miix_story_raw" ) {
+                            boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                           
+                            boxForm.append(storyMvGenBtn);                            
+                            tr_4.prepend(sp);
+                            tr.append(tr_4);
+                            tr.append(boxForm);
+                            boxForm.appendTo(tr_4)
+                            tr.append("<br>");
+                            
+                            if(j!=res[i].liveContent.length-1){
+                               tr.append("<hr>");
+                            }
+                            
+                            tr.append("<br>");
+                        }
+                        else if ( res[i].liveContent[j].genre == "miix_story" ){ 
                             boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
                             boxForm.append(boxInput);
                             boxForm.append("default");
@@ -417,12 +443,14 @@
                             tr.append(boxForm);
                             boxForm.appendTo(tr_4)
                             tr.append("<br>");
-                        
-                         if(j!=res[i].liveContent.length-1){
-                            tr.append("<hr>");
-                         }
-                        
-                        tr.append("<br>");
+                            
+                            if(j!=res[i].liveContent.length-1){
+                               tr.append("<hr>");
+                            }
+                            
+                            tr.append("<br>");
+                        }
+                            
                     }
 
                 }else{//for 1/5
