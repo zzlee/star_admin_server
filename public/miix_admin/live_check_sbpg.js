@@ -317,7 +317,7 @@
                 
                 var storyMvGenBtn = $("<input>").attr({type:"button",
                     class:"storyMvGenBtn",
-                    value: "產生story MV",
+                    value: "產生Story MV",
                     "ownerId":res[i].liveContent[j].ownerId.userID,
                     "s3url":res[i].liveContent[j].url.s3,
                     "longPic":res[i].liveContent[j].url.longPhoto,
@@ -437,7 +437,6 @@
                             boxForm.append(boxInput2);
                             boxForm.append("正確");
                             boxForm.append("<br>");
-                            boxForm.append(storyMvGenBtn);                            
                             tr_4.prepend(sp);
                             tr.append(tr_4);
                             tr.append(boxForm);

@@ -684,15 +684,15 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                                 fbMgr.postMessage(accessToken, can_msg, liveContentUrl.youtube, function(errOfPostMessage, result){
                                     //console.log("result=%s", result);
                                     if (!errOfPostMessage) {
-                                        callback(null);
+                                        postPicture_cb(null, 'done');
                                     }
                                     else {
-                                        callback("Failed to post FB: "+errOfPostMessage);
+                                        postPicture_cb("Failed to post FB: "+errOfPostMessage);
                                     }
                                 });
                             }
                             else {
-                                callback("Failed to get FB access token from member DB: "+errOfGetFBAccessTokenById);
+                                postPicture_cb("Failed to get FB access token from member DB: "+errOfGetFBAccessTokenById);
                             }
                              
                          });
