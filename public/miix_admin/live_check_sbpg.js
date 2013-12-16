@@ -624,7 +624,7 @@
         $("#boxCheckLive.good").click(function(){ //btn for image(only one) and video
         //alert("g");
         
-            if($(this).attr("genre") == "miix_story_raw"){
+            if($(this).attr("genre") == "miix_story"){
                 // alert("it's miix_story_raw");
                 var forComfirm=confirm("你按下的是 ***正確***(for video)\n多謝!!");
                 if (forComfirm==true)
@@ -683,7 +683,25 @@
                     }
                 });
                 
-                /* add code to implement "miix_story_raw"*/
+                var url=DOMAIN+"fbItem/"+userID;
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {s3Url: s3Url,
+                           //longPic: longPic,
+                           type: picType,
+                           liveTime: liveTime,
+                           ugcCensorNo: ugcCensorNo,
+                           liveContent_Id:_id},
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message:" + response.message);
+                        }
+                    }
+                });
+
+                
+                /* add code to implement "miix_story"*/
                 
                 
               

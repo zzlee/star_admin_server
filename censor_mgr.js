@@ -10,6 +10,7 @@ var member_mgr = require('./member.js');
 var pushMgr = require('./push_mgr.js');
 var canvasProcessMgr = require('./canvas_process_mgr.js');
 var storyContentMgr = require('./story_content_mgr.js');
+var fbMgr = require('./facebook_mgr.js');
 
 var UGCs = FMDB.getDocModel("ugc");
 var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
@@ -532,6 +533,9 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
     var access_token;
     var fb_name, playTime, start, link;
     var sourceId;
+    var liveContentGenre;
+    var owner_id = null;
+    var liveContentUrl = null;
     
     //
     async.waterfall([
@@ -553,6 +557,9 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
            if(type == 'correct'){
                if(userLiveContentObj[0]){
                    sourceId = userLiveContentObj[0].sourceId;
+                   liveContentGenre = userLiveContentObj[0].genre;
+                   owner_id = userLiveContentObj[0].ownerId._id;
+                   liveContentUrl = userLiveContentObj[0].url;
                }
                memberModel.find({'_id': userLiveContentObj[0].ownerId._id}).exec(function (err, memberSearch) {
                    if (!err)
@@ -654,15 +661,44 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                 }
             ], function(err, res){
                 if(type == 'correct'){
-                    var option = {
-                        accessToken: access_token,
-                        type: member.app,
-                        source: photoUrl.play,
-                        photo: photoUrl.preview,
-                        text: textContent,
-                        ugcProjectId: sourceId
-                    };
-                    canvasProcessMgr.markTextAndIcon(option, postPicture_cb);
+                    if ( liveContentGenre == "miix_image_live_photo" ) {
+                        var option = {
+                                accessToken: access_token,
+                                type: member.app,
+                                source: photoUrl.play,
+                                photo: photoUrl.preview,
+                                text: textContent,
+                                ugcProjectId: sourceId
+                            };
+                            canvasProcessMgr.markTextAndIcon(option, postPicture_cb);
+                    } 
+                    else if ( liveContentGenre == "miix_story" ) {
+                        //post the link on FB
+                        memberDB.getFBAccessTokenById(owner_id, function(errOfGetFBAccessTokenById, result){
+                            //debugger;
+                            if (!errOfGetFBAccessTokenById){
+                                //var userID = result.fb.userID;
+                                //var userName = result.fb.userName;
+                                var can_msg =  "";
+                                var accessToken = result.fb.auth.accessToken;
+                                fbMgr.postMessage(accessToken, can_msg, liveContentUrl.youtube, function(errOfPostMessage, result){
+                                    //console.log("result=%s", result);
+                                    if (!errOfPostMessage) {
+                                        callback(null);
+                                    }
+                                    else {
+                                        callback("Failed to post FB: "+errOfPostMessage);
+                                    }
+                                });
+                            }
+                            else {
+                                callback("Failed to get FB access token from member DB: "+errOfGetFBAccessTokenById);
+                            }
+                             
+                         });
+
+                        
+                    }
                 }
                 else {
                     postPicture_cb(null, 'done');
