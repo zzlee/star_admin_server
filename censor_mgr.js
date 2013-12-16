@@ -80,7 +80,7 @@ censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, pageType, 
     }
 
     if ( pageLimit && pageSkip ) {
-        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent highlight url processingState fbProfilePicture', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
+        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent highlight url processingState fbProfilePicture forMRTReview', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
             if(err) {
                 logger.error('[censorMgr_db.listOfUGCs]', err);
                 cb(err, null);
@@ -118,10 +118,9 @@ var UGCList = [];
 var timeslotStart;
 var timeslotEnd;
 
-var UGCListInfo = function(tsLiveStateCount,tsUGCCount,ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, arr) {
+
+var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, tsLiveStateCount,tsUGCCount, forMRTReview, createdOn, arr) {
     arr.push({
-        tsLiveStateCount: tsLiveStateCount,
-        tsUGCCount:tsUGCCount,
         userPhotoUrl: userPhotoUrl,
         ugcProjectId: ugcProjectId,
         ugcCensorNo: ugcCensorNo,
@@ -141,7 +140,11 @@ var UGCListInfo = function(tsLiveStateCount,tsUGCCount,ugcProjectId, userPhotoUr
         highlight: highlight,
         url: url,
         liveContentUrl: liveContentUrl,
-        processingState: processingState
+        processingState: processingState,
+		tsLiveStateCount: tsLiveStateCount,
+        tsUGCCount:tsUGCCount,
+		forMRTReview:forMRTReview,
+        createdOn: createdOn
     });
 };
 var mappingUGCList = function(data, type, set_cb){
@@ -195,14 +198,13 @@ var mappingUGCList = function(data, type, set_cb){
             }
             //UGCListInfo
             if(next == limit - 1) {
-
-                UGCListInfo(result[3],result[4],data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn,UGCList);
                 set_cb(null, 'ok'); 
                 next = 0;
                 UGCList = [];
             }
             else{
-                UGCListInfo(result[3], result[4], data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState,result[3], result[4],data[next].forMRTReview,data[next].createdOn, UGCList);
                 next += 1;
                 mappingUGCList(data, type, set_cb);
             }
@@ -338,6 +340,11 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
         vjson = {highlight : true};
     else if(vjson.highlight == 'false')
         vjson = {highlight : false};
+
+    if(vjson.forMRTReview == 'true')
+        vjson = {forMRTReview : true};
+    else if(vjson.forMRTReview == 'false')
+        vjson = {forMRTReview : false};
 
 
     UGC_mgr.getOwnerIdByNo(no, function(err, result){
