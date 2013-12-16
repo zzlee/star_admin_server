@@ -55,7 +55,7 @@ FM.storyCamControllerHandler.availableStreetMovies = function(req, res){
             program = option.programInterval;
         
         async.waterfall([
-            function( setting_cb ){ videoSetting( program, setting_cb ); },
+            function( setting_cb ){ videoSetting( recordTime, program, setting_cb ); },
             function( target, categories_cb ){ videoCategoriesByUser( file, target, categories_cb ); },
             function( target, update_cb ){ updateLiveVideoContent( recordTime, program, target, update_cb ); },
             function( status, renderLive_cb ){
@@ -373,13 +373,13 @@ var getLiveVideo = function( recordTime, report_cb ){
     
 };
 
-var videoSetting = function( programInterval, setting_cb ){
+var videoSetting = function( recordTime, programInterval, setting_cb ){
     // [projectId].__story.avi
     var folder_path = 'user_project/';
     var naming = function(program, naming_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var name = result[0].projectId + '__story.avi';
-            var s3Path = folder_path + result[0].projectId + '/' + name;
+            var s3Path = folder_path + result[0].projectId + '_' + recordTime + '/' + name;
             
             naming_cb( null, s3Path );
         });
