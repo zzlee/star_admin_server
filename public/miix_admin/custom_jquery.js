@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FeltMeng.com
  */
 
@@ -584,7 +584,7 @@ $(document).ready(function(){
                 /**
                  * generate video UGC btn
                  */
-                $("input[id='ugcGenVideoUgcBtn']").click(function(){
+                $(".ugcGenVideoUgcBtn").click(function(){
                     //alert($(this).attr('projectId'));
                     $.ajax({
                         url: '/miix_admin/video_ugcs/'+$(this).attr('projectId'),
@@ -607,7 +607,8 @@ $(document).ready(function(){
                         }
                     });
                     
-                    $(this).hide();
+                    $("#miixVideoStateDiv_"+$(this).attr('rowIndex')).html("<label>正在產生拉洋片...</label>");
+                    //$(this).hide();
                 });
     
             }// End of UGCList
@@ -716,6 +717,32 @@ $(document).ready(function(){
         }
         else{
             $("#pageNoInput").val( FM.currentContent.currentPage);
+        }
+    });
+    
+    var ctrlIsDown = false;
+    
+    
+    $(document.activeElement).keyup(function( event ) {
+        //console.log("keyup event.which="+event.which);
+        if ( event.which == 17 ) {  //ctrl key
+            ctrlIsDown = false;
+        }
+        else if ( ctrlIsDown && (event.which == 33) ) {
+            //console.log('ctrl+pageUp pressed!');
+            FM.currentContent.showPreviousPageContent();
+        }
+
+        else if ( ctrlIsDown && (event.which == 34) ) {
+            //console.log('ctrl+pageDown pressed!');
+            FM.currentContent.showNextPageContent();
+        }
+    });
+
+    $(document.activeElement).keydown(function( event ) {
+        //console.log("keydown event.which="+event.which);
+        if ( event.which == 17 ) {  //ctrl key
+            ctrlIsDown = true;
         }
     });
 

@@ -55,10 +55,10 @@ if (!fs.existsSync(logDir) ){
 require('winston-mongodb').MongoDB;
 var logger = new(winston.Logger)({
     transports: [ 
-        new winston.transports.MongoDB({host:mongoDbServerUrlObj.hostname, db: 'feltmeng', level: 'info'}),
+        new winston.transports.MongoDB({host:mongoDbServerUrlObj.hostname, db: 'feltmeng', level: 'info', username: systemConfig.HOST_MONGO_DB_USER_NAME, password: systemConfig.HOST_MONGO_DB_PASSWORD}),
         new winston.transports.File({ filename: './log/winston.log'})   
     ],
-    exceptionHandlers: [new winston.transports.MongoDB({host:mongoDbServerUrlObj.hostname, db: 'feltmeng', level: 'info'}),
+    exceptionHandlers: [new winston.transports.MongoDB({host:mongoDbServerUrlObj.hostname, db: 'feltmeng', level: 'info', username: systemConfig.HOST_MONGO_DB_USER_NAME, password: systemConfig.HOST_MONGO_DB_PASSWORD}),
                     new winston.transports.File({filename: './log/exceptions.log'})
     ]
     
@@ -88,12 +88,17 @@ app.use(express.bodyParser());
 app.use(express.methodOverride());
 
 //-- start of session management ? --
+var DefaultDB = 'feltmeng';
+var mongoUrlHead = systemConfig.HOST_MONGO_DB_SERVER_URL.substring(0,10);
+var mongoUrlRoot = systemConfig.HOST_MONGO_DB_SERVER_URL.substring(10, systemConfig.HOST_MONGO_DB_SERVER_URL.length);
+var mongoUrl = mongoUrlHead + systemConfig.HOST_MONGO_DB_USER_NAME +':'+ systemConfig.HOST_MONGO_DB_PASSWORD +'@'+ mongoUrlRoot + '/'+DefaultDB;
+
 app.use(express.query());
 app.use(express.cookieParser('kooBkooCedoN'));
 app.use(express.session({
     secret: "thesecretoffeltmeng",
     maxAge: 24 * 60 * 60 * 1000 ,
-    store: new mongoStore({ db: fmdb })
+    store: new mongoStore({ url: mongoUrl })
 }));  // sessionID save as "_id" of session doc in MongoDB.
 
 app.use(express.methodOverride());
