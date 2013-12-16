@@ -437,6 +437,134 @@ function scalaMgr( url, account ){
     };
     
     /**
+     * Push program groups to playlist.
+     *
+     */
+    var pushProgramGourpsToPlaylist = function( set, groups_cb ) {
+        var options = set;
+        var query = 
+        {
+            search : set.playlist.name
+        };
+        
+        var updateItemSortOrder = function( options, sort_cb ) {
+            var query =
+            {
+                filters: encodeURIComponent("{'id':{'values':[" + options.playlist.id + "]}}")
+            };
+            contractor.playlist.list(query, function(err, res) {
+                var playlist = res.list[0];
+                for(var i=0; i<options.groups.length; i++) {
+                    for(var j=0; j<playlist.playlistItems.length; j++) {
+                        if(playlist.playlistItems[j].id == options.groups[i].content.playlistItem.id) {
+                            playlist.playlistItems[j].sortOrder = options.groups[i].content.playlistItem.sortOrder;
+                        }
+                    }
+                }
+                contractor.playlist.update({
+                    playlist: { id: playlist.id, content: playlist },
+                }, function(report){
+                    scalaLogger.action('update program groups sortOder');
+                    sort_cb(null, report);
+                });
+            });
+        };
+        
+        contractor.playlist.list(query, function(err, res) {
+            
+            if(err) {
+                // console.dir(err);
+                scalaLogger.action('playlist search error: ' + err);
+                return;
+            }
+            
+            var playlist = null;
+            var sortMax = -1,
+                itemNumbers = 0;
+            
+            res.list.forEach(function(list) {
+                if(list.name === options.playlist.name) {
+                    playlist = list;
+                    options.playlist.id = list.id;
+                }
+            });
+            
+            if(playlist == null) {
+                // console.log('not find playlist');
+                scalaLogger.action('not find target playlist');
+                return;
+            }
+            
+            // step.3 - checkitem numbers and get max sortOrder
+            playlist.playlistItems.forEach(function(item) {
+                if( item.sortOrder > sortMax )
+                    sortMax = item.sortOrder;
+                itemNumbers += 1;
+            });
+            scalaLogger.action('find out max sortOrder in playlist');
+            
+            var executes = [];
+            options.groups.forEach(function(program) {
+                var event = 
+                {
+                    playlist : { id : playlist.id, name : playlist.name },
+                    playTime : program.content.playTime
+                };
+                if(program.content.file) {
+                    event.file = program.content.file;
+                    executes.push(function(callback) { setItemToPlaylist(event, callback); });
+                }
+                else {
+                    event.webpage = program.content.webpage;
+                    executes.push(function(callback) { setWebpageToPlaylist(event, callback); });
+                }
+            });
+            scalaLogger.action('push program groups to playlist');
+            
+            async.series(executes, function(err, items){
+                for(var i=0; i<items.length; i++) {
+                    var item = 
+                    {
+                        id : items[i].playlistItem.id,
+                        sortOrder : options.groups[i].no + sortMax
+                    };
+                    options.groups[i].content.playlistItem = item;
+                    options.groups[i].content.mdia = items[i].media;
+                }
+                
+                updateItemSortOrder(options, function(err, res) {
+                    var programGroups = 
+                    {
+                        playlist : options.playlist,
+                        groups : []
+                    };
+                    options.groups.forEach(function(program) {
+                        programGroups.groups.push({
+                            media : program.content.mdia,
+                            playlistItem : program.content.playlistItem,
+                            playTime : program.content.playTime
+                        });
+                    });
+                    scalaLogger.action('pushProgramGourpsToPlaylist is successfully');
+                    groups_cb(err, programGroups);
+                });
+            });
+            
+            // update sortOrder test
+            /* var temp = playlist.playlistItems[0].sortOrder;
+            for(var i=0; i<playlist.playlistItems.length; i++) {
+                playlist.playlistItems[i].sortOrder++;
+            }
+            playlist.playlistItems[playlist.playlistItems.length-1].sortOrder = temp;
+            
+            contractor.playlist.update({ playlist: { id: playlist.id, content: playlist } }, function(status) {
+                console.log(status);
+            }); */
+            
+        });
+    };
+    
+    /**
      * Upload Media Item.
      * 
      */
@@ -946,6 +1074,7 @@ function scalaMgr( url, account ){
         pushEvent : pushEvent,
         setWebpageToPlaylist: setWebpageToPlaylist,
         pushMediaToPlaylist: pushMediaToPlaylist,
+        pushProgramGourpsToPlaylist: pushProgramGourpsToPlaylist,
         uploadMediaItem: uploadMediaItem,
         pullPlaylistItem: pullPlaylistItem,
         clearPlaylistItems: clearPlaylistItems,

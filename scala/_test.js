@@ -20,7 +20,7 @@ var scalaMgr = scala( 'http://192.168.5.189:8080', { username: 'administrator', 
 
 setTimeout(function(){
     
-    //ScalaMgr APIs : listTimeslot()
+    // ScalaMgr APIs : listTimeslot()
     /* var oneday = '2013/10/03 10:00:00';
     scalaMgr.listTimeslot( oneday, function(err, res){
         if(err)
@@ -29,7 +29,7 @@ setTimeout(function(){
             console.dir(res);
     } ); */
     
-    //ScalaMgr APIs : setItemToPlaylist()
+    // ScalaMgr APIs : setItemToPlaylist()
     /* var option = 
     {
         //playlist: { name: 'last' },
@@ -47,7 +47,7 @@ setTimeout(function(){
             console.dir(res);
     } ); */
     
-    //ScalaMgr APIs : uploadMediaItem()
+    // ScalaMgr APIs : uploadMediaItem()
     /* var option = 
     {
         file: {
@@ -63,7 +63,7 @@ setTimeout(function(){
             console.dir(res);
     } ); */
     
-    //ScalaMgr APIs : validProgramExpired()
+    // ScalaMgr APIs : validProgramExpired()
     /* var option =
     {
         search: 'lastModified'
@@ -75,7 +75,7 @@ setTimeout(function(){
             console.dir(res);
     }); */
     
-    //ScalaMgr APIs : pullPlaylistItem()
+    // ScalaMgr APIs : pullPlaylistItem()
     /* var option = {
         playlistItem: { id: 47 },
         playlist: { id: 9, name: 'test_1' } // you can only input id or name
@@ -87,7 +87,7 @@ setTimeout(function(){
             console.dir(res);
     }); */
     
-    //ScalaMgr APIs : pushMediaToPlaylist()
+    // ScalaMgr APIs : pushMediaToPlaylist()
     /* var setting = {
         media: { name: 'Algorithm' },
         playlist:{ name: 'test_1' },
@@ -100,7 +100,7 @@ setTimeout(function(){
             console.dir(res);
     }); */
     
-    //ScalaMgr APIs : clearPlaylistItems()
+    // ScalaMgr APIs : clearPlaylistItems()
     /* scalaMgr.clearPlaylistItems(function(err, res){
         if(err)
             console.dir(err);
@@ -108,7 +108,7 @@ setTimeout(function(){
             console.dir(res);
     }); */
     
-    //ScalaMgr APIs : setWebpageToPlaylist()
+    // ScalaMgr APIs : setWebpageToPlaylist()
     /* var option = 
     {
         playlist: { name: 'last' },
@@ -125,7 +125,7 @@ setTimeout(function(){
             console.dir(res);
     }); */
     
-    //ScalaMgr APIs : removePlaylist()
+    // ScalaMgr APIs : removePlaylist()
     /* var option =
     {
         search: 'OnDaScreen-'
@@ -137,7 +137,7 @@ setTimeout(function(){
             console.dir(res);
     }); */
     
-    //ScalaMgr APIs : clearMedia()
+    // ScalaMgr APIs : clearMedia()
     /* var option =
     {
         search: 'web_test'
@@ -149,7 +149,7 @@ setTimeout(function(){
             console.dir(res);
     }); */
     
-    //ScalaMgr APIs : pushEvent()
+    // ScalaMgr APIs : pushEvent()
     /* var option = { 
         playlist: { search: 'lastModified', play: 'OnDaScreen' },
         player: { name: 'feltmeng' } 
@@ -158,7 +158,7 @@ setTimeout(function(){
         console.log(res);
     }); */
     
-    //ScalaMgr APIs : dumpPlaylist()
+    // ScalaMgr APIs : dumpPlaylist()
     /* var option = { 
         playlist: { name: 'OnDaScreen' },
         logger: { name: 'playlist.log' }
@@ -169,5 +169,76 @@ setTimeout(function(){
         else
             console.dir(res);
     }); */
+    
+    // ScalaMgr APIs : pushProgramGourpsToPlaylist()
+    /* var set = 
+    {
+        playlist: { id: '', name: 'test_1' },
+        groups : [
+            { 
+                no : 1, 
+                content : {
+                    playTime: { start: '2013-07-22 18:00:00', end: '2013-07-22 19:00:00', duration: 50 },
+                    webpage: {
+                        name: 'web_test',
+                        uri: 'www.feltmeng.idv.tw'
+                    }
+                }
+            },
+            { 
+                no : 2, 
+                content : {
+                    playTime: { start: '2013-07-21 12:30:00', end: '2013-07-22 17:50:00', duration: 35 },
+                    file: {
+                        name : 'test_0.avi',
+                        path : 'C:\\tmp\\',
+                        savepath : ''
+                    }
+                } 
+            },
+            { 
+                no : 3, 
+                content : {
+                    playTime: { start: '2013-09-25 18:00:00', end: '2013-09-25 19:00:00', duration: 50 },
+                    webpage: {
+                        name: 'web_test_03',
+                        uri: 'www.feltmeng.idv.tw'
+                    }
+                } 
+            },
+            { 
+                no : 4, 
+                content : {
+                    playTime: { start: '2013-07-21 12:30:00', end: '2013-07-22 17:50:00', duration: 35 },
+                    file: {
+                        name : 'test_png.png',
+                        path : 'C:\\tmp\\',
+                        savepath : ''
+                    }
+                } 
+            },
+            { 
+                no : 5, 
+                content : {
+                    playTime: { start: '2013-09-25 18:00:00', end: '2013-09-25 19:00:00', duration: 50 },
+                    webpage: {
+                        name: 'web_test_05',
+                        uri: 'www.feltmeng.idv.tw'
+                    }
+                } 
+            }
+        ]
+    };
+    scalaMgr.pushProgramGourpsToPlaylist(set, function(err, res) {
+        if(err)
+            console.dir(err);
+        else {
+            console.dir(res.playlist);
+            res.groups.forEach(function(entry) {
+                console.dir(entry);
+            });
+        }
+    }); */
+    
         
 }, 2000);
