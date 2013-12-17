@@ -125,6 +125,8 @@ FM.admin.member_total_counts_get_cb = function(req, res){
     
     var allResult = { video:{}, image:{}, total:{} };
     var ugcModel = db.getDocModel("ugc");
+    var videoUgcCount = null;
+    var imageUgcCount = null;
     
     async.waterfall([
         function(callback){
@@ -134,7 +136,7 @@ FM.admin.member_total_counts_get_cb = function(req, res){
                     logger.info("Total UGC counts: "+JSON.stringify(result));
                     //console.log("result=");
                     //console.dir(result);
-//                    allResult.video.totalUgc = result;
+                    videoUgcCount = result;
                     callback(null);
                 }
                 else {
@@ -149,12 +151,7 @@ FM.admin.member_total_counts_get_cb = function(req, res){
                     logger.info("Total UGC counts: "+JSON.stringify(result));
                     //console.log("result=");
                     //console.dir(result);
-                    
-                    allResult.image.totalUgc = result;
-                    
-                    //== for quick screen shot
-                    allResult.video.totalUgc = result*1.2;
-                    
+                    imageUgcCount = result;
                     callback(null);
                 }
                 else {
@@ -187,10 +184,14 @@ FM.admin.member_total_counts_get_cb = function(req, res){
             allResult.image = {totalUgc: 2830, totalPlayOnDooh: 3533, totalFbLike: 45988, totalFbComment: 24355, totalFbShare: 2358};
             allResult.video = {totalUgc: 3250, totalPlayOnDooh: 4233, totalFbLike: 51034, totalFbComment: 27890, totalFbShare: 2903};
             allResult.total.totalUgc = allResult.image.totalUgc + allResult.video.totalUgc;
-            allResult.total.totalUgc = allResult.image.totalPlayOnDooh + allResult.video.totalPlayOnDooh;
-            allResult.total.totalUgc = allResult.image.totalFbLike + allResult.video.totalFbLike;
-            allResult.total.totalUgc = allResult.image.totalFbComment + allResult.video.totalFbComment;
-            allResult.total.totalUgc = allResult.image.totalFbShare + allResult.video.totalFbShare;
+            allResult.total.totalPlayOnDooh = allResult.image.totalPlayOnDooh + allResult.video.totalPlayOnDooh;
+            allResult.total.totalFbLike = allResult.image.totalFbLike + allResult.video.totalFbLike;
+            allResult.total.totalFbComment = allResult.image.totalFbComment + allResult.video.totalFbComment;
+            allResult.total.totalFbShare = allResult.image.totalFbShare + allResult.video.totalFbShare;
+            
+            allResult.total2 = memberListAggregateResult;
+            allResult.total2.totalUgc = videoUgcCount + imageUgcCount;
+
 
             callback(null);
         },

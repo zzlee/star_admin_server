@@ -27,6 +27,13 @@ var memberListSubPg = {
                 $('#tdTotalFBLikeTatalCount').html(res.total.totalFbLike);
                 $('#tdTotalFBCommentTatalCount').html(res.total.totalFbComment);
                 $('#tdTotalFBShareTatalCount').html(res.total.totalFbShare);
+                
+                $('#tdTotal2UgcTatalCount').html(res.total2.totalUgc);
+                $('#tdTotal2PlayedOnDoohTatalCount').html(res.total2.totalPlayOnDooh);
+                $('#tdTotal2FBLikeTatalCount').html(res.total2.totalFbLike);
+                $('#tdTotal2FBCommentTatalCount').html(res.total2.totalFbComment);
+                $('#tdTotal2FBShareTatalCount').html(res.total2.totalFbShare);
+
 
             });
         });

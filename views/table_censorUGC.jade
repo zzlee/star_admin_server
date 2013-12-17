@@ -38,7 +38,7 @@ form#mainform(action='')
             a(href='') 主題類別
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') UGC編號
-          th.table-header-repeat.line-left.minwidth-1(width='10')
+          th.table-header-repeat.line-left.minwidth-1(width='10' dunkel='true')
             a(href='') 投稿時間
           th.table-header-repeat.line-left.minwidth-1(width='700')
             a(href='') 長條圖
@@ -48,7 +48,7 @@ form#mainform(action='')
             a(href='') 播放並實拍成功次數  
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 審核
-          th.table-header-repeat.line-left.minwidth-1(width='10')
+          th.table-header-repeat.line-left.minwidth-1(width='10' dunkel='true')
             a(href='') 捷運局審查
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 本次必登
@@ -67,7 +67,7 @@ form#mainform(action='')
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
                       td #{ugcCensor.ugcCensorNo}
-                      td #{ugcCensor.createdOn}
+                      td(dunkel='true') #{ugcCensor.createdOn}
                       if(ugcCensor.contentGenre == 'miix_it')
                          td
                              img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
@@ -143,7 +143,7 @@ form#mainform(action='')
                              |   F
                              br
                          .clear
-                      td
+                      td(dunkel='true')
                         if(ugcCensor.forMRTReview == true)					  
                           input#ugcCensor.ugcCensorMRT(type='checkbox', value='#{ugcCensor.forMRTReview}', name='#{ugcCensor.ugcCensorNo}', checked)
                         else
@@ -167,7 +167,7 @@ form#mainform(action='')
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
                       td #{ugcCensor.ugcCensorNo}
-                      td #{ugcCensor.createdOn}
+                      td(dunkel='true') #{ugcCensor.createdOn}
                       if(ugcCensor.contentGenre == 'miix_it')
                          td
                              img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
@@ -243,7 +243,7 @@ form#mainform(action='')
                              |   F
                              br
                          .clear
-                      td
+                      td(dunkel='true')
                         if(ugcCensor.forMRTReview == true)					  
                           input#ugcCensor.ugcCensorMRT(type='checkbox', value='#{ugcCensor.forMRTReview}', name='#{ugcCensor.ugcCensorNo}', checked)
                         else

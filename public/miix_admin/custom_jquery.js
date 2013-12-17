@@ -262,6 +262,7 @@ $(document).ready(function(){
             $("div[sensitive='true']").hide();
             $('#pushProgramsBtn').remove();
             $('#traceWindow').hide();
+            $("[dunkel='true']").hide();
         }
 
         if(typeCheck == "GET"){
@@ -792,6 +793,7 @@ $(document).ready(function(){
         $("[id^='historyList']").hide();
         $("[id^='highlightList']").hide();
         $("[id^='live_check']").hide();
+        $("[dunkel='true']").hide();
         FM.currentContent = FM.memberList;
         $('#memberListBtn').click();
     }
