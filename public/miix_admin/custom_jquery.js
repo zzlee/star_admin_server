@@ -125,6 +125,11 @@ $(document).ready(function(){
         FM.currentContent.showCurrentPageContent();
         $('#table-content-header').html('');
 
+        if (localStorage.role == "FELTMENG_DEMO") {
+            $('#ugcSearchMiixGenreRadioInput').click();
+        }
+        
+
     });
     
     
@@ -306,12 +311,12 @@ $(document).ready(function(){
 				$($('input:radio[name=searchByGenre]')).click(function(){
 					var inputSearchData = {};
                     $('input:radio[name=searchByGenre]:checked').each(function(){
-                        inputSearchData = {'contentGenre':$(this).val()};
+                        inputSearchData = {'genre':$(this).val()};
                         conditions = inputSearchData;
                     });
                     if(inputSearchData != null){
                         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
-                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 10, '/miix_admin/ugc_censor', null, null);
                         FM.UGCList.setConditions(conditions);
                         $('#main_menu ul[class="current"]').attr("class", "select");
                         $('#UGCList').attr("class", "current");
