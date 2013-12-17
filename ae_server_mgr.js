@@ -173,7 +173,7 @@ aeServerMgr.downloadStoryMovieFromMainServer = function(movieProjectID, download
 
 };
 
-aeServerMgr.downloadStoryMovieFromS3 = function(movieProjectID, downloadMovie_cb) {
+aeServerMgr.downloadStoryMovieFromS3 = function(movieProjectID, recordTime, downloadMovie_cb) {
 
     var starAeServerID;
     var UGCDB = require('./ugc.js');
@@ -188,7 +188,8 @@ aeServerMgr.downloadStoryMovieFromS3 = function(movieProjectID, downloadMovie_cb
             starAeServerID = systemConfig.DEFAULT_AE_SERVER;
         }
         var commandParameters = {
-            movieProjectID: movieProjectID
+            movieProjectID: movieProjectID,
+            recordTime: recordTime
         };
         
         globalConnectionMgr.sendRequestToRemote( starAeServerID, { command: "DOWNLOAD_STORY_MOVIE_FROM_S3", parameters: commandParameters }, function(responseParameters) {
