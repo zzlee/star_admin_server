@@ -125,7 +125,7 @@ miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbI
             }
             else {
                 //download the Miix video from S3 and then upload it to Youtube
-                console.log("download the Miix video from S3 and then upload it Youtube... ");
+                //console.log("download the Miix video from S3 and then upload it Youtube... ");
                 var movieFileForPhone = null;
                 var ytAccessToken = null;
                 
