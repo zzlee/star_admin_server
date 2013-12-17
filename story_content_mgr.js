@@ -1,4 +1,4 @@
-var storyContentMgr = {};
+﻿var storyContentMgr = {};
 
 var async = require('async');
 var workingPath = process.cwd();
@@ -158,63 +158,6 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
             });
         });
     };
-    /*
-    downloadStoryMovieFromStoryCamControllerToAeServer( miixMovieProjectID, function(err){
-        
-        if (!err){
-            getUserIdAndName(function(err2){
-                if (!err2){
-                    //TODO: get the file extension of this Miix movie
-                    aeServerMgr.createStoryMV( miixMovieProjectID, ownerStdID, ownerFbID, movieTitle, function(responseParameters){
-                    
-                        logger.info('generating Story MV finished. ');
-                        logger.info('res: _commandId='+responseParameters._commandId+' err='+responseParameters.err+' youtube_video_id='+responseParameters.youtube_video_id);
-                        
-                        if ( responseParameters.youtube_video_id ) {
-                            var aeServerID = responseParameters.ae_server_id;
-                            var youtubeVideoID = responseParameters.youtube_video_id;
-                            var storyMovieProjectID = responseParameters.movie_project_id;
-                            logger.info('storyMovieProjectID= '+storyMovieProjectID);
-                            //var youtubeVideoID = "VNrn-jhmLBE"; //GZ temporarily hard code for test
-                            
-                            
-                            
-                            if ( responseParameters.err == 'null' || (!responseParameters.err) ) {
-                            
-                                
-                                var url = {"youtube":"http://www.youtube.com/embed/"+youtubeVideoID};			
-                                var vjson = {"title": movieTitle,
-                                             "ownerId": {"_id": ownerStdID, "userID": ownerFbID},
-                                             "url": url,
-                                             "genre":"miix_story",
-                                             "aeId": aeServerID,
-                                             "projectId":storyMovieProjectID};
-                                UGCDB.addUGC(vjson, function(err, result){
-                                    if(err) {
-                                        throw err;
-                                    }
-                                    else {
-                                        fmapi._fbPostUGCThenAdd(vjson); 
-                                        logger.info('fmapi._fbPostUGCThenAdd(vjson) called. vjson='+JSON.stringify(vjson));
-                                    }
-                                });
-                            }
-                            
-                        }
-                        
-                    });
-                }
-                else{
-                    logger.info('fail to get user ID and name');
-                }
-            });
-        }
-        else {
-            logger.info('fail to download Story Movie from Cam Controller to AE Server');
-        }
-        
-        
-    });*/
     
     
     
@@ -284,6 +227,7 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
                             "genre":"miix_story",
                             "aeId": aeServerID,
                             "projectId":storyMovieProjectID,
+                            "sourceId": miixMovieProjectID,
                             "liveTime":parseInt(recordTime)
                         };
                         //add story MV notification
@@ -299,8 +243,8 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
                                     cb4("UGCDB.addUGC() failed : "+ err);
                                 }
                                 else {
-                                    fmapi._fbPostUGCThenAdd(vjson); 
-                                    logger.info('fmapi._fbPostUGCThenAdd(vjson) called. vjson='+JSON.stringify(vjson));
+                                    //fmapi._fbPostUGCThenAdd(vjson); 
+                                    //logger.info('fmapi._fbPostUGCThenAdd(vjson) called. vjson='+JSON.stringify(vjson));
                                     cb4(null);
                                 }
                             });

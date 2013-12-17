@@ -5,6 +5,8 @@ var events = require("events");
 var eventEmitter = new events.EventEmitter();
 var globalConnectionMgr;
 
+eventEmitter.setMaxListeners(50);
+
 var requestsToRemote = {};
 
 connectionHandler.init = function( _globalConnectionManager ){
