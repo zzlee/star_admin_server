@@ -175,6 +175,7 @@ exports.init = function() {
      * @memberof miix_service
      */
     app.get('/miix_service/customer_service_items', routes.service.getCustomerServiceItems_get_cb);
-
+	
+	app.post('/miix_service/message', routes.service.pushMessage_get_cb);
 
 };

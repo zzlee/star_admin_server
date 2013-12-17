@@ -16,7 +16,7 @@ var memberModel = db.getDocModel("member");
 var facebookMgr = require('./facebook_mgr.js');
 var pushMgr = require('./push_mgr.js');
 
-var downloadStoryMovieFromStoryCamControllerToAeServer = function(movieProjectID, downloaded_cb){
+var downloadStoryMovieFromStoryCamControllerToAeServer = function(movieProjectID, recordTime, downloaded_cb){
 
     //storyCamControllerMgr.uploadStoryMovieToMainServer(movieProjectID, function(resParametes){
         //logger.info('uploading story movie from Story Cam Controller to Main Server finished. ');
@@ -35,7 +35,7 @@ var downloadStoryMovieFromStoryCamControllerToAeServer = function(movieProjectID
         else{
             //aeServerMgr.downloadStoryMovieFromMainServer(movieProjectID, function(resParameter2){
                 //logger.info('downloading story movie from Main Server to AE Server.');
-            aeServerMgr.downloadStoryMovieFromS3(movieProjectID, function(resParameter2){
+            aeServerMgr.downloadStoryMovieFromS3(movieProjectID, recordTime, function(resParameter2){
                 logger.info('downloading story movie from S3 to AE Server.');
                 logger.info('res: _commandId='+resParameter2._commandId+' err='+resParameter2.err);
                 
@@ -165,7 +165,7 @@ storyContentMgr.generateStoryMV = function(miixMovieProjectID, recordTime) {
     async.series([
         function(cb1){
             //console.log('step.1 start');
-            downloadStoryMovieFromStoryCamControllerToAeServer( miixMovieProjectID, function(err1){
+            downloadStoryMovieFromStoryCamControllerToAeServer( miixMovieProjectID, recordTime, function(err1){
                 //console.log('step.1 end');
                 cb1(err1);
             });

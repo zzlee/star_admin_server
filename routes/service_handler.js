@@ -3,7 +3,8 @@ var workingPath = process.cwd();
 
 var admin_mgr = require("../admin.js"),
 service_mgr = require("../service_mgr.js"),
-tokenMgr = require("../token_mgr.js");
+tokenMgr = require("../token_mgr.js"),
+pushMgr = require("../push_mgr.js");
 
 var FMDB = require('../db.js');
 
@@ -58,7 +59,7 @@ FM.service.getCustomerServiceItems_get_cb = function(req, res){
         }
 
         else{
-            console.log(err);
+            // console.log(err);
             res.send(400, {error: "Parameters are not correct"});
         }
     });
@@ -80,7 +81,7 @@ FM.service.createCustomerServiceItems_get_cb = function(req, res){
 //          console.log('createItems'+result);
         }
         else{
-            console.log('createItems'+err);
+            // console.log('createItems'+err);
             res.send(400, {error: "Parameters are not correct"});
         }
     });
@@ -111,6 +112,28 @@ FM.service.updateCustomerServiceItems_get_cb = function(req, res){
         if(!err){
             res.send(200, {message: 'ok'});
 //          console.log('updateItems'+result);
+        }
+        else{
+            res.send(400, {error: "Parameters are not correct"});
+        }
+    });
+
+};
+
+FM.service.pushMessage_get_cb = function(req, res){
+	var message;
+	var app;
+
+    if(req.body.message){
+		message = req.body.message;
+    }
+	if(req.body.app){
+		app = req.body.app;
+    }
+	
+    pushMgr.sendMessageToAllMemberByApp(message, app, function(err, result){
+        if(!err){
+            res.send(200, {message: 'ok'});
         }
         else{
             res.send(400, {error: "Parameters are not correct"});
