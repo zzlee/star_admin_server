@@ -679,7 +679,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                             if (!errOfGetFBAccessTokenById){
                                 //var userID = result.fb.userID;
                                 //var userName = result.fb.userName;
-                                var can_msg =  "";
+                                var can_msg =  fb_name+"的素人拉洋片出現在小巨蛋! 快點瞧瞧吧!\n上大螢幕，讓您免費登上小巨蛋天幕!";
                                 var accessToken = result.fb.auth.accessToken;
                                 fbMgr.postMessage(accessToken, can_msg, liveContentUrl.youtube, function(errOfPostMessage, result){
                                     //console.log("result=%s", result);
