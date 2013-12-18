@@ -23,21 +23,23 @@ var pushCenterPg = function(){
     var select_option_genre_3 = $("<option>").text('節慶');
     
     var label_app_genre = $("<label>").text("app類別");
-    var select_app_genre = $("<select>").attr({});
-    var select_app_option_genre_1 = $("<option>").text('上大螢幕');
-    var select_app_option_genre_2 = $("<option>").text('哇上小巨蛋');
+    var select_app_genre = $("<select>").attr({id:"appGenre"});
+    var select_app_option_genre_1 = $("<option>").attr({value:"ondascreen"}).text('上大螢幕');
+    var select_app_option_genre_2 = $("<option>").attr({value:"wowtaipeiarena"}).text('哇上小巨蛋');
     
     
     var label_content = $("<label>").text("訊息內容");
     var textarea = $("<textarea>").attr({
         cols:"30",
-        rows:"4"
+        rows:"4",
+        id:"textareaContent"
     });
     var input_btn = $("<input>").attr({
         type:"button",
         name:"input_sendTimeBtn",
         class:"input_sendTimeBtn",
-        value:"發送"
+        value:"發送",
+        id: "pushToAllBtn"
     });
     /*----------------END Search block declaration-----------*/
     /*---------------- show push list declaration-------------*/
@@ -100,7 +102,7 @@ var pushCenterPg = function(){
      
      /* ------------ Show push list block combine ----------- */
      article.append(header);
-     header.append(h3)
+     header.append(h3);
      article.append(div_tab_container);
      div_tab_container.append(div_tab_container_sub);
      div_tab_container_sub.append(form_pushList);
@@ -140,6 +142,30 @@ var pushCenterPg = function(){
 
      $('#main').append(sendForm);
      $('#main').append(article);
+     
+     
+     $('#pushToAllBtn').click(function(){
+         var send_message = $('#textareaContent').val();
+         var send_appGenre = $("#appGenre").find(":selected").val();
+        
+         console.log(send_message);
+         console.log(send_appGenre);
+         
+         
+         $.post('/miix_service/message', {
+             message: send_message,
+             app: send_appGenre
+             },function(res) {
+             console.log(res);
+         });
+         
+         
+         
+         
+//        alert('test'); 
+     });
+     
+     
 //    $.get( "../../service_push_head.html",{type:html}. function( data ) {
 //        console.log(data);
 //        $( "#main" ).append( data );
