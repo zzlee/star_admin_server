@@ -121,8 +121,8 @@ FM.service.updateCustomerServiceItems_get_cb = function(req, res){
 };
 
 FM.service.pushMessage_get_cb = function(req, res){
-	var message;
-	var app;
+	var message; 
+	var app; 
 
     if(req.body.message){
 		message = req.body.message;
@@ -131,10 +131,14 @@ FM.service.pushMessage_get_cb = function(req, res){
 		app = req.body.app;
     }
 	
+	if(req.body.pushGenre){
+	    pushGenre = req.body.pushGenre;
+    }
+	
     pushMgr.sendMessageToAllMemberByApp(message, app, function(err, result){
         if(!err){
             //res.send(200, {message: 'ok'});
-            service_mgr.createPushAllMessage({content:message,appGenre:app}, function(err, result){
+            service_mgr.createPushAllMessage({content:message,appGenre:app,pushGenre:pushGenre}, function(err, result){
                 if(!err){
                     res.send(200, {message: 'createPushAllMessage & sendMessageToAllMemberByApp done'});
 //                  console.log('createItems'+result);
@@ -149,20 +153,7 @@ FM.service.pushMessage_get_cb = function(req, res){
             res.send(400, {error: "Parameters are not correct"});
         }
     });
-	/*
-	service_mgr.createPushAllMessage({content:message,appGenre:app}, function(err, result){
-        if(!err){
-            res.send(200, {message: 'createPushAllMessage done'});
-//          console.log('createItems'+result);
-        }
-        else{
-            // console.log('createItems'+err);
-            res.send(400, {error: "Parameters are not correct"});
-        }
-    });
-	*/
 	
-
 };
 
 FM.service.getPushAllMessage_get_cb = function(req, res){
@@ -176,7 +167,7 @@ FM.service.getPushAllMessage_get_cb = function(req, res){
     service_mgr.getPushAllMessage(condition, function(err, result){
         if(!err){
 //          console.log('getCustomerServiceItem'+result);
-            res.send(200, {message: 'ok'});
+            res.send(200, {message: 'ok',result:result});
         }
 
         else{

@@ -141,7 +141,7 @@ serviceMgr.getPushAllMessage= function(condition, cb ){
     
     //TODO pagination
 //      db.listOfdocModels( customerServiceItemModel, condition, field, {sort :'no', limit: pageLimit , skip: pageSkip}, function(err, result){
-      db.listOfdocModels( pushAllMessageModel, condition, function(err, result){
+      db.listOfdocModels( pushAllMessageModel, condition,null,{sort :{'pushTime':-1}}, function(err, result){
           cb(err, result); 
       });
       

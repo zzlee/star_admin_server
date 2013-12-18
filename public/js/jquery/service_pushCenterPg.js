@@ -17,10 +17,10 @@ var pushCenterPg = function(){
         class:"input_sendTime"
     });
     var label_genre = $("<label>").text("類別");
-    var select_genre = $("<select>").attr({});
-    var select_option_genre_1 = $("<option>").text('維修');
-    var select_option_genre_2 = $("<option>").text('新服務');
-    var select_option_genre_3 = $("<option>").text('節慶');
+    var select_genre = $("<select>").attr({id:"pushGenre"});
+    var select_option_genre_1 = $("<option>").attr({value:"maintain"}).text('維修');
+    var select_option_genre_2 = $("<option>").attr({value:"newService"}).text('新服務');
+    var select_option_genre_3 = $("<option>").attr({value:"festival"}).text('節慶');
     
     var label_app_genre = $("<label>").text("app類別");
     var select_app_genre = $("<select>").attr({id:"appGenre"});
@@ -119,32 +119,33 @@ var pushCenterPg = function(){
      /* ------------END Show push list block combine ----------- */
    
      /*-----------------  Ajax get push list-----------------------------*/
+     var getPushList = function(){
+         $.get('/miix_service/get_push_all_message', {},function(res) {
+             for(var i = 0; i<res.result.length; i++) {
+                 var tr_ajax = $("<tr>");
+                 var td_1 = $("<td>").text(res.result[i].pushTime);
+                 var td_2 = $("<td>").text(res.result[i].pushGenre);
+                 var td_3 = $("<td>").text(res.result[i].content);
+                 var td_4 = $("<td>").text(res.result[i].pushStatus);
+                 var td_5 = $("<td>").text(res.result[i].appGenre);
+                 var td_6 = $("<td>").text(i);
+                 tr_ajax.append(td_1);
+                 tr_ajax.append(td_2);
+                 tr_ajax.append(td_3);
+                 tr_ajax.append(td_4);
+                 tr_ajax.append(td_5);
+                 tr_ajax.append(td_6);
+                 tbody_content.append(tr_ajax);
+             }
+         console.log(res.result);
+         });
+     };
+     getPushList();
      
-     for(var i =0; i<3; i++) {
-         
-         var tr_ajax = $("<tr>");
-         var td_1 = $("<td>").text("test: "+i);
-         var td_2 = $("<td>").text("test: "+i);
-         var td_3 = $("<td>").text("test: "+i);
-         var td_4 = $("<td>").text("test: "+i);
-         var td_5 = $("<td>").text("test: "+i);
-         var td_6 = $("<td>").text("test: "+i);
-         
-         tr_ajax.append(td_1);
-         tr_ajax.append(td_2);
-         tr_ajax.append(td_3);
-         tr_ajax.append(td_4);
-         tr_ajax.append(td_5);
-         tr_ajax.append(td_6);
-         tbody_content.append(tr_ajax);
-     }
+     
+     
      /*-----------------END  Ajax get push list-----------------------------*/
-//     $.get('/miix_service/message', {
-//         message: send_message,
-//         app: send_appGenre
-//         },function(res) {
-//         console.log(res);
-//     });
+    
     
      $('#main').append(sendForm);
      $('#main').append(article);
@@ -153,16 +154,19 @@ var pushCenterPg = function(){
      $('#pushToAllBtn').click(function(){
          var send_message = $('#textareaContent').val();
          var send_appGenre = $("#appGenre").find(":selected").val();
-        
-         console.log(send_message);
-         console.log(send_appGenre);
+         var send_pushGenre = $("#pushGenre").find(":selected").val();
+         
+         
          
          
          $.post('/miix_service/message', {
              message: send_message,
-             app: send_appGenre
+             app: send_appGenre,
+             pushGenre: send_pushGenre
              },function(res) {
-             console.log(res);
+                 console.log(res);
+                tbody_content.html("");
+                 getPushList();
          });
          
          
