@@ -663,7 +663,7 @@
                     }
                 });
                 
-                
+                //TODO: debug this code block. It seemed not work
                 var programTimeSlot_id=$(this).attr("programTimeSlot_id");
                 var liveState="correct";
                 var fbUserId=$(this).attr("fbUserId");
@@ -682,22 +682,26 @@
                     }
                 });
                 
-                var url=DOMAIN+"fbItem/"+userID;
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {s3Url: s3Url,
-                           //longPic: longPic,
-                           type: picType,
-                           liveTime: liveTime,
-                           ugcCensorNo: ugcCensorNo,
-                           liveContent_Id:_id},
-                    success: function(response) {
-                        if(response.message){
-                            console.log("[Response] message:" + response.message);
+                if ( !liveCheckSubPg.isInDataMantenanceMode ){
+                    var url=DOMAIN+"fbItem/"+userID;
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: {s3Url: s3Url,
+                               //longPic: longPic,
+                               type: picType,
+                               liveTime: liveTime,
+                               ugcCensorNo: ugcCensorNo,
+                               liveContent_Id:_id},
+                        success: function(response) {
+                            if(response.message){
+                                console.log("[Response] message:" + response.message);
+                            }
                         }
-                    }
-                });
+                    });
+
+                }
+                
 
                 
                 /* add code to implement "miix_story"*/
@@ -742,22 +746,26 @@
                     }
                 });
                 
-                var url=DOMAIN+"fbItem/"+userID;
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {s3Url: s3Url,
-                           longPic: longPic,
-                           type: picType,
-                           liveTime: liveTime,
-                           ugcCensorNo: ugcCensorNo,
-                           liveContent_Id:_id},
-                    success: function(response) {
-                        if(response.message){
-                            console.log("[Response] message:" + response.message);
+                if ( !liveCheckSubPg.isInDataMantenanceMode ){
+                    var url=DOMAIN+"fbItem/"+userID;
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: {s3Url: s3Url,
+                               longPic: longPic,
+                               type: picType,
+                               liveTime: liveTime,
+                               ugcCensorNo: ugcCensorNo,
+                               liveContent_Id:_id},
+                        success: function(response) {
+                            if(response.message){
+                                console.log("[Response] message:" + response.message);
+                            }
                         }
-                    }
-                });
+                    });
+
+                }
+                
                 
                 var programTimeSlot_id=$(this).attr("programTimeSlot_id");
                 var liveState="correct";
@@ -851,22 +859,25 @@
                 }
             });
             
-            var url=DOMAIN+"fbItem/"+userID;
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: {s3Url: s3Url,
-                    longPic: longPic,
-                    type: picType,
-                        liveTime: liveTime,
-                        ugcCensorNo: ugcCensorNo,
-                        liveContent_Id:_id},
-                success: function(response) {
-                    if(response.message){
-                        console.log("[Response] message:" + response.message);
+            if ( !liveCheckSubPg.isInDataMantenanceMode ){
+                var url=DOMAIN+"fbItem/"+userID;
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {s3Url: s3Url,
+                        longPic: longPic,
+                        type: picType,
+                            liveTime: liveTime,
+                            ugcCensorNo: ugcCensorNo,
+                            liveContent_Id:_id},
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message:" + response.message);
+                        }
                     }
-                }
-            });
+                });
+
+            }
             
             var programTimeSlot_id=$(this).attr("programTimeSlot_id");
             var liveState="correct";
