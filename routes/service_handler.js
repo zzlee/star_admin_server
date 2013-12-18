@@ -7,7 +7,7 @@ tokenMgr = require("../token_mgr.js"),
 pushMgr = require("../push_mgr.js");
 
 var FMDB = require('../db.js');
-
+var async = require('async');
 
 var DEBUG = true,
 FM_LOG = (DEBUG) ? function(str){ logger.info( typeof(str)==='string' ? str : JSON.stringify(str) ); } : function(str){} ;
@@ -134,26 +134,78 @@ FM.service.pushMessage_get_cb = function(req, res){
 	if(req.body.pushGenre){
 	    pushGenre = req.body.pushGenre;
     }
+	if(req.body.pushTime){
+        pushTime = req.body.pushTime;
+    }
 	
-    pushMgr.sendMessageToAllMemberByApp(message, app, function(err, result){
-        if(!err){
-            //res.send(200, {message: 'ok'});
-            service_mgr.createPushAllMessage({content:message,appGenre:app,pushGenre:pushGenre}, function(err, result){
-                if(!err){
-                    res.send(200, {message: 'createPushAllMessage & sendMessageToAllMemberByApp done'});
-//                  console.log('createItems'+result);
-                }
-                else{
-                    // console.log('createItems'+err);
-                    res.send(400, {error: "Parameters are not correct"});
-                }
-            });
-        }
-        else{
-            res.send(400, {error: "Parameters are not correct"});
-        }
-    });
+	var willBePushed =[];
 	
+	async.series([
+	              function(callback) {
+	                  service_mgr.createPushAllMessage({content:message,appGenre:app,pushGenre:pushGenre, pushTime: pushTime}, function(err, result){
+                          if(!err){
+                             // res.send(200, {message: 'createPushAllMessage & sendMessageToAllMemberByApp done'});
+//                          console.log('createItems'+result);
+                              callback(null);
+                          }
+                          else{
+                              // console.log('createItems'+err);
+                              res.send(400, {error: "Parameters are not correct"});
+                          }
+                      });
+	              },
+	              function(callback) {
+	                  clearInterval(test_time);
+	                  var test_time = setInterval(function(){
+	                      console.log('test');
+	                  },2000);
+	                  service_mgr.getPushAllMessage({pushStatus: false}, function(err, result){
+	                      if(!err){
+	                          for(var i = 0;i<result.length;i++){
+	                              var itemTime = new Date(result[i].pushTime).getTime();
+	                              var nowTime = new Date().getTime();
+
+	                              if(itemTime > nowTime) {
+	                                  willBePushed.push({app:result[i].appGenre,message:result[i].content});
+	                              }
+	                          }
+	                          console.log(willBePushed);
+	                          callback(null);
+//	                        console.log('getCustomerServiceItem'+result);
+	                      }
+
+	                      else{
+	                          // console.log(err);
+	                          res.send(400, {error: "Parameters are not correct"});
+	                      }
+	                  });
+	                  
+	              },
+	              function(callback) {
+	                  pushMgr.sendMessageToAllMemberByApp(message, app, function(err, result){
+                          if(!err){
+                              //res.send(200, {message: 'ok'});
+                              callback(null);
+                          }
+                          else{
+                              res.send(400, {error: "Parameters are not correct"});
+                          }
+                      });
+	                  
+	                 
+	              }
+	              ],
+	              function(err, results){
+	                if(!err) {
+                         res.send(200, {message: 'createPushAllMessage & sendMessageToAllMemberByApp done'});
+
+	                }else{
+	                    
+	                }
+	});
+    
+    
+    
 };
 
 FM.service.getPushAllMessage_get_cb = function(req, res){

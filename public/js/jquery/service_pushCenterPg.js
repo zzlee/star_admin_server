@@ -12,6 +12,7 @@ var pushCenterPg = function(){
     });
     var label_sendTime = $("<label>").text("送出時間");
     var input_sendTime = $("<input>").attr({
+        id: "pushTime",
         type:"text",
         name:"input_sendTime",
         class:"input_sendTime"
@@ -122,8 +123,9 @@ var pushCenterPg = function(){
      var getPushList = function(){
          $.get('/miix_service/get_push_all_message', {},function(res) {
              for(var i = 0; i<res.result.length; i++) {
+                 var timeString = new Date(res.result[i].pushTime)+" ";
                  var tr_ajax = $("<tr>");
-                 var td_1 = $("<td>").text(res.result[i].pushTime);
+                 var td_1 = $("<td>").text(timeString);
                  var td_2 = $("<td>").text(res.result[i].pushGenre);
                  var td_3 = $("<td>").text(res.result[i].content);
                  var td_4 = $("<td>").text(res.result[i].pushStatus);
@@ -155,11 +157,13 @@ var pushCenterPg = function(){
          var send_message = $('#textareaContent').val();
          var send_appGenre = $("#appGenre").find(":selected").val();
          var send_pushGenre = $("#pushGenre").find(":selected").val();
+         var send_pushTime = new Date($("#pushTime").val()).getTime();
          
          
          
          
          $.post('/miix_service/message', {
+             pushTime: send_pushTime,
              message: send_message,
              app: send_appGenre,
              pushGenre: send_pushGenre

@@ -369,7 +369,7 @@ FM.DB = (function(){
 		
 		var PushAllMessageSchema = new Schema({
 		    content: {type: String},
-		    pushTime: {type: Date, default: Date.now},
+		    pushTime: {type: Date},
 		    pushGenre: {type: String},
 		    appGenre: {type: String},
 		    pushStatus: {type: Boolean, default: false}
