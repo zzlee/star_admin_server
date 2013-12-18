@@ -7,6 +7,7 @@ var async = require('async');
 
 var customerServiceItemModel = db.getDocModel("customerServiceItem");
 var memberModel = db.getDocModel("member");
+var pushAllMessageModel = db.getDocModel("pushAllMessage");
 
 /**
  * The manager who handles the customer service
@@ -128,6 +129,23 @@ serviceMgr.getCustomerServiceList = function(fb_id, cb ){
 };
 
 //TODO admin and message count
+
+serviceMgr.createPushAllMessage = function(vjson, cb ){
+    db.createAdoc(pushAllMessageModel , vjson, function(err,result){
+        console.log(result)
+        cb(err, result); 
+    });
+};
+
+serviceMgr.getPushAllMessage= function(condition, cb ){
+    
+    //TODO pagination
+//      db.listOfdocModels( customerServiceItemModel, condition, field, {sort :'no', limit: pageLimit , skip: pageSkip}, function(err, result){
+      db.listOfdocModels( pushAllMessageModel, condition, function(err, result){
+          cb(err, result); 
+      });
+      
+  };
 
 
 module.exports = serviceMgr;

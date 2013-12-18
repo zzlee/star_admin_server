@@ -139,7 +139,13 @@ var pushCenterPg = function(){
          tbody_content.append(tr_ajax);
      }
      /*-----------------END  Ajax get push list-----------------------------*/
-
+//     $.get('/miix_service/message', {
+//         message: send_message,
+//         app: send_appGenre
+//         },function(res) {
+//         console.log(res);
+//     });
+    
      $('#main').append(sendForm);
      $('#main').append(article);
      

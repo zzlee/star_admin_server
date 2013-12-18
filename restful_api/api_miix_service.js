@@ -177,5 +177,8 @@ exports.init = function() {
     app.get('/miix_service/customer_service_items', routes.service.getCustomerServiceItems_get_cb);
 	
 	app.post('/miix_service/message', routes.service.pushMessage_get_cb);
+	
+    app.get('/miix_service/get_push_all_message', routes.service.getPushAllMessage_get_cb);
+
 
 };

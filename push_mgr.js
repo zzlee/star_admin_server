@@ -295,7 +295,11 @@ FM.pushMgr = (function() {
                               }
                               ],
                               function(err, results){
-                    
+                                if(!err){
+                                    cbOfSendMessageToDeviceByMemberId(null);
+                                }else{
+                                    
+                                }
                               });
 
            },
@@ -327,5 +331,5 @@ FM.pushMgr = (function() {
 })();
 
 /* TEST */
- FM.pushMgr.getInstance()._testkaiser();
+// FM.pushMgr.getInstance()._testkaiser();
 module.exports = FM.pushMgr.getInstance();
