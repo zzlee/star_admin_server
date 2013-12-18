@@ -259,6 +259,15 @@
                                                 
                         /*----------------------------------ends when genre is   "miix_story_raw"----------------------------------------*/
                     }
+                    else if(res[i].liveContent[j].genre == "miix_story"){
+                        var iframeTag = $("<iframe>").attr({
+                                width: 500, 
+                                height: 281, 
+                                src: res[i].liveContent[j].url.youtube
+                                   
+                        });
+                        var tr_4=$("<tr>").html(iframeTag);
+                    }
                     else{
                         /*---------------------------------- when genre is   "miix_image_live_photo" (非五選一 舊版)----------------------------------------*/
                                                 var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.s3,
@@ -305,6 +314,21 @@
                     "_type":"correct",
                     "genre":res[i].liveContent[j].genre
                 });
+                
+                var storyMvGenBtn = $("<input>").attr({type:"button",
+                    class:"storyMvGenBtn",
+                    value: "產生Story MV",
+                    "ownerId":res[i].liveContent[j].ownerId.userID,
+                    "s3url":res[i].liveContent[j].url.s3,
+                    "longPic":res[i].liveContent[j].url.longPhoto,
+                    "_id":res[i].liveContent[j]._id,
+                    "projectId": res[i].liveContent[j].projectId,
+                    "liveTime":res[i].liveContent[j].liveTime,
+                    "ugcCensorNo":res[i].ugcCensorNo,
+                    "_type":"correct",
+                    "genre":res[i].liveContent[j].genre
+                });
+
                 /*------------------------- ends live content(one image)  or  video btn -----------------------------------------------*/       
                 
                 
@@ -388,6 +412,23 @@
                         tr.append("<br>");
                         //---------------------------------------------
                     }else{
+                        if ( res[i].liveContent[j].genre == "miix_story_raw" ) {
+                            boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                           
+                            boxForm.append(storyMvGenBtn);                            
+                            tr_4.prepend(sp);
+                            tr.append(tr_4);
+                            tr.append(boxForm);
+                            boxForm.appendTo(tr_4)
+                            tr.append("<br>");
+                            
+                            if(j!=res[i].liveContent.length-1){
+                               tr.append("<hr>");
+                            }
+                            
+                            tr.append("<br>");
+                        }
+                        else if ( res[i].liveContent[j].genre == "miix_story" ){ 
                             boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
                             boxForm.append(boxInput);
                             boxForm.append("default");
@@ -395,18 +436,20 @@
                             boxForm.append("&nbsp;&nbsp;&nbsp;&nbsp;");
                             boxForm.append(boxInput2);
                             boxForm.append("正確");
-                            
+                            boxForm.append("<br>");
                             tr_4.prepend(sp);
                             tr.append(tr_4);
                             tr.append(boxForm);
                             boxForm.appendTo(tr_4)
                             tr.append("<br>");
-                        
-                         if(j!=res[i].liveContent.length-1){
-                            tr.append("<hr>");
-                         }
-                        
-                        tr.append("<br>");
+                            
+                            if(j!=res[i].liveContent.length-1){
+                               tr.append("<hr>");
+                            }
+                            
+                            tr.append("<br>");
+                        }
+                            
                     }
 
                 }else{//for 1/5
@@ -580,7 +623,7 @@
         $("#boxCheckLive.good").click(function(){ //btn for image(only one) and video
         //alert("g");
         
-            if($(this).attr("genre") == "miix_story_raw"){
+            if($(this).attr("genre") == "miix_story"){
                 // alert("it's miix_story_raw");
                 var forComfirm=confirm("你按下的是 ***正確***(for video)\n多謝!!");
                 if (forComfirm==true)
@@ -606,17 +649,6 @@
                             "\n" + "s3Url: " + s3Url + 
                             "\n" + "Type: " + picType);
                 
-                var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
-                $.ajax({
-                    url: "/internal/story_cam_controller/available_story_movie",
-                    type: "POST",
-                    headers : { 'miix_movie_project_id' : projectId, 'record_time' : liveTime },
-                    success: function(response) {
-                        if(response.message){
-                            console.log("[Response] message:" + response.message);
-                        }
-                    }
-                });
                 
                 var url=DOMAIN+"doohs/"+DEFAULT_DOOH+"/liveContent";
                 $.ajax({
@@ -650,7 +682,25 @@
                     }
                 });
                 
-                /* add code to implement "miix_story_raw"*/
+                var url=DOMAIN+"fbItem/"+userID;
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {s3Url: s3Url,
+                           //longPic: longPic,
+                           type: picType,
+                           liveTime: liveTime,
+                           ugcCensorNo: ugcCensorNo,
+                           liveContent_Id:_id},
+                    success: function(response) {
+                        if(response.message){
+                            console.log("[Response] message:" + response.message);
+                        }
+                    }
+                });
+
+                
+                /* add code to implement "miix_story"*/
                 
                 
               
@@ -729,6 +779,26 @@
 
             }
             
+            
+        });
+        
+        // button to gen story MV
+        $(".storyMvGenBtn").click(function(){
+            var projectId = $(this).attr("projectId");
+            var liveTime=$(this).attr("liveTime");
+
+            $.ajax({
+                url: "/internal/story_cam_controller/available_story_movie",
+                type: "POST",
+                headers : { 'miix_movie_project_id' : projectId, 'record_time' : liveTime },
+                success: function(response) {
+                    if(response.message){
+                        console.log("[Response] message:" + response.message);
+                    }
+                }
+            });
+            
+            $(this).hide();
             
         });
         /* ------------------------------ end 最右邊正確紐---------------------------------------------------*/

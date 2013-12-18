@@ -72,15 +72,19 @@ aeServerMgr.createStoryMV = function(movieProjectID, miixMovieFileExtension, own
         }
         youtubeTokenMgr.getAccessToken( function(ytAccessToken){
             if (ytAccessToken) {
+                var userProjectFolder = path.join( workingPath, 'public/contents/user_project');
                 var userDataFolder = path.join( workingPath, 'public/contents/user_project', movieProjectID, 'user_data');
                 var savePath = path.join( workingPath, 'public/contents/user_project', movieProjectID);
+                if(!fs.existsSync(userProjectFolder)){
+                    fs.mkdirSync(userProjectFolder);
+                }
                 if(!fs.existsSync(savePath)){
                     fs.mkdirSync(savePath);
                     fs.mkdirSync(userDataFolder);
                 }
                 
                 var commandParameters = {
-                    userFileList: fs.readdirSync(userDataFolder),
+                    userFileList: fs.readdirSync(userDataFolder), //TODO: remove this. It is not used anymore
                     movieProjectID: movieProjectID,
                     miixMovieFileExtension: miixMovieFileExtension,
                     ownerStdID: ownerStdID,
@@ -169,7 +173,7 @@ aeServerMgr.downloadStoryMovieFromMainServer = function(movieProjectID, download
 
 };
 
-aeServerMgr.downloadStoryMovieFromS3 = function(movieProjectID, downloadMovie_cb) {
+aeServerMgr.downloadStoryMovieFromS3 = function(movieProjectID, recordTime, downloadMovie_cb) {
 
     var starAeServerID;
     var UGCDB = require('./ugc.js');
@@ -184,7 +188,8 @@ aeServerMgr.downloadStoryMovieFromS3 = function(movieProjectID, downloadMovie_cb
             starAeServerID = systemConfig.DEFAULT_AE_SERVER;
         }
         var commandParameters = {
-            movieProjectID: movieProjectID
+            movieProjectID: movieProjectID,
+            recordTime: recordTime
         };
         
         globalConnectionMgr.sendRequestToRemote( starAeServerID, { command: "DOWNLOAD_STORY_MOVIE_FROM_S3", parameters: commandParameters }, function(responseParameters) {

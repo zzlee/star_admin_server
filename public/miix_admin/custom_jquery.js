@@ -125,6 +125,11 @@ $(document).ready(function(){
         FM.currentContent.showCurrentPageContent();
         $('#table-content-header').html('');
 
+        if (localStorage.role == "FELTMENG_DEMO") {
+            $('#ugcSearchMiixGenreRadioInput').click();
+        }
+        
+
     });
     
     
@@ -262,6 +267,7 @@ $(document).ready(function(){
             $("div[sensitive='true']").hide();
             $('#pushProgramsBtn').remove();
             $('#traceWindow').hide();
+            $("[dunkel='true']").hide();
         }
 
         if(typeCheck == "GET"){
@@ -305,12 +311,12 @@ $(document).ready(function(){
 				$($('input:radio[name=searchByGenre]')).click(function(){
 					var inputSearchData = {};
                     $('input:radio[name=searchByGenre]:checked').each(function(){
-                        inputSearchData = {'contentGenre':$(this).val()};
+                        inputSearchData = {'genre':$(this).val()};
                         conditions = inputSearchData;
                     });
                     if(inputSearchData != null){
                         $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
-                        FM.UGCList = new PageList( 'ugcCensorMovieList', 5, '/miix_admin/ugc_censor', null, null);
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 10, '/miix_admin/ugc_censor', null, null);
                         FM.UGCList.setConditions(conditions);
                         $('#main_menu ul[class="current"]').attr("class", "select");
                         $('#UGCList').attr("class", "current");
@@ -554,6 +560,33 @@ $(document).ready(function(){
                     });
                 });
                 
+                $('#ugcCensor.ugcCensorMRT').click(function(){
+                    
+                    var url = DOMAIN + "user_content_attribute";
+                    var no = $(this).attr("name");
+                    var forMRTReview = null;
+                    
+                    if($(this).val() == 'true'){
+                        forMRTReview = false;
+                        console.log(forMRTReview);
+                    }
+                    if($(this).val() == 'false'){
+                        forMRTReview = true; 
+                        console.log(forMRTReview);
+                    }
+    
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: {no: no, vjson:{forMRTReview: forMRTReview}},
+                        success: function(response) {
+                            if(response.message){
+                                console.log("[Response] message:" + response.message);
+                            }
+                        }
+                    });
+                });
+                
                 /**
                  * generate video UGC btn
                  */
@@ -765,6 +798,7 @@ $(document).ready(function(){
         $("[id^='historyList']").hide();
         $("[id^='highlightList']").hide();
         $("[id^='live_check']").hide();
+        $("[dunkel='true']").hide();
         FM.currentContent = FM.memberList;
         $('#memberListBtn').click();
     }

@@ -64,20 +64,34 @@ o.map = function(){
     var programTime = new Date(this.timeslot.start);
     var programDateString = programTime.getFullYear()+'/'+String(programTime.getMonth()+1)+'/'+programTime.getDate();
     var programDateObj = {y:programTime.getFullYear(), m:programTime.getMonth()+1, d:programTime.getDate() };
-    var fail = 0;
-    if ( (this.liveState == 'incorrect') ) {
+    var notCheckedCount = 0;
+    var correctCount = 0;
+    var incorrectCount = 0;
+
+    if ( (this.liveState == 'not_checked') ) {
         //console.log('this.liveState='+this.liveState);
-        fail = 1;
+        notCheckedCount = 1;
     }
-    emit(programDateObj, {count:1, failCount:fail}); 
+    else if ( (this.liveState == 'correct') ) {
+        //console.log('this.liveState='+this.liveState);
+        correctCount = 1;
+    }
+    else if ( (this.liveState == 'incorrect') ) {
+        //console.log('this.liveState='+this.liveState);
+        incorrectCount = 1;
+    }
+     
+    emit(programDateObj, {count:1, notCheckedCount:notCheckedCount, correctCount:correctCount, incorrectCount:incorrectCount}); 
 };
 
 o.reduce = function(key, countObjVals){ 
-    reducedVal = { count: 0, failCount: 0 };
+    reducedVal = { count:0, notCheckedCount:0, correctCount:0, incorrectCount:0 };
 
     for (var idx = 0; idx < countObjVals.length; idx++) {
         reducedVal.count += countObjVals[idx].count;
-        reducedVal.failCount += countObjVals[idx].failCount;
+        reducedVal.notCheckedCount += countObjVals[idx].notCheckedCount;
+        reducedVal.correctCount += countObjVals[idx].correctCount;
+        reducedVal.incorrectCount += countObjVals[idx].incorrectCount;
     }
     
     return reducedVal;
@@ -86,10 +100,10 @@ o.reduce = function(key, countObjVals){
 //o.query = { "type":'UGC', "timeslot.start":{$gte: 1383235200000 } };
 o.query = { "type":'UGC',  "timeslot.start":{$gte:(new Date('2013/11/18')).getTime(), $lt:(new Date()).getTime()} }; 
 
-o.finalize = function (key, reducedVal) {
-    reducedVal.failRate = Math.round(reducedVal.failCount/reducedVal.count*100)+"%";
-    return reducedVal;
-};
+//o.finalize = function (key, reducedVal) {
+//    reducedVal.failRate = Math.round(reducedVal.incorrectCount/reducedVal.count*100)+"%";
+//    return reducedVal;
+//};
 
 o.out = { replace: 'tempOutput' };
 
@@ -99,20 +113,30 @@ programTimeSlotModel.mapReduce(o, function (err, model) {
             //console.log('result=');
             //console.dir(result);
             
-            var outString = "date, programs played, live content fails, fail rate\n";
+            //var outString = "date, programs played, live content fails, fail rate\n";
+            var outString = "date, programs played, not_checked, correct, incorrect\n";
             for (var i=0; i<result.length; i++) {
-                outString += result[i]._id.y+"/"+result[i]._id.m+"/"+result[i]._id.d+", "+result[i].value.count+", "+result[i].value.failCount+", "+result[i].value.failRate+"\n";
+                //outString += result[i]._id.y+"/"+result[i]._id.m+"/"+result[i]._id.d+", "+result[i].value.count+", "+result[i].value.incorrectCount+", "+result[i].value.failRate+"\n";
+                outString += result[i]._id.y+"/"+result[i]._id.m+"/"+result[i]._id.d+", "
+                            +result[i].value.count+", "
+                            +result[i].value.notCheckedCount+", "
+                            +result[i].value.correctCount+", "
+                            +result[i].value.incorrectCount+"\n";
+
             }
-            //console.log(outString);
+            console.log(outString);
             fs.writeFile('program_play_statistics.csv', outString, function (err) {
                 if (err) throw err;
                 console.log('program_play_statistics.csv is saved!');
+                process.exit(1);
             });
+            //process.exit(1);
 
         }
         else {
             console.log("err=");
             console.dir(err);
+            process.exit(1);
         }
         
     });
