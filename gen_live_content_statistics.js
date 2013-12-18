@@ -66,24 +66,28 @@ o.map = function(){
     var programDateObj = {y:programTime.getFullYear(), m:programTime.getMonth()+1, d:programTime.getDate() };
     var notCheckedCount = 0;
     var correctCount = 0;
-    var incorrectCount = 0;
     var sourceNotPlayedCount = 0;
+    var notGeneratedCount = 0;
+    var incorrectCount = 0;
+    var badExposureCount = 0;
 
     if ( (this.liveState == 'not_checked') ) {
-        //console.log('this.liveState='+this.liveState);
         notCheckedCount = 1;
     }
     else if ( (this.liveState == 'correct') ) {
-        //console.log('this.liveState='+this.liveState);
         correctCount = 1;
     }
     else if ( (this.liveState == 'source_not_played') ) {
-        //console.log('this.liveState='+this.liveState);
         sourceNotPlayedCount = 1;
     }
+    else if ( (this.liveState == 'not_generated') ) {
+        notGeneratedCount = 1;
+    }
     else if ( (this.liveState == 'incorrect') ) {
-        //console.log('this.liveState='+this.liveState);
         incorrectCount = 1;
+    }
+    else if ( (this.liveState == 'bad_exposure') ) {
+        badExposureCount = 1;
     }
      
     emit(programDateObj, {
@@ -91,7 +95,9 @@ o.map = function(){
             notCheckedCount:notCheckedCount, 
             correctCount:correctCount, 
             sourceNotPlayedCount:sourceNotPlayedCount, 
-            incorrectCount:incorrectCount }); 
+            notGeneratedCount:notGeneratedCount,
+            incorrectCount:incorrectCount,
+            badExposureCount:badExposureCount}); 
 };
 
 o.reduce = function(key, countObjVals){ 
@@ -100,14 +106,18 @@ o.reduce = function(key, countObjVals){
             notCheckedCount:0, 
             correctCount:0, 
             sourceNotPlayedCount:0,
-            incorrectCount:0 };
+            notGeneratedCount:0,
+            incorrectCount:0,
+            badExposureCount:0};
 
     for (var idx = 0; idx < countObjVals.length; idx++) {
         reducedVal.count += countObjVals[idx].count;
         reducedVal.notCheckedCount += countObjVals[idx].notCheckedCount;
         reducedVal.correctCount += countObjVals[idx].correctCount;
         reducedVal.sourceNotPlayedCount += countObjVals[idx].sourceNotPlayedCount;
+        reducedVal.notGeneratedCount += countObjVals[idx].notGeneratedCount;
         reducedVal.incorrectCount += countObjVals[idx].incorrectCount;
+        reducedVal.badExposureCount += countObjVals[idx].badExposureCount;
     }
     
     return reducedVal;
@@ -130,7 +140,7 @@ programTimeSlotModel.mapReduce(o, function (err, model) {
             //console.dir(result);
             
             //var outString = "date, programs played, live content fails, fail rate\n";
-            var outString = "date, programs played, not_checked, correct, source_not_played, incorrect\n";
+            var outString = "date, programs played, not_checked, correct, source_not_played, not_generated, incorrect, bad_exposure\n";
             for (var i=0; i<result.length; i++) {
                 //outString += result[i]._id.y+"/"+result[i]._id.m+"/"+result[i]._id.d+", "+result[i].value.count+", "+result[i].value.incorrectCount+", "+result[i].value.failRate+"\n";
                 outString += result[i]._id.y+"/"+result[i]._id.m+"/"+result[i]._id.d+", "+
@@ -138,7 +148,9 @@ programTimeSlotModel.mapReduce(o, function (err, model) {
                             result[i].value.notCheckedCount+", "+
                             result[i].value.correctCount+", "+
                             result[i].value.sourceNotPlayedCount+", "+
-                            result[i].value.incorrectCount+"\n";
+                            result[i].value.notGeneratedCount+", "+
+                            result[i].value.incorrectCount+", "+
+                            result[i].value.badExposureCount+"\n";
 
             }
             console.log(outString);
