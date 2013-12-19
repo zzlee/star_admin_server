@@ -123,6 +123,9 @@ var pushCenterPg = function(){
      var getPushList = function(){
          $.get('/miix_service/get_push_all_message', {},function(res) {
              for(var i = 0; i<res.result.length; i++) {
+//                 if(res.result[i].pushStatus == true){
+//                     continue;
+//                 }
                  var timeString = new Date(res.result[i].pushTime)+" ";
                  var tr_ajax = $("<tr>");
                  var td_1 = $("<td>").text(timeString);

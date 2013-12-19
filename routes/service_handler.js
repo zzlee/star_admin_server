@@ -1,3 +1,5 @@
+//test_time
+
 var path = require('path');
 var workingPath = process.cwd();
 
@@ -121,6 +123,7 @@ FM.service.updateCustomerServiceItems_get_cb = function(req, res){
 };
 
 FM.service.pushMessage_get_cb = function(req, res){
+    
 	var message; 
 	var app; 
 
@@ -141,7 +144,7 @@ FM.service.pushMessage_get_cb = function(req, res){
 	var willBePushed =[];
 	
 	async.series([
-	              function(callback) {
+	              function(callback) { //create a new record in pushAllMessage collection
 	                  service_mgr.createPushAllMessage({content:message,appGenre:app,pushGenre:pushGenre, pushTime: pushTime}, function(err, result){
                           if(!err){
                              // res.send(200, {message: 'createPushAllMessage & sendMessageToAllMemberByApp done'});
@@ -154,11 +157,13 @@ FM.service.pushMessage_get_cb = function(req, res){
                           }
                       });
 	              },
-	              function(callback) {
-	                  clearInterval(test_time);
-	                  var test_time = setInterval(function(){
-	                      console.log('test');
-	                  },2000);
+	              function(callback) { //determine wihch push should send, and push this row in obj array
+	                  
+//	                  clearInterval(test_time);
+//	                  test_time = setInterval(function(){
+//	                      console.log(new Date());
+//	                  },2000);
+	                  
 	                  service_mgr.getPushAllMessage({pushStatus: false}, function(err, result){
 	                      if(!err){
 	                          for(var i = 0;i<result.length;i++){
@@ -166,10 +171,10 @@ FM.service.pushMessage_get_cb = function(req, res){
 	                              var nowTime = new Date().getTime();
 
 	                              if(itemTime > nowTime) {
-	                                  willBePushed.push({app:result[i].appGenre,message:result[i].content});
+	                                  willBePushed.push({app:result[i].appGenre,message:result[i].content, _id:result[i]._id});
 	                              }
 	                          }
-	                          console.log(willBePushed);
+	                          //console.log(willBePushed);
 	                          callback(null);
 //	                        console.log('getCustomerServiceItem'+result);
 	                      }
@@ -181,16 +186,50 @@ FM.service.pushMessage_get_cb = function(req, res){
 	                  });
 	                  
 	              },
-	              function(callback) {
-	                  pushMgr.sendMessageToAllMemberByApp(message, app, function(err, result){
-                          if(!err){
-                              //res.send(200, {message: 'ok'});
-                              callback(null);
-                          }
-                          else{
-                              res.send(400, {error: "Parameters are not correct"});
-                          }
-                      });
+	              function(callback) { // send push, and update the "pushStatus" to true
+	                  
+	                  var iterator_pushList = function(iterator, cb_each){
+	                      var iterator_app = iterator.app;
+	                      var iterator_message = iterator.message;
+	                      var iterator_id = iterator._id;
+//	                      console.log(iterator_id);
+	                      
+	                      pushMgr.sendMessageToAllMemberByApp(iterator_message, iterator_app, function(err, result){
+	                          if(!err){
+	                              //callback(null);
+	                              service_mgr.updatePushAllMessage(iterator_id,{"pushStatus":true},function(err,result){
+	                                 if(!err){
+	                                 cb_each(null);
+	                                 }
+	                                 
+	                              });
+	                            cb_each(null);
+	                          }
+	                          else{
+	                              res.send(400, {error: "Parameters are not correct"});
+	                          }
+	                      });
+	                      
+	                      //cb_each(null);
+	                  };
+	                  async.eachSeries(willBePushed, iterator_pushList, function(err, results){
+	                      if(!err){
+	                         callback(null);
+	                      }else{
+	                          
+	                      }
+	                  });
+	                  
+	                  
+	                  
+//	                  pushMgr.sendMessageToAllMemberByApp(message, app, function(err, result){
+//                          if(!err){
+//                              callback(null);
+//                          }
+//                          else{
+//                              res.send(400, {error: "Parameters are not correct"});
+//                          }
+//                      });
 	                  
 	                 
 	              }

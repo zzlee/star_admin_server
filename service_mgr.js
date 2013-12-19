@@ -146,6 +146,14 @@ serviceMgr.getPushAllMessage= function(condition, cb ){
       });
       
   };
+  
+serviceMgr.updatePushAllMessage = function(_id, vjson, cb ){
+      
+      db.updateAdoc(pushAllMessageModel,_id, vjson, function(err, result){
+          cb(err, result); 
+      });
+      
+  };
 
 
 module.exports = serviceMgr;
