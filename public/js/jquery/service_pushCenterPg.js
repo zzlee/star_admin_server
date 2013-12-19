@@ -10,7 +10,7 @@ var pushCenterPg = function(){
     var condition_inner = $("<div>").attr({
         id:"condition_inner"
     });
-    var label_sendTime = $("<label>").text("送出時間");
+    var label_sendTime = $("<label>").text("預定送出時間");
     var input_sendTime = $("<input>").attr({
         id: "pushTime",
         type:"text",
@@ -69,7 +69,7 @@ var pushCenterPg = function(){
     });
     var thead_push_list = $("<thead>");
     var tr = $("<tr>");
-    var th_showPush_1 = $("<th>").attr({width:"14%"}).text("送出時間");
+    var th_showPush_1 = $("<th>").attr({width:"14%"}).text("(預定)送出時間");
     var th_showPush_2 = $("<th>").attr({width:"13%"}).text("類型");
     var th_showPush_3 = $("<th>").attr({width:"29%"}).text("訊息內容");
     var th_showPush_4 = $("<th>").attr({width:"18%"}).text("狀態");
@@ -131,7 +131,14 @@ var pushCenterPg = function(){
                  var td_3 = $("<td>").text(res.result[i].content);
                  var td_4 = $("<td>").text(res.result[i].pushStatus);
                  var td_5 = $("<td>").text(res.result[i].appGenre);
-                 var td_6 = $("<td>").text(i);
+                 var td_6 = $("<td>");
+                 
+                 
+                 var remarkArea = $("<textarea>").attr({
+                     id:"pushCenterRemark",
+                     class: "remarkText"
+                         });
+                 td_6.append(remarkArea);
                  tr_ajax.append(td_1);
                  tr_ajax.append(td_2);
                  tr_ajax.append(td_3);
@@ -163,4 +170,29 @@ var pushCenterPg = function(){
          });
      });
      /*-------------- END send push record to db, not actually do push!!---------------- */
+     $(document).keyup(function(e){
+         if ($("tr td .textarea:focus") && (e.keyCode === 13)) {
+             $('#pushCenterRemark.remarkText').each(function(){
+                 if($(this).attr("value")){
+                     alert($(this).attr("value"));
+                     //var url = DOMAIN + "questions";
+//                     $.ajax({
+//                         url: url,
+//                         type: 'PUT',
+//                         data: {_id: $(this).attr("name"), vjson:{remarks: $(this).attr("value")}},
+//                         success: function(response) {
+//                             if(response.message){
+//                                 reloadTable();
+//                             }
+//                         }
+//                     });
+
+
+                 }
+             });
+
+         }
+         
+     });
+    
 };
