@@ -68,7 +68,7 @@ form#mainform(action='')
                       td(sensitive='true') #{ugcCensor.createdOn}
                       if(ugcCensor.contentGenre == 'miix_it')
                          td
-                             img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
+                             img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120', sensitive='true')
                              label       
                              img(src='#{ugcCensor.userPhotoUrl}', alt='', width='300', style='padding:5px')
                              div(id='miixVideoStateDiv_#{i}', style='display:inline')
@@ -168,7 +168,7 @@ form#mainform(action='')
                       td(sensitive='true') #{ugcCensor.createdOn}
                       if(ugcCensor.contentGenre == 'miix_it')
                          td
-                             img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120')
+                             img(src='#{ugcCensor.fbPictureUrl}', alt='', width='120', sensitive='true')
                              label       
                              img(src='#{ugcCensor.userPhotoUrl}', alt='', width='300', style='padding:5px')
                              div(id='miixVideoStateDiv_#{i}', style='display:inline')

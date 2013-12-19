@@ -125,9 +125,6 @@ $(document).ready(function(){
         FM.currentContent.showCurrentPageContent();
         $('#table-content-header').html('');
 
-        if (localStorage.role == "FELTMENG_DEMO") {
-            $('#ugcSearchMiixGenreRadioInput').click();
-        }
         
 
     });
@@ -267,7 +264,7 @@ $(document).ready(function(){
             $("div[sensitive='true']").hide();
             $('#pushProgramsBtn').remove();
             $('#traceWindow').hide();
-            $("[dunkel='true']").hide();
+            $("[sensitive='true']").hide();
         }
 
         if(typeCheck == "GET"){
@@ -303,7 +300,11 @@ $(document).ready(function(){
              * UGCList
              */
             if(censorCheck == '/miix_admin/ugc_censor'){
-			
+                
+                if (localStorage.role == "FELTMENG_DEMO") {
+                    $('#ugcSearchMiixGenreRadioInput').click();
+                }
+
 				/**
                  * search by genre  JOY
                  */
@@ -798,7 +799,7 @@ $(document).ready(function(){
         $("[id^='historyList']").hide();
         $("[id^='highlightList']").hide();
         $("[id^='live_check']").hide();
-        $("[dunkel='true']").hide();
+        $("[sensitive='true']").hide();
         FM.currentContent = FM.memberList;
         $('#memberListBtn').click();
     }
