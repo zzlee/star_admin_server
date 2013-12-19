@@ -265,7 +265,7 @@ FM.pushMgr = (function() {
                     condition = {"app": app};
                 
                 var iteratorSendMessageToDeviceByMemberId = function(data, cbOfIteratorSendMessageToDeviceByMemberId){
-//                   console.log(data._id, message);
+                   console.log(data._id, message);
                     cbOfIteratorSendMessageToDeviceByMemberId(null);
 //                    FM.pushMgr.getInstance().sendMessageToDeviceByMemberId( data._id, message, function(err, result){
 //                        console.log(err, result);

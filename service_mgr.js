@@ -130,29 +130,25 @@ serviceMgr.getCustomerServiceList = function(fb_id, cb ){
 
 //TODO admin and message count
 
+/*create new row of pushAllMessage collection by Joy*/
 serviceMgr.createPushAllMessage = function(vjson, cb ){
     db.createAdoc(pushAllMessageModel , vjson, function(err,result){
-        console.log(result)
         cb(err, result); 
     });
 };
 
+    /*get 'pushAllMessage' data by Joy*/
 serviceMgr.getPushAllMessage= function(condition, cb ){
-    
-    //TODO pagination
-//      db.listOfdocModels( customerServiceItemModel, condition, field, {sort :'no', limit: pageLimit , skip: pageSkip}, function(err, result){
       db.listOfdocModels( pushAllMessageModel, condition,null,{sort :{'pushTime':-1}}, function(err, result){
           cb(err, result); 
       });
-      
   };
   
+  /*update 'pushStatus' to true' by Joy*/
 serviceMgr.updatePushAllMessage = function(_id, vjson, cb ){
-      
       db.updateAdoc(pushAllMessageModel,_id, vjson, function(err, result){
           cb(err, result); 
       });
-      
   };
 
 

@@ -122,10 +122,8 @@ var pushCenterPg = function(){
      /*-----------------  Ajax get push list-----------------------------*/
      var getPushList = function(){
          $.get('/miix_service/get_push_all_message', {},function(res) {
+             console.log(res.message); // show cb status
              for(var i = 0; i<res.result.length; i++) {
-//                 if(res.result[i].pushStatus == true){
-//                     continue;
-//                 }
                  var timeString = new Date(res.result[i].pushTime)+" ";
                  var tr_ajax = $("<tr>");
                  var td_1 = $("<td>").text(timeString);
@@ -146,64 +144,23 @@ var pushCenterPg = function(){
          });
      };
      getPushList();
-     
-     
-     
      /*-----------------END  Ajax get push list-----------------------------*/
-    
     
      $('#main').append(sendForm);
      $('#main').append(article);
      
-     
+     /* --------------START send push record to db, not actually do push!! -----------*/
      $('#pushToAllBtn').click(function(){
          var send_message = $('#textareaContent').val();
          var send_appGenre = $("#appGenre").find(":selected").val();
          var send_pushGenre = $("#pushGenre").find(":selected").val();
          var send_pushTime = new Date($("#pushTime").val()).getTime();
          
-         
-         
-         
-         $.post('/miix_service/message', {
-             pushTime: send_pushTime,
-             message: send_message,
-             app: send_appGenre,
-             pushGenre: send_pushGenre
-             },function(res) {
-                 console.log(res);
-                tbody_content.html("");
-                 getPushList();
+         $.post('/miix_service/message', { pushTime: send_pushTime, message: send_message, app: send_appGenre, pushGenre: send_pushGenre},function(res) {
+             console.log(res);
+             tbody_content.html("");
+             getPushList();
          });
-         
-         
-         
-         
-//        alert('test'); 
      });
-     
-     
-//    $.get( "../../service_push_head.html",{type:html}. function( data ) {
-//        console.log(data);
-//        $( "#main" ).append( data );
-//        $( "#main" ).append( "123");
-//        
-//      });
-    /*
-    $.ajax({
-        url:"../../service_push_head.html",
-        type:"GET",
-        dataType:"html",
-        success: function(res){
-         //var testt = eval(res);
-            $('res').append('1233');
-            $( "#main" ).append( res );
-            $( "#main" ).append( "123");
-        },
-        error:function(xhr, ajaxOptions, thrownError){
-            console.log(xhr.status); 
-            console.log(thrownError); 
-        }
-    });*/
-    
+     /*-------------- END send push record to db, not actually do push!!---------------- */
 };

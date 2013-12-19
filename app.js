@@ -149,6 +149,16 @@ async.waterfall([
         
         http.createServer(app).listen(app.get('port'), function(){
             console.log("Express server listening on port " + app.get('port'));
+            
+            var triggerPushTimer = setInterval(function(){
+               routes.service.checkAndSendPushAll(function(){
+                   console.log(new Date());
+                   console.log('done routes.service.checkAndSendPushAll from app.js');
+                   console.log('-------------------------------');
+
+               });
+            },2000);
+            
             callback(null);
         });
     },
