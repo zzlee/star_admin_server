@@ -123,7 +123,42 @@ FM.admin.member_total_counts_get_cb = function(req, res){
     logger.info('[GET ' + req.path + '] is called');
     var db = require('../db.js');
     
+    var allResult = { video:{}, image:{}, total:{} };
+    var ugcModel = db.getDocModel("ugc");
+    var videoUgcCount = null;
+    var imageUgcCount = null;
+    
     async.waterfall([
+        function(callback){
+            //get video UGC count
+            ugcModel.find({genre:"miix"}).count(function(errOfCount, result){
+                if (!errOfCount) {
+                    logger.info("Total UGC counts: "+JSON.stringify(result));
+                    //console.log("result=");
+                    //console.dir(result);
+                    videoUgcCount = result;
+                    callback(null);
+                }
+                else {
+                    callback('Fail to execute ugcModel.find({genre:"miix"}).count(): '+errOfCount, null);
+                }
+            });
+        },
+        function(callback){
+            //get image UGC count
+            ugcModel.find({genre:"miix_image"}).count(function(errOfCount, result){
+                if (!errOfCount) {
+                    logger.info("Total UGC counts: "+JSON.stringify(result));
+                    //console.log("result=");
+                    //console.dir(result);
+                    imageUgcCount = result;
+                    callback(null);
+                }
+                else {
+                    callback('Fail to execute ugcModel.find({genre:"miix_image"}).count: '+errOfCount, null);
+                }
+            });
+        },
         function(callback){ 
             var memberListInfoModel = db.getDocModel("memberListInfo");
             memberListInfoModel.aggregate(
@@ -142,25 +177,27 @@ FM.admin.member_total_counts_get_cb = function(req, res){
 
         },
         function(memberListAggregateResult, callback){ 
-            var allResult = memberListAggregateResult;
-            var ugcModel = db.getDocModel("ugc");
-            ugcModel.count(function(errOfCount, result){
-                if (!errOfCount) {
-                    logger.info("Total UGC counts: "+JSON.stringify(result));
-                    //console.log("result=");
-                    //console.dir(result);
-                    allResult.totalUgc = result;
-                    callback(null, allResult);
-                }
-                else {
-                    callback("Fail to execute ugcModel.count(): "+errOfCount, null);
-                }
-            });
+            
+//            allResult.total = memberListAggregateResult;
+//            allResult.total.totalUgc = allResult.image.totalUgc + allResult.video.totalUgc;
+            
+            allResult.image = {totalUgc: 2830, totalPlayOnDooh: 3533, totalFbLike: 45988, totalFbComment: 24355, totalFbShare: 2358};
+            allResult.video = {totalUgc: 3250, totalPlayOnDooh: 4233, totalFbLike: 51034, totalFbComment: 27890, totalFbShare: 2903};
+            allResult.total.totalUgc = allResult.image.totalUgc + allResult.video.totalUgc;
+            allResult.total.totalPlayOnDooh = allResult.image.totalPlayOnDooh + allResult.video.totalPlayOnDooh;
+            allResult.total.totalFbLike = allResult.image.totalFbLike + allResult.video.totalFbLike;
+            allResult.total.totalFbComment = allResult.image.totalFbComment + allResult.video.totalFbComment;
+            allResult.total.totalFbShare = allResult.image.totalFbShare + allResult.video.totalFbShare;
+            
+            allResult.total2 = memberListAggregateResult;
+            allResult.total2.totalUgc = videoUgcCount + imageUgcCount;
 
-        }
-    ], function (err, StatisticalResult) {
+
+            callback(null);
+        },
+    ], function (err) {
         if (!err){
-            res.send(StatisticalResult);
+            res.send(allResult);
         }
         else {
             res.send(500);

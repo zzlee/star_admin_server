@@ -10,11 +10,31 @@ var memberListSubPg = {
         $.get('/miix_admin/table_censorMemberList_contentExtra.html', function(res){
             $('#contentExtra').html(res).show();
             $.get('/miix_admin/member_total_counts', {token: localStorage.token}, function(res){
-                $('#tdUgcTatalCount').html(res.totalUgc);
-                $('#tdPlayedOnDoohTatalCount').html(res.totalPlayOnDooh);
-                $('#tdFBLikeTatalCount').html(res.totalFbLike);
-                $('#tdFBCommentTatalCount').html(res.totalFbComment);
-                $('#tdFBShareTatalCount').html(res.totalFbShare);
+                $('#tdVideoUgcTatalCount').html(res.video.totalUgc);
+                $('#tdVideoPlayedOnDoohTatalCount').html(res.video.totalPlayOnDooh);
+                $('#tdVideoFBLikeTatalCount').html(res.video.totalFbLike);
+                $('#tdVideoFBCommentTatalCount').html(res.video.totalFbComment);
+                $('#tdVideoFBShareTatalCount').html(res.video.totalFbShare);
+                
+                $('#tdImageUgcTatalCount').html(res.image.totalUgc);
+                $('#tdImagePlayedOnDoohTatalCount').html(res.image.totalPlayOnDooh);
+                $('#tdImageFBLikeTatalCount').html(res.image.totalFbLike);
+                $('#tdImageFBCommentTatalCount').html(res.image.totalFbComment);
+                $('#tdImageFBShareTatalCount').html(res.image.totalFbShare);
+
+                $('#tdTotalUgcTatalCount').html(res.total.totalUgc);
+                $('#tdTotalPlayedOnDoohTatalCount').html(res.total.totalPlayOnDooh);
+                $('#tdTotalFBLikeTatalCount').html(res.total.totalFbLike);
+                $('#tdTotalFBCommentTatalCount').html(res.total.totalFbComment);
+                $('#tdTotalFBShareTatalCount').html(res.total.totalFbShare);
+                
+                $('#tdTotal2UgcTatalCount').html(res.total2.totalUgc);
+                $('#tdTotal2PlayedOnDoohTatalCount').html(res.total2.totalPlayOnDooh);
+                $('#tdTotal2FBLikeTatalCount').html(res.total2.totalFbLike);
+                $('#tdTotal2FBCommentTatalCount').html(res.total2.totalFbComment);
+                $('#tdTotal2FBShareTatalCount').html(res.total2.totalFbShare);
+
+
             });
         });
     }
