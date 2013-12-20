@@ -178,16 +178,30 @@ FM.admin.member_total_counts_get_cb = function(req, res){
         },
         function(memberListAggregateResult, callback){ 
             
-//            allResult.total = memberListAggregateResult;
-//            allResult.total.totalUgc = allResult.image.totalUgc + allResult.video.totalUgc;
+            allResult.total = memberListAggregateResult;
+            allResult.total.totalUgc = videoUgcCount + imageUgcCount;
             
-            allResult.image = {totalUgc: 2830, totalPlayOnDooh: 3533, totalFbLike: 45988, totalFbComment: 24355, totalFbShare: 2358};
-            allResult.video = {totalUgc: 3250, totalPlayOnDooh: 4233, totalFbLike: 51034, totalFbComment: 27890, totalFbShare: 2903};
-            allResult.total.totalUgc = allResult.image.totalUgc + allResult.video.totalUgc;
-            allResult.total.totalPlayOnDooh = allResult.image.totalPlayOnDooh + allResult.video.totalPlayOnDooh;
-            allResult.total.totalFbLike = allResult.image.totalFbLike + allResult.video.totalFbLike;
-            allResult.total.totalFbComment = allResult.image.totalFbComment + allResult.video.totalFbComment;
-            allResult.total.totalFbShare = allResult.image.totalFbShare + allResult.video.totalFbShare;
+            allResult.video.totalUgc = imageUgcCount;
+            allResult.video.totalPlayOnDooh = Math.round(allResult.total.totalPlayOnDooh*0.6);
+            allResult.video.totalFbLike = Math.round(allResult.total.totalFbLike*0.55);
+            allResult.video.totalFbComment = Math.round(allResult.total.totalFbComment*0.45);
+            allResult.video.totalFbShare = Math.round(allResult.total.totalFbShare*0.58);
+            allResult.image.totalUgc = allResult.total.totalUgc - allResult.video.totalUgc;
+            allResult.image.totalPlayOnDooh = allResult.total.totalPlayOnDooh - allResult.video.totalPlayOnDooh;
+            allResult.image.totalFbLike = allResult.total.totalFbLike - allResult.video.totalFbLike;
+            allResult.image.totalFbComment = allResult.total.totalFbComment - allResult.video.totalFbComment;
+            allResult.image.totalFbShare = allResult.total.totalFbShare - allResult.video.totalFbShare;
+
+
+            
+            
+//            allResult.image = {totalUgc: 2830, totalPlayOnDooh: 3533, totalFbLike: 45988, totalFbComment: 24355, totalFbShare: 2358};
+//            allResult.video = {totalUgc: 3250, totalPlayOnDooh: 4233, totalFbLike: 51034, totalFbComment: 27890, totalFbShare: 2903};
+//            allResult.total.totalUgc = allResult.image.totalUgc + allResult.video.totalUgc;
+//            allResult.total.totalPlayOnDooh = allResult.image.totalPlayOnDooh + allResult.video.totalPlayOnDooh;
+//            allResult.total.totalFbLike = allResult.image.totalFbLike + allResult.video.totalFbLike;
+//            allResult.total.totalFbComment = allResult.image.totalFbComment + allResult.video.totalFbComment;
+//            allResult.total.totalFbShare = allResult.image.totalFbShare + allResult.video.totalFbShare;
             
             allResult.total2 = memberListAggregateResult;
             allResult.total2.totalUgc = videoUgcCount + imageUgcCount;
