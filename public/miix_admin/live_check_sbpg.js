@@ -308,6 +308,7 @@
                     "_id":res[i].liveContent[j]._id,
                     //
                     "projectId": res[i].liveContent[j].projectId,
+                    "programTimeSlot_id": res[i].programTimeSlot_id,
                     //
                     "liveTime":res[i].liveContent[j].liveTime,
                     "ugcCensorNo":res[i].ugcCensorNo,
