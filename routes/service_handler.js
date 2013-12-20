@@ -206,6 +206,7 @@ FM.service.checkAndSendPushAll = function(checkAndSendPushAll_cb){
                                   if(!err){
                                       service_mgr.updatePushAllMessage(iterator_id,{"pushStatus":true},function(err,result){
                                          if(!err){
+                                             logger.info(iterator_id+' push for every user success');
                                              cb_each(null);
                                          }else {
                                              cb_each("failed in sendMessageToAllMemberByApp (async.eachSeries)"+err);

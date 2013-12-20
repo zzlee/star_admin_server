@@ -79,7 +79,7 @@ if (!fs.existsSync(tempDir) ){
 
 
 // all environments
-app.set('port', process.env.PORT || 80);
+app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
@@ -152,12 +152,13 @@ async.waterfall([
             
             var triggerPushTimer = setInterval(function(){
                routes.service.checkAndSendPushAll(function(){
+                   logger.info('timer to trigger push to All member(every hour)');
 //                   console.log(new Date());
 //                   console.log('done routes.service.checkAndSendPushAll from app.js');
 //                   console.log('-------------------------------');
 
                });
-            },2000);
+            },3600000);
             
             callback(null);
         });
