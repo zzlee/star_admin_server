@@ -372,7 +372,8 @@ FM.DB = (function(){
 		    pushTime: {type: Date},
 		    pushGenre: {type: String},
 		    appGenre: {type: String},
-		    pushStatus: {type: Boolean, default: false}
+		    pushStatus: {type: Boolean, default: false},
+		    remark: {type: String}
 		    
 		    
 		    

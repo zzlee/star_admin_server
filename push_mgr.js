@@ -265,10 +265,10 @@ FM.pushMgr = (function() {
                     condition = {"app": app};
                 
                 var iteratorSendMessageToDeviceByMemberId = function(data, cbOfIteratorSendMessageToDeviceByMemberId){
-                   console.log(data._id, message);
+//                   console.log(data._id, message);
                     cbOfIteratorSendMessageToDeviceByMemberId(null);
                     FM.pushMgr.getInstance().sendMessageToDeviceByMemberId( data._id, message, function(err, result){
-                        console.log(err, result);
+//                        console.log(err, result);
                     });
                 };
                 
@@ -307,7 +307,7 @@ FM.pushMgr = (function() {
             /** TEST */
             _testkaiser: function(){
                 var userNo = 1234;
-                var memberId = '529d4bc39ffc785817000006';
+                var memberId = '52b3af8820786b142600000f';
                 var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
                 this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
                         console.log(err, result);
@@ -331,5 +331,5 @@ FM.pushMgr = (function() {
 })();
 
 /* TEST */
-// FM.pushMgr.getInstance()._testkaiser();
+ FM.pushMgr.getInstance()._testkaiser();
 module.exports = FM.pushMgr.getInstance();

@@ -239,4 +239,16 @@ FM.service.checkAndSendPushAll = function(checkAndSendPushAll_cb){
     });
 };
 
+FM.service.updatePushAllMessage_get_cb = function(req, res){
+    var _id = req.body._id;
+    var vjson = req.body.vjson;
+    service_mgr.updatePushAllMessage(_id,vjson,function(err,result){
+        if(!err){
+            res.send(200, {message: 'update record in pushAllMessage success!'});           
+        }else {
+            res.send(400, {error: "failed in update record in pushAllMessage"});
+        }
+     });
+};
+
 module.exports = FM.service;

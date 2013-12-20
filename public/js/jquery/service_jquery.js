@@ -11,7 +11,10 @@ $(document).ready(function(){
     $('#customerService').click(function(){
         location.reload();
     });
-    $('#pushCenter').click(pushCenterPg);
+    $('#pushCenter').click(function(){
+        $(document).unbind( "keyup" );
+        pushCenterPg();
+        });
 });
 
 

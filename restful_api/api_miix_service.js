@@ -179,6 +179,8 @@ exports.init = function() {
 	app.post('/miix_service/message', routes.service.pushMessage_get_cb);
 	
     app.get('/miix_service/get_push_all_message', routes.service.getPushAllMessage_get_cb);
+    
+    app.put('/miix_service/update_push_all_message', routes.service.updatePushAllMessage_get_cb);
 
 
 };

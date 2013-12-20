@@ -136,8 +136,16 @@ var pushCenterPg = function(){
                  
                  var remarkArea = $("<textarea>").attr({
                      id:"pushCenterRemark",
-                     class: "remarkText"
+                     class: "remarkText",
+                     "_id": res.result[i]._id
                          });
+                 
+                 var remarkDiv = $('<div>').text(res.result[i].remark);
+                 if(res.result[i].remark){
+                     td_6.append(remarkDiv);
+                 }else{
+                     td_6.append("<div>");
+                 }
                  td_6.append(remarkArea);
                  tr_ajax.append(td_1);
                  tr_ajax.append(td_2);
@@ -170,29 +178,32 @@ var pushCenterPg = function(){
          });
      });
      /*-------------- END send push record to db, not actually do push!!---------------- */
+//     $('body').bind("keyup",function(e){
+//         alert('rr');
+//     });
+     $('#pushCenterRemark').click(function(){
+         alert('tt');
+     });
      $(document).keyup(function(e){
          if ($("tr td .textarea:focus") && (e.keyCode === 13)) {
              $('#pushCenterRemark.remarkText').each(function(){
                  if($(this).attr("value")){
-                     alert($(this).attr("value"));
-                     //var url = DOMAIN + "questions";
-//                     $.ajax({
-//                         url: url,
-//                         type: 'PUT',
-//                         data: {_id: $(this).attr("name"), vjson:{remarks: $(this).attr("value")}},
-//                         success: function(response) {
-//                             if(response.message){
-//                                 reloadTable();
-//                             }
-//                         }
-//                     });
-
-
+                     var url = DOMAIN + "update_push_all_message";
+                     var _id=  $(this).attr("_id");
+                     var text = $(this).attr("value");
+                     $.ajax({
+                         url: url,
+                         type: 'PUT',
+                         data: {_id: $(this).attr("_id"), vjson:{remark: $(this).attr("value")}},
+                         success: function(response) {
+                             if(response.message){
+                                 console.log(response.message);
+                                 $( "textarea[_id="+_id+"]" ).prev().html('').append(text);
+                             }
+                         }
+                     });
                  }
              });
-
-         }
-         
+         }        
      });
-    
 };
