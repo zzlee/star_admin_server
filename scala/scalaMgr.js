@@ -615,10 +615,24 @@ function scalaMgr( url, account ){
             });
         };
         
+        var mediaConsole = function( file, media, media_cb ) {
+            contractor.media.list({search: media.name}, function(err, res){
+                if((res.count == 0) || (res.list[0].status != 'OK') || (res.list[0].length == 0)) {
+                    scalaLogger.action('upload media is failed, file name is ' + media.name + ', please re-upload.');
+                    upload( file, media, media_cb );
+                }
+                else {
+                    media.id = res.list[0].id;
+                    media_cb(null, { media: media });
+                }
+            });
+        };
+        
         async.whilst(
             function () { return count < limit; },
             function (callback) {
-                upload(file, media, function(err, res) {
+                // upload(file, media, function(err, res) {
+                mediaConsole(file, media, function(err, res) {
                     if( err ) {
                         count++;
                         if(count != limit)
