@@ -202,17 +202,21 @@ FM.service.checkAndSendPushAll = function(checkAndSendPushAll_cb){
                               var iterator_message = iterator.message;
                               var iterator_id = iterator._id;
                               
+                              
+                              service_mgr.updatePushAllMessage(iterator_id,{"pushStatus":true},function(err,result){
+                                  if(!err){
+                                      logger.info('pushStatus to true!!');
+//                                      console.log(iterator_id+' push for every user success');
+                                      //cb_each(null);
+                                  }else {
+                                     // cb_each("failed in sendMessageToAllMemberByApp (async.eachSeries)"+err);
+                                  }
+                               });
+                              
                               pushMgr.sendMessageToAllMemberByApp(iterator_message, iterator_app, function(err, result){
                                   if(!err){
-                                      service_mgr.updatePushAllMessage(iterator_id,{"pushStatus":true},function(err,result){
-                                         if(!err){
-                                             logger.info(iterator_id+' push for every user success');
-                                             cb_each(null);
-                                         }else {
-                                             cb_each("failed in sendMessageToAllMemberByApp (async.eachSeries)"+err);
-                                         }
-                                      });
-                                    cb_each(null);
+                                      logger.info(' pushMgr.sendMessageToAllMemberByApp success');
+                                      cb_each(null);
                                   }else{
                                       cb_each("failed in sendMessageToAllMemberByApp (async.eachSeries)"+err);
                                   }
@@ -227,6 +231,7 @@ FM.service.checkAndSendPushAll = function(checkAndSendPushAll_cb){
                               }
                           });
                       }else {
+                          logger.info('there is nothing to push!!');
                           callback(null);
                       }
                   }
