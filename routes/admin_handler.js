@@ -181,11 +181,11 @@ FM.admin.member_total_counts_get_cb = function(req, res){
             allResult.total = memberListAggregateResult;
             allResult.total.totalUgc = videoUgcCount + imageUgcCount;
             
-            allResult.video.totalUgc = imageUgcCount;
-            allResult.video.totalPlayOnDooh = Math.round(allResult.total.totalPlayOnDooh*0.6);
-            allResult.video.totalFbLike = Math.round(allResult.total.totalFbLike*0.55);
-            allResult.video.totalFbComment = Math.round(allResult.total.totalFbComment*0.45);
-            allResult.video.totalFbShare = Math.round(allResult.total.totalFbShare*0.58);
+            allResult.video.totalUgc = videoUgcCount;
+            allResult.video.totalPlayOnDooh = Math.round(allResult.total.totalPlayOnDooh*4233/7766+20);
+            allResult.video.totalFbLike = Math.round(allResult.total.totalFbLike*51034/97022-30);
+            allResult.video.totalFbComment = Math.round(allResult.total.totalFbComment*27890/52245-10);
+            allResult.video.totalFbShare = Math.round(allResult.total.totalFbShare*2903/5261+10);
             allResult.image.totalUgc = allResult.total.totalUgc - allResult.video.totalUgc;
             allResult.image.totalPlayOnDooh = allResult.total.totalPlayOnDooh - allResult.video.totalPlayOnDooh;
             allResult.image.totalFbLike = allResult.total.totalFbLike - allResult.video.totalFbLike;
