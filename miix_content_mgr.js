@@ -38,7 +38,7 @@ var miixContentMgr = {};
  */
 miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbID, movieTitle, cbOfGenerateMiixMoive) {
     
-    var ugcModel = db.getDocModel("ugc");
+    var ugcModel = db.getDocModel("fakeUgc");
     var errDuringProcessing = null;
     var urls = null;
     var fileExtension = null;
@@ -76,7 +76,7 @@ miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbI
             
             if (!hasS3Url ){
                 //ask AE server to generate the UGC from scratch
-                aeServerMgr.createMiixMovie( movieProjectID, ownerStdID, ownerFbID, movieTitle, mediaType, function(responseParameters){
+                aeServerMgr.createMiixMovie( movieProjectID, ownerStdID, ownerFbID, movieTitle, mediaType, "normal", function(responseParameters){
                     
                     if ( responseParameters ) {
                         logger.info("aeServerMgr.createMiixMovie(): responseParameters= "+JSON.stringify(responseParameters));

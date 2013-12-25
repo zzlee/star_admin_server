@@ -73,10 +73,10 @@ memberListInfoModel.find({"hot":true}).exec(function(err, memberList){
     
     var iteratorUpdateAMemberInfo = function(anIndex, callback){
         memberList[anIndex].miixMovieVideo_count = 1+ Math.round( 3*Math.random()*Math.random() );
-        memberList[anIndex].doohPlay_count = Math.floor( memberList[anIndex].miixMovieVideo_count*(1+3.3*Math.random()*Math.random()) );
-        memberList[anIndex].fbLike_count = Math.floor( memberList[anIndex].doohPlay_count*66*Math.random()*Math.random() );
-        memberList[anIndex].fbComment_count = Math.floor( memberList[anIndex].fbLike_count*0.8*Math.random() );
-        memberList[anIndex].fbShare_count = Math.round( memberList[anIndex].fbLike_count*0.2*Math.random()*Math.random() );
+        memberList[anIndex].doohPlay_count = Math.floor( memberList[anIndex].miixMovieVideo_count*(1+3.2*Math.random()*Math.random()) );
+        memberList[anIndex].fbLike_count = Math.floor( memberList[anIndex].doohPlay_count*62*Math.random()*Math.random() );
+        memberList[anIndex].fbComment_count = Math.floor( memberList[anIndex].fbLike_count*1.1*Math.random() );
+        memberList[anIndex].fbShare_count = Math.round( memberList[anIndex].fbLike_count*0.25*Math.random()*Math.random() );
 
         memberList[anIndex].save(callback);
         console.log("updated "+anIndex);

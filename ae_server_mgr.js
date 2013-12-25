@@ -14,7 +14,7 @@ var youtubeTokenMgr = require( './youtube_mgr.js' );
 
 
 //use long polling to ask AE Server to create Miix movie
-aeServerMgr.createMiixMovie = function(movieProjectID, ownerStdID, ownerFbID, movieTitle, mediaType, createMovie_cb) {
+aeServerMgr.createMiixMovie = function(movieProjectID, ownerStdID, ownerFbID, movieTitle, mediaType, mode, createMovie_cb) {
 
 	var starAeServerID = systemConfig.DEFAULT_AE_SERVER;
 	
@@ -37,7 +37,8 @@ aeServerMgr.createMiixMovie = function(movieProjectID, ownerStdID, ownerFbID, mo
                     ownerFbID: ownerFbID,
                     movieTitle: movieTitle,
                     ytAccessToken: ytAccessToken,
-                    mediaType: mediaType
+                    mediaType: mediaType,
+                    mode: mode
                 };
                             
                 globalConnectionMgr.sendRequestToRemote( starAeServerID, { command: "RENDER_MIIX_MOVIE", parameters: commandParameters }, function(responseParameters) {

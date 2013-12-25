@@ -37,24 +37,30 @@
             }else{
                 var tr=$("<tr>").attr({class:""});
             }
+            /*START left side Img (longs3 or miixSource)*/
 
-            if(res[i].liveContent[0]){
-                var s3img=$("<img>").attr({src:res[i].liveContent[0].url.longPhoto,
+            if(res[i].s3Img){
+                var s3img=$("<img>").attr({src:res[i].s3Img,
                                            width:"200",
                                            height:"80"
                                            });
-            }else{
-                var s3img=$("<div>").attr({
-                                           width:"200",
-                                           height:"80"}).html("live content 尚未產生喔~");
+            }else if(res[i].miixSource){
+                var s3img=$("<img>").attr({src:res[i].miixSource,
+                    width:"200",
+                    height:"100"
+                    });
             }           
 
-            if(res[i].liveContent[0]){
-                var s3imgLink=$("<a>").attr({href:res[i].liveContent[0].url.longPhoto,
+            if(res[i].s3Img){
+                var s3imgLink=$("<a>").attr({href:res[i].s3Img,
                                              target:"_blank"
                                              }).append(s3img);
+            }else if(res[i].miixSource){
+                var s3imgLink=$("<a>").attr({href:res[i].miixSource,
+                    target:"_blank"
+                    }).append(s3img);
             }
-
+            /*END left side Img (longs3 or miixSource)*/
 
             var post_live_time_start=new Date(parseInt(res[i].start));
             var post_year_start=post_live_time_start.getFullYear();
