@@ -488,7 +488,7 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
     }
         var liveContentList = [];
 
-        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, fbUserId, programTimeSlot_id, ownerId_id, canBeFoundInPlayerLog, arr) {
+        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, fbUserId, programTimeSlot_id, ownerId_id, canBeFoundInPlayerLog, s3Img, miixSource, arr) {
             arr.push({
                 ugcCensorNo: ugcCensorNo,
                 liveContent: liveContent,
@@ -498,14 +498,22 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
                 fbUserId: fbUserId,
                 programTimeSlot_id: programTimeSlot_id,
                 ownerId_id: ownerId_id,
-                canBeFoundInPlayerLog: canBeFoundInPlayerLog
+                canBeFoundInPlayerLog: canBeFoundInPlayerLog,
+                s3Img: s3Img,
+                miixSource: miixSource
             });
         };  
         var mappingLiveContentList = function(data, cbOfMappingLiveContentList){
             userLiveContentModel.find({'liveTime': {$gte: data.timeslot.start, $lt: data.timeslot.end}, "sourceId": data.content.projectId}).exec(function(err, result){
                 if(!err){
-                    LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, liveContentList);
-                    cbOfMappingLiveContentList(null); 
+                    UGCs.find({"no": data.content.no}).exec(function(err_2, result_2){
+                        if(!err_2) {
+                            LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, result_2[0].userRawContent[0].content, liveContentList);
+                            cbOfMappingLiveContentList(null); 
+                        }else {
+                            cbOfMappingLiveContentList(err_2);
+                        }
+                    });
                 }else{
                     cbOfMappingLiveContentList(err); 
                 }
