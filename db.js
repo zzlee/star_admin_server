@@ -367,6 +367,18 @@ FM.DB = (function(){
             showInCenter: {type: Boolean, default: false}
         }); //  MyMember collection
 		
+		var PushAllMessageSchema = new Schema({
+		    content: {type: String},
+		    pushTime: {type: Date},
+		    pushGenre: {type: String},
+		    appGenre: {type: String},
+		    pushStatus: {type: Boolean, default: false},
+		    remark: {type: String}
+		    
+		    
+		    
+		});
+		
         /****************** End of DB Schema ******************/
 		
         var Member = connection.model('Member', MemberSchema, 'member'),
@@ -387,6 +399,8 @@ FM.DB = (function(){
             UserLiveContent = connection.model('UserLiveContent', UserLiveContentSchema, 'userLiveContent'),
             MyMember = connection.model('MyMember', MyMemberSchema, 'myMember'),
 			Message = connection.model('Message', MessageSchema, 'message');
+            PushAllMessage = connection.model('PushAllMessage', PushAllMessageSchema, 'pushAllMessage');
+        
            
             
         var dbModels = [];
@@ -408,6 +422,7 @@ FM.DB = (function(){
         dbModels["userLiveContent"] = UserLiveContent;
         dbModels["myMember"] = MyMember;
 		dbModels["message"] = Message;
+		dbModels["pushAllMessage"] = PushAllMessage;
         
         //???? nobody uses it, so this section can be removed? 
         var dbSchemas = [];
@@ -427,7 +442,14 @@ FM.DB = (function(){
                 try{
                     var options = {
                             user: systemConfig.HOST_MONGO_DB_USER_NAME,
-                            pass: systemConfig.HOST_MONGO_DB_PASSWORD
+                            pass: systemConfig.HOST_MONGO_DB_PASSWORD,
+							server:{
+								auto_reconnect: true,
+								poolSize: 10,
+								socketOptions:{
+									keepAlive: 1
+								}
+							}
                         };
                     mongoose.connect(systemConfig.HOST_MONGO_DB_SERVER_URL+'/'+DB, options);
                     return mongoose.connection;
@@ -526,6 +548,9 @@ FM.DB = (function(){
 					case 'message':
                         return Message;
                         break;
+					case 'pushAllMessage':
+					    return PushAllMessage;
+					    break;
                     default:
                         throw new error('DB Cannot find this Collection: ' + collection);
                         break;

@@ -10,6 +10,9 @@ FM.pushMgr = (function() {
 	var messageModel = db.getDocModel("message");
 
 	function constructor() {
+	    var async = require('async');
+	    var db = require('./db.js');
+
 		/**
 		 * Google Cloud Messaging, a.k.a., GCM. GCM sender_ID: 701982981612 API
 		 * Key: AIzaSyDn_H-0W251CKUjDCl-EkBLV0GunnWwpZ4
@@ -185,7 +188,7 @@ FM.pushMgr = (function() {
 			},
 			
             sendMessageToDeviceByMemberId : function(memberId, message, cbOfSendMessageToDeviceByMemberId){
-                 memberDB = require("./member.js");
+                 var memberDB = require("./member.js");
 
                  memberDB.getDeviceTokenById(memberId, function(err, result){
                      if(err){
@@ -202,23 +205,34 @@ FM.pushMgr = (function() {
                          for( var devicePlatform in result.deviceToken){
                              var deviceTokenCheck = result.deviceToken[devicePlatform];
                              if(!deviceTokenCheck){
+                                 logger.info("[push_mgr]deviceToken is null" + JSON.stringify(result.deviceToken)+"memberId="+memberId  );
                                  FM_LOG("[push_mgr]deviceToken is null" + JSON.stringify(result.deviceToken)+"memberId="+memberId ); 
                              }
                              else if(deviceTokenCheck == "undefined"){
+                                 logger.info("[push_mgr]deviceToken is undefined" + JSON.stringify(result.deviceToken)+"memberId="+memberId );
                                  FM_LOG("[push_mgr]deviceToken is undefined" + JSON.stringify(result.deviceToken)+"memberId="+memberId ); 
                              }
                              else if(deviceTokenCheck){
                                  FM.pushMgr.getInstance().sendMessageToDevice(devicePlatform, result.deviceToken[devicePlatform], result.app, message);
                              }else{
+                                 logger.info("[push_mgr]deviceToken error" + JSON.stringify(result.deviceToken)+"memberId="+memberId );
                                  FM_LOG("[push_mgr]deviceToken error" + JSON.stringify(result.deviceToken)+"memberId="+memberId );
                              }
                          }
+                         //console.log("Push Successful");
+                         logger.info('[pus_mgr.sendMessageToDeviceByMemberId] Push Successful result.deviceToken= '+result.deviceToken);
                          cbOfSendMessageToDeviceByMemberId(err, "Push Successful");
+                     }else{
+//                         FM_LOG('[pus_mgr.sendMessageToDeviceByMemberId] error = deviceToken is null ;'+result);
+                         logger.info('[pus_mgr.sendMessageToDeviceByMemberId] error = deviceToken is null ;result= '+result);
+                         cbOfSendMessageToDeviceByMemberId(err, result);
+                         //console.log("else");
                      }
+                     
                  });
 
             },
-			
+
 			createMessage : function(memberId,  message, cbOfCreateMessage){
 				var jsonOfNewMessage = {
 					content: message,
@@ -255,14 +269,74 @@ FM.pushMgr = (function() {
 			
 			},
 			
+            sendMessageToAllMemberByApp : function(message, app, cbOfSendMessageToDeviceByMemberId){
+                var memberModel = db.getDocModel("member");
+                var condition = null;
+                if(app)
+                    condition = {"app": app};
+                
+                var iteratorSendMessageToDeviceByMemberId = function(data, cbOfIteratorSendMessageToDeviceByMemberId){
+                   //console.log(data._id, message);
+                   logger.info("iteratorSendMessageToDeviceByMemberId member_id  ="+ data._id+',message='+ message);
+                    FM.pushMgr.getInstance().sendMessageToDeviceByMemberId( data._id, message, function(err, result){
+                        
+                        if(!err){
+                            logger.info("iteratorSendMessageToDeviceByMemberId result"+ result);
+                            cbOfIteratorSendMessageToDeviceByMemberId(null, result);
+                        }else{
+                            logger.info("iteratorSendMessageToDeviceByMemberId err="+err);
+                            cbOfIteratorSendMessageToDeviceByMemberId(null, err);
+                        }
+                        
+                    });
+                };
+                
+                async.waterfall([
+                              function(callback1){
+                                  memberModel.find(condition).exec(function(err, memberList){
+                                      if(!err){
+                                          callback1(null, memberList);
+                                      }else{
+                                          callback1(err, null);
+                                      }
+                                  });
+                              },
+                              function(memberList, callback2){
+                                 // console.log(memberList.length);
+                                  logger.info("sendMessageToAllMemberByApp memberList.length"+ memberList.length);
+                                  async.eachSeries(memberList, iteratorSendMessageToDeviceByMemberId, function(errOfEachSeries){
+                                      //console.log('iter end');
+                                      //console.log(errOfEachSeries);
+                                      if (!errOfEachSeries) {
+                                          callback2(null, "done");
+                                      }
+                                      else{
+                                          callback2(errOfEachSeries, null);
+                                      }
+                                  });
+                              }
+                              ],
+                              function(err, results){
+                                //console.log('end');
+                                //console.log(err, results);
+                                if(!err){
+                                    logger.info("sendMessageToAllMemberByApp results "+results);
+                                    cbOfSendMessageToDeviceByMemberId("done");
+                                }else{
+                                    logger.info("sendMessageToAllMemberByApp err "+err);
+                                    cbOfSendMessageToDeviceByMemberId(err);
+                                }
+                              });
+
+           },
 			
             /** TEST */
             _testkaiser: function(){
                 var userNo = 1234;
-                var memberId = '529dafa950ceec4015000005';
-                var message = '您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。您目前是第'+userNo+'位試鏡者，等候通告期間，您可以先到客棧打個工。';
+                var memberId = '52b7e3f115678eec0a000103';
+                var message = "★哇！聖誕祝福來囉★ 哇！上小巨蛋，提供聖誕特別模板， 今年聖誕，給朋友史上最大的聖誕祝福吧！";
                 this.sendMessageToDeviceByMemberId( memberId, message, function(err, result){
-                        console.log(err, result);
+                        //console.log(err, result);
                 });
 				// this.saveMessageToDataBase( memberId, message, function(err, result){
 					// console.log(err, result);

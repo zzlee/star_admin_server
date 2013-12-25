@@ -313,7 +313,7 @@ FM.censorHandler.getLiveContentList_get_cb = function(req, res){
     condition = {
             "type": "UGC",
             "timeslot.start": {$gte: (new Date("1911/1/1 00:00:00")).getTime(), $lt: (new Date("9999/12/31 12:59:59")).getTime()},
-            "state": "confirmed"
+            "state": { $ne: "not_confirmed" }
     };
     sort = {
             "timeslot.start":-1,
@@ -323,7 +323,7 @@ FM.censorHandler.getLiveContentList_get_cb = function(req, res){
         condition = {
             "type": "UGC",
             "timeslot.start": {$gte: (new Date(req.query.condition.playtimeStart)).getTime(), $lt: (new Date(req.query.condition.playtimeEnd)).getTime()},
-            "state": "confirmed"
+            "state": { $ne: "not_confirmed" }
     };
     if(req.query.sort) 
         sort = req.query.sort;
