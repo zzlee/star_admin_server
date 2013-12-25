@@ -201,6 +201,13 @@ $(document).ready(function(){
 
     });
     
+    $("#logoutBtn").click(function(){
+        $.get(DOMAIN + "logout", function(res){
+            delete localStorage.token;
+            delete localStorage.role;
+            location.reload();
+        });
+    });
     
   
     
