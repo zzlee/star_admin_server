@@ -664,7 +664,6 @@
                     }
                 });
                 
-                //TODO: debug this code block. It seemed not work
                 var programTimeSlot_id=$(this).attr("programTimeSlot_id");
                 var liveState="correct";
                 var fbUserId=$(this).attr("fbUserId");
