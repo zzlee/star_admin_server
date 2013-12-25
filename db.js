@@ -442,7 +442,14 @@ FM.DB = (function(){
                 try{
                     var options = {
                             user: systemConfig.HOST_MONGO_DB_USER_NAME,
-                            pass: systemConfig.HOST_MONGO_DB_PASSWORD
+                            pass: systemConfig.HOST_MONGO_DB_PASSWORD,
+							server:{
+								auto_reconnect: true,
+								poolSize: 10,
+								socketOptions:{
+									keepAlive: 1
+								}
+							}
                         };
                     mongoose.connect(systemConfig.HOST_MONGO_DB_SERVER_URL+'/'+DB, options);
                     return mongoose.connection;
