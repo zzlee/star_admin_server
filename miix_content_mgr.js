@@ -38,7 +38,7 @@ var miixContentMgr = {};
  */
 miixContentMgr.generateMiixMoive = function(movieProjectID, ownerStdID, ownerFbID, movieTitle, cbOfGenerateMiixMoive) {
     
-    var ugcModel = db.getDocModel("fakeUgc");
+    var ugcModel = db.getDocModel("ugc");
     var errDuringProcessing = null;
     var urls = null;
     var fileExtension = null;
