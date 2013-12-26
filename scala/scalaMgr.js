@@ -147,7 +147,8 @@ function scalaMgr( url, account ){
                                         start: timeToInt(oneday, list.timeslots[i].startTime),
                                         end: timeToInt(oneday, list.timeslots[i].endTime)
                                     },
-                                    cycleDuration: durationToNumber(list.timeslots[i].playlist.prettifyDuration.replace('(','').replace(')','').split(' - '))
+                                    cycleDuration: durationToNumber(list.timeslots[i].playlist.prettifyDuration.replace('(','').replace(')','').split(' - ')),
+                                    priority: list.timeslots[i].priorityClass
                                 });
                             }
                         });
@@ -160,6 +161,127 @@ function scalaMgr( url, account ){
             }
         });
         
+    };
+    
+    /**
+     * List timetriggers from server.
+     * 
+     */
+    var listTimetriggers = function( oneday, setting, timetriggers_cb ) {
+        
+        var options = {
+            channel : { id: 1, frames: 1 }, //hardcode
+            date : null,
+        };
+        
+        if(typeof(oneday) === 'function') {
+            timetriggers_cb = oneday;
+            options.channel.id = 1;
+            options.channel.frames = 1;
+            options.date = new Date();
+        }
+        else if((oneday.channel) && (typeof(setting) === 'function')) {
+            timetriggers_cb = setting;
+            setting = oneday;
+            options.channel.id = setting.channel.id;
+            options.channel.frames = setting.channel.frames;
+            options.date = new Date();
+        }
+        else if(typeof(setting) === 'function') {
+            timetriggers_cb = setting;
+            options.channel.id = 1;
+            options.channel.frames = 1;
+            options.date = new Date(oneday);
+        }
+        else {
+            options.channel.id = setting.channel.id;
+            options.channel.frames = setting.channel.frames;
+            options.date = new Date(oneday);
+        }
+        
+        contractor.schedule.findTimetrggers(options, function(err, res) {
+            
+            if( !res.timeTriggers ) {
+                scalaLogger.action('not find time triggers info');
+                timetriggers_cb('not_find_timetriggers', null);
+                return;
+            }
+            var timetriggers = res.timeTriggers;
+            var timeInterval = [];
+            scalaLogger.action('get timeslot is successfully, info: ' + JSON.stringify(timetriggers));
+            
+            timetriggers.forEach(function(trigger) {
+                
+                var startDate = new Date(trigger.startDate).getTime(),
+                    endDate = new Date(trigger.endDate).getTime();
+                
+                if((endDate < options.date.getTime()) || (startDate > options.date.getTime())) {
+                    return;
+                }
+                
+                var playlist = { id: trigger.playlist.id, name: trigger.playlist.name };
+                var interval = { start:'', end: '', repeat: '' };
+                
+                if(!trigger.repeatStartTime) {
+                    var time = trigger.time.split(':');
+                    var start = 
+                    new Date(
+                        options.date.getFullYear(),
+                        options.date.getMonth(),
+                        options.date.getDate(),
+                        time[0], time[1], time[2]
+                    ).getTime();
+                    interval.start = start;
+                    interval.end = -1;
+                    interval.repeat = -1;
+                }
+                else {
+                    var time = trigger.time.split(':');
+                    var start = 
+                        new Date(
+                            options.date.getFullYear(),
+                            options.date.getMonth(),
+                            options.date.getDate(),
+                            time[0], time[1], time[2]
+                        ).getTime();
+                    interval.start = start;
+                    
+                    var cycle = trigger.repeatStartTime.split(':');
+                    var repeat = ((parseInt(cycle[0]) * 60 + parseInt(cycle[1])) * 60 + parseFloat(cycle[2])) * 1000;
+                    interval.repeat = repeat;
+                    
+                    var repeatEnd = trigger.repeatEndTime.split(':');
+                    var end = 
+                        new Date(
+                            options.date.getFullYear(),
+                            options.date.getMonth(),
+                            options.date.getDate(),
+                            repeatEnd[0], repeatEnd[1], repeatEnd[2]
+                        ).getTime();
+                    interval.end = end;
+                }
+                
+                var once = trigger.playlist.prettifyDuration.replace('(', '').replace(')', '');
+                if(once.indexOf('-') > 0) {
+                    once  = once.split('-');
+                    once = once[1].split(':');
+                }
+                else {
+                    once = once.split(':');
+                }
+                var duration = (once[0] * 60 + parseFloat(once[1])) * 1000;
+                
+                timeInterval.push({
+                    playlist: playlist,
+                    interval: interval,
+                    duration: duration
+                });
+            });
+            
+            // console.dir(timeInterval);
+            timetriggers_cb(null, timeInterval);
+            
+        });
     };
     
     /**
@@ -1084,6 +1206,7 @@ function scalaMgr( url, account ){
     
     return {
         listTimeslot : listTimeslot,
+        listTimetriggers : listTimetriggers,
         setItemToPlaylist : setItemToPlaylist,
         pushEvent : pushEvent,
         setWebpageToPlaylist: setWebpageToPlaylist,
