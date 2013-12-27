@@ -99,8 +99,10 @@ function scalaMgr( url, account ){
         });
     };
     var isExistedOfPlaylist = function(search, isExisted_cb){
-        contractor.playlist.list({ fields: 'id', search: search }, function(err, res){
-            (res.count > 0)?isExisted_cb({ exist: true, id: res.list[0].id }):isExisted_cb({ exist: false, id: null });
+        contractor.playlist.list({ fields: 'id,name', search: search }, function(err, res){
+            (res.count > 0)
+              ? isExisted_cb({ exist: true, id: res.list[0].id, name: res.list[0].name })
+              : isExisted_cb({ exist: false, id: null, name: null });
         });
     };
     
@@ -491,6 +493,7 @@ function scalaMgr( url, account ){
                     }
                     else {
                         setting.playlist.id = status.id;
+                        setting.playlist.name = status.name;
                         step2(null, 'done');
                     }
                 });

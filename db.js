@@ -379,6 +379,39 @@ FM.DB = (function(){
 		    
 		});
 		
+        var ProgramGroupsSchema = new Schema({
+            // id : (String),
+            uuid : { type : String },
+            dooh : { 
+                owner : { type : String }, 
+                name : { type : String }, 
+                place : { type : String } 
+            },
+            timeslot : { start : { type : Number }, end : { type : Number } },
+            playlist : { id : { type : Number }, name : { type : String } },
+            parentPlaylist : { id : { type : Number }, name : { type : String } },
+            player : { 
+                id : { type : Number }, 
+                name : { type : String }, 
+                channel : { id : { type : Number }, name : { type : String }, frame : { type : Number } }
+            },
+            programs : { type : Mixed }
+            /* [{
+                no : { type : Number },
+                media: { id: { type : Number }, name: { type : String } },    // ?
+                playlistItem : 
+                {
+                    id : { type : Number },
+                    name : { type : String },
+                    sortOrder : { type : Number },
+                    duration : { type : Number }
+                }
+             },
+             { 
+                ... 
+             }] */
+        });
+        
         /****************** End of DB Schema ******************/
 		
         var Member = connection.model('Member', MemberSchema, 'member'),
@@ -398,8 +431,9 @@ FM.DB = (function(){
             SessionItem = connection.model('SessionItem', SessionItemSchema, 'sessionItem'),
             UserLiveContent = connection.model('UserLiveContent', UserLiveContentSchema, 'userLiveContent'),
             MyMember = connection.model('MyMember', MyMemberSchema, 'myMember'),
-			Message = connection.model('Message', MessageSchema, 'message');
-            PushAllMessage = connection.model('PushAllMessage', PushAllMessageSchema, 'pushAllMessage');
+			Message = connection.model('Message', MessageSchema, 'message'),
+            PushAllMessage = connection.model('PushAllMessage', PushAllMessageSchema, 'pushAllMessage'),
+            ProgramGroups = connection.model('ProgramGroups', ProgramGroupsSchema, 'programGroups');
         
            
             
@@ -423,6 +457,7 @@ FM.DB = (function(){
         dbModels["myMember"] = MyMember;
 		dbModels["message"] = Message;
 		dbModels["pushAllMessage"] = PushAllMessage;
+		dbModels["programGroups"] = ProgramGroups;
         
         //???? nobody uses it, so this section can be removed? 
         var dbSchemas = [];

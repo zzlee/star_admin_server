@@ -46,7 +46,7 @@ setTimeout(function(){
     // ScalaMgr APIs : setItemToPlaylist()
     /* var option = 
     {
-        //playlist: { name: 'last' },
+        // playlist: { name: 'myTest_' + new Date().getTime() },
         playTime: { start: '2013-07-21 12:30:00', end: '2013-07-22 17:50:00', duration: 35 },
         file: {
             name : 'test_0.avi',
@@ -125,10 +125,10 @@ setTimeout(function(){
     // ScalaMgr APIs : setWebpageToPlaylist()
     /* var option = 
     {
-        playlist: { name: 'last' },
+        playlist: { name: 'myTest_' + new Date().getTime() },
         playTime: { start: '2013-07-22 18:00:00', end: '2013-07-22 19:00:00', duration: 50 },
         webpage: {
-            name: 'web_test',
+            name: 'web_test_' + new Date().getTime(),
             uri: 'www.feltmeng.idv.tw'
         }
     };
