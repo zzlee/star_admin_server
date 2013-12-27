@@ -5,7 +5,7 @@ FM_LOG = (DEBUG) ? function(str){ logger.info( typeof(str)==='string' ? str : JS
 var FM = { censorHandler: {} };
 var censorMgr = require("../censor_mgr.js");
 var apis = require("../routes/api.js");
-var scheduleMgr = require("../schedule_mgr.js");
+var scheduleMgr = require("../schedule").scheduleMgr;
 var db = require('../db.js');
 var async = require('async');
 var sessionItemModel = db.getDocModel("sessionItem");

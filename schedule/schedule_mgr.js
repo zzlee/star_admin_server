@@ -8,10 +8,10 @@ var mongoose = require('mongoose');
 var workingPath = process.cwd();
 var path = require('path');
 var fs = require('fs');
-var awsS3 = require('./aws_s3.js');
-var db = require('./db.js');
+var awsS3 = require('../aws_s3.js');
+var db = require('../db.js');
 //var scalaMgr = (require('./scala/scalaMgr.js'))( 'http://server-pc:8080', { username: 'administrator', password: '53768608' } );
-var scalaMgr = (require('./scala/scalaMgr.js'))( systemConfig.HOST_SCALA_URL , { username: systemConfig.HOST_SCALA_USER_NAME, password: systemConfig.HOST_SCALA_PASSWORD } );
+var scalaMgr = (require('../scala/scalaMgr.js'))( systemConfig.HOST_SCALA_URL , { username: systemConfig.HOST_SCALA_USER_NAME, password: systemConfig.HOST_SCALA_PASSWORD } );
 var scalaPlayerName = systemConfig.HOST_SCALA_PLAYER_NAME;
 //var scalaMgr = require('./scala/scalaMgr.js')();
 
@@ -20,11 +20,11 @@ var ugcModel = db.getDocModel("ugc");
 var candidateUgcCacheModel = db.getDocModel("candidateUgcCache");
 var sessionItemModel = db.getDocModel("sessionItem");
 
-var canvasProcessMgr = require('./canvas_process_mgr.js');
-var facebookMgr = require('./facebook_mgr.js');
-var pushMgr = require('./push_mgr.js');
+var canvasProcessMgr = require('../canvas_process_mgr.js');
+var facebookMgr = require('../facebook_mgr.js');
+var pushMgr = require('../push_mgr.js');
 var memberModel = db.getDocModel("member");
-var adminBrowserMgr = require('./admin_browser_mgr.js');
+var adminBrowserMgr = require('../admin_browser_mgr.js');
 
 /**
  * The manager who handles the scheduling of playing UGC on DOOHs
