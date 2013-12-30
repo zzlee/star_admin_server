@@ -379,7 +379,7 @@ FM.DB = (function(){
 		    
 		});
 		
-        var ProgramGroupsSchema = new Schema({
+        var ProgramGroupSchema = new Schema({
             // id : (String),
             uuid : { type : String },
             dooh : { 
@@ -387,7 +387,7 @@ FM.DB = (function(){
                 name : { type : String }, 
                 place : { type : String } 
             },
-            timeslot : { start : { type : Number }, end : { type : Number } },
+            interval : { start : { type : Number }, end : { type : Number } },
             playlist : { id : { type : Number }, name : { type : String } },
             parentPlaylist : { id : { type : Number }, name : { type : String } },
             player : { 
@@ -395,6 +395,7 @@ FM.DB = (function(){
                 name : { type : String }, 
                 channel : { id : { type : Number }, name : { type : String }, frame : { type : Number } }
             },
+            planner: {type: String}, //The id of planner who plans this session of creating program timeslots
             programs : { type : Mixed }
             /* [{
                 sequenceNo : { type : Number }, //the sequece number in terms of our program in a program group
@@ -436,7 +437,7 @@ FM.DB = (function(){
             MyMember = connection.model('MyMember', MyMemberSchema, 'myMember'),
 			Message = connection.model('Message', MessageSchema, 'message'),
             PushAllMessage = connection.model('PushAllMessage', PushAllMessageSchema, 'pushAllMessage'),
-            ProgramGroups = connection.model('ProgramGroups', ProgramGroupsSchema, 'programGroups');
+            ProgramGroup = connection.model('ProgramGroup', ProgramGroupSchema, 'programGroup');
         
            
             
@@ -460,7 +461,7 @@ FM.DB = (function(){
         dbModels["myMember"] = MyMember;
 		dbModels["message"] = Message;
 		dbModels["pushAllMessage"] = PushAllMessage;
-		dbModels["programGroups"] = ProgramGroups;
+		dbModels["programGroup"] = ProgramGroup;
         
         //???? nobody uses it, so this section can be removed? 
         var dbSchemas = [];

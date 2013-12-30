@@ -12,7 +12,7 @@ var programPlanningPattern = require("./program_planning_pattern.js");
 var paddingContent = require("./padding_content.js");
 var programGroupTemplate = require("./program_group_template.js");
 var programTimeSlotModel = db.getDocModel("programTimeSlot");
-var programGroupModel = db.getDocModel("ProgramGroups");
+var programGroupModel = db.getDocModel("programGroup");
 var DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING = 2*1000; //2 sec.
 
 /**
@@ -70,7 +70,7 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
     };
 
 
-    async.series([
+    async.waterfall([
         function(callback){
             //get the program group from template
             programGroupTemplate.get(templateId, function(errOfGet, _pgTemplate){
@@ -84,8 +84,8 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
                 }
             });
         },
-        function(callback3){
-            // put following programs: UGC 0, padding 1, UGC 1, padding 2, .....
+        function(callback){
+            // generate programs: padding 0, UGC 0, padding 1, UGC 1, padding 2, .....
             var indexArrayPrograms = []; for (var i = 0; i < programs.length; i++) { indexArrayPrograms.push(i); }
             
             var iteratorPutUgcAndPaddingProgrames = function(indexOfPrograms, cbOfIteratorPutUgcAndPaddingProgrames){
@@ -114,7 +114,6 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
                 aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(programs[indexOfPrograms].sequenceNo, 3);
                 aProgramTimeSlot.save(function(errOfSave, _result){     
                     if (!errOfSave) {
-                        //TODO: save to programGroupVjson
                         cbOfIteratorPutUgcAndPaddingProgrames(null);
                     }
                     else {
@@ -126,7 +125,23 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
                 
             };
             async.eachSeries(indexArrayPrograms, iteratorPutUgcAndPaddingProgrames, function(err){
-                callback3(null);
+                callback(err);
+            });
+            
+        },
+        function(callback){
+            //save to programGroupVjson to DB
+            programGroupVjson.interval = this.interval;
+            programGroupVjson.planner = this.planner;
+            var aProgramGroup = new programGroupModel(programGroupVjson);
+            aProgramGroup.save(function(errOfSave, _result){     
+                if (!errOfSave) {
+                    callback(null);
+                }
+                else {
+                    callback("Failed to add a new programGroup to DB: "+errOfSave);
+                }
+                
             });
             
         }
