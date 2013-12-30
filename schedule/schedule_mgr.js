@@ -26,6 +26,8 @@ var pushMgr = require('../push_mgr.js');
 var memberModel = db.getDocModel("member");
 var adminBrowserMgr = require('../admin_browser_mgr.js');
 
+var ProgramGroup = require("./program_group.js");
+
 /**
  * The manager who handles the scheduling of playing UGC on DOOHs
  *
@@ -42,79 +44,80 @@ var TIME_INTERVAL_RANKIGN = [{startHour: 17, endHour: 23},  //start with the tim
 
 var censorMgr = null;
 
-var programPlanningPattern =(function(){    
-    var i = -1;
-    var DEFAULT_PROGRAM_SEQUENCE = [ "miix_it", "cultural_and_creative", "mood", "check_in" ]; 
-    var programSequence = DEFAULT_PROGRAM_SEQUENCE;
-    
-    return {
-        getProgramGenreToPlan: function(){
-            i++;
-            if (i >= programSequence.length){
-                i = 0;
-            }
-            return programSequence[i];
-        },
-        
-        resetIndex: function(){
-            i = -1;
-        },
-        
-        set: function(_programSequence){
-            programSequence = _programSequence;
-        },
-        
-        getProgramSequence: function(){
-            return programSequence;    
-        },
-        
-        remove: function(contentGenreToRemove){
-            for (var i=0; i<programSequence.length; i++){
-                if (programSequence[i]==contentGenreToRemove){
-                    programSequence.splice(i, 1);
-                    i--;
-                }
-            }
-            
-        }
-    };
-})();
+//var programPlanningPattern =(function(){    
+//    var i = -1;
+//    var DEFAULT_PROGRAM_SEQUENCE = [ "miix_it", "cultural_and_creative", "mood", "check_in" ]; 
+//    var programSequence = DEFAULT_PROGRAM_SEQUENCE;
+//    
+//    return {
+//        getProgramGenreToPlan: function(){
+//            i++;
+//            if (i >= programSequence.length){
+//                i = 0;
+//            }
+//            return programSequence[i];
+//        },
+//        
+//        resetIndex: function(){
+//            i = -1;
+//        },
+//        
+//        set: function(_programSequence){
+//            programSequence = _programSequence;
+//        },
+//        
+//        getProgramSequence: function(){
+//            return programSequence;    
+//        },
+//        
+//        remove: function(contentGenreToRemove){
+//            for (var i=0; i<programSequence.length; i++){
+//                if (programSequence[i]==contentGenreToRemove){
+//                    programSequence.splice(i, 1);
+//                    i--;
+//                }
+//            }
+//            
+//        }
+//    };
+//})();
+//
+//var paddingContent =(function(){ 
+//    var PADDING_CONTENT_TABLE = { //specify the media name of each padding content store on Scala's Content Manager
+//            miix_it: [{name: "ondascreen_padding-miix_it-start"},
+//                      //{name: "Jeff_start"},
+//                      {name: "ondascreen_padding-miix_it-end.jpg"}],
+//            cultural_and_creative: [{name: "ondascreen_padding-cultural_and_creative-start"},
+//                                    {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
+//                                    {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
+//                                    {name: "ondascreen_padding-cultural_and_creative-end.jpg"}
+//                                    ],
+//            mood: [{name: "ondascreen_padding-wish-start"},
+//                   {name: "ondascreen_padding-wish-middle.jpg"},
+//                   {name: "ondascreen_padding-wish-middle.jpg"},
+//                   {name: "ondascreen_padding-wish-end.jpg"}
+//                   ],
+//            check_in: [{name: "ondascreen_padding-check_in-start"},
+//                       {name: "ondascreen_padding-check_in-middle.jpg"},
+//                       {name: "ondascreen_padding-check_in-middle.jpg"},
+//                       {name: "ondascreen_padding-check_in-end.jpg"}
+//                       ]                                
+//    };
+//        
+//    return {
+//        get: function(id, cb){
+//            var idArray = id.split('-');
+//            var contentGenre = idArray[0]; 
+//            var index = idArray[1];
+//            if (cb){
+//                cb(null, PADDING_CONTENT_TABLE[contentGenre][index]);
+//            } 
+//        }
+//    };
+//})();
 
-//Jeff_start
-
-var paddingContent =(function(){ 
-    var PADDING_CONTENT_TABLE = { //specify the media name of each padding content store on Scala's Content Manager
-            miix_it: [{name: "ondascreen_padding-miix_it-start"},
-                      //{name: "Jeff_start"},
-                      {name: "ondascreen_padding-miix_it-end.jpg"}],
-            cultural_and_creative: [{name: "ondascreen_padding-cultural_and_creative-start"},
-                                    {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
-                                    {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
-                                    {name: "ondascreen_padding-cultural_and_creative-end.jpg"}
-                                    ],
-            mood: [{name: "ondascreen_padding-wish-start"},
-                   {name: "ondascreen_padding-wish-middle.jpg"},
-                   {name: "ondascreen_padding-wish-middle.jpg"},
-                   {name: "ondascreen_padding-wish-end.jpg"}
-                   ],
-            check_in: [{name: "ondascreen_padding-check_in-start"},
-                       {name: "ondascreen_padding-check_in-middle.jpg"},
-                       {name: "ondascreen_padding-check_in-middle.jpg"},
-                       {name: "ondascreen_padding-check_in-end.jpg"}
-                       ]                                
-    };
-        
-    return {
-        get: function(id, cb){
-            var idArray = id.split('-');
-            var contentGenre = idArray[0]; 
-            var index = idArray[1];
-            if (cb){
-                cb(null, PADDING_CONTENT_TABLE[contentGenre][index]);
-            } 
-        }
-    };
-})();
+var programPlanningPattern = require("./program_planning_pattern.js");
+var paddingContent = require("./padding_content.js");
 
 var periodicalHighPriorityEvents =(function(){ 
     
@@ -148,70 +151,6 @@ var periodicalHighPriorityEvents =(function(){
     
 })();
         
-//for test
-var censorMgr_getUGCList_fake = function(interval, get_cb){
-    /*
-    var result = [];
-    for (var i=0;i<300;i++){
-        result[i] = {id: i};
-    }
-    */
-    var result = [ {_id: "1", contentGenre: "miix_it"},
-                   {_id: "2", contentGenre: "cultural_and_creative"},
-                   {_id: "3", contentGenre: "check_in"},
-                   {_id: "4", contentGenre: "miix_it"},
-                   {_id: "5", contentGenre: "check_in"},
-                   {_id: "6", contentGenre: "check_in"},
-                   {_id: "7", contentGenre: "miix_it"},
-                   {_id: "8", contentGenre: "check_in"},
-                   {_id: "9", contentGenre: "miix_it"},
-                   {_id: "10", contentGenre: "cultural_and_creative"},
-                   {_id: "11", contentGenre: "miix_it"},
-                   {_id: "12", contentGenre: "check_in"},
-                   {_id: "13", contentGenre: "mood"},
-                   {_id: "14", contentGenre: "cultural_and_creative"},
-                   {_id: "15", contentGenre: "miix_it"},
-                   {_id: "16", contentGenre: "mood"},
-                   {_id: "17", contentGenre: "check_in"},
-                   {_id: "18", contentGenre: "check_in"},
-                   {_id: "19", contentGenre: "miix_it"},
-                   {_id: "20", contentGenre: "cultural_and_creative"},
-                   {_id: "21", contentGenre: "miix_it"},
-                   {_id: "22", contentGenre: "check_in"},
-                   {_id: "23", contentGenre: "cultural_and_creative"},
-                   {_id: "24", contentGenre: "mood"},
-                   {_id: "25", contentGenre: "mood"},
-                   {_id: "26", contentGenre: "miix_it"},
-                   {_id: "27", contentGenre: "cultural_and_creative"},
-                   {_id: "28", contentGenre: "miix_it"},
-                   {_id: "29", contentGenre: "check_in"},
-                   {_id: "30", contentGenre: "miix_it"},
-                   {_id: "31", contentGenre: "miix_it"},
-                   {_id: "32", contentGenre: "check_in"},
-                   {_id: "33", contentGenre: "mood"},
-                   {_id: "34", contentGenre: "cultural_and_creative"},
-                   {_id: "35", contentGenre: "miix_it"},
-                   {_id: "36", contentGenre: "mood"},
-                   {_id: "37", contentGenre: "check_in"},
-                   {_id: "38", contentGenre: "check_in"},
-                   {_id: "39", contentGenre: "mood"},
-                   {_id: "40", contentGenre: "mood"},
-                   {_id: "41", contentGenre: "miix_it"},
-                   {_id: "42", contentGenre: "check_in"},
-                   {_id: "43", contentGenre: "mood"},
-                   {_id: "44", contentGenre: "check_in"},
-                   {_id: "45", contentGenre: "mood"},
-                   {_id: "46", contentGenre: "miix_it"},
-                   {_id: "47", contentGenre: "check_in"},
-                   {_id: "48", contentGenre: "miix_it"},
-                   {_id: "49", contentGenre: "check_in"},
-                   {_id: "50", contentGenre: "miix_it"},
-                   
-                   ];
-    
-    get_cb(null, result);
-    
-};
 
 //for test
 var scalaMgr_listAvailableTimeInterval = function(interval, list_cb){
@@ -442,123 +381,123 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
     var generateTimeSlot = function( cbOfGenerateTimeSlot){
         
          
-        var generateTimeSlotsOfMicroInterval = function(interval, generatedTimeSlotsOfMicroInterval_cb){ //Micro interval means a time slot containing purely our programs
-            
-            var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //the genra that will be uesed in this micro interval
-            var numberOfUGC;
-            if (contentGenre=="miix_it"){
-                numberOfUGC = 1;
-            }
-            else{
-                numberOfUGC = 3;
-            }
-            var paddingContents;
-            
-            var ProgramTimeSlot = programTimeSlotModel;
-            var vjsonDefault = {
-                    contentType: "file",
-                    dooh: dooh,
-                    timeslot: {
-                        start: interval.start, 
-                        end: interval.end,
-                        startHour: (new Date(interval.start)).getHours()},
-                    //content: {ugcId:"12345676", ugcProjcetId:"3142462123"}
-                    contentGenre: contentGenre,
-                    planner: planner,
-                    state: 'not_confirmed',
-                    session: sessionId
-                    };
-            
-            var timeStampIndex = 0;
-            
-            var pad = function(n, width, z) { //function for padding the number ns with character z 
-                z = z || '0';
-                n = n + '';
-                return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-            };
-            
-            async.series([
-                          function(callback1){
-                              // get all the padding contents
-                              var indexArrayPaddingContents = []; for (var i = 0; i < numberOfUGC+1; i++) { indexArrayPaddingContents.push(i); }
-                              
-                              var iteratorGetPaddingContents = function(indexOfPaddingContents, interationDone_getPaddingContents_cb){
-                                  paddingContent.get(contentGenre+'-'+indexOfPaddingContents , function(err_get, paddingContent){
-                                      interationDone_getPaddingContents_cb(err_get, paddingContent);
-                                  });
-                              };
-                              async.mapSeries(indexArrayPaddingContents, iteratorGetPaddingContents, function(err, results){
-                                  paddingContents = results;
-                                  //console.log('paddingContents=');
-                                  //console.dir(paddingContents);
-                                  callback1(null);
-                              });
-                              
-                          },
-                          function(callback2){
-                              // put padding program 0
-                              var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
-                              aProgramTimeSlot.type = 'padding';
-                              aProgramTimeSlot.contentType = 'media_item';
-                              aProgramTimeSlot.content = paddingContents[0];
-                              aProgramTimeSlot.timeslot.playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING;
-                              aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
-                              timeStampIndex++;
-                              aProgramTimeSlot.markModified('content');
-                              aProgramTimeSlot.save(function(err1, _result){     
-                                  //if (err1) console.log("err1="+err1);
-                                  callback2(err1);
-                              });
-                          },
-                          function(callback3){
-                              // put following programs: UGC 0, padding 1, UGC 1, padding 2, .....
-                              var indexArrayUgcPrograms = []; for (var i = 0; i < numberOfUGC; i++) { indexArrayUgcPrograms.push(i); }
-                              
-                              var iteratorPutUgcAndPaddingProgrames = function(indexOfUgcContents, interationDone_putUgcAndPaddingPrograms_cb){
-                                  
-                                  async.series([
-                                                function(cb1){
-                                                    //put UGC program
-                                                    var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
-                                                    aProgramTimeSlot.type = 'UGC';
-                                                    aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
-                                                    timeStampIndex++;
-                                                    aProgramTimeSlot.save(function(err2, _result){     
-                                                        cb1(err2);
-                                                    });
-                                                },
-                                                function(cb2){
-                                                    //put padding program
-                                                    var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
-                                                    aProgramTimeSlot.type = 'padding';
-                                                    aProgramTimeSlot.contentType = 'media_item';
-                                                    aProgramTimeSlot.content = paddingContents[indexOfUgcContents+1];
-                                                    aProgramTimeSlot.markModified('content');
-                                                    aProgramTimeSlot.timeslot.playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING;
-                                                    aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
-                                                    timeStampIndex++;
-                                                    aProgramTimeSlot.save(function(err3, _result){     
-                                                        cb2(err3);
-                                                    });
-                                                }
-                                  ],
-                                  function(err, results){
-                                      interationDone_putUgcAndPaddingPrograms_cb(err);
-                                  });
-                                  
-                              };
-                              async.eachSeries(indexArrayUgcPrograms, iteratorPutUgcAndPaddingProgrames, function(err){
-                                  callback3(null);
-                              });
-                              
-                          }
-            ],
-            function(err, results){
-                generatedTimeSlotsOfMicroInterval_cb(err);
-            });
-
-            
-        };
+//        var generateTimeSlotsOfMicroInterval = function(interval, generatedTimeSlotsOfMicroInterval_cb){ //Micro interval means a time slot containing purely our programs
+//            
+//            var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //the genra that will be uesed in this micro interval
+//            var numberOfUGC;
+//            if (contentGenre=="miix_it"){
+//                numberOfUGC = 1;
+//            }
+//            else{
+//                numberOfUGC = 3;
+//            }
+//            var paddingContents;
+//            
+//            var ProgramTimeSlot = programTimeSlotModel;
+//            var vjsonDefault = {
+//                    contentType: "file",
+//                    dooh: dooh,
+//                    timeslot: {
+//                        start: interval.start, 
+//                        end: interval.end,
+//                        startHour: (new Date(interval.start)).getHours()},
+//                    //content: {ugcId:"12345676", ugcProjcetId:"3142462123"}
+//                    contentGenre: contentGenre,
+//                    planner: planner,
+//                    state: 'not_confirmed',
+//                    session: sessionId
+//                    };
+//            
+//            var timeStampIndex = 0;
+//            
+//            var pad = function(n, width, z) { //function for padding the number ns with character z 
+//                z = z || '0';
+//                n = n + '';
+//                return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+//            };
+//            
+//            async.series([
+//                          function(callback1){
+//                              // get all the padding contents
+//                              var indexArrayPaddingContents = []; for (var i = 0; i < numberOfUGC+1; i++) { indexArrayPaddingContents.push(i); }
+//                              
+//                              var iteratorGetPaddingContents = function(indexOfPaddingContents, interationDone_getPaddingContents_cb){
+//                                  paddingContent.get(contentGenre+'-'+indexOfPaddingContents , function(err_get, paddingContent){
+//                                      interationDone_getPaddingContents_cb(err_get, paddingContent);
+//                                  });
+//                              };
+//                              async.mapSeries(indexArrayPaddingContents, iteratorGetPaddingContents, function(err, results){
+//                                  paddingContents = results;
+//                                  //console.log('paddingContents=');
+//                                  //console.dir(paddingContents);
+//                                  callback1(null);
+//                              });
+//                              
+//                          },
+//                          function(callback2){
+//                              // put padding program 0
+//                              var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
+//                              aProgramTimeSlot.type = 'padding';
+//                              aProgramTimeSlot.contentType = 'media_item';
+//                              aProgramTimeSlot.content = paddingContents[0];
+//                              aProgramTimeSlot.timeslot.playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING;
+//                              aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
+//                              timeStampIndex++;
+//                              aProgramTimeSlot.markModified('content');
+//                              aProgramTimeSlot.save(function(err1, _result){     
+//                                  //if (err1) console.log("err1="+err1);
+//                                  callback2(err1);
+//                              });
+//                          },
+//                          function(callback3){
+//                              // put following programs: UGC 0, padding 1, UGC 1, padding 2, .....
+//                              var indexArrayUgcPrograms = []; for (var i = 0; i < numberOfUGC; i++) { indexArrayUgcPrograms.push(i); }
+//                              
+//                              var iteratorPutUgcAndPaddingProgrames = function(indexOfUgcContents, interationDone_putUgcAndPaddingPrograms_cb){
+//                                  
+//                                  async.series([
+//                                                function(cb1){
+//                                                    //put UGC program
+//                                                    var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
+//                                                    aProgramTimeSlot.type = 'UGC';
+//                                                    aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
+//                                                    timeStampIndex++;
+//                                                    aProgramTimeSlot.save(function(err2, _result){     
+//                                                        cb1(err2);
+//                                                    });
+//                                                },
+//                                                function(cb2){
+//                                                    //put padding program
+//                                                    var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
+//                                                    aProgramTimeSlot.type = 'padding';
+//                                                    aProgramTimeSlot.contentType = 'media_item';
+//                                                    aProgramTimeSlot.content = paddingContents[indexOfUgcContents+1];
+//                                                    aProgramTimeSlot.markModified('content');
+//                                                    aProgramTimeSlot.timeslot.playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING;
+//                                                    aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
+//                                                    timeStampIndex++;
+//                                                    aProgramTimeSlot.save(function(err3, _result){     
+//                                                        cb2(err3);
+//                                                    });
+//                                                }
+//                                  ],
+//                                  function(err, results){
+//                                      interationDone_putUgcAndPaddingPrograms_cb(err);
+//                                  });
+//                                  
+//                              };
+//                              async.eachSeries(indexArrayUgcPrograms, iteratorPutUgcAndPaddingProgrames, function(err){
+//                                  callback3(null);
+//                              });
+//                              
+//                          }
+//            ],
+//            function(err, results){
+//                generatedTimeSlotsOfMicroInterval_cb(err);
+//            });
+//
+//            
+//        };
         
         /**
          * Get availalbe time intervals by checking the playlists in Scala schedules
@@ -672,7 +611,9 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                             if (timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end) {
                                 // add time slots of a micro timeslot (of the same content genre) to db
                                 var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
-                                generateTimeSlotsOfMicroInterval(inteval, function(err1){
+                                var programGroup = new ProgramGroup(inteval, dooh, planner, sessionId);
+                                programGroup.generateByTemplate(function(err1){
+                                //generateTimeSlotsOfMicroInterval(inteval, function(err1){
                                     timeToAddTimeSlot += programPeriod;
                                     
                                     cb_whilst(err1);
@@ -736,7 +677,6 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         function(callback){
             //get the sorted candidate UGC list
             
-            //censorMgr_getUGCList_fake(intervalOfSelectingUGC, function(err_1, _sortedUgcList ){
             censorMgr.getUGCListLite(intervalOfSelectingUGC, function(err_1, _sortedUgcList ){
                 if (!err_1){
                     sortedUgcList = _sortedUgcList;
@@ -1449,8 +1389,6 @@ scheduleMgr.removeUgcfromProgramAndAutoSetNewOne = function(sessionId, programTi
                       var sessionIdInfoArray = sessionId.split('-');
                       var intervalOfSelectingUGC = {start: Number(sessionIdInfoArray[0]), end: Number(sessionIdInfoArray[1]) };
                       
-                      //TODO: call the real censorMgr
-//                      censorMgr_getUGCList_fake(intervalOfSelectingUGC, function(err0, _sortedUgcList ){
                           censorMgr.getUGCListLite(intervalOfSelectingUGC, function(err0, _sortedUgcList ){
                           if (!err0) {
                               sortedUgcList = _sortedUgcList;
