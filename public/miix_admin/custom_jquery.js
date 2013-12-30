@@ -699,29 +699,29 @@ $(document).ready(function(){
         }
     });
     
-    var ctrlIsDown = false;
+    var altIsDown = false;
     
     
     $(document.activeElement).keyup(function( event ) {
         //console.log("keyup event.which="+event.which);
         if ( event.which == 17 ) {  //ctrl key
-            ctrlIsDown = false;
+            altIsDown = false;
         }
-        else if ( ctrlIsDown && (event.which == 33) ) {
+        else if ( altIsDown && (event.which == 33) ) {
             //console.log('ctrl+pageUp pressed!');
             FM.currentContent.showPreviousPageContent();
         }
 
-        else if ( ctrlIsDown && (event.which == 34) ) {
+        else if ( altIsDown && (event.which == 34) ) {
             //console.log('ctrl+pageDown pressed!');
             FM.currentContent.showNextPageContent();
         }
     });
 
     $(document.activeElement).keydown(function( event ) {
-        //console.log("keydown event.which="+event.which);
-        if ( event.which == 17 ) {  //ctrl key
-            ctrlIsDown = true;
+        console.log("keydown event.which="+event.which);
+        if ( event.which == 18 ) {  //alt key
+            altIsDown = true;
         }
     });
 
