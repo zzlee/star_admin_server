@@ -197,7 +197,7 @@ FM.DB = (function(){
         
         var ProgramTimeSlotSchema = new Schema({
             content: {type: Mixed},
-            contentType: {type: String, enum: programTimeSlotContnetType, default: 'file'}, //file or web_page
+            contentType: {type: String, enum: programTimeSlotContnetType, default: 'file'}, //file or web_page or media_item
             dooh: {type: String},
             timeslot: { 
                 start: Number,  //milliseconds since midnight Jan 1, 1970
@@ -397,14 +397,17 @@ FM.DB = (function(){
             },
             programs : { type : Mixed }
             /* [{
-                no : { type : Number },
-                media: { id: { type : Number }, name: { type : String } },    // ?
-                playlistItem : 
+                sequenceNo : { type : Number }, //the sequece number in terms of our program in a program group
+                preSetDuration : { type : Number } //in sec
+                contentType: {type: String, enum: programTimeSlotContnetType, default: 'file'}, //file or web_page or media_item
+                type: {type: String, enum: programTimeSlotType}, //UGC or padding contnet
+                
+                playlistItem :   //the playlist item returned from Scala
                 {
                     id : { type : Number },
                     name : { type : String },
-                    sortOrder : { type : Number },
-                    duration : { type : Number }
+                    sortOrder : { type : Number }, //the sequence number in Scala's playlist
+                    duration : { type : Number }  //in sec
                 }
              },
              { 

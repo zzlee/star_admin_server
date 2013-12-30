@@ -286,13 +286,14 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                             }
                         }
                         
-                        var playDuration = 0;
-                        if ( selectedUgc.genre == "miix_image"){
-                            playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_UGC;
-                        }
+//                        var playDuration = 0;
+//                        if ( selectedUgc.genre == "miix_image"){
+//                            playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_UGC;
+//                        }
                         //debugger;
                         var _selectedUgc = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
-                        db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc, "timeslot.playDuration": playDuration }, function(_err_2, result){
+                        //db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc, "timeslot.playDuration": playDuration }, function(_err_2, result){
+                        db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc }, function(_err_2, result){
                             counter++;
                             //debugger;
                             //console.dir(result);
@@ -612,7 +613,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                                 // add time slots of a micro timeslot (of the same content genre) to db
                                 var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
                                 var programGroup = new ProgramGroup(inteval, dooh, planner, sessionId);
-                                programGroup.generateByTemplate(function(err1){
+                                programGroup.generateByTemplate('PG_30SEC_2UGC', function(err1){
                                 //generateTimeSlotsOfMicroInterval(inteval, function(err1){
                                     timeToAddTimeSlot += programPeriod;
                                     
