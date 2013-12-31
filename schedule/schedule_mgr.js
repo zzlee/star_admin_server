@@ -870,6 +870,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
     
     logger.info('[scheduleMgr] start to push session '+sessionId+' to 3rd-party Content Manager' );
     var arrayOfsessionId = sessionId.split('-');
+    var programGroups = null;
     async.waterfall([
         function(cb1){
             //query the programs of this specific session
@@ -887,6 +888,25 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                 }
                 else {
                     cb1('Failed to query the programs of a specific session: '+err1, null);
+                }                             
+            });
+        },
+        function(programs, cb1_0){
+            //query the program groups of this specific session
+            programGroupModel.find({ "programSession": sessionId }).exec(function (err1, _programGroups) {
+                if (!err1) {
+                    programGroups = JSON.parse(JSON.stringify(_programGroups));
+                    
+                    //for debugging
+                    logger.info('[scheduleMgr] program groups to push (to 3rd-party Content Manager:' );
+                    for (var i in programGroups){
+                        logger.info(JSON.stringify(programGroups[i]));
+                    }
+                                       
+                    cb1_0(null, programs);
+                }
+                else {
+                    cb1_0('Failed to query the program groups of a specific session: '+err1, null);
                 }                             
             });
         },
@@ -1170,7 +1190,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
 
         },
         function(programs, cb3){
-            // change the state of this programTimeslot doc
+            // update the state of programTimeslot docs
             var iteratorUpdateAProgramState = function(aProgram, callbackOfIteratorUpdateAProgramState){
                 //var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
                 db.updateAdoc(programTimeSlotModel, aProgram._id, {"state": "confirmed" }, function(errOfUpdateAdoc, result){
@@ -1186,7 +1206,25 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             async.eachSeries(programs, iteratorUpdateAProgramState, function(errEachSeries){
                 cb3(errEachSeries);
             });
+        },
+        function( cb4){
+            // update the state of programGroup docs
+            var iteratorUpdateAProgramGroupState = function(aProgramGroup, callbackOfIteratorUpdateAProgramGroupState){
+                db.updateAdoc(programGroupModel, aProgramGroup._id, {"state": "confirmed" }, function(errOfUpdateAdoc, result){
+                    if (!errOfUpdateAdoc){
+                        callbackOfIteratorUpdateAProgramGroupState(null);
+                    }
+                    else {
+                        callbackOfIteratorUpdateAProgramGroupState("Failed to update program "+aProgramGroup._id.toHexString()+": "+errOfUpdateAdoc);
+                    }
+                });
+
+            };
+            async.eachSeries(programGroups, iteratorUpdateAProgramGroupState, function(errEachSeries){
+                cb4(errEachSeries);
+            });
         }
+
     ], function (err, result) {
         if (!err) {
             adminBrowserMgr.showTrace(null, straceStamp+"節目推送完成!");

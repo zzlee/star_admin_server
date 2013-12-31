@@ -38,6 +38,8 @@ var ProgramGroup = function(interval, dooh, planner, sessionId, options) {
     this.planner = planner;
     this.sessionId = sessionId;
     this.options = options;
+//    console.log("sessionId");
+//    console.dir(sessionId);
 };
 
 ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
@@ -136,6 +138,7 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
             //save to programGroupVjson to DB
             programGroupVjson.interval = _this.interval;
             programGroupVjson.planner = _this.planner;
+            programGroupVjson.programSession = _this.sessionId;
             
             aProgramGroup = new programGroupModel(programGroupVjson);
 //            aProgramGroup.interval = _this.interval;
