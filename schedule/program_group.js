@@ -164,4 +164,96 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
 };
 
 
+ProgramGroup.prototype.generateFromCandidateList = function(programCandidateList, cbOfGenerateFromCandidateList) {
+    var _this = this;
+    var DURATION_FOR_NORMAL = 15; //sec
+    var DURATION_FOR_VIP = 120; //sec
+    
+    var programGroupVjson = {
+        programs : []    
+    };
+    var programs = programGroupVjson.programs;
+    
+    var vjsonDefault = {
+        contentType: "file",
+        dooh: _this.dooh,
+        timeslot: {
+            start: _this.interval.start, 
+            end: _this.interval.end,
+            startHour: (new Date(_this.interval.start)).getHours()},
+        contentGenre: contentGenre,
+        planner: _this.planner,
+        state: 'not_confirmed',
+        type: 'UGC',
+        session: _this.sessionId
+    };
+
+    
+    async.waterfall([
+        function(callback){
+            //put the programs into the program group from the candidate list
+            var maxAllowableDuration = _this.interval.end - _this.interval.start ;  //millisecond
+            var totalDuration = 0; //millisecond
+            var sequenceNo = 0;
+            
+            async.whilst(
+                function () { return totalDuration <= maxAllowableDuration; },
+                function (cbOfWhilst) {
+                    
+                    var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
+                    
+                    
+                    var playDuration; //sec
+                    //TODO: check the content class
+                    aProgramTimeSlot.timeslot.playDuration = playDuration;
+                    programs[sequenceNo].preSetDuration = playDuration;  
+                    
+                    aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(sequenceNo, 3);
+                    
+                    totalDuration += playDuration;
+                    sequenceNo++;
+                    aProgramTimeSlot.save(function(errOfSave, _result){     
+                        if (!errOfSave) {
+                            programs[sequenceNo]._id = _result._id;
+                            cbOfWhilst(null);
+                        }
+                        else {
+                            cbOfWhilst("Failed to add a new programTimeslot to DB: "+errOfSave);
+                        }
+                        
+                    });
+                    
+                },
+                function (errOfWhilst) {
+                    callback(errOfWhilst);
+                }
+            );
+
+            
+        },
+        function(callback){
+            //save to programGroupVjson to DB
+            programGroupVjson.interval = _this.interval;
+            programGroupVjson.planner = _this.planner;
+            programGroupVjson.programSession = _this.sessionId;
+            
+            aProgramGroup = new programGroupModel(programGroupVjson);
+            
+            aProgramGroup.save(function(errOfSave, _result){     
+                if (!errOfSave) {
+                    callback(null);
+                }
+                else {
+                    callback("Failed to add a new programGroup to DB: "+errOfSave);
+                }
+                
+            });
+            
+        }
+    ],
+    function(err, results){
+        cbOfGenerateFromCandidateList(err);
+    });
+};
+
 module.exports = ProgramGroup;

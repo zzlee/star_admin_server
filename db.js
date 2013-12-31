@@ -35,6 +35,7 @@ FM.DB = (function(){
                 //mood: a.k.a. 心情
                 //check_in: a.k.a. 打卡
             ugcProcessingState = 'not_generated under_generating generating_failed complete'.split(' '),
+            contentClass = 'normal VIP'.split(' '),
             questionGenre = 'account publish sign_in others'.split(' '),
             
             programTimeSlotType = 'UGC padding'.split(' '),
@@ -157,6 +158,7 @@ FM.DB = (function(){
             highlight: {type: Boolean, default: false},
             hot: {type: Boolean, default: false},
             processingState: {type: String, enum: ugcProcessingState, default:"not_generated"},
+            contentClass: {type: String, enum: ugcContentClass, default:"normal"}, //normal or VIP
             fbProfilePicture: {type: String},
 			forMRTReview: {type:Boolean, default: false}
         }); //  UGC collection
@@ -203,6 +205,7 @@ FM.DB = (function(){
                 start: Number,  //milliseconds since midnight Jan 1, 1970
                 end: Number, //milliseconds since midnight Jan 1, 1970
                 playDuration: Number,  //milliseconds.  This value is normally used by image or web content
+                predictedPlayTime: Number,  //milliseconds since midnight Jan 1, 1970
                 startHour: Number //0~23
                 },
             timeStamp: {type: String},
