@@ -69,6 +69,7 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
         return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
     };
 
+    var aProgramGroup = null;
 
     async.waterfall([
         function(callback){
@@ -77,6 +78,7 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
                 if (!errOfGet){
                     programGroupVjson = _pgTemplate;
                     programs = programGroupVjson.programs;
+                    
                     callback(null);
                 }
                 else {
@@ -114,6 +116,7 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
                 aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(programs[indexOfPrograms].sequenceNo, 3);
                 aProgramTimeSlot.save(function(errOfSave, _result){     
                     if (!errOfSave) {
+                        programs[indexOfPrograms]._id = _result._id;
                         cbOfIteratorPutUgcAndPaddingProgrames(null);
                     }
                     else {
@@ -131,9 +134,14 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
         },
         function(callback){
             //save to programGroupVjson to DB
-            programGroupVjson.interval = this.interval;
-            programGroupVjson.planner = this.planner;
-            var aProgramGroup = new programGroupModel(programGroupVjson);
+            programGroupVjson.interval = _this.interval;
+            programGroupVjson.planner = _this.planner;
+            
+            aProgramGroup = new programGroupModel(programGroupVjson);
+//            aProgramGroup.interval = _this.interval;
+//            aProgramGroup.planner = _this.planner;
+            
+
             aProgramGroup.save(function(errOfSave, _result){     
                 if (!errOfSave) {
                     callback(null);

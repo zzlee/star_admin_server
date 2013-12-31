@@ -395,9 +395,12 @@ FM.DB = (function(){
                 name : { type : String }, 
                 channel : { id : { type : Number }, name : { type : String }, frame : { type : Number } }
             },
-            planner: {type: String}, //The id of planner who plans this session of creating program timeslots
+            session: {type: String}, //The id indicating the session of creating program time slot and group
+            planner: {type: String}, //The id of planner who plans this session of creating program timeslots and groups
+            state: {type: String, enum: programTimeSlotState, default: 'not_confirmed'}, //The state of the program group
             programs : { type : Mixed }
             /* [{
+                _id: {type: [ObjectID]}, //the _id of the corresponding programTimeslot
                 sequenceNo : { type : Number }, //the sequece number in terms of our program in a program group
                 preSetDuration : { type : Number } //in sec
                 contentType: {type: String, enum: programTimeSlotContnetType, default: 'file'}, //file or web_page or media_item

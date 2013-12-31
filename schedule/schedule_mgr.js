@@ -16,6 +16,7 @@ var scalaPlayerName = systemConfig.HOST_SCALA_PLAYER_NAME;
 //var scalaMgr = require('./scala/scalaMgr.js')();
 
 var programTimeSlotModel = db.getDocModel("programTimeSlot");
+var programGroupModel = db.getDocModel("programGroup");
 var ugcModel = db.getDocModel("ugc");
 var candidateUgcCacheModel = db.getDocModel("candidateUgcCache");
 var sessionItemModel = db.getDocModel("sessionItem");
@@ -44,77 +45,6 @@ var TIME_INTERVAL_RANKIGN = [{startHour: 17, endHour: 23},  //start with the tim
 
 var censorMgr = null;
 
-//var programPlanningPattern =(function(){    
-//    var i = -1;
-//    var DEFAULT_PROGRAM_SEQUENCE = [ "miix_it", "cultural_and_creative", "mood", "check_in" ]; 
-//    var programSequence = DEFAULT_PROGRAM_SEQUENCE;
-//    
-//    return {
-//        getProgramGenreToPlan: function(){
-//            i++;
-//            if (i >= programSequence.length){
-//                i = 0;
-//            }
-//            return programSequence[i];
-//        },
-//        
-//        resetIndex: function(){
-//            i = -1;
-//        },
-//        
-//        set: function(_programSequence){
-//            programSequence = _programSequence;
-//        },
-//        
-//        getProgramSequence: function(){
-//            return programSequence;    
-//        },
-//        
-//        remove: function(contentGenreToRemove){
-//            for (var i=0; i<programSequence.length; i++){
-//                if (programSequence[i]==contentGenreToRemove){
-//                    programSequence.splice(i, 1);
-//                    i--;
-//                }
-//            }
-//            
-//        }
-//    };
-//})();
-//
-//var paddingContent =(function(){ 
-//    var PADDING_CONTENT_TABLE = { //specify the media name of each padding content store on Scala's Content Manager
-//            miix_it: [{name: "ondascreen_padding-miix_it-start"},
-//                      //{name: "Jeff_start"},
-//                      {name: "ondascreen_padding-miix_it-end.jpg"}],
-//            cultural_and_creative: [{name: "ondascreen_padding-cultural_and_creative-start"},
-//                                    {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
-//                                    {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
-//                                    {name: "ondascreen_padding-cultural_and_creative-end.jpg"}
-//                                    ],
-//            mood: [{name: "ondascreen_padding-wish-start"},
-//                   {name: "ondascreen_padding-wish-middle.jpg"},
-//                   {name: "ondascreen_padding-wish-middle.jpg"},
-//                   {name: "ondascreen_padding-wish-end.jpg"}
-//                   ],
-//            check_in: [{name: "ondascreen_padding-check_in-start"},
-//                       {name: "ondascreen_padding-check_in-middle.jpg"},
-//                       {name: "ondascreen_padding-check_in-middle.jpg"},
-//                       {name: "ondascreen_padding-check_in-end.jpg"}
-//                       ]                                
-//    };
-//        
-//    return {
-//        get: function(id, cb){
-//            var idArray = id.split('-');
-//            var contentGenre = idArray[0]; 
-//            var index = idArray[1];
-//            if (cb){
-//                cb(null, PADDING_CONTENT_TABLE[contentGenre][index]);
-//            } 
-//        }
-//    };
-//})();
 
 var programPlanningPattern = require("./program_planning_pattern.js");
 var paddingContent = require("./padding_content.js");
@@ -700,9 +630,24 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                 }
             });
         },
+        
         function(callback){
             //remove all the "not_confirmed" programs of this specific planner's
             programTimeSlotModel.find({ "state": "not_confirmed", "planner": planner }).remove().exec(function (errOfRomove) {
+                
+                if (!errOfRomove) {
+                    // console.log('"not_confirmed" programs are successfully removed!');
+                    callback(null);
+                }
+                else {
+                    callback('Failed to query the programs of a specific session: '+errOfRomove, null);
+                }                             
+            });
+        },
+        
+        function(callback){
+            //remove all the "not_confirmed" program groups of this specific planner's
+            programGroupModel.find({ "state": "not_confirmed", "planner": planner }).remove().exec(function (errOfRomove) {
                 
                 if (!errOfRomove) {
                     // console.log('"not_confirmed" programs are successfully removed!');
