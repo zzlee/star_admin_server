@@ -214,7 +214,8 @@ FM.DB = (function(){
             contentGenre: {type: String, enum: ugcContentGenre},  //miix_it, cultural_and_creative, mood, or check_in
             canBeFoundInPlayerLog: {type: String},
             liveState: {type: String, enum: liveContentState, default: 'not_checked'},
-            upload: {type: Boolean, default: false}
+            upload: {type: Boolean, default: false},
+            playState: {type: String, default: 'not_check'} // Check content play to DOOH 
         }); 
         
         var CandidateUgcCacheSchema = new Schema({

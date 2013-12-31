@@ -31,6 +31,11 @@ var globalConnectionMgr = require('./global_connection_mgr.js');
 var youtubeMgr = require('./youtube_mgr.js');
 var ugcSerialNoMgr = require('./ugc_serial_no_mgr.js');
 
+/**
+ * Scala player play check by log.
+ */
+var popMger = require('./pop_mgr.js');
+
 var app = express();
 
 var workingPath = process.cwd();

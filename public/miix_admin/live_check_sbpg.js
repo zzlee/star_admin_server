@@ -139,13 +139,15 @@
                 }
                 failedLiveContentSelectionDiv.append(failedLiveContentSelect);
 
-                
             }
             
-                        
-            
-
-            
+            // player play program status chcek
+            if( res[i].playState == 'played' ) {
+                failedLiveContentSelectionDiv.append("<p><font color='blue'>檢查Log已播出</font></p>");
+            }
+            else if( res[i].playState == 'not_play' ) {
+                failedLiveContentSelectionDiv.append("<p><font color='red'>檢查Log未播出</font></p>");
+            }
 
             //---------  'fail' checkbox  click--------------
 

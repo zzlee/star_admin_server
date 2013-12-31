@@ -466,7 +466,8 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                     contentGenre: contentGenre,
                     planner: planner,
                     state: 'not_confirmed',
-                    session: sessionId
+                    session: sessionId,
+                    playState: 'not_check'
                     };
             
             var timeStampIndex = 0;
