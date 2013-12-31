@@ -2,7 +2,6 @@
  * @fileoverview Implementation of scheduleMgr
  */
 
-
 var async = require('async');
 var mongoose = require('mongoose');
 var workingPath = process.cwd();
@@ -10,10 +9,10 @@ var path = require('path');
 var fs = require('fs');
 var awsS3 = require('../aws_s3.js');
 var db = require('../db.js');
+
 //var scalaMgr = (require('./scala/scalaMgr.js'))( 'http://server-pc:8080', { username: 'administrator', password: '53768608' } );
 var scalaMgr = (require('../scala/scalaMgr.js'))( systemConfig.HOST_SCALA_URL , { username: systemConfig.HOST_SCALA_USER_NAME, password: systemConfig.HOST_SCALA_PASSWORD } );
 var scalaPlayerName = systemConfig.HOST_SCALA_PLAYER_NAME;
-//var scalaMgr = require('./scala/scalaMgr.js')();
 
 var programTimeSlotModel = db.getDocModel("programTimeSlot");
 var programGroupModel = db.getDocModel("programGroup");
@@ -28,6 +27,9 @@ var memberModel = db.getDocModel("member");
 var adminBrowserMgr = require('../admin_browser_mgr.js');
 
 var ProgramGroup = require("./program_group.js");
+var programPlanningPattern = require("./program_planning_pattern.js");
+var paddingContent = require("./padding_content.js");
+var periodicalHighPriorityEvents = require("./periodical_high_priority_events.js");
 
 /**
  * The manager who handles the scheduling of playing UGC on DOOHs
@@ -42,54 +44,9 @@ var TIME_INTERVAL_RANKIGN = [{startHour: 17, endHour: 23},  //start with the tim
                              {startHour: 8, endHour: 16},
                              {startHour: 0, endHour: 7}];
 
-
 var censorMgr = null;
 
-
-var programPlanningPattern = require("./program_planning_pattern.js");
-var paddingContent = require("./padding_content.js");
-
-var periodicalHighPriorityEvents =(function(){ 
-    
-    var TIME_INTERVALS = [ { startMinute: 0, endMinute: 10}, { startMinute: 30, endMinute: 35} ]; //in minutes
-    
-    return {
-        isConflictedWith: function(timeIntervalToCheck) {
-            
-            
-            var ti = {};
-            var startDateObj = new Date(timeIntervalToCheck.start);
-            var endDateObj = new Date(timeIntervalToCheck.end);
-            ti.startMinute = startDateObj.getMinutes();
-            ti.endMinute = endDateObj.getMinutes()+(endDateObj.getHours()-startDateObj.getHours())*60;
-            
-            for (var i=0; i<TIME_INTERVALS.length; i++){
-                
-                //NOTE: this check below is NOT able to handle the time interval like 4:55~5:05
-                if ((   ( TIME_INTERVALS[i].startMinute < ti.startMinute ) && ( ti.startMinute < TIME_INTERVALS[i].endMinute )  ) ||
-                    (   ( TIME_INTERVALS[i].startMinute < ti.endMinute ) && ( ti.endMinute < TIME_INTERVALS[i].endMinute )  ) ||
-                    (   ( TIME_INTERVALS[i].startMinute <= ti.startMinute ) && ( ti.endMinute <= TIME_INTERVALS[i].endMinute )  ) ||
-                    (   ( ti.startMinute <= TIME_INTERVALS[i].startMinute ) && ( TIME_INTERVALS[i].endMinute <= ti.endMinute )  )      ) {
-                    
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-    };
-    
-})();
-        
-
-//for test
-var scalaMgr_listAvailableTimeInterval = function(interval, list_cb){
-    var result = [{interval:{start:(new Date("2013/5/5 7:30:20")).getTime(), end:(new Date("2013/5/5 8:30:20")).getTime()},cycleDuration: 5*60*1000},
-                  {interval:{start:(new Date("2013/5/5 13:00:00")).getTime(), end:(new Date("2013/5/5 13:30:00")).getTime()},cycleDuration: 5*60*1000},
-                  {interval:{start:(new Date("2013/5/5 19:00:00")).getTime(), end:(new Date("2013/5/5 19:40:00")).getTime()},cycleDuration: 5*60*1000}
-                  ];
-    list_cb(null, result );
-};
+     
 
 /**
  * Initialize scheduleMgr
@@ -216,10 +173,6 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                             }
                         }
                         
-//                        var playDuration = 0;
-//                        if ( selectedUgc.genre == "miix_image"){
-//                            playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_UGC;
-//                        }
                         //debugger;
                         var _selectedUgc = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
                         //db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc, "timeslot.playDuration": playDuration }, function(_err_2, result){
@@ -311,125 +264,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
     
     var generateTimeSlot = function( cbOfGenerateTimeSlot){
         
-         
-//        var generateTimeSlotsOfMicroInterval = function(interval, generatedTimeSlotsOfMicroInterval_cb){ //Micro interval means a time slot containing purely our programs
-//            
-//            var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //the genra that will be uesed in this micro interval
-//            var numberOfUGC;
-//            if (contentGenre=="miix_it"){
-//                numberOfUGC = 1;
-//            }
-//            else{
-//                numberOfUGC = 3;
-//            }
-//            var paddingContents;
-//            
-//            var ProgramTimeSlot = programTimeSlotModel;
-//            var vjsonDefault = {
-//                    contentType: "file",
-//                    dooh: dooh,
-//                    timeslot: {
-//                        start: interval.start, 
-//                        end: interval.end,
-//                        startHour: (new Date(interval.start)).getHours()},
-//                    //content: {ugcId:"12345676", ugcProjcetId:"3142462123"}
-//                    contentGenre: contentGenre,
-//                    planner: planner,
-//                    state: 'not_confirmed',
-//                    session: sessionId
-//                    };
-//            
-//            var timeStampIndex = 0;
-//            
-//            var pad = function(n, width, z) { //function for padding the number ns with character z 
-//                z = z || '0';
-//                n = n + '';
-//                return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-//            };
-//            
-//            async.series([
-//                          function(callback1){
-//                              // get all the padding contents
-//                              var indexArrayPaddingContents = []; for (var i = 0; i < numberOfUGC+1; i++) { indexArrayPaddingContents.push(i); }
-//                              
-//                              var iteratorGetPaddingContents = function(indexOfPaddingContents, interationDone_getPaddingContents_cb){
-//                                  paddingContent.get(contentGenre+'-'+indexOfPaddingContents , function(err_get, paddingContent){
-//                                      interationDone_getPaddingContents_cb(err_get, paddingContent);
-//                                  });
-//                              };
-//                              async.mapSeries(indexArrayPaddingContents, iteratorGetPaddingContents, function(err, results){
-//                                  paddingContents = results;
-//                                  //console.log('paddingContents=');
-//                                  //console.dir(paddingContents);
-//                                  callback1(null);
-//                              });
-//                              
-//                          },
-//                          function(callback2){
-//                              // put padding program 0
-//                              var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
-//                              aProgramTimeSlot.type = 'padding';
-//                              aProgramTimeSlot.contentType = 'media_item';
-//                              aProgramTimeSlot.content = paddingContents[0];
-//                              aProgramTimeSlot.timeslot.playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING;
-//                              aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
-//                              timeStampIndex++;
-//                              aProgramTimeSlot.markModified('content');
-//                              aProgramTimeSlot.save(function(err1, _result){     
-//                                  //if (err1) console.log("err1="+err1);
-//                                  callback2(err1);
-//                              });
-//                          },
-//                          function(callback3){
-//                              // put following programs: UGC 0, padding 1, UGC 1, padding 2, .....
-//                              var indexArrayUgcPrograms = []; for (var i = 0; i < numberOfUGC; i++) { indexArrayUgcPrograms.push(i); }
-//                              
-//                              var iteratorPutUgcAndPaddingProgrames = function(indexOfUgcContents, interationDone_putUgcAndPaddingPrograms_cb){
-//                                  
-//                                  async.series([
-//                                                function(cb1){
-//                                                    //put UGC program
-//                                                    var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
-//                                                    aProgramTimeSlot.type = 'UGC';
-//                                                    aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
-//                                                    timeStampIndex++;
-//                                                    aProgramTimeSlot.save(function(err2, _result){     
-//                                                        cb1(err2);
-//                                                    });
-//                                                },
-//                                                function(cb2){
-//                                                    //put padding program
-//                                                    var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
-//                                                    aProgramTimeSlot.type = 'padding';
-//                                                    aProgramTimeSlot.contentType = 'media_item';
-//                                                    aProgramTimeSlot.content = paddingContents[indexOfUgcContents+1];
-//                                                    aProgramTimeSlot.markModified('content');
-//                                                    aProgramTimeSlot.timeslot.playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING;
-//                                                    aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
-//                                                    timeStampIndex++;
-//                                                    aProgramTimeSlot.save(function(err3, _result){     
-//                                                        cb2(err3);
-//                                                    });
-//                                                }
-//                                  ],
-//                                  function(err, results){
-//                                      interationDone_putUgcAndPaddingPrograms_cb(err);
-//                                  });
-//                                  
-//                              };
-//                              async.eachSeries(indexArrayUgcPrograms, iteratorPutUgcAndPaddingProgrames, function(err){
-//                                  callback3(null);
-//                              });
-//                              
-//                          }
-//            ],
-//            function(err, results){
-//                generatedTimeSlotsOfMicroInterval_cb(err);
-//            });
-//
-//            
-//        };
-        
+                 
         /**
          * Get availalbe time intervals by checking the playlists in Scala schedules
          */
@@ -492,7 +327,6 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
             
         };
         
-        //scalaMgr_listAvailableTimeInterval(intervalOfPlanningDoohProgrames,function(err, result){
         getAvailableTimeIntervals(intervalOfPlanningDoohProgrames,function(err, result){
             //debugger;
             if (!err){
@@ -564,21 +398,21 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                 
                 async.eachSeries(availableTimeIntervals, iteratorGenerateTimeSlot, function(err0){
                     if (!err0) {
-                        /*
-                        //for debugging
-                        programTimeSlotModel.find({ "session": sessionId }, "timeStamp timeslot contentGenre type" ).sort({timeStamp:1}).exec(function (_err, timeslots) {
-                            if (!_err){
-                                //console.log("time slot generated:");
-                                //console.dir(timeslots);
-                                logger.info('[scheduleMgr] time slots generated:' );
-                                for (var i in timeslots){
-                                    logger.info(JSON.stringify(timeslots[i]));
-                                }
-                                cbOfGenerateTimeSlot(null);
-                            }else {
-                                cbOfGenerateTimeSlot("Failed to guery the time slots after their generation: "+_err);
-                            }
-                        }); */
+                        
+//                        //for debugging
+//                        programTimeSlotModel.find({ "session": sessionId }, "timeStamp timeslot contentGenre type" ).sort({timeStamp:1}).exec(function (_err, timeslots) {
+//                            if (!_err){
+//                                //console.log("time slot generated:");
+//                                //console.dir(timeslots);
+//                                logger.info('[scheduleMgr] time slots generated:' );
+//                                for (var i in timeslots){
+//                                    logger.info(JSON.stringify(timeslots[i]));
+//                                }
+//                                cbOfGenerateTimeSlot(null);
+//                            }else {
+//                                cbOfGenerateTimeSlot("Failed to guery the time slots after their generation: "+_err);
+//                            }
+//                        }); 
                         
                         cbOfGenerateTimeSlot(null);
                         
@@ -834,22 +668,6 @@ scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, c
     });
 };
 
-/*
-scheduleMgr.getProgramListBySession_test = function(sessionId,cbOfGetProgramListBySession2 ){
-    var query2 = programTimeSlotModel.count({ "session": sessionId, "type": "UGC"});
-    
-
-    
-   
-    
-    query2.exec(function (_err, result) {
-    	//console.log(result);
-        if (cbOfGetProgramListBySession2) {
-            cbOfGetProgramListBySession2(_err, result);
-        }
-    });
-};
-*/
 /**
  * Push programs (of a specific session) to the 3rd-party content manager.<br>
  * <br>
@@ -909,66 +727,6 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                     cb1_0('Failed to query the program groups of a specific session: '+err1, null);
                 }                             
             });
-        },
-        function(programs, cb1_1){
-//            //render Miix moive if it is not yet rendered
-//            
-//            if ( systemConfig.RENDER_MIIX_MOVIE_IF_IT_IS_NOT_YET_RENDERED ) {
-//                var miixContentMgr = require('./miix_content_mgr.js');
-//                
-//                var iteratorRenderMiixMovie = function(aProgram, callbackIterator){
-//                    
-//                    //console.log("aProgram=");
-//                    //console.dir(aProgram);
-//                    //TODO: find a way to check aProgram.content.url.youtube does not exist
-//                    if ( (aProgram.contentType == "file") && (aProgram.contentGenre == "miix_it") && (!aProgram.content.url) ) {
-//                        async.waterfall([
-//                            function(callback){
-//                                //get the corresponding UGC info
-//                                ugcModel.findOne({ 'projectId': aProgram.content.projectId }, '_id ownerId projectId title no', function (errOfFindOne, ugc) {
-//                                    if (!errOfFindOne) {
-//                                        var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded" 
-//                                        //console.log("_ugc=");
-//                                        //console.dir(_ugc);
-//                                        callback(null, _ugc.projectId, _ugc.ownerId._id,  _ugc.ownerId.fbUserId, _ugc.title, _ugc.no);
-//                                    }
-//                                    else {
-//                                        callback("Failed to get the corresponding UGC info: "+errOfFindOne, null, null, null, null, null);
-//                                    }
-//                                });
-//                            }, 
-//                            function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, ugcNo, callback){
-//                                //render this video UGC (Miix movie)
-//                                adminBrowserMgr.showTrace(null, straceStamp+"開始合成編號"+ugcNo+"的UGC....請等待約15~20分鐘");
-//                                miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, function(errOfGenerateMiixMoive){
-//                                    if (!errOfGenerateMiixMoive){
-//                                        adminBrowserMgr.showTrace(null, straceStamp+"成功地合成編號"+ugcNo+"的UGC!");
-//                                        callback(null);
-//                                    }
-//                                    else {
-//                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
-//                                        callback(errOfGenerateMiixMoive);
-//                                    }
-//                                });
-//                            }
-//                        ], function(errOfWaterFall){
-//                            callbackIterator(errOfWaterFall);
-//                        });
-//                    }
-//                    else {
-//                        callbackIterator(null);
-//                    }
-//                };
-//                async.eachSeries(programs, iteratorRenderMiixMovie, function(errEachSeries){
-//                    cb1_1(errEachSeries, programs);
-//                });
-//                
-//            }
-//            else {
-//                cb1_1(null, programs);
-//            }
-            cb1_1(null, programs);
-            
         },
         function(programs, cb2){
             
