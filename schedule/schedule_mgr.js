@@ -87,9 +87,17 @@ scheduleMgr.init = function(_censorMgr){
  *     when the system is planning the program(s) of a "micro time interval" <br>
  *     Note: the string must be "miix_it", "cultural_and_creative", "mood", or "check_in"
  *     For example, ["miix_it", "check_in", "check_in", "mood", "cultural_and_creative" ] <br>
+ *     
+ * @param {String} planner The hex string of planner's _id
  * 
- * @param {Function} created_cb The callback function called when the result program list is created.<br>
- *     The function signature is created_cb(err, result):
+ * @param {String} mode The mode of generating program list.  It must be one of the following values: <br>
+ *     <ul>
+ *     <li>"appended_to_each_playlist_cycle"
+ *     <li>"continuous"
+ *     </ul>
+ * 
+ * @param {Function} cbOfCreateProgramList The callback function called when the result program list is created.<br>
+ *     The function signature is cbOfCreateProgramList(err, result):
  *     <ul>
  *     <li>err: error message if any error happens
  *     <li>result: object containing the following information:
@@ -102,7 +110,7 @@ scheduleMgr.init = function(_censorMgr){
  *         { numberOfProgramTimeSlots: 33, sessionId: '1367596800000-1367683140000-1373332978201' }     
  *     </ul>
  */
-scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, created_cb ){
+scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, mode, cbOfCreateProgramList ){
     
     logger.info('[scheduleMgr.createProgramList()]: intervalOfSelectingUGC={start:'+(new Date(intervalOfSelectingUGC.start))+' end:'+(new Date(intervalOfSelectingUGC.end))+'} ');
     logger.info('intervalOfPlanningDoohProgrames= {start:'+(new Date(intervalOfPlanningDoohProgrames.start))+' end:'+(new Date(intervalOfPlanningDoohProgrames.end))+'} programSequence='+JSON.stringify(programSequence));
@@ -114,6 +122,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         
         var candidateUgcList = sortedUgcList.slice(0); //clone the full array of sortedUgcList
         var counter = 0;
+        var isLoopedAround = false;
         
         var saveCandidateUgcList = function(_candidateUgcList, _intervalOfSelectingUGC, cbOfSaveCandidateUgcList){
             var indexArrayCandidateUgcCache = []; for (var i = 0; i < _candidateUgcList.length; i++) { indexArrayCandidateUgcCache.push(i); }
@@ -165,6 +174,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                             
                             if (indexOfcandidateToSelect == candidateUgcList.length){
                                 candidateUgcList = candidateUgcList.concat(sortedUgcList);
+                                isLoopedAround = true;
                             }
                             
                             if ( candidateUgcList[indexOfcandidateToSelect].contentGenre == aTimeSlot.contentGenre){
@@ -176,7 +186,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                         //debugger;
                         var _selectedUgc = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
                         //db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc, "timeslot.playDuration": playDuration }, function(_err_2, result){
-                        db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc }, function(_err_2, result){
+                        db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc, "isLoopedAround": isLoopedAround }, function(_err_2, result){
                             counter++;
                             //debugger;
                             //console.dir(result);
@@ -519,37 +529,58 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         },
         function(callback){
             //generate program time slots
-            generateTimeSlot( function(err_2){
-                if (!err_2) {
-                    //console.log('generateTimeSlot() done! ');
-                    callback(null);
-                }
-                else {
-                    callback("Fail to generate time slots: "+err_2);
-                }
-            });
+            if (mode == "appended_to_each_playlist_cycle") {
+                generateTimeSlot( function(err_2){
+                    if (!err_2) {
+                        //console.log('generateTimeSlot() done! ');
+                        callback(null);
+                    }
+                    else {
+                        callback("Fail to generate time slots: "+err_2);
+                    }
+                });
+
+            }
+            else {
+                callback(null);
+            }
         }, 
         function(callback){
             //put UGCs into programe time slots
-            putUgcIntoTimeSlots(function(err_3, result){
-                if (!err_3) {
-                    //console.log('putUgcIntoTimeSlots() done! ');
-                    callback(null, result);
-                }
-                else {
-                    callback("Fail to put UGCs into time slots: "+err_3, null);
-                }
-                
-            });
+            if (mode == "appended_to_each_playlist_cycle") {
+                putUgcIntoTimeSlots(function(err_3, result){
+                    if (!err_3) {
+                        //console.log('putUgcIntoTimeSlots() done! ');
+                        callback(null, result);
+                    }
+                    else {
+                        callback("Fail to put UGCs into time slots (appended_to_each_playlist_cycle mode): "+err_3, null);
+                    }
+                    
+                });
+            }
+            else { //mode == "continuous"
+                var programGroup = new ProgramGroup(intervalOfPlanningDoohProgrames, dooh, planner, sessionId);
+                programGroup.generateFromSortedUgcList(sortedUgcList, function(errOfGenerateFromSortedUgcList, resultProgramGroup){
+                    if (!errOfGenerateFromSortedUgcList) {
+                        var result = {numberOfProgramTimeSlots: resultProgramGroup.programs.length, sessionId: resultProgramGroup.programSession };
+                        callback(null, result);
+                    }
+                    else {
+                        callback("Fail to generate programs from sorted UGC list (continuous mode): "+errOfGenerateFromSortedUgcList, null);
+                    }
+
+                });
+            }
         }  
     ],
     function(err, result){
-        if (created_cb){
+        if (cbOfCreateProgramList){
             if (!err) {
-                created_cb(null, result);
+                cbOfCreateProgramList(null, result);
             }
             else {
-                created_cb(err, null);
+                cbOfCreateProgramList(err, null);
             }
         } 
     });

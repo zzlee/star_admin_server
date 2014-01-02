@@ -164,7 +164,7 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
 };
 
 
-ProgramGroup.prototype.generateFromCandidateList = function(programCandidateList, cbOfGenerateFromCandidateList) {
+ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfGenerateFromSortedUgcList) {
     var _this = this;
     var DURATION_FOR_NORMAL = 15; //sec
     var DURATION_FOR_VIP = 120; //sec
@@ -187,6 +187,9 @@ ProgramGroup.prototype.generateFromCandidateList = function(programCandidateList
         type: 'UGC',
         session: _this.sessionId
     };
+    
+    var candidateUgcList = sortedUgcList.slice(0); //clone the full array of sortedUgcList
+    var isLoopedAround = false;
 
     
     async.waterfall([
@@ -203,14 +206,40 @@ ProgramGroup.prototype.generateFromCandidateList = function(programCandidateList
                     var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
                     
                     
-                    var playDuration; //sec
-                    //TODO: check the content class
-                    aProgramTimeSlot.timeslot.playDuration = playDuration;
-                    programs[sequenceNo].preSetDuration = playDuration;  
                     
                     aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(sequenceNo, 3);
                     
-                    totalDuration += playDuration;
+                    var selectedUgc = null;
+                    
+                    //pick up one UGC from the sorted list 
+                    for (var indexOfcandidateToSelect=0; indexOfcandidateToSelect<=candidateUgcList.length; indexOfcandidateToSelect++){
+                        
+                        if (indexOfcandidateToSelect == candidateUgcList.length){
+                            candidateUgcList = candidateUgcList.concat(sortedUgcList);
+                            isLoopedAround = true;
+                        }
+                        
+                        if ( candidateUgcList[indexOfcandidateToSelect].contentGenre == aTimeSlot.contentGenre){
+                            selectedUgc = candidateUgcList.splice(indexOfcandidateToSelect, 1)[0];
+                            break;
+                        }
+                    }
+                    
+                    var playDuration; //sec
+                    if (selectedUgc.contentClass == "VIP") {
+                        playDuration = 120;  //2 mins
+                    }
+                    else {
+                        playDuration = 15; //15 sec
+                    }
+                    aProgramTimeSlot.timeslot.playDuration = playDuration;
+                    programs[sequenceNo].preSetDuration = playDuration;  
+
+
+                    aProgramTimeSlot.isLoopedAround = isLoopedAround;
+                    aProgramTimeSlot.content = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
+                    
+                    totalDuration += playDuration*1000;
                     sequenceNo++;
                     aProgramTimeSlot.save(function(errOfSave, _result){     
                         if (!errOfSave) {
@@ -241,18 +270,18 @@ ProgramGroup.prototype.generateFromCandidateList = function(programCandidateList
             
             aProgramGroup.save(function(errOfSave, _result){     
                 if (!errOfSave) {
-                    callback(null);
+                    callback(null, _result);
                 }
                 else {
-                    callback("Failed to add a new programGroup to DB: "+errOfSave);
+                    callback("Failed to add a new programGroup to DB: "+errOfSave, null);
                 }
                 
             });
             
         }
     ],
-    function(err, results){
-        cbOfGenerateFromCandidateList(err);
+    function(err, resultProgramGroup){
+        cbOfGenerateFromSortedUgcList(err, resultProgramGroup);
     });
 };
 
