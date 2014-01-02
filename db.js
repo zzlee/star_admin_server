@@ -35,7 +35,7 @@ FM.DB = (function(){
                 //mood: a.k.a. 心情
                 //check_in: a.k.a. 打卡
             ugcProcessingState = 'not_generated under_generating generating_failed complete'.split(' '),
-            contentClass = 'normal VIP'.split(' '),
+            ugcContentClass = 'normal VIP'.split(' '),
             questionGenre = 'account publish sign_in others'.split(' '),
             
             programTimeSlotType = 'UGC padding'.split(' '),
