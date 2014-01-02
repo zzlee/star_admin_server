@@ -146,6 +146,15 @@ var UGCPlayListSubPg = {
                 var playTimeEnd = new Date(inputSearchData.playTimeEnd).getTime();
                 console.log(inputSearchData.playTimeEnd);
                 console.log("checkDate"+checkDate+",playTimeStart"+playTimeStart+",playTimeEnd"+playTimeEnd);
+                
+                var mode;
+                if ( $("#checkboxIsContinuousProgramMode").is(":checked") ) {
+                    mode = "continuous";
+                }
+                else {
+                    mode = "appended_to_each_playlist_cycle";
+                }
+                
                 if(checkDate >= playTimeStart){
                     alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
                     
@@ -157,7 +166,13 @@ var UGCPlayListSubPg = {
                     $.ajax({
                         url: url,
                         type: 'POST',
-                        data: {intervalOfSelectingUGC:{start:inputSearchData.timeStart, end:inputSearchData.timeEnd}, intervalOfPlanningDoohProgrames:{start:inputSearchData.playTimeStart, end:inputSearchData.playTimeEnd}, programSequence:programSequenceArr, originSequence:originSequence},
+                        data: {
+                            intervalOfSelectingUGC:{start:inputSearchData.timeStart, end:inputSearchData.timeEnd}, 
+                            intervalOfPlanningDoohProgrames:{start:inputSearchData.playTimeStart, end:inputSearchData.playTimeEnd}, 
+                            programSequence:programSequenceArr, 
+                            originSequence:originSequence,
+                            mode: mode
+                        },
                         success: function(response) {
                             if(response.message){
                                 $('#table-content').html('<br> <br>資料產生中，請稍候....');

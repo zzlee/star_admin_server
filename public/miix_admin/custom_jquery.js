@@ -719,7 +719,7 @@ $(document).ready(function(){
     });
 
     $(document.activeElement).keydown(function( event ) {
-        console.log("keydown event.which="+event.which);
+        //console.log("keydown event.which="+event.which);
         if ( event.which == 18 ) {  //alt key
             altIsDown = true;
         }
