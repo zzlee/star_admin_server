@@ -19,7 +19,9 @@ var ftpMgr = ftp.init({ host: systemConfig.FTP_SCALA_PLAYER_HOST,
                         password: systemConfig.FTP_SCALA_PLAYER_PASSWORD });
 
 var day = new Date();
-var file = 'bill' + day.getFullYear().toString() + (day.getMonth() + 1).toString() + day.getDate() + '.log';
+var filename_month = ((day.getMonth() + 1) < 10) ? '0' + (day.getMonth() + 1).toString() : (day.getMonth() + 1).toString();
+var filename_date = ((day.getDate() + 1) < 10) ? '0' + day.getDate().toString() : day.getDate().toString();
+var file = 'bill' + day.getFullYear().toString() + filename_month + filename_date + '.log';
 // console.log(file);
 // var today = new Date(day.getFullYear(), day.getMonth(), day.getDate()).getTime();
 
@@ -140,7 +142,9 @@ var checkPlayProgram = function( programs, logs, check_cb ) {
 var execute = function() {
     
     day = new Date();
-    file = 'bill' + day.getFullYear().toString() + (day.getMonth() + 1).toString() + day.getDate() + '.log';
+    filename_month = ((day.getMonth() + 1) < 10) ? '0' + (day.getMonth() + 1).toString() : (day.getMonth() + 1).toString();
+    filename_date = ((day.getDate() + 1) < 10) ? '0' + day.getDate().toString() : day.getDate().toString();
+    file = 'bill' + day.getFullYear().toString() + filename_month + filename_date + '.log';
     var today = new Date(day.getFullYear(), day.getMonth(), day.getDate()).getTime();
     
     checkProgramPlayState(today, function(err, programs) {
