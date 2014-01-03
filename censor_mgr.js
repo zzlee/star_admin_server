@@ -81,7 +81,7 @@ censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, pageType, 
     }
 
     if ( pageLimit && pageSkip ) {
-        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent highlight url processingState fbProfilePicture forMRTReview', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
+        FMDB.listOfdocModels( UGCs,condition,'fb.userID _id title description createdOn rating doohPlayedTimes projectId ownerId no contentGenre mustPlay userRawContent highlight url processingState fbProfilePicture forMRTReview contentClass', {sort :sort ,limit: pageLimit ,skip: pageSkip}, function(err, result){
             if(err) {
                 logger.error('[censorMgr_db.listOfUGCs]', err);
                 cb(err, null);
@@ -120,7 +120,7 @@ var timeslotStart;
 var timeslotEnd;
 
 
-var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, tsLiveStateCount,tsUGCCount, forMRTReview, createdOn, arr) {
+var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, tsLiveStateCount,tsUGCCount, forMRTReview, createdOn,contentClass, arr) {
     arr.push({
         userPhotoUrl: userPhotoUrl,
         ugcProjectId: ugcProjectId,
@@ -145,7 +145,8 @@ var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent,
 		tsLiveStateCount: tsLiveStateCount,
         tsUGCCount:tsUGCCount,
 		forMRTReview:forMRTReview,
-        createdOn: createdOn
+        createdOn: createdOn,
+        contentClass: contentClass
     });
 };
 var mappingUGCList = function(data, type, set_cb){
@@ -199,13 +200,13 @@ var mappingUGCList = function(data, type, set_cb){
             }
             //UGCListInfo
             if(next == limit - 1) {
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn,UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass,UGCList);
                 set_cb(null, 'ok'); 
                 next = 0;
                 UGCList = [];
             }
             else{
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState,result[3], result[4],data[next].forMRTReview,data[next].createdOn, UGCList);
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState,result[3], result[4],data[next].forMRTReview,data[next].createdOn, data[next].contentClass, UGCList);
                 next += 1;
                 mappingUGCList(data, type, set_cb);
             }
@@ -488,7 +489,7 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
     }
         var liveContentList = [];
 
-        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, playState, fbUserId, programTimeSlot_id, ownerId_id, canBeFoundInPlayerLog, s3Img, miixSource, arr) {
+        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, playState, fbUserId, programTimeSlot_id, ownerId_id, canBeFoundInPlayerLog, s3Img, miixSource, contentClass, arr) {
             arr.push({
                 ugcCensorNo: ugcCensorNo,
                 liveContent: liveContent,
@@ -501,7 +502,8 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
                 ownerId_id: ownerId_id,
                 canBeFoundInPlayerLog: canBeFoundInPlayerLog,
                 s3Img: s3Img,
-                miixSource: miixSource
+                miixSource: miixSource,
+                contentClass: contentClass
             });
         };  
         var mappingLiveContentList = function(data, cbOfMappingLiveContentList){
@@ -509,7 +511,7 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
                 if(!err){
                     UGCs.find({"no": data.content.no}).exec(function(err_2, result_2){
                         if(!err_2) {
-                            LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.playState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, result_2[0].userRawContent[0].content, liveContentList);
+                            LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.playState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, result_2[0].userRawContent[0].content, result_2[0].contentClass, liveContentList);
                             cbOfMappingLiveContentList(null); 
                         }else {
                             cbOfMappingLiveContentList(err_2);

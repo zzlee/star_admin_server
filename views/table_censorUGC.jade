@@ -2,6 +2,12 @@
 form#mainform(action='')
 
     #condition-inner
+      label 內容分級    :  
+      label      normal
+       input#ugcSearchVIPRadioInput(type='radio', name='searchByVIP', value = 'normal')
+      label      vip
+       input(type='radio', name='searchByVIP', value = 'vip')
+      br
       label 類別    :  
       label      合成影片
        input#ugcSearchMiixGenreRadioInput(type='radio', name='searchByGenre', value = 'miix')
@@ -35,6 +41,8 @@ form#mainform(action='')
           th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') 主題類別
           th.table-header-repeat.line-left.minwidth-1(width='10')
+            a(href='') VIP
+          th.table-header-repeat.line-left.minwidth-1(width='10')
             a(href='') UGC編號
           th.table-header-repeat.line-left.minwidth-1(width='10' sensitive='true')
             a(href='') 投稿時間
@@ -64,6 +72,7 @@ form#mainform(action='')
                              label.label_mood 心情
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
+                      td #{ugcCensor.contentClass}
                       td #{ugcCensor.ugcCensorNo}
                       td(sensitive='true') #{ugcCensor.createdOn}
                       if(ugcCensor.contentGenre == 'miix_it')
@@ -164,6 +173,7 @@ form#mainform(action='')
                              label.label_mood 心情
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
+                      td #{ugcCensor.contentClass}
                       td #{ugcCensor.ugcCensorNo}
                       td(sensitive='true') #{ugcCensor.createdOn}
                       if(ugcCensor.contentGenre == 'miix_it')

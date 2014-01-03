@@ -51,6 +51,7 @@ FM.DB = (function(){
             videoStatus = 'good soso bad waiting none'.split(' '), //DEPRECATE, keep for reference
             videoGenre = 'miix miix_street miix_story'.split(' '); //DEPRECATE, keep for reference 
             //programTimeSlotStatus = 'waiting proved'.split(' ');
+            ugcContentClass = 'normal vip'.split(' ');
         
 		/****************** DB Schema ******************/
 		
@@ -158,7 +159,8 @@ FM.DB = (function(){
             hot: {type: Boolean, default: false},
             processingState: {type: String, enum: ugcProcessingState, default:"not_generated"},
             fbProfilePicture: {type: String},
-			forMRTReview: {type:Boolean, default: false}
+			forMRTReview: {type:Boolean, default: false},
+            contentClass: {type: String, enum: ugcContentClass,default:"normal"}
         }); //  UGC collection
         
         var CommentSchema = new Schema({

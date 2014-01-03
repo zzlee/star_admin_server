@@ -16,11 +16,13 @@
 
         var tbody=$("<tbody>");
         var title_tr=$("<tr>");
+        var title_vip=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>vip</a>");
         var title_td=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>播放時間</a>");
         var title_td2=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>影片編號</a>");
         var title_td3=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>原始UGC</a>");
         var title_td4=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>live UGC (live number / time / image / radio box)</a>");
 
+        title_tr.append(title_vip);
         title_tr.append(title_td);
         title_tr.append(title_td2);
         title_tr.append(title_td3);
@@ -78,6 +80,7 @@
             var post_minutes_end=post_live_time_end.getMinutes();
             var timeString_start_end=post_year_end+"/"+post_month_end+"/"+post_date_end+"  "+post_hours_end+":"+post_minutes_end;
 
+            var td_vip=$("<td>").html(res[i].contentClass);
             var td_1=$("<td>").html("start："+timeString_start+"<br>"+"end："+timeString_start_end+"<br><br>");
             var td_2=$("<td>").attr({align:"center"}).html("<b>"+res[i].ugcCensorNo+"</b>");
             var td_3=$("<td>").html(s3imgLink);
@@ -168,6 +171,8 @@
             //----------------end 'fail' checkbox  click-----
 
             tbody.append(tr);
+            tr.append(td_vip);
+            FailboxForm.appendTo(td_vip);
             tr.append(td_1);
             FailboxForm.appendTo(td_1);
             tr.append(td_2);
