@@ -155,6 +155,15 @@ var UGCPlayListSubPg = {
                     mode = "appended_to_each_playlist_cycle";
                 }
                 
+                var filter;
+                if ( $("#checkboxIncludeLiveContentFailed").is(":checked") ) {
+                    filter = "not_being_submitted_to_dooh or live_content_failed_in_last_play";
+                }
+                else {
+                    filter = "not_being_submitted_to_dooh";
+                }
+
+                
                 if(checkDate >= playTimeStart){
                     alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
                     
@@ -171,6 +180,7 @@ var UGCPlayListSubPg = {
                             intervalOfPlanningDoohProgrames:{start:inputSearchData.playTimeStart, end:inputSearchData.playTimeEnd}, 
                             programSequence:programSequenceArr, 
                             originSequence:originSequence,
+                            filter: filter,
                             mode: mode
                         },
                         success: function(response) {

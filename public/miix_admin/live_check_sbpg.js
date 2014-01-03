@@ -571,11 +571,11 @@
                     });
                     
                     var url = DOMAIN + "user_content_attribute";
-                    var mustPlay = true;
+                    var failedToGenliveContentInLastPlay = true;
                     $.ajax({
                         url: url,
                         type: 'PUT',
-                        data: {no: ugcCensorNo, vjson:{mustPlay: mustPlay}},
+                        data: {no: ugcCensorNo, vjson:{failedToGenliveContentInLastPlay: failedToGenliveContentInLastPlay}},
                         success: function(response) {
                             if(response.message){
                                 console.log("[Response] message: PUT"+ url + ':' + response.message);

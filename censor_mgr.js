@@ -165,50 +165,50 @@ var mappingUGCList = function(data, type, set_cb){
             return;
         }
             
-            //data[next] not exist
-            if(!data[next]) return;
-            
-            var userPhotoUrl = 'No Photo';
-            var description = null;
-            
-            //timeslot
-            if(data[next].timeslot){
-                timeslotDateStart = new Date(data[next].timeslot.start).toString().substring(0,25);
-                timeslotDateEnd = new Date(data[next].timeslot.end).toString().substring(0,25);
-                //timeslotStart date format
-                yyyy = timeslotDateStart.substring(11,15);
-                mm = new Date(data[next].timeslot.start).getMonth()+1;
-                dd = timeslotDateStart.substring(8,10);
-                time = timeslotDateStart.substring(16,25);
-                timeslotStart = yyyy+'/'+mm+'/'+dd+' '+time;
-                //timeslotEnd date format
-                yyyy = timeslotDateEnd.substring(11,15);
-                mm = new Date(data[next].timeslot.end).getMonth()+1;
-                dd = timeslotDateEnd.substring(8,10);
-                time = timeslotDateEnd.substring(16,25);
-                timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
+        //data[next] not exist
+        if(!data[next]) return;
+        
+        var userPhotoUrl = 'No Photo';
+        var description = null;
+        
+        //timeslot
+        if(data[next].timeslot){
+            timeslotDateStart = new Date(data[next].timeslot.start).toString().substring(0,25);
+            timeslotDateEnd = new Date(data[next].timeslot.end).toString().substring(0,25);
+            //timeslotStart date format
+            yyyy = timeslotDateStart.substring(11,15);
+            mm = new Date(data[next].timeslot.start).getMonth()+1;
+            dd = timeslotDateStart.substring(8,10);
+            time = timeslotDateStart.substring(16,25);
+            timeslotStart = yyyy+'/'+mm+'/'+dd+' '+time;
+            //timeslotEnd date format
+            yyyy = timeslotDateEnd.substring(11,15);
+            mm = new Date(data[next].timeslot.end).getMonth()+1;
+            dd = timeslotDateEnd.substring(8,10);
+            time = timeslotDateEnd.substring(16,25);
+            timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
+        }
+        //userRawContent
+        if(data[next].userRawContent){
+            for(var i=0 ; i <data[next].userRawContent.length ; i++){
+                if(data[next].userRawContent[i].type == 'text')
+                    description = data[next].userRawContent[i].content;
+                if(data[next].userRawContent[i].type == 'image')
+                    userPhotoUrl = data[next].userRawContent[i].content;
             }
-            //userRawContent
-            if(data[next].userRawContent){
-                for(var i=0 ; i <data[next].userRawContent.length ; i++){
-                    if(data[next].userRawContent[i].type == 'text')
-                        description = data[next].userRawContent[i].content;
-                    if(data[next].userRawContent[i].type == 'image')
-                        userPhotoUrl = data[next].userRawContent[i].content;
-                }
-            }
-            //UGCListInfo
-            if(next == limit - 1) {
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn,UGCList);
-                set_cb(null, 'ok'); 
-                next = 0;
-                UGCList = [];
-            }
-            else{
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState,result[3], result[4],data[next].forMRTReview,data[next].createdOn, UGCList);
-                next += 1;
-                mappingUGCList(data, type, set_cb);
-            }
+        }
+        //UGCListInfo
+        if(next == limit - 1) {
+            UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn,UGCList);
+            set_cb(null, 'ok'); 
+            next = 0;
+            UGCList = [];
+        }
+        else{
+            UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState,result[3], result[4],data[next].forMRTReview,data[next].createdOn, UGCList);
+            next += 1;
+            mappingUGCList(data, type, set_cb);
+        }
 
     };//toDo End ******
 
@@ -333,6 +333,7 @@ var getUserContent = function(fb_id, app, get_cb){
  */
 censorMgr.setUGCAttribute = function(no, vjson, cb){
 
+    //TODO: find a cleaner way to avoid the code section below
     if(vjson.mustPlay == 'true')
         vjson = {mustPlay : true};
     else if(vjson.mustPlay == 'false')
@@ -346,6 +347,11 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
         vjson = {forMRTReview : true};
     else if(vjson.forMRTReview == 'false')
         vjson = {forMRTReview : false};
+
+    if(vjson.failedToGenliveContentInLastPlay == 'true')
+        vjson = {failedToGenliveContentInLastPlay : true};
+    else if(vjson.failedToGenliveContentInLastPlay == 'false')
+        vjson = {failedToGenliveContentInLastPlay : false};
 
 
     UGC_mgr.getOwnerIdByNo(no, function(err, result){
@@ -371,9 +377,26 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
 /**
  * for scheduleMgr
  */
-censorMgr.getUGCListLite = function(condition, cb){
+censorMgr.getUGCListLite = function(intervalOfSelectingUGC, filter, cb){
+    
+    var condition;
+    var sort; 
+    
+    if (filter == "not_being_submitted_to_dooh or live_content_failed_in_last_play")  {     
+        condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}}, {'mustPlay':true}, {'failedToGenliveContentInLastPlay':true}], 'doohSubmitTimes': 0, 'rating': {$gte: 'A' , $lte: 'E' } };
+        sort = {'mustPlay':-1, 'failedToGenliveContentInLastPlay':-1, 'doohPlayedTimes':1,'rating':1,'createdOn':1};
+    }
+    else { // filter == "not_being_submitted_to_dooh" 
+        condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}}, {'mustPlay':true}], 'doohSubmitTimes': 0, 'rating': {$gte: 'A' , $lte: 'E' } };
+        //condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}}, {'mustPlay':true}], 'rating': {$gte: 'A' , $lte: 'E' } };
+        sort = {'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1};
+    }
 
-    FMDB.listOfdocModels( UGCs,{ $or: [ {'createdOn' : {$gte: condition.start, $lt: condition.end}}, {'mustPlay':true}], 'rating': {$gte: 'A' , $lte: 'E' }},'_id genre contentGenre projectId fileExtension no ownerId url mustPlay contentClass', {sort :{'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1}}, function(err, result){
+    //console.log("condition=");
+    //console.dir(condition);
+
+    
+    FMDB.listOfdocModels( UGCs, condition,'_id genre contentGenre projectId fileExtension no ownerId url mustPlay contentClass', {sort: sort}, function(err, result){
         if(err) {
             logger.error('[censorMgr.getUGCListLite]', err);
             cb(err, null);

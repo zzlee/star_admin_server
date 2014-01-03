@@ -103,13 +103,12 @@ FM.DB = (function(){
             status: {type: String, enum: videoStatus, default: 'none'},
 			createdOn: {type: Date, default: Date.now},
 			doohTimes: { times: {type: Number, default: 0, min: 0}, event: [ObjectID], submited_time: Date},
-			playedTimes: {type: Number, min: 0},
 			review: {type: Number},
 			vip: {type: Boolean, default: false},
             genre: {type: String, enum: videoGenre, default: 'miix'},
             no: {type: Number},
             aeId: {type: String},
-			triedDoohTimes: {type: Number, min: 0, default: 0},	//JF
+			triedDoohTimes: {type: Number, min: 0, default: 0},	//JF  
 			doohPlayedTimes: {type: Number, min: 0, default: 0},	//JF
 			timesOfPlaying: {type: Number}		//JF
         }); //  videos collection
@@ -132,12 +131,9 @@ FM.DB = (function(){
             projectId: {type: String},  // project ID which is unique to each AE rendering
             hitRate: {type: Number, min:0},
             comments: {type: Mixed},    //  "data": []
-            vote: {type: Number, default: 0, min:0},
             likes: {type: Number, default: 0, min:0},
             createdOn: {type: Date, default: Date.now},
-            doohTimes: { times: {type: Number, default: 0, min: 0}, event: [ObjectID], submited_time: Date},
-            playedTimes: {type: Number, min: 0},
-            review: {type: Number},
+            doohTimes: { times: {type: Number, default: 0, min: 0}, event: [ObjectID], submited_time: Date},  //DEPRECATTED, not used in OnDaScreen or WTA
             vip: {type: Boolean, default: false},
             genre: {type: String, enum: UGCGenre, default: 'miix'},
             contentGenre: {type: String, enum: ugcContentGenre}, //Is normally the id of main template that this UGC uses
@@ -146,10 +142,12 @@ FM.DB = (function(){
             aeId: {type: String}, //ID of AE Server who renders this UGC
             mediaType: {type: String},
             fileExtension: {type: String},
-            triedDoohTimes: {type: Number, min: 0, default: 0}, //JF
+            triedDoohTimes: {type: Number, min: 0, default: 0}, //JF  //DEPRECATTED, not used in OnDaScreen or WTA
             doohPlayedTimes: {type: Number, min: 0, default: 0},    //JF
+            doohSubmitTimes: {type: Number, min: 0, default: 0},   
             timesOfPlaying: {type: Number},     //JF
             mustPlay: {type: Boolean, default: false},
+            failedToGenliveContentInLastPlay: {type: Boolean, default: false},
             allUserContentExist: {type: Boolean, default: false},
             rating: {type: String},//range A~E      kaiser
             fb_postId: [{

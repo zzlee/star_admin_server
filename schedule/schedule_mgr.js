@@ -90,6 +90,12 @@ scheduleMgr.init = function(_censorMgr){
  *     
  * @param {String} planner The hex string of planner's _id
  * 
+ * @param {String} filter The filter of generating sorted candidate UGC list.  It must be one of the following values: <br>
+ *     <ul>
+ *     <li>"not_being_submitted_to_dooh"
+ *     <li>"not_being_submitted_to_dooh or live_content_failed_in_last_play"
+ *     </ul>
+ *     
  * @param {String} mode The mode of generating program list.  It must be one of the following values: <br>
  *     <ul>
  *     <li>"appended_to_each_playlist_cycle"
@@ -110,7 +116,7 @@ scheduleMgr.init = function(_censorMgr){
  *         { numberOfProgramTimeSlots: 33, sessionId: '1367596800000-1367683140000-1373332978201' }     
  *     </ul>
  */
-scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, mode, cbOfCreateProgramList ){
+scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, filter, mode, cbOfCreateProgramList ){
     
     logger.info('[scheduleMgr.createProgramList()]: intervalOfSelectingUGC={start:'+(new Date(intervalOfSelectingUGC.start))+' end:'+(new Date(intervalOfSelectingUGC.end))+'} ');
     logger.info('intervalOfPlanningDoohProgrames= {start:'+(new Date(intervalOfPlanningDoohProgrames.start))+' end:'+(new Date(intervalOfPlanningDoohProgrames.end))+'} programSequence='+JSON.stringify(programSequence));
@@ -452,7 +458,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         function(callback){
             //get the sorted candidate UGC list
             
-            censorMgr.getUGCListLite(intervalOfSelectingUGC, function(err_1, _sortedUgcList ){
+            censorMgr.getUGCListLite(intervalOfSelectingUGC, filter, function(err_1, _sortedUgcList ){
                 if (!err_1){
                     sortedUgcList = _sortedUgcList;
                     //console.log('sortedUgcList=');
@@ -759,6 +765,29 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                 }                             
             });
         },
+        function(programs, callback){
+            //update "doohSubmitTimes" as well as "mustPlay" and "failedToGenliveContentInLastPlay" flag 
+            ugcModel.findOne({"no":contentNo}).exec(function(err, ugcItem){
+                if (ugcItem.mustPlay) {
+                    ugcItem.mustPlay = false;
+                    ugcItem.failedToGenliveContentInLastPlay = false;
+                    ugcItem.doohSubmitTimes++;
+                    ugcItem.save(function(errOfSave){
+                        if (!errOfSave) {
+                            callback(null, fileToPlay, timeslot, contentNo);
+                        }
+                        else {
+                            callback("Failed to update mustPlay flag: "+errOfSave, null);
+                        }
+                    });
+                }
+                else {
+                    callback(null, programs);
+                }
+                
+            });
+        },
+
         function(programs, cb2){
             
             var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
@@ -1162,7 +1191,7 @@ scheduleMgr.removeUgcfromProgramAndAutoSetNewOne = function(sessionId, programTi
                       var sessionIdInfoArray = sessionId.split('-');
                       var intervalOfSelectingUGC = {start: Number(sessionIdInfoArray[0]), end: Number(sessionIdInfoArray[1]) };
                       
-                          censorMgr.getUGCListLite(intervalOfSelectingUGC, function(err0, _sortedUgcList ){
+                          censorMgr.getUGCListLite(intervalOfSelectingUGC, "not_being_submitted_to_dooh", function(err0, _sortedUgcList ){
                           if (!err0) {
                               sortedUgcList = _sortedUgcList;
                               //console.log('sortedUgcList=');
