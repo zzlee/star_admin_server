@@ -276,6 +276,28 @@ $(document).ready(function(){
                 if (localStorage.role == "FELTMENG_DEMO") {
                     $('#ugcSearchMiixGenreRadioInput').click();
                 }
+                
+                /**
+                 * search by VIP  JOY
+                 */
+            
+                $($('input:radio[name=searchByVIP]')).click(function(){
+                    var inputSearchData = {};
+                    $('input:radio[name=searchByVIP]:checked').each(function(){
+                        inputSearchData = {'contentClass':$(this).val()};
+                        conditions = inputSearchData;
+                    });
+                    if(inputSearchData != null){
+                        $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 10, '/miix_admin/ugc_censor', null, null);
+                        FM.UGCList.setConditions(conditions);
+                        $('#main_menu ul[class="current"]').attr("class", "select");
+                        $('#UGCList').attr("class", "current");
+                        FM.currentContent = FM.UGCList;
+                        FM.currentContent.showCurrentPageContent();
+                    }
+                });
+                
 
 				/**
                  * search by genre  JOY

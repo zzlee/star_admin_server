@@ -134,7 +134,6 @@ FM.DB = (function(){
             likes: {type: Number, default: 0, min:0},
             createdOn: {type: Date, default: Date.now},
             doohTimes: { times: {type: Number, default: 0, min: 0}, event: [ObjectID], submited_time: Date},  //DEPRECATTED, not used in OnDaScreen or WTA
-            vip: {type: Boolean, default: false},
             genre: {type: String, enum: UGCGenre, default: 'miix'},
             contentGenre: {type: String, enum: ugcContentGenre}, //Is normally the id of main template that this UGC uses
             contentSubGenre: {type: String}, //Is normally the id of sub template that this UGC uses
@@ -216,7 +215,9 @@ FM.DB = (function(){
             canBeFoundInPlayerLog: {type: String},
             liveState: {type: String, enum: liveContentState, default: 'not_checked'},
             isLoopedAround: {type: Boolean, default: false},
-            upload: {type: Boolean, default: false}
+            upload: {type: Boolean, default: false},
+            playState: {type: String, default: 'not_check'} // Check content play to DOOH 
+
         }); 
         
         var CandidateUgcCacheSchema = new Schema({
