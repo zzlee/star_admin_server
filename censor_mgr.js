@@ -122,8 +122,8 @@ var timeslotEnd;
 
 var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, tsLiveStateCount,tsUGCCount, forMRTReview, createdOn, arr) {
     arr.push({
-        userPhotoUrl: userPhotoUrl,
         ugcProjectId: ugcProjectId,
+        userPhotoUrl: userPhotoUrl,
         ugcCensorNo: ugcCensorNo,
         userContent: userContent,
         fb_userName: fb_userName,
@@ -478,6 +478,111 @@ censorMgr.getPlayList = function(programList, updateUGC, cb){
     }
     else cb(err, null);
 
+};
+
+
+censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList){
+    
+    var playList = [];
+    var db = require('./db.js');
+    var ugcModel = db.getDocModel("ugc");
+    
+    var indexList = [];
+    for (var i=0; i<programList.length; i++) {
+        //console.dir(programList[i]);
+        indexList.push(i);
+    }
+    //console.dir(indexList);
+    
+    var iteratorQueryUgcInfo = function(anIndex, callback){
+        
+        var ugcModel = db.getDocModel("ugc");
+        ugcModel.findOne({_id: programList[anIndex].content._id}, function(errOfFineOne, _ugc){
+            if (!errOfFineOne){
+                var ugc = JSON.parse(JSON.stringify( _ugc )); //clone candidateUgc object to prevent from strange error "RangeError: Maximum call stack size exceeded";
+                
+                //timeslot
+                var timeslotStart, timeslotEnd;
+                if(programList[anIndex].timeslot){
+                    var timeslotDateStart = new Date(programList[anIndex].timeslot.start).toString().substring(0,25);
+                    var timeslotDateEnd = new Date(programList[anIndex].timeslot.end).toString().substring(0,25);
+                    var yyyy, mm, dd, time;
+                    //timeslotStart date format
+                    yyyy = timeslotDateStart.substring(11,15);
+                    mm = new Date(programList[anIndex].timeslot.start).getMonth()+1;
+                    dd = timeslotDateStart.substring(8,10);
+                    time = timeslotDateStart.substring(16,25);
+                    timeslotStart = yyyy+'/'+mm+'/'+dd+' '+time;
+                    //timeslotEnd date format
+                    yyyy = timeslotDateEnd.substring(11,15);
+                    mm = new Date(programList[anIndex].timeslot.end).getMonth()+1;
+                    dd = timeslotDateEnd.substring(8,10);
+                    time = timeslotDateEnd.substring(16,25);
+                    timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
+                }
+                //userRawContent
+                var description = null;
+                var userPhotoUrl = null;
+                if(ugc.userRawContent){
+                    for(var i=0 ; i <ugc.userRawContent.length ; i++){
+                        if(ugc.userRawContent[i].type == 'text')
+                            description = ugc.userRawContent[i].content;
+                        if(ugc.userRawContent[i].type == 'image')
+                            userPhotoUrl = ugc.userRawContent[i].content;
+                    }
+                }
+                
+                async.parallel([
+                    function(callback){
+                        member_mgr.getUserNameAndID(ugc.ownerId._id, function(err, result){
+                            if(err) callback(err, null);
+                            else if(result === null) callback(null, 'No User');
+                            else callback(null, result.fb.userName);
+                        });
+    
+                    },
+                ],
+                function(errOfParallel, results){
+                    
+                    var playListItem = {
+                        userPhotoUrl: userPhotoUrl,
+                        ugcCensorNo: ugc.no,
+                        fb_userName: results[0],
+                        fbPictureUrl: ugc.fbProfilePicture,
+                        rating: ugc.rating,
+                        contentGenre: ugc.contentGenre,
+                        mustPlay: ugc.mustPlay,
+                        timeslotStart: timeslotStart,
+                        timeslotEnd: timeslotEnd,
+                        programTimeSlotId: programList[anIndex],
+                        url: ugc.url,
+                        createdOn: ugc.createdOn
+                    };
+
+                    playList.push(playListItem);
+                    callback(null);
+                });
+
+                
+            }
+            else {
+                callback("Failed to query the corresponding UGC: "+errOfFineOne);
+            }
+        });
+
+    };
+    
+    async.eachSeries(indexList, iteratorQueryUgcInfo, function(err){
+        
+        if (cbOfGetFullPlayList) {
+            cbOfGetFullPlayList(err, playList);
+        }
+
+    });
+
+    
+    
+    
 };
 
 

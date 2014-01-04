@@ -596,6 +596,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
 
 
 /**
+ * 
  * Get(a.k.a query) the programs (of a specific DOOH) of a specific interval.<br>
  * <br>
  * @param {String} dooh The ID of the DOOH where the program is to be updated
@@ -629,6 +630,12 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
  *          {_id:43544, timeSlot:{start:1371897000000, end:1371898000000}, ugc:43593}]
  *         
  *     </ul>
+ *  
+ *     
+ */
+
+/**
+ * @deprecated
  */
 scheduleMgr.getProgramList = function(dooh, interval, pageLimit, pageSkip , updateUGC, got_cb ){
     var query = programTimeSlotModel.find({ "timeslot.start": {$gte:interval.start}, "timeslot.end":{$lt:interval.end}, "type": "UGC", "dooh": dooh })
