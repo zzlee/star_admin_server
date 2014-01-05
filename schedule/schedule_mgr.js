@@ -471,7 +471,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                         callback(null);
                     }
                     else {
-                        callback("There is no UGC available for playing.");
+                        callback("在此搜尋條件下，没有任何節目可以排！");
                     }
                     
                 }

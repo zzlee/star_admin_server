@@ -199,9 +199,9 @@ var UGCPlayListSubPg = {
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown ) {
-                            console.log(errorThrown);
-                            if (jqXHR.response) {
-                                var errMessage = JSON.parse(jqXHR.response).error;
+                            //console.log(errorThrown);
+                            if (jqXHR.responseJSON) {
+                                var errMessage = jqXHR.responseJSON.error;
                                 if (errMessage) {
                                     $('#table-content').html('<br> <br>'+errMessage);
                                 }
