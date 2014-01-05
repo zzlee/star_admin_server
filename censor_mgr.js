@@ -5,7 +5,7 @@ var async = require('async');
 var fb_handler = require('./facebook_mgr.js');
 var FMDB = require('./db.js');
 var UGC_mgr = require('./UGC.js');
-var sheculeMgr = require('./schedule_mgr.js');
+var sheculeMgr = require("./schedule").scheduleMgr;
 var member_mgr = require('./member.js');
 var pushMgr = require('./push_mgr.js');
 var canvasProcessMgr = require('./canvas_process_mgr.js');
@@ -122,8 +122,8 @@ var timeslotEnd;
 
 var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, tsLiveStateCount,tsUGCCount, forMRTReview, createdOn, arr) {
     arr.push({
-        userPhotoUrl: userPhotoUrl,
         ugcProjectId: ugcProjectId,
+        userPhotoUrl: userPhotoUrl,
         ugcCensorNo: ugcCensorNo,
         userContent: userContent,
         fb_userName: fb_userName,
@@ -165,50 +165,50 @@ var mappingUGCList = function(data, type, set_cb){
             return;
         }
             
-            //data[next] not exist
-            if(!data[next]) return;
-            
-            var userPhotoUrl = 'No Photo';
-            var description = null;
-            
-            //timeslot
-            if(data[next].timeslot){
-                timeslotDateStart = new Date(data[next].timeslot.start).toString().substring(0,25);
-                timeslotDateEnd = new Date(data[next].timeslot.end).toString().substring(0,25);
-                //timeslotStart date format
-                yyyy = timeslotDateStart.substring(11,15);
-                mm = new Date(data[next].timeslot.start).getMonth()+1;
-                dd = timeslotDateStart.substring(8,10);
-                time = timeslotDateStart.substring(16,25);
-                timeslotStart = yyyy+'/'+mm+'/'+dd+' '+time;
-                //timeslotEnd date format
-                yyyy = timeslotDateEnd.substring(11,15);
-                mm = new Date(data[next].timeslot.end).getMonth()+1;
-                dd = timeslotDateEnd.substring(8,10);
-                time = timeslotDateEnd.substring(16,25);
-                timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
+        //data[next] not exist
+        if(!data[next]) return;
+        
+        var userPhotoUrl = 'No Photo';
+        var description = null;
+        
+        //timeslot
+        if(data[next].timeslot){
+            timeslotDateStart = new Date(data[next].timeslot.start).toString().substring(0,25);
+            timeslotDateEnd = new Date(data[next].timeslot.end).toString().substring(0,25);
+            //timeslotStart date format
+            yyyy = timeslotDateStart.substring(11,15);
+            mm = new Date(data[next].timeslot.start).getMonth()+1;
+            dd = timeslotDateStart.substring(8,10);
+            time = timeslotDateStart.substring(16,25);
+            timeslotStart = yyyy+'/'+mm+'/'+dd+' '+time;
+            //timeslotEnd date format
+            yyyy = timeslotDateEnd.substring(11,15);
+            mm = new Date(data[next].timeslot.end).getMonth()+1;
+            dd = timeslotDateEnd.substring(8,10);
+            time = timeslotDateEnd.substring(16,25);
+            timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
+        }
+        //userRawContent
+        if(data[next].userRawContent){
+            for(var i=0 ; i <data[next].userRawContent.length ; i++){
+                if(data[next].userRawContent[i].type == 'text')
+                    description = data[next].userRawContent[i].content;
+                if(data[next].userRawContent[i].type == 'image')
+                    userPhotoUrl = data[next].userRawContent[i].content;
             }
-            //userRawContent
-            if(data[next].userRawContent){
-                for(var i=0 ; i <data[next].userRawContent.length ; i++){
-                    if(data[next].userRawContent[i].type == 'text')
-                        description = data[next].userRawContent[i].content;
-                    if(data[next].userRawContent[i].type == 'image')
-                        userPhotoUrl = data[next].userRawContent[i].content;
-                }
-            }
-            //UGCListInfo
-            if(next == limit - 1) {
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn,UGCList);
-                set_cb(null, 'ok'); 
-                next = 0;
-                UGCList = [];
-            }
-            else{
-                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState,result[3], result[4],data[next].forMRTReview,data[next].createdOn, UGCList);
-                next += 1;
-                mappingUGCList(data, type, set_cb);
-            }
+        }
+        //UGCListInfo
+        if(next == limit - 1) {
+            UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn,UGCList);
+            set_cb(null, 'ok'); 
+            next = 0;
+            UGCList = [];
+        }
+        else{
+            UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState,result[3], result[4],data[next].forMRTReview,data[next].createdOn, UGCList);
+            next += 1;
+            mappingUGCList(data, type, set_cb);
+        }
 
     };//toDo End ******
 
@@ -333,6 +333,7 @@ var getUserContent = function(fb_id, app, get_cb){
  */
 censorMgr.setUGCAttribute = function(no, vjson, cb){
 
+    //TODO: find a cleaner way to avoid the code section below
     if(vjson.mustPlay == 'true')
         vjson = {mustPlay : true};
     else if(vjson.mustPlay == 'false')
@@ -346,6 +347,11 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
         vjson = {forMRTReview : true};
     else if(vjson.forMRTReview == 'false')
         vjson = {forMRTReview : false};
+
+    if(vjson.failedToGenliveContentInLastPlay == 'true')
+        vjson = {failedToGenliveContentInLastPlay : true};
+    else if(vjson.failedToGenliveContentInLastPlay == 'false')
+        vjson = {failedToGenliveContentInLastPlay : false};
 
 
     UGC_mgr.getOwnerIdByNo(no, function(err, result){
@@ -371,9 +377,26 @@ censorMgr.setUGCAttribute = function(no, vjson, cb){
 /**
  * for scheduleMgr
  */
-censorMgr.getUGCListLite = function(condition, cb){
+censorMgr.getUGCListLite = function(intervalOfSelectingUGC, filter, cb){
+    
+    var condition;
+    var sort; 
+    
+    if (filter == "not_being_submitted_to_dooh or live_content_failed_in_last_play")  {     
+        condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}, 'doohSubmitTimes': 0, 'rating': {$gte: 'A' , $lte: 'E' }}, {'mustPlay':true}, {'failedToGenliveContentInLastPlay':true}] };
+        sort = {'mustPlay':-1, 'failedToGenliveContentInLastPlay':-1, 'doohPlayedTimes':1,'rating':1,'createdOn':1};
+    }
+    else { // filter == "not_being_submitted_to_dooh" 
+        condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}, 'doohSubmitTimes': 0, 'rating': {$gte: 'A' , $lte: 'E' }}, {'mustPlay':true}] };
+        //condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}}, {'mustPlay':true}], 'rating': {$gte: 'A' , $lte: 'E' } };
+        sort = {'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1};
+    }
 
-    FMDB.listOfdocModels( UGCs,{ $or: [ {'createdOn' : {$gte: condition.start, $lt: condition.end}}, {'mustPlay':true}], 'rating': {$gte: 'A' , $lte: 'E' }},'_id genre contentGenre projectId fileExtension no ownerId url mustPlay', {sort :{'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1}}, function(err, result){
+    //console.log("condition=");
+    //console.dir(condition);
+
+    
+    FMDB.listOfdocModels( UGCs, condition,'_id genre contentGenre projectId fileExtension no ownerId url mustPlay contentClass', {sort: sort}, function(err, result){
         if(err) {
             logger.error('[censorMgr.getUGCListLite]', err);
             cb(err, null);
@@ -455,6 +478,122 @@ censorMgr.getPlayList = function(programList, updateUGC, cb){
     }
     else cb(err, null);
 
+};
+
+
+censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList){
+    
+    var playList = [];
+    var db = require('./db.js');
+    var ugcModel = db.getDocModel("ugc");
+    
+    var indexList = [];
+    for (var i=0; i<programList.length; i++) {
+        //console.dir(programList[i]);
+        indexList.push(i);
+    }
+    //console.dir(indexList);
+    
+    var iteratorQueryUgcInfo = function(anIndex, callback){
+        
+        if(updateUGC){
+            if(programList[anIndex].content._id == updateUGC.oldUGCId) {
+                programList[anIndex].content._id = updateUGC.newUGCId;
+            }
+                
+            
+        }
+
+        
+        var ugcModel = db.getDocModel("ugc");
+        ugcModel.findOne({_id: programList[anIndex].content._id}, function(errOfFineOne, _ugc){
+            if (!errOfFineOne){
+                var ugc = JSON.parse(JSON.stringify( _ugc )); //clone candidateUgc object to prevent from strange error "RangeError: Maximum call stack size exceeded";
+                
+                //timeslot
+                var timeslotStart, timeslotEnd;
+                if(programList[anIndex].timeslot){
+                    var timeslotDateStart = new Date(programList[anIndex].timeslot.start).toString().substring(0,25);
+                    var timeslotDateEnd = new Date(programList[anIndex].timeslot.end).toString().substring(0,25);
+                    var yyyy, mm, dd, time;
+                    //timeslotStart date format
+                    yyyy = timeslotDateStart.substring(11,15);
+                    mm = new Date(programList[anIndex].timeslot.start).getMonth()+1;
+                    dd = timeslotDateStart.substring(8,10);
+                    time = timeslotDateStart.substring(16,25);
+                    timeslotStart = yyyy+'/'+mm+'/'+dd+' '+time;
+                    //timeslotEnd date format
+                    yyyy = timeslotDateEnd.substring(11,15);
+                    mm = new Date(programList[anIndex].timeslot.end).getMonth()+1;
+                    dd = timeslotDateEnd.substring(8,10);
+                    time = timeslotDateEnd.substring(16,25);
+                    timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
+                }
+                //userRawContent
+                var description = null;
+                var userPhotoUrl = null;
+                if(ugc.userRawContent){
+                    for(var i=0 ; i <ugc.userRawContent.length ; i++){
+                        if(ugc.userRawContent[i].type == 'text')
+                            description = ugc.userRawContent[i].content;
+                        if(ugc.userRawContent[i].type == 'image')
+                            userPhotoUrl = ugc.userRawContent[i].content;
+                    }
+                }
+                
+                async.parallel([
+                    function(callback){
+                        member_mgr.getUserNameAndID(ugc.ownerId._id, function(err, result){
+                            if(err) callback(err, null);
+                            else if(result === null) callback(null, 'No User');
+                            else callback(null, result.fb.userName);
+                        });
+    
+                    },
+                ],
+                function(errOfParallel, results){
+                    
+                    var playListItem = {
+                        userPhotoUrl: userPhotoUrl,
+                        ugcCensorNo: ugc.no,
+                        fb_userName: results[0],
+                        fbPictureUrl: ugc.fbProfilePicture,
+                        rating: ugc.rating,
+                        contentGenre: ugc.contentGenre,
+                        mustPlay: ugc.mustPlay,
+                        failedToGenliveContentInLastPlay: ugc.failedToGenliveContentInLastPlay,
+                        isLoopedAround: programList[anIndex].isLoopedAround,
+                        timeslotStart: timeslotStart,
+                        timeslotEnd: timeslotEnd,
+                        programTimeSlotId: programList[anIndex]._id,
+                        url: ugc.url,
+                        createdOn: ugc.createdOn
+                    };
+
+                    playList.push(playListItem);
+                    callback(null);
+                });
+
+                
+            }
+            else {
+                callback("Failed to query the corresponding UGC: "+errOfFineOne);
+            }
+        });
+
+    };
+    
+    async.eachSeries(indexList, iteratorQueryUgcInfo, function(err){
+        
+        if (cbOfGetFullPlayList) {
+            cbOfGetFullPlayList(err, playList);
+        }
+
+    });
+
+    
+    
+    
 };
 
 

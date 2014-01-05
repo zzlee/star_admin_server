@@ -35,6 +35,7 @@ FM.DB = (function(){
                 //mood: a.k.a. 心情
                 //check_in: a.k.a. 打卡
             ugcProcessingState = 'not_generated under_generating generating_failed complete'.split(' '),
+            ugcContentClass = 'normal VIP'.split(' '),
             questionGenre = 'account publish sign_in others'.split(' '),
             
             programTimeSlotType = 'UGC padding'.split(' '),
@@ -102,13 +103,12 @@ FM.DB = (function(){
             status: {type: String, enum: videoStatus, default: 'none'},
 			createdOn: {type: Date, default: Date.now},
 			doohTimes: { times: {type: Number, default: 0, min: 0}, event: [ObjectID], submited_time: Date},
-			playedTimes: {type: Number, min: 0},
 			review: {type: Number},
 			vip: {type: Boolean, default: false},
             genre: {type: String, enum: videoGenre, default: 'miix'},
             no: {type: Number},
             aeId: {type: String},
-			triedDoohTimes: {type: Number, min: 0, default: 0},	//JF
+			triedDoohTimes: {type: Number, min: 0, default: 0},	//JF  
 			doohPlayedTimes: {type: Number, min: 0, default: 0},	//JF
 			timesOfPlaying: {type: Number}		//JF
         }); //  videos collection
@@ -131,13 +131,9 @@ FM.DB = (function(){
             projectId: {type: String},  // project ID which is unique to each AE rendering
             hitRate: {type: Number, min:0},
             comments: {type: Mixed},    //  "data": []
-            vote: {type: Number, default: 0, min:0},
             likes: {type: Number, default: 0, min:0},
             createdOn: {type: Date, default: Date.now},
-            doohTimes: { times: {type: Number, default: 0, min: 0}, event: [ObjectID], submited_time: Date},
-            playedTimes: {type: Number, min: 0},
-            review: {type: Number},
-            vip: {type: Boolean, default: false},
+            doohTimes: { times: {type: Number, default: 0, min: 0}, event: [ObjectID], submited_time: Date},  //DEPRECATTED, not used in OnDaScreen or WTA
             genre: {type: String, enum: UGCGenre, default: 'miix'},
             contentGenre: {type: String, enum: ugcContentGenre}, //Is normally the id of main template that this UGC uses
             contentSubGenre: {type: String}, //Is normally the id of sub template that this UGC uses
@@ -145,10 +141,12 @@ FM.DB = (function(){
             aeId: {type: String}, //ID of AE Server who renders this UGC
             mediaType: {type: String},
             fileExtension: {type: String},
-            triedDoohTimes: {type: Number, min: 0, default: 0}, //JF
+            triedDoohTimes: {type: Number, min: 0, default: 0}, //JF  //DEPRECATTED, not used in OnDaScreen or WTA
             doohPlayedTimes: {type: Number, min: 0, default: 0},    //JF
+            doohSubmitTimes: {type: Number, min: 0, default: 0},   
             timesOfPlaying: {type: Number},     //JF
             mustPlay: {type: Boolean, default: false},
+            failedToGenliveContentInLastPlay: {type: Boolean, default: false},
             allUserContentExist: {type: Boolean, default: false},
             rating: {type: String},//range A~E      kaiser
             fb_postId: [{
@@ -157,6 +155,7 @@ FM.DB = (function(){
             highlight: {type: Boolean, default: false},
             hot: {type: Boolean, default: false},
             processingState: {type: String, enum: ugcProcessingState, default:"not_generated"},
+            contentClass: {type: String, enum: ugcContentClass, default:"normal"}, //normal or VIP
             fbProfilePicture: {type: String},
 			forMRTReview: {type:Boolean, default: false}
         }); //  UGC collection
@@ -197,12 +196,13 @@ FM.DB = (function(){
         
         var ProgramTimeSlotSchema = new Schema({
             content: {type: Mixed},
-            contentType: {type: String, enum: programTimeSlotContnetType, default: 'file'}, //file or web_page
+            contentType: {type: String, enum: programTimeSlotContnetType, default: 'file'}, //file or web_page or media_item
             dooh: {type: String},
             timeslot: { 
                 start: Number,  //milliseconds since midnight Jan 1, 1970
                 end: Number, //milliseconds since midnight Jan 1, 1970
                 playDuration: Number,  //milliseconds.  This value is normally used by image or web content
+                predictedPlayTime: Number,  //milliseconds since midnight Jan 1, 1970
                 startHour: Number //0~23
                 },
             timeStamp: {type: String},
@@ -214,7 +214,10 @@ FM.DB = (function(){
             contentGenre: {type: String, enum: ugcContentGenre},  //miix_it, cultural_and_creative, mood, or check_in
             canBeFoundInPlayerLog: {type: String},
             liveState: {type: String, enum: liveContentState, default: 'not_checked'},
-            upload: {type: Boolean, default: false}
+            isLoopedAround: {type: Boolean, default: false},
+            upload: {type: Boolean, default: false},
+            playState: {type: String, default: 'not_check'} // Check content play to DOOH 
+
         }); 
         
         var CandidateUgcCacheSchema = new Schema({
@@ -379,6 +382,46 @@ FM.DB = (function(){
 		    
 		});
 		
+        var ProgramGroupSchema = new Schema({
+            // id : (String),
+            uuid : { type : String },
+            dooh : { 
+                owner : { type : String }, 
+                name : { type : String }, 
+                place : { type : String } 
+            },
+            interval : { start : { type : Number }, end : { type : Number } },
+            playlist : { id : { type : Number }, name : { type : String } },
+            parentPlaylist : { id : { type : Number }, name : { type : String } },
+            player : { 
+                id : { type : Number }, 
+                name : { type : String }, 
+                channel : { id : { type : Number }, name : { type : String }, frame : { type : Number } }
+            },
+            programSession: {type: String}, //The id indicating the session of creating program time slot and group
+            planner: {type: String}, //The id of planner who plans this session of creating program timeslots and groups
+            state: {type: String, enum: programTimeSlotState, default: 'not_confirmed'}, //The state of the program group
+            programs : { type : Mixed }
+            /* [{
+                _id: {type: [ObjectID]}, //the _id of the corresponding programTimeslot
+                sequenceNo : { type : Number }, //the sequece number in terms of our program in a program group
+                preSetDuration : { type : Number } //in sec
+                contentType: {type: String, enum: programTimeSlotContnetType, default: 'file'}, //file or web_page or media_item
+                type: {type: String, enum: programTimeSlotType}, //UGC or padding contnet
+                
+                playlistItem :   //the playlist item returned from Scala
+                {
+                    id : { type : Number },
+                    name : { type : String },
+                    sortOrder : { type : Number }, //the sequence number in Scala's playlist
+                    duration : { type : Number }  //in sec
+                }
+             },
+             { 
+                ... 
+             }] */
+        });
+        
         /****************** End of DB Schema ******************/
 		
         var Member = connection.model('Member', MemberSchema, 'member'),
@@ -398,8 +441,9 @@ FM.DB = (function(){
             SessionItem = connection.model('SessionItem', SessionItemSchema, 'sessionItem'),
             UserLiveContent = connection.model('UserLiveContent', UserLiveContentSchema, 'userLiveContent'),
             MyMember = connection.model('MyMember', MyMemberSchema, 'myMember'),
-			Message = connection.model('Message', MessageSchema, 'message');
-            PushAllMessage = connection.model('PushAllMessage', PushAllMessageSchema, 'pushAllMessage');
+			Message = connection.model('Message', MessageSchema, 'message'),
+            PushAllMessage = connection.model('PushAllMessage', PushAllMessageSchema, 'pushAllMessage'),
+            ProgramGroup = connection.model('ProgramGroup', ProgramGroupSchema, 'programGroup');
         
            
             
@@ -423,6 +467,7 @@ FM.DB = (function(){
         dbModels["myMember"] = MyMember;
 		dbModels["message"] = Message;
 		dbModels["pushAllMessage"] = PushAllMessage;
+		dbModels["programGroup"] = ProgramGroup;
         
         //???? nobody uses it, so this section can be removed? 
         var dbSchemas = [];

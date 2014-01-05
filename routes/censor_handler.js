@@ -5,7 +5,7 @@ FM_LOG = (DEBUG) ? function(str){ logger.info( typeof(str)==='string' ? str : JS
 var FM = { censorHandler: {} };
 var censorMgr = require("../censor_mgr.js");
 var apis = require("../routes/api.js");
-var scheduleMgr = require("../schedule_mgr.js");
+var scheduleMgr = require("../schedule").scheduleMgr;
 var db = require('../db.js');
 var async = require('async');
 var sessionItemModel = db.getDocModel("sessionItem");
@@ -110,7 +110,7 @@ FM.censorHandler.postProgramTimeSlotSession_cb = function(req, res){
     
     var programSequence = req.body.programSequence;
 
-    scheduleMgr.createProgramList(doohId, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, req.session.admin_user.hexOfObjectID, function(err, result){
+    scheduleMgr.createProgramList(doohId, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, req.session.admin_user.hexOfObjectID, req.body.filter, req.body.mode, function(err, result){
         if (!err){
             res.send(200, {message: result.sessionId});
         }
@@ -141,7 +141,8 @@ FM.censorHandler.gettimeslots_get_cb = function(req, res){
         
         if (!err){
             if (programList.length > 0){
-                censorMgr.getPlayList(programList , updateUGC, function(errGetPlayList, result){
+                //censorMgr.getPlayList(programList , updateUGC, function(errGetPlayList, result){
+                censorMgr.getFullPlayList(programList , updateUGC, function(errGetPlayList, result){
                     if (!errGetPlayList){
                         res.render( 'table_censorPlayList', {ugcCensorPlayList: result} );
                     }

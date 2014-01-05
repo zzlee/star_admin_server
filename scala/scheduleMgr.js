@@ -20,11 +20,18 @@ var schedule = (function() {
     };
     
     var _private = {
-        list : function( option, list_cb ){
+        timeslots : function( option, timeslots_cb ){
             var playDate = new Date(option.date);
-            connectMgr.checkCollision('schedule.list', function(status){
+            connectMgr.checkCollision('schedule.timeslots', function(status){
                 adapter.get('/ContentManager/api/rest/channels/' + option.channel.id + '/frames/' + option.channel.frames + '/timeslots?year=' + playDate.getFullYear() + '&week=' + playDate.getWeek() + '&token=' + token, function(err, req, res, obj){
-                    list_cb(obj);
+                    timeslots_cb(obj);
+                });
+            });
+        },
+        timetrggers : function( option, timetrggers_cb ){
+            connectMgr.checkCollision('schedule.timetrggers', function(status){
+                adapter.get('/ContentManager/api/rest/channels/' + option.channel.id + '/frames/' + option.channel.frames + '/timetriggers?token=' + token, function(err, req, res, obj){
+                    timetrggers_cb( err, obj );
                 });
             });
         },
@@ -45,8 +52,13 @@ var schedule = (function() {
             });
         },
         findTimeslots : function( option, timeslots_cb ) {
-            _private.list( option, function( list ){
-                timeslots_cb(list);
+            _private.timeslots( option, function( timeslots ){
+                timeslots_cb(timeslots);
+            } );
+        },
+        findTimetrggers : function( option, timetrggers_cb ) {
+            _private.timetrggers( option, function( err, timetrggers ){
+                timetrggers_cb( err, timetrggers );
             } );
         },
         checkWeekday : function( check, weekslots, check_cb ){

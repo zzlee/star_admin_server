@@ -2,29 +2,34 @@
  * @fileoverview Implementation of scheduleMgr
  */
 
-
 var async = require('async');
 var mongoose = require('mongoose');
 var workingPath = process.cwd();
 var path = require('path');
 var fs = require('fs');
-var awsS3 = require('./aws_s3.js');
-var db = require('./db.js');
+var awsS3 = require('../aws_s3.js');
+var db = require('../db.js');
+
 //var scalaMgr = (require('./scala/scalaMgr.js'))( 'http://server-pc:8080', { username: 'administrator', password: '53768608' } );
-var scalaMgr = (require('./scala/scalaMgr.js'))( systemConfig.HOST_SCALA_URL , { username: systemConfig.HOST_SCALA_USER_NAME, password: systemConfig.HOST_SCALA_PASSWORD } );
+var scalaMgr = (require('../scala/scalaMgr.js'))( systemConfig.HOST_SCALA_URL , { username: systemConfig.HOST_SCALA_USER_NAME, password: systemConfig.HOST_SCALA_PASSWORD } );
 var scalaPlayerName = systemConfig.HOST_SCALA_PLAYER_NAME;
-//var scalaMgr = require('./scala/scalaMgr.js')();
 
 var programTimeSlotModel = db.getDocModel("programTimeSlot");
+var programGroupModel = db.getDocModel("programGroup");
 var ugcModel = db.getDocModel("ugc");
 var candidateUgcCacheModel = db.getDocModel("candidateUgcCache");
 var sessionItemModel = db.getDocModel("sessionItem");
 
-var canvasProcessMgr = require('./canvas_process_mgr.js');
-var facebookMgr = require('./facebook_mgr.js');
-var pushMgr = require('./push_mgr.js');
+var canvasProcessMgr = require('../canvas_process_mgr.js');
+var facebookMgr = require('../facebook_mgr.js');
+var pushMgr = require('../push_mgr.js');
 var memberModel = db.getDocModel("member");
-var adminBrowserMgr = require('./admin_browser_mgr.js');
+var adminBrowserMgr = require('../admin_browser_mgr.js');
+
+var ProgramGroup = require("./program_group.js");
+var programPlanningPattern = require("./program_planning_pattern.js");
+var paddingContent = require("./padding_content.js");
+var periodicalHighPriorityEvents = require("./periodical_high_priority_events.js");
 
 /**
  * The manager who handles the scheduling of playing UGC on DOOHs
@@ -39,188 +44,9 @@ var TIME_INTERVAL_RANKIGN = [{startHour: 17, endHour: 23},  //start with the tim
                              {startHour: 8, endHour: 16},
                              {startHour: 0, endHour: 7}];
 
-
 var censorMgr = null;
 
-var programPlanningPattern =(function(){    
-    var i = -1;
-    var DEFAULT_PROGRAM_SEQUENCE = [ "miix_it", "cultural_and_creative", "mood", "check_in" ]; 
-    var programSequence = DEFAULT_PROGRAM_SEQUENCE;
-    
-    return {
-        getProgramGenreToPlan: function(){
-            i++;
-            if (i >= programSequence.length){
-                i = 0;
-            }
-            return programSequence[i];
-        },
-        
-        resetIndex: function(){
-            i = -1;
-        },
-        
-        set: function(_programSequence){
-            programSequence = _programSequence;
-        },
-        
-        getProgramSequence: function(){
-            return programSequence;    
-        },
-        
-        remove: function(contentGenreToRemove){
-            for (var i=0; i<programSequence.length; i++){
-                if (programSequence[i]==contentGenreToRemove){
-                    programSequence.splice(i, 1);
-                    i--;
-                }
-            }
-            
-        }
-    };
-})();
-
-//Jeff_start
-
-var paddingContent =(function(){ 
-    var PADDING_CONTENT_TABLE = { //specify the media name of each padding content store on Scala's Content Manager
-            miix_it: [{name: "ondascreen_padding-miix_it-start"},
-                      //{name: "Jeff_start"},
-                      {name: "ondascreen_padding-miix_it-end.jpg"}],
-            cultural_and_creative: [{name: "ondascreen_padding-cultural_and_creative-start"},
-                                    {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
-                                    {name: "ondascreen_padding-cultural_and_creative-middle.jpg"},
-                                    {name: "ondascreen_padding-cultural_and_creative-end.jpg"}
-                                    ],
-            mood: [{name: "ondascreen_padding-wish-start"},
-                   {name: "ondascreen_padding-wish-middle.jpg"},
-                   {name: "ondascreen_padding-wish-middle.jpg"},
-                   {name: "ondascreen_padding-wish-end.jpg"}
-                   ],
-            check_in: [{name: "ondascreen_padding-check_in-start"},
-                       {name: "ondascreen_padding-check_in-middle.jpg"},
-                       {name: "ondascreen_padding-check_in-middle.jpg"},
-                       {name: "ondascreen_padding-check_in-end.jpg"}
-                       ]                                
-    };
-        
-    return {
-        get: function(id, cb){
-            var idArray = id.split('-');
-            var contentGenre = idArray[0]; 
-            var index = idArray[1];
-            if (cb){
-                cb(null, PADDING_CONTENT_TABLE[contentGenre][index]);
-            } 
-        }
-    };
-})();
-
-var periodicalHighPriorityEvents =(function(){ 
-    
-    var TIME_INTERVALS = [ { startMinute: 0, endMinute: 10}, { startMinute: 30, endMinute: 35} ]; //in minutes
-    
-    return {
-        isConflictedWith: function(timeIntervalToCheck) {
-            
-            
-            var ti = {};
-            var startDateObj = new Date(timeIntervalToCheck.start);
-            var endDateObj = new Date(timeIntervalToCheck.end);
-            ti.startMinute = startDateObj.getMinutes();
-            ti.endMinute = endDateObj.getMinutes()+(endDateObj.getHours()-startDateObj.getHours())*60;
-            
-            for (var i=0; i<TIME_INTERVALS.length; i++){
-                
-                //NOTE: this check below is NOT able to handle the time interval like 4:55~5:05
-                if ((   ( TIME_INTERVALS[i].startMinute < ti.startMinute ) && ( ti.startMinute < TIME_INTERVALS[i].endMinute )  ) ||
-                    (   ( TIME_INTERVALS[i].startMinute < ti.endMinute ) && ( ti.endMinute < TIME_INTERVALS[i].endMinute )  ) ||
-                    (   ( TIME_INTERVALS[i].startMinute <= ti.startMinute ) && ( ti.endMinute <= TIME_INTERVALS[i].endMinute )  ) ||
-                    (   ( ti.startMinute <= TIME_INTERVALS[i].startMinute ) && ( TIME_INTERVALS[i].endMinute <= ti.endMinute )  )      ) {
-                    
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-    };
-    
-})();
-        
-//for test
-var censorMgr_getUGCList_fake = function(interval, get_cb){
-    /*
-    var result = [];
-    for (var i=0;i<300;i++){
-        result[i] = {id: i};
-    }
-    */
-    var result = [ {_id: "1", contentGenre: "miix_it"},
-                   {_id: "2", contentGenre: "cultural_and_creative"},
-                   {_id: "3", contentGenre: "check_in"},
-                   {_id: "4", contentGenre: "miix_it"},
-                   {_id: "5", contentGenre: "check_in"},
-                   {_id: "6", contentGenre: "check_in"},
-                   {_id: "7", contentGenre: "miix_it"},
-                   {_id: "8", contentGenre: "check_in"},
-                   {_id: "9", contentGenre: "miix_it"},
-                   {_id: "10", contentGenre: "cultural_and_creative"},
-                   {_id: "11", contentGenre: "miix_it"},
-                   {_id: "12", contentGenre: "check_in"},
-                   {_id: "13", contentGenre: "mood"},
-                   {_id: "14", contentGenre: "cultural_and_creative"},
-                   {_id: "15", contentGenre: "miix_it"},
-                   {_id: "16", contentGenre: "mood"},
-                   {_id: "17", contentGenre: "check_in"},
-                   {_id: "18", contentGenre: "check_in"},
-                   {_id: "19", contentGenre: "miix_it"},
-                   {_id: "20", contentGenre: "cultural_and_creative"},
-                   {_id: "21", contentGenre: "miix_it"},
-                   {_id: "22", contentGenre: "check_in"},
-                   {_id: "23", contentGenre: "cultural_and_creative"},
-                   {_id: "24", contentGenre: "mood"},
-                   {_id: "25", contentGenre: "mood"},
-                   {_id: "26", contentGenre: "miix_it"},
-                   {_id: "27", contentGenre: "cultural_and_creative"},
-                   {_id: "28", contentGenre: "miix_it"},
-                   {_id: "29", contentGenre: "check_in"},
-                   {_id: "30", contentGenre: "miix_it"},
-                   {_id: "31", contentGenre: "miix_it"},
-                   {_id: "32", contentGenre: "check_in"},
-                   {_id: "33", contentGenre: "mood"},
-                   {_id: "34", contentGenre: "cultural_and_creative"},
-                   {_id: "35", contentGenre: "miix_it"},
-                   {_id: "36", contentGenre: "mood"},
-                   {_id: "37", contentGenre: "check_in"},
-                   {_id: "38", contentGenre: "check_in"},
-                   {_id: "39", contentGenre: "mood"},
-                   {_id: "40", contentGenre: "mood"},
-                   {_id: "41", contentGenre: "miix_it"},
-                   {_id: "42", contentGenre: "check_in"},
-                   {_id: "43", contentGenre: "mood"},
-                   {_id: "44", contentGenre: "check_in"},
-                   {_id: "45", contentGenre: "mood"},
-                   {_id: "46", contentGenre: "miix_it"},
-                   {_id: "47", contentGenre: "check_in"},
-                   {_id: "48", contentGenre: "miix_it"},
-                   {_id: "49", contentGenre: "check_in"},
-                   {_id: "50", contentGenre: "miix_it"},
-                   
-                   ];
-    
-    get_cb(null, result);
-    
-};
-
-//for test
-var scalaMgr_listAvailableTimeInterval = function(interval, list_cb){
-    var result = [{interval:{start:(new Date("2013/5/5 7:30:20")).getTime(), end:(new Date("2013/5/5 8:30:20")).getTime()},cycleDuration: 5*60*1000},
-                  {interval:{start:(new Date("2013/5/5 13:00:00")).getTime(), end:(new Date("2013/5/5 13:30:00")).getTime()},cycleDuration: 5*60*1000},
-                  {interval:{start:(new Date("2013/5/5 19:00:00")).getTime(), end:(new Date("2013/5/5 19:40:00")).getTime()},cycleDuration: 5*60*1000}
-                  ];
-    list_cb(null, result );
-};
+     
 
 /**
  * Initialize scheduleMgr
@@ -261,9 +87,23 @@ scheduleMgr.init = function(_censorMgr){
  *     when the system is planning the program(s) of a "micro time interval" <br>
  *     Note: the string must be "miix_it", "cultural_and_creative", "mood", or "check_in"
  *     For example, ["miix_it", "check_in", "check_in", "mood", "cultural_and_creative" ] <br>
+ *     
+ * @param {String} planner The hex string of planner's _id
  * 
- * @param {Function} created_cb The callback function called when the result program list is created.<br>
- *     The function signature is created_cb(err, result):
+ * @param {String} filter The filter of generating sorted candidate UGC list.  It must be one of the following values: <br>
+ *     <ul>
+ *     <li>"not_being_submitted_to_dooh"
+ *     <li>"not_being_submitted_to_dooh or live_content_failed_in_last_play"
+ *     </ul>
+ *     
+ * @param {String} mode The mode of generating program list.  It must be one of the following values: <br>
+ *     <ul>
+ *     <li>"appended_to_each_playlist_cycle"
+ *     <li>"continuous"
+ *     </ul>
+ * 
+ * @param {Function} cbOfCreateProgramList The callback function called when the result program list is created.<br>
+ *     The function signature is cbOfCreateProgramList(err, result):
  *     <ul>
  *     <li>err: error message if any error happens
  *     <li>result: object containing the following information:
@@ -276,7 +116,7 @@ scheduleMgr.init = function(_censorMgr){
  *         { numberOfProgramTimeSlots: 33, sessionId: '1367596800000-1367683140000-1373332978201' }     
  *     </ul>
  */
-scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, created_cb ){
+scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, filter, mode, cbOfCreateProgramList ){
     
     logger.info('[scheduleMgr.createProgramList()]: intervalOfSelectingUGC={start:'+(new Date(intervalOfSelectingUGC.start))+' end:'+(new Date(intervalOfSelectingUGC.end))+'} ');
     logger.info('intervalOfPlanningDoohProgrames= {start:'+(new Date(intervalOfPlanningDoohProgrames.start))+' end:'+(new Date(intervalOfPlanningDoohProgrames.end))+'} programSequence='+JSON.stringify(programSequence));
@@ -288,6 +128,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         
         var candidateUgcList = sortedUgcList.slice(0); //clone the full array of sortedUgcList
         var counter = 0;
+        var isLoopedAround = false;
         
         var saveCandidateUgcList = function(_candidateUgcList, _intervalOfSelectingUGC, cbOfSaveCandidateUgcList){
             var indexArrayCandidateUgcCache = []; for (var i = 0; i < _candidateUgcList.length; i++) { indexArrayCandidateUgcCache.push(i); }
@@ -339,6 +180,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                             
                             if (indexOfcandidateToSelect == candidateUgcList.length){
                                 candidateUgcList = candidateUgcList.concat(sortedUgcList);
+                                isLoopedAround = true;
                             }
                             
                             if ( candidateUgcList[indexOfcandidateToSelect].contentGenre == aTimeSlot.contentGenre){
@@ -347,13 +189,10 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                             }
                         }
                         
-                        var playDuration = 0;
-                        if ( selectedUgc.genre == "miix_image"){
-                            playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_UGC;
-                        }
                         //debugger;
                         var _selectedUgc = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
-                        db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc, "timeslot.playDuration": playDuration }, function(_err_2, result){
+                        //db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc, "timeslot.playDuration": playDuration }, function(_err_2, result){
+                        db.updateAdoc(programTimeSlotModel, aTimeSlot._id, {"content": _selectedUgc, "isLoopedAround": isLoopedAround }, function(_err_2, result){
                             counter++;
                             //debugger;
                             //console.dir(result);
@@ -441,125 +280,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
     
     var generateTimeSlot = function( cbOfGenerateTimeSlot){
         
-         
-        var generateTimeSlotsOfMicroInterval = function(interval, generatedTimeSlotsOfMicroInterval_cb){ //Micro interval means a time slot containing purely our programs
-            
-            var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //the genra that will be uesed in this micro interval
-            var numberOfUGC;
-            if (contentGenre=="miix_it"){
-                numberOfUGC = 1;
-            }
-            else{
-                numberOfUGC = 3;
-            }
-            var paddingContents;
-            
-            var ProgramTimeSlot = programTimeSlotModel;
-            var vjsonDefault = {
-                    contentType: "file",
-                    dooh: dooh,
-                    timeslot: {
-                        start: interval.start, 
-                        end: interval.end,
-                        startHour: (new Date(interval.start)).getHours()},
-                    //content: {ugcId:"12345676", ugcProjcetId:"3142462123"}
-                    contentGenre: contentGenre,
-                    planner: planner,
-                    state: 'not_confirmed',
-                    session: sessionId
-                    };
-            
-            var timeStampIndex = 0;
-            
-            var pad = function(n, width, z) { //function for padding the number ns with character z 
-                z = z || '0';
-                n = n + '';
-                return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-            };
-            
-            async.series([
-                          function(callback1){
-                              // get all the padding contents
-                              var indexArrayPaddingContents = []; for (var i = 0; i < numberOfUGC+1; i++) { indexArrayPaddingContents.push(i); }
-                              
-                              var iteratorGetPaddingContents = function(indexOfPaddingContents, interationDone_getPaddingContents_cb){
-                                  paddingContent.get(contentGenre+'-'+indexOfPaddingContents , function(err_get, paddingContent){
-                                      interationDone_getPaddingContents_cb(err_get, paddingContent);
-                                  });
-                              };
-                              async.mapSeries(indexArrayPaddingContents, iteratorGetPaddingContents, function(err, results){
-                                  paddingContents = results;
-                                  //console.log('paddingContents=');
-                                  //console.dir(paddingContents);
-                                  callback1(null);
-                              });
-                              
-                          },
-                          function(callback2){
-                              // put padding program 0
-                              var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
-                              aProgramTimeSlot.type = 'padding';
-                              aProgramTimeSlot.contentType = 'media_item';
-                              aProgramTimeSlot.content = paddingContents[0];
-                              aProgramTimeSlot.timeslot.playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING;
-                              aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
-                              timeStampIndex++;
-                              aProgramTimeSlot.markModified('content');
-                              aProgramTimeSlot.save(function(err1, _result){     
-                                  //if (err1) console.log("err1="+err1);
-                                  callback2(err1);
-                              });
-                          },
-                          function(callback3){
-                              // put following programs: UGC 0, padding 1, UGC 1, padding 2, .....
-                              var indexArrayUgcPrograms = []; for (var i = 0; i < numberOfUGC; i++) { indexArrayUgcPrograms.push(i); }
-                              
-                              var iteratorPutUgcAndPaddingProgrames = function(indexOfUgcContents, interationDone_putUgcAndPaddingPrograms_cb){
-                                  
-                                  async.series([
-                                                function(cb1){
-                                                    //put UGC program
-                                                    var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
-                                                    aProgramTimeSlot.type = 'UGC';
-                                                    aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
-                                                    timeStampIndex++;
-                                                    aProgramTimeSlot.save(function(err2, _result){     
-                                                        cb1(err2);
-                                                    });
-                                                },
-                                                function(cb2){
-                                                    //put padding program
-                                                    var aProgramTimeSlot = new ProgramTimeSlot(vjsonDefault);
-                                                    aProgramTimeSlot.type = 'padding';
-                                                    aProgramTimeSlot.contentType = 'media_item';
-                                                    aProgramTimeSlot.content = paddingContents[indexOfUgcContents+1];
-                                                    aProgramTimeSlot.markModified('content');
-                                                    aProgramTimeSlot.timeslot.playDuration = DEFAULT_PLAY_DURATION_FOR_STATIC_PADDING;
-                                                    aProgramTimeSlot.timeStamp = interval.start + '-' + pad(timeStampIndex, 3);
-                                                    timeStampIndex++;
-                                                    aProgramTimeSlot.save(function(err3, _result){     
-                                                        cb2(err3);
-                                                    });
-                                                }
-                                  ],
-                                  function(err, results){
-                                      interationDone_putUgcAndPaddingPrograms_cb(err);
-                                  });
-                                  
-                              };
-                              async.eachSeries(indexArrayUgcPrograms, iteratorPutUgcAndPaddingProgrames, function(err){
-                                  callback3(null);
-                              });
-                              
-                          }
-            ],
-            function(err, results){
-                generatedTimeSlotsOfMicroInterval_cb(err);
-            });
-
-            
-        };
-        
+                 
         /**
          * Get availalbe time intervals by checking the playlists in Scala schedules
          */
@@ -622,7 +343,6 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
             
         };
         
-        //scalaMgr_listAvailableTimeInterval(intervalOfPlanningDoohProgrames,function(err, result){
         getAvailableTimeIntervals(intervalOfPlanningDoohProgrames,function(err, result){
             //debugger;
             if (!err){
@@ -672,7 +392,9 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                             if (timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end) {
                                 // add time slots of a micro timeslot (of the same content genre) to db
                                 var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
-                                generateTimeSlotsOfMicroInterval(inteval, function(err1){
+                                var programGroup = new ProgramGroup(inteval, dooh, planner, sessionId);
+                                programGroup.generateByTemplate('PG_30SEC_3UGC', function(err1){
+                                //generateTimeSlotsOfMicroInterval(inteval, function(err1){
                                     timeToAddTimeSlot += programPeriod;
                                     
                                     cb_whilst(err1);
@@ -692,21 +414,21 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                 
                 async.eachSeries(availableTimeIntervals, iteratorGenerateTimeSlot, function(err0){
                     if (!err0) {
-                        /*
-                        //for debugging
-                        programTimeSlotModel.find({ "session": sessionId }, "timeStamp timeslot contentGenre type" ).sort({timeStamp:1}).exec(function (_err, timeslots) {
-                            if (!_err){
-                                //console.log("time slot generated:");
-                                //console.dir(timeslots);
-                                logger.info('[scheduleMgr] time slots generated:' );
-                                for (var i in timeslots){
-                                    logger.info(JSON.stringify(timeslots[i]));
-                                }
-                                cbOfGenerateTimeSlot(null);
-                            }else {
-                                cbOfGenerateTimeSlot("Failed to guery the time slots after their generation: "+_err);
-                            }
-                        }); */
+                        
+//                        //for debugging
+//                        programTimeSlotModel.find({ "session": sessionId }, "timeStamp timeslot contentGenre type" ).sort({timeStamp:1}).exec(function (_err, timeslots) {
+//                            if (!_err){
+//                                //console.log("time slot generated:");
+//                                //console.dir(timeslots);
+//                                logger.info('[scheduleMgr] time slots generated:' );
+//                                for (var i in timeslots){
+//                                    logger.info(JSON.stringify(timeslots[i]));
+//                                }
+//                                cbOfGenerateTimeSlot(null);
+//                            }else {
+//                                cbOfGenerateTimeSlot("Failed to guery the time slots after their generation: "+_err);
+//                            }
+//                        }); 
                         
                         cbOfGenerateTimeSlot(null);
                         
@@ -736,8 +458,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         function(callback){
             //get the sorted candidate UGC list
             
-            //censorMgr_getUGCList_fake(intervalOfSelectingUGC, function(err_1, _sortedUgcList ){
-            censorMgr.getUGCListLite(intervalOfSelectingUGC, function(err_1, _sortedUgcList ){
+            censorMgr.getUGCListLite(intervalOfSelectingUGC, filter, function(err_1, _sortedUgcList ){
                 if (!err_1){
                     sortedUgcList = _sortedUgcList;
                     //console.log('sortedUgcList=');
@@ -750,7 +471,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                         callback(null);
                     }
                     else {
-                        callback("There is no UGC available for playing.");
+                        callback("在此搜尋條件下，没有任何節目可以排！");
                     }
                     
                 }
@@ -759,9 +480,24 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                 }
             });
         },
+        
         function(callback){
             //remove all the "not_confirmed" programs of this specific planner's
             programTimeSlotModel.find({ "state": "not_confirmed", "planner": planner }).remove().exec(function (errOfRomove) {
+                
+                if (!errOfRomove) {
+                    // console.log('"not_confirmed" programs are successfully removed!');
+                    callback(null);
+                }
+                else {
+                    callback('Failed to query the programs of a specific session: '+errOfRomove, null);
+                }                             
+            });
+        },
+        
+        function(callback){
+            //remove all the "not_confirmed" program groups of this specific planner's
+            programGroupModel.find({ "state": "not_confirmed", "planner": planner }).remove().exec(function (errOfRomove) {
                 
                 if (!errOfRomove) {
                     // console.log('"not_confirmed" programs are successfully removed!');
@@ -799,37 +535,58 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         },
         function(callback){
             //generate program time slots
-            generateTimeSlot( function(err_2){
-                if (!err_2) {
-                    //console.log('generateTimeSlot() done! ');
-                    callback(null);
-                }
-                else {
-                    callback("Fail to generate time slots: "+err_2);
-                }
-            });
+            if (mode == "appended_to_each_playlist_cycle") {
+                generateTimeSlot( function(err_2){
+                    if (!err_2) {
+                        //console.log('generateTimeSlot() done! ');
+                        callback(null);
+                    }
+                    else {
+                        callback("Fail to generate time slots: "+err_2);
+                    }
+                });
+
+            }
+            else {
+                callback(null);
+            }
         }, 
         function(callback){
             //put UGCs into programe time slots
-            putUgcIntoTimeSlots(function(err_3, result){
-                if (!err_3) {
-                    //console.log('putUgcIntoTimeSlots() done! ');
-                    callback(null, result);
-                }
-                else {
-                    callback("Fail to put UGCs into time slots: "+err_3, null);
-                }
-                
-            });
+            if (mode == "appended_to_each_playlist_cycle") {
+                putUgcIntoTimeSlots(function(err_3, result){
+                    if (!err_3) {
+                        //console.log('putUgcIntoTimeSlots() done! ');
+                        callback(null, result);
+                    }
+                    else {
+                        callback("Fail to put UGCs into time slots (appended_to_each_playlist_cycle mode): "+err_3, null);
+                    }
+                    
+                });
+            }
+            else { //mode == "continuous"
+                var programGroup = new ProgramGroup(intervalOfPlanningDoohProgrames, dooh, planner, sessionId);
+                programGroup.generateFromSortedUgcList(sortedUgcList, function(errOfGenerateFromSortedUgcList, resultProgramGroup){
+                    if (!errOfGenerateFromSortedUgcList) {
+                        var result = {numberOfProgramTimeSlots: resultProgramGroup.programs.length, sessionId: resultProgramGroup.programSession };
+                        callback(null, result);
+                    }
+                    else {
+                        callback("Fail to generate programs from sorted UGC list (continuous mode): "+errOfGenerateFromSortedUgcList, null);
+                    }
+
+                });
+            }
         }  
     ],
     function(err, result){
-        if (created_cb){
+        if (cbOfCreateProgramList){
             if (!err) {
-                created_cb(null, result);
+                cbOfCreateProgramList(null, result);
             }
             else {
-                created_cb(err, null);
+                cbOfCreateProgramList(err, null);
             }
         } 
     });
@@ -839,6 +596,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
 
 
 /**
+ * 
  * Get(a.k.a query) the programs (of a specific DOOH) of a specific interval.<br>
  * <br>
  * @param {String} dooh The ID of the DOOH where the program is to be updated
@@ -872,6 +630,12 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
  *          {_id:43544, timeSlot:{start:1371897000000, end:1371898000000}, ugc:43593}]
  *         
  *     </ul>
+ *  
+ *     
+ */
+
+/**
+ * @deprecated
  */
 scheduleMgr.getProgramList = function(dooh, interval, pageLimit, pageSkip , updateUGC, got_cb ){
     var query = programTimeSlotModel.find({ "timeslot.start": {$gte:interval.start}, "timeslot.end":{$lt:interval.end}, "type": "UGC", "dooh": dooh })
@@ -948,22 +712,6 @@ scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, c
     });
 };
 
-/*
-scheduleMgr.getProgramListBySession_test = function(sessionId,cbOfGetProgramListBySession2 ){
-    var query2 = programTimeSlotModel.count({ "session": sessionId, "type": "UGC"});
-    
-
-    
-   
-    
-    query2.exec(function (_err, result) {
-    	//console.log(result);
-        if (cbOfGetProgramListBySession2) {
-            cbOfGetProgramListBySession2(_err, result);
-        }
-    });
-};
-*/
 /**
  * Push programs (of a specific session) to the 3rd-party content manager.<br>
  * <br>
@@ -984,6 +732,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
     
     logger.info('[scheduleMgr] start to push session '+sessionId+' to 3rd-party Content Manager' );
     var arrayOfsessionId = sessionId.split('-');
+    var programGroups = null;
     async.waterfall([
         function(cb1){
             //query the programs of this specific session
@@ -1004,66 +753,48 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                 }                             
             });
         },
-        function(programs, cb1_1){
-//            //render Miix moive if it is not yet rendered
-//            
-//            if ( systemConfig.RENDER_MIIX_MOVIE_IF_IT_IS_NOT_YET_RENDERED ) {
-//                var miixContentMgr = require('./miix_content_mgr.js');
-//                
-//                var iteratorRenderMiixMovie = function(aProgram, callbackIterator){
-//                    
-//                    //console.log("aProgram=");
-//                    //console.dir(aProgram);
-//                    //TODO: find a way to check aProgram.content.url.youtube does not exist
-//                    if ( (aProgram.contentType == "file") && (aProgram.contentGenre == "miix_it") && (!aProgram.content.url) ) {
-//                        async.waterfall([
-//                            function(callback){
-//                                //get the corresponding UGC info
-//                                ugcModel.findOne({ 'projectId': aProgram.content.projectId }, '_id ownerId projectId title no', function (errOfFindOne, ugc) {
-//                                    if (!errOfFindOne) {
-//                                        var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded" 
-//                                        //console.log("_ugc=");
-//                                        //console.dir(_ugc);
-//                                        callback(null, _ugc.projectId, _ugc.ownerId._id,  _ugc.ownerId.fbUserId, _ugc.title, _ugc.no);
-//                                    }
-//                                    else {
-//                                        callback("Failed to get the corresponding UGC info: "+errOfFindOne, null, null, null, null, null);
-//                                    }
-//                                });
-//                            }, 
-//                            function(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, ugcNo, callback){
-//                                //render this video UGC (Miix movie)
-//                                adminBrowserMgr.showTrace(null, straceStamp+"開始合成編號"+ugcNo+"的UGC....請等待約15~20分鐘");
-//                                miixContentMgr.generateMiixMoive(ugcProjectId, ugcOwnerId, ugcOwnerFbUserId, ugcTitle, function(errOfGenerateMiixMoive){
-//                                    if (!errOfGenerateMiixMoive){
-//                                        adminBrowserMgr.showTrace(null, straceStamp+"成功地合成編號"+ugcNo+"的UGC!");
-//                                        callback(null);
-//                                    }
-//                                    else {
-//                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!編號"+ugcNo+"的UGC合成失敗,原因: "+errOfGenerateMiixMoive);
-//                                        callback(errOfGenerateMiixMoive);
-//                                    }
-//                                });
-//                            }
-//                        ], function(errOfWaterFall){
-//                            callbackIterator(errOfWaterFall);
-//                        });
-//                    }
-//                    else {
-//                        callbackIterator(null);
-//                    }
-//                };
-//                async.eachSeries(programs, iteratorRenderMiixMovie, function(errEachSeries){
-//                    cb1_1(errEachSeries, programs);
-//                });
-//                
-//            }
-//            else {
-//                cb1_1(null, programs);
-//            }
-            cb1_1(null, programs);
-            
+        function(programs, cb1_0){
+            //query the program groups of this specific session
+            programGroupModel.find({ "programSession": sessionId }).exec(function (err1, _programGroups) {
+                if (!err1) {
+                    programGroups = JSON.parse(JSON.stringify(_programGroups));
+                    
+                    //for debugging
+                    logger.info('[scheduleMgr] program groups to push (to 3rd-party Content Manager:' );
+                    for (var i in programGroups){
+                        logger.info(JSON.stringify(programGroups[i]));
+                    }
+                                       
+                    cb1_0(null, programs);
+                }
+                else {
+                    cb1_0('Failed to query the program groups of a specific session: '+err1, null);
+                }                             
+            });
         },
+        function(programs, callback){
+            //update "doohSubmitTimes" as well as "mustPlay" and "failedToGenliveContentInLastPlay" flag 
+            ugcModel.findOne({"no":contentNo}).exec(function(err, ugcItem){
+                if (ugcItem.mustPlay) {
+                    ugcItem.mustPlay = false;
+                    ugcItem.failedToGenliveContentInLastPlay = false;
+                    ugcItem.doohSubmitTimes++;
+                    ugcItem.save(function(errOfSave){
+                        if (!errOfSave) {
+                            callback(null, fileToPlay, timeslot, contentNo);
+                        }
+                        else {
+                            callback("Failed to update mustPlay flag: "+errOfSave, null);
+                        }
+                    });
+                }
+                else {
+                    callback(null, programs);
+                }
+                
+            });
+        },
+
         function(programs, cb2){
             
             var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
@@ -1284,7 +1015,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
 
         },
         function(programs, cb3){
-            // change the state of this programTimeslot doc
+            // update the state of programTimeslot docs
             var iteratorUpdateAProgramState = function(aProgram, callbackOfIteratorUpdateAProgramState){
                 //var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
                 db.updateAdoc(programTimeSlotModel, aProgram._id, {"state": "confirmed" }, function(errOfUpdateAdoc, result){
@@ -1300,7 +1031,25 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
             async.eachSeries(programs, iteratorUpdateAProgramState, function(errEachSeries){
                 cb3(errEachSeries);
             });
+        },
+        function( cb4){
+            // update the state of programGroup docs
+            var iteratorUpdateAProgramGroupState = function(aProgramGroup, callbackOfIteratorUpdateAProgramGroupState){
+                db.updateAdoc(programGroupModel, aProgramGroup._id, {"state": "confirmed" }, function(errOfUpdateAdoc, result){
+                    if (!errOfUpdateAdoc){
+                        callbackOfIteratorUpdateAProgramGroupState(null);
+                    }
+                    else {
+                        callbackOfIteratorUpdateAProgramGroupState("Failed to update program "+aProgramGroup._id.toHexString()+": "+errOfUpdateAdoc);
+                    }
+                });
+
+            };
+            async.eachSeries(programGroups, iteratorUpdateAProgramGroupState, function(errEachSeries){
+                cb4(errEachSeries);
+            });
         }
+
     ], function (err, result) {
         if (!err) {
             adminBrowserMgr.showTrace(null, straceStamp+"節目推送完成!");
@@ -1449,9 +1198,7 @@ scheduleMgr.removeUgcfromProgramAndAutoSetNewOne = function(sessionId, programTi
                       var sessionIdInfoArray = sessionId.split('-');
                       var intervalOfSelectingUGC = {start: Number(sessionIdInfoArray[0]), end: Number(sessionIdInfoArray[1]) };
                       
-                      //TODO: call the real censorMgr
-//                      censorMgr_getUGCList_fake(intervalOfSelectingUGC, function(err0, _sortedUgcList ){
-                          censorMgr.getUGCListLite(intervalOfSelectingUGC, function(err0, _sortedUgcList ){
+                          censorMgr.getUGCListLite(intervalOfSelectingUGC, "not_being_submitted_to_dooh", function(err0, _sortedUgcList ){
                           if (!err0) {
                               sortedUgcList = _sortedUgcList;
                               //console.log('sortedUgcList=');

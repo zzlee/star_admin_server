@@ -276,6 +276,28 @@ $(document).ready(function(){
                 if (localStorage.role == "FELTMENG_DEMO") {
                     $('#ugcSearchMiixGenreRadioInput').click();
                 }
+                
+                /**
+                 * search by VIP  JOY
+                 */
+            
+                $($('input:radio[name=searchByVIP]')).click(function(){
+                    var inputSearchData = {};
+                    $('input:radio[name=searchByVIP]:checked').each(function(){
+                        inputSearchData = {'contentClass':$(this).val()};
+                        conditions = inputSearchData;
+                    });
+                    if(inputSearchData != null){
+                        $('#table-content').html('<br> <br>審查名單準備中，請稍候....');
+                        FM.UGCList = new PageList( 'ugcCensorMovieList', 10, '/miix_admin/ugc_censor', null, null);
+                        FM.UGCList.setConditions(conditions);
+                        $('#main_menu ul[class="current"]').attr("class", "select");
+                        $('#UGCList').attr("class", "current");
+                        FM.currentContent = FM.UGCList;
+                        FM.currentContent.showCurrentPageContent();
+                    }
+                });
+                
 
 				/**
                  * search by genre  JOY
@@ -515,11 +537,7 @@ $(document).ready(function(){
     
                     var url = DOMAIN + "user_content_attribute";
                     var no = $(this).attr("name");
-                    var mustPlay = null;
-                    if($(this).val() == 'true')
-                        mustPlay = false;
-                    if($(this).val() == 'false')
-                        mustPlay = true;
+                    var mustPlay = $(this).is(":checked");
     
                     $.ajax({
                         url: url,
@@ -699,20 +717,20 @@ $(document).ready(function(){
         }
     });
     
-    var ctrlIsDown = false;
+    var altIsDown = false;
     
     
     $(document.activeElement).keyup(function( event ) {
         //console.log("keyup event.which="+event.which);
         if ( event.which == 17 ) {  //ctrl key
-            ctrlIsDown = false;
+            altIsDown = false;
         }
-        else if ( ctrlIsDown && (event.which == 33) ) {
+        else if ( altIsDown && (event.which == 33) ) {
             //console.log('ctrl+pageUp pressed!');
             FM.currentContent.showPreviousPageContent();
         }
 
-        else if ( ctrlIsDown && (event.which == 34) ) {
+        else if ( altIsDown && (event.which == 34) ) {
             //console.log('ctrl+pageDown pressed!');
             FM.currentContent.showNextPageContent();
         }
@@ -720,8 +738,8 @@ $(document).ready(function(){
 
     $(document.activeElement).keydown(function( event ) {
         //console.log("keydown event.which="+event.which);
-        if ( event.which == 17 ) {  //ctrl key
-            ctrlIsDown = true;
+        if ( event.which == 18 ) {  //alt key
+            altIsDown = true;
         }
     });
 

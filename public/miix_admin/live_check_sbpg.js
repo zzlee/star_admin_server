@@ -16,11 +16,13 @@
 
         var tbody=$("<tbody>");
         var title_tr=$("<tr>");
+        var title_vip=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>VIP</a>");
         var title_td=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>播放時間</a>");
         var title_td2=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>影片編號</a>");
         var title_td3=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>原始UGC</a>");
         var title_td4=$("<td>").attr({class:"table-header-repeat_live_check",align:"center"}).html("<a class='aForLive'>live UGC (live number / time / image / radio box)</a>");
 
+        title_tr.append(title_vip);
         title_tr.append(title_td);
         title_tr.append(title_td2);
         title_tr.append(title_td3);
@@ -78,6 +80,7 @@
             var post_minutes_end=post_live_time_end.getMinutes();
             var timeString_start_end=post_year_end+"/"+post_month_end+"/"+post_date_end+"  "+post_hours_end+":"+post_minutes_end;
 
+            var td_vip=$("<td>").html(res[i].contentClass);
             var td_1=$("<td>").html("start："+timeString_start+"<br>"+"end："+timeString_start_end+"<br><br>");
             var td_2=$("<td>").attr({align:"center"}).html("<b>"+res[i].ugcCensorNo+"</b>");
             var td_3=$("<td>").html(s3imgLink);
@@ -139,13 +142,15 @@
                 }
                 failedLiveContentSelectionDiv.append(failedLiveContentSelect);
 
-                
             }
             
-                        
-            
-
-            
+            // player play program status chcek
+            if( res[i].playState == 'played' ) {
+                failedLiveContentSelectionDiv.append("<p><font color='blue'>檢查Log已播出</font></p>");
+            }
+            else if( res[i].playState == 'not_play' ) {
+                failedLiveContentSelectionDiv.append("<p><font color='red'>檢查Log未播出</font></p>");
+            }
 
             //---------  'fail' checkbox  click--------------
 
@@ -166,6 +171,8 @@
             //----------------end 'fail' checkbox  click-----
 
             tbody.append(tr);
+            tr.append(td_vip);
+            FailboxForm.appendTo(td_vip);
             tr.append(td_1);
             FailboxForm.appendTo(td_1);
             tr.append(td_2);
@@ -571,11 +578,11 @@
                     });
                     
                     var url = DOMAIN + "user_content_attribute";
-                    var mustPlay = true;
+                    var failedToGenliveContentInLastPlay = true;
                     $.ajax({
                         url: url,
                         type: 'PUT',
-                        data: {no: ugcCensorNo, vjson:{mustPlay: mustPlay}},
+                        data: {no: ugcCensorNo, vjson:{failedToGenliveContentInLastPlay: failedToGenliveContentInLastPlay}},
                         success: function(response) {
                             if(response.message){
                                 console.log("[Response] message: PUT"+ url + ':' + response.message);
