@@ -506,6 +506,7 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
         var mappingLiveContentList = function(data, cbOfMappingLiveContentList){
             userLiveContentModel.find({'liveTime': {$gte: data.timeslot.start, $lt: data.timeslot.end}, "sourceId": data.content.projectId}).exec(function(err, result){
                 if(!err){
+					logger.info('[censor_mgr-mappingLiveContentList] no= '+ data.content.no);
                     UGCs.find({"no": data.content.no}).exec(function(err_2, result_2){
                         if(!err_2) {
                             LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, result_2[0].userRawContent[0].content, liveContentList);
