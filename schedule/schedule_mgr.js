@@ -393,7 +393,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                                 // add time slots of a micro timeslot (of the same content genre) to db
                                 var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
                                 var programGroup = new ProgramGroup(inteval, dooh, planner, sessionId);
-                                programGroup.generateByTemplate('PG_30SEC_2UGC', function(err1){
+                                programGroup.generateByTemplate('PG_30SEC_3UGC', function(err1){
                                 //generateTimeSlotsOfMicroInterval(inteval, function(err1){
                                     timeToAddTimeSlot += programPeriod;
                                     

@@ -383,11 +383,11 @@ censorMgr.getUGCListLite = function(intervalOfSelectingUGC, filter, cb){
     var sort; 
     
     if (filter == "not_being_submitted_to_dooh or live_content_failed_in_last_play")  {     
-        condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}}, {'mustPlay':true}, {'failedToGenliveContentInLastPlay':true}], 'doohSubmitTimes': 0, 'rating': {$gte: 'A' , $lte: 'E' } };
+        condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}, 'doohSubmitTimes': 0, 'rating': {$gte: 'A' , $lte: 'E' }}, {'mustPlay':true}, {'failedToGenliveContentInLastPlay':true}] };
         sort = {'mustPlay':-1, 'failedToGenliveContentInLastPlay':-1, 'doohPlayedTimes':1,'rating':1,'createdOn':1};
     }
     else { // filter == "not_being_submitted_to_dooh" 
-        condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}}, {'mustPlay':true}], 'doohSubmitTimes': 0, 'rating': {$gte: 'A' , $lte: 'E' } };
+        condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}, 'doohSubmitTimes': 0, 'rating': {$gte: 'A' , $lte: 'E' }}, {'mustPlay':true}] };
         //condition = {  $or: [ {'createdOn' : {$gte: intervalOfSelectingUGC.start, $lt: intervalOfSelectingUGC.end}}, {'mustPlay':true}], 'rating': {$gte: 'A' , $lte: 'E' } };
         sort = {'mustPlay':-1,'doohPlayedTimes':1,'rating':1,'createdOn':1};
     }
