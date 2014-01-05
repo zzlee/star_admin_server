@@ -537,11 +537,7 @@ $(document).ready(function(){
     
                     var url = DOMAIN + "user_content_attribute";
                     var no = $(this).attr("name");
-                    var mustPlay = null;
-                    if($(this).val() == 'true')
-                        mustPlay = false;
-                    if($(this).val() == 'false')
-                        mustPlay = true;
+                    var mustPlay = $(this).is(":checked");
     
                     $.ajax({
                         url: url,

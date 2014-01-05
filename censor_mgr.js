@@ -496,6 +496,15 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
     
     var iteratorQueryUgcInfo = function(anIndex, callback){
         
+        if(updateUGC){
+            if(programList[anIndex].content._id == updateUGC.oldUGCId) {
+                programList[anIndex].content._id = updateUGC.newUGCId;
+            }
+                
+            
+        }
+
+        
         var ugcModel = db.getDocModel("ugc");
         ugcModel.findOne({_id: programList[anIndex].content._id}, function(errOfFineOne, _ugc){
             if (!errOfFineOne){
@@ -552,9 +561,11 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
                         rating: ugc.rating,
                         contentGenre: ugc.contentGenre,
                         mustPlay: ugc.mustPlay,
+                        failedToGenliveContentInLastPlay: ugc.failedToGenliveContentInLastPlay,
+                        isLoopedAround: programList[anIndex].isLoopedAround,
                         timeslotStart: timeslotStart,
                         timeslotEnd: timeslotEnd,
-                        programTimeSlotId: programList[anIndex],
+                        programTimeSlotId: programList[anIndex]._id,
                         url: ugc.url,
                         createdOn: ugc.createdOn
                     };

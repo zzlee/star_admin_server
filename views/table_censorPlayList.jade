@@ -30,6 +30,15 @@ form#mainform(action='')
                         input(class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
                         input#PlayList.ugcCensorNoSetBtn(type='button', class='ugcChange', value='確認', name='#{PlayList.programTimeSlotId}')
                       td #{PlayList.ugcCensorNo}
+                        if (PlayList.isLoopedAround == true)
+                            br
+                            label.label_special_condition 已從頭循環
+                        if (PlayList.mustPlay == true)
+                            br
+                            label.label_special_condition 必播
+                        if (PlayList.failedToGenliveContentInLastPlay == true)
+                            br
+                            label.label_special_condition 上回實拍失敗
                       td 
                          if(PlayList.contentGenre == 'miix_it')
                              label.label_video 合成影片
@@ -64,6 +73,15 @@ form#mainform(action='')
                         input(class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
                         input#PlayList.ugcCensorNoSetBtn(type='button', class='ugcChange', value='確認', name='#{PlayList.programTimeSlotId}')
                       td #{PlayList.ugcCensorNo}
+                        if (PlayList.isLoopedAround == true)
+                            br
+                            label.label_special_condition 已從頭循環 
+                        if (PlayList.mustPlay == true)
+                            br
+                            label.label_special_condition 必播
+                        if (PlayList.failedToGenliveContentInLastPlay == true)
+                            br
+                            label.label_special_condition 上回實拍失敗
                       td 
                          if(PlayList.contentGenre == 'miix_it')
                              label.label_video 合成影片
