@@ -172,6 +172,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
     var DURATION_FOR_NORMAL = 15*1000; //milliseconds
     var DURATION_FOR_VIP = 120*1000; //milliseconds
     var DURATION_FOR_LEADING_PADDING = 2*1000; //milliseconds
+    var DEFAULT_CONTENT_GENRE_FOR_LEADING_PADDING = "mood";
     
     var programGroupVjson = {
         programs : []    
@@ -194,19 +195,20 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
     var candidateUgcList = sortedUgcList.slice(0); //clone the full array of sortedUgcList
     var isLoopedAround = false;
 
-    
+    debugger;
     async.waterfall([
         function(callback){
             //put the leading padding content (a web page triggnering the camera) into the program group
             var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
             aProgramTimeSlot.type = 'padding';
             aProgramTimeSlot.contentType = 'media_item';
-            aProgramTimeSlot.content = {name: paddingContent.get(contentGenre, 'start') };
+            aProgramTimeSlot.content = {name: paddingContent.get(DEFAULT_CONTENT_GENRE_FOR_LEADING_PADDING, 'start') };
             aProgramTimeSlot.markModified('content');
             aProgramTimeSlot.timeslot.playDuration = DURATION_FOR_LEADING_PADDING;
             aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(0, 3);
             aProgramTimeSlot.save(function(errOfSave, _result){     
                 if (!errOfSave) {
+                    programs[0] = {};
                     programs[0]._id = _result._id;
                     callback(null);
                 }
@@ -227,7 +229,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
             async.whilst(
                 function () { 
                     //console.log("totalDuration= %d maxAllowableDuration=%d", totalDuration, maxAllowableDuration)
-                    return (totalDuration+DURATION_FOR_NORMAL*1000) <= maxAllowableDuration; 
+                    return (totalDuration+DURATION_FOR_NORMAL) <= maxAllowableDuration; 
                 },
                 function (cbOfWhilst) {
                     
