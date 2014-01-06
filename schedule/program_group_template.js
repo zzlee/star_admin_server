@@ -7,43 +7,43 @@ var programGroupTemplate =(function(){
             programs : [
                 {
                     sequenceNo: 0,
-                    preSetDuration: 2,
+                    preSetDuration: 2*1000,
                     contentType: 'media_item',
                     type: 'padding'
                 },
                 {
                     sequenceNo: 1,
-                    preSetDuration: 7,
+                    preSetDuration: 7*1000,
                     contentType: 'file',
                     type: 'UGC'
                 },
                 {
                     sequenceNo: 2,
-                    preSetDuration: 2,
+                    preSetDuration: 2*1000,
                     contentType: 'media_item',
                     type: 'padding'
                 },
                 {
                     sequenceNo: 3,
-                    preSetDuration: 7,
+                    preSetDuration: 7*1000,
                     contentType: 'file',
                     type: 'UGC'
                 },
                 {
                     sequenceNo: 4,
-                    preSetDuration: 2,
+                    preSetDuration: 2*1000,
                     contentType: 'media_item',
                     type: 'padding'
                 },
                 {
                     sequenceNo: 5,
-                    preSetDuration: 7,
+                    preSetDuration: 7*1000,
                     contentType: 'file',
                     type: 'UGC'
                 },
                 {
                     sequenceNo: 6,
-                    preSetDuration: 2,
+                    preSetDuration: 2*1000,
                     contentType: 'media_item',
                     type: 'padding'
                 }
@@ -54,31 +54,31 @@ var programGroupTemplate =(function(){
             programs : [
                 {
                     sequenceNo: 0,
-                    preSetDuration: 2,
+                    preSetDuration: 2*1000,
                     contentType: 'media_item',
                     type: 'padding'
                 },
                 {
                     sequenceNo: 1,
-                    preSetDuration: 12,
+                    preSetDuration: 12*1000,
                     contentType: 'file',
                     type: 'UGC'
                 },
                 {
                     sequenceNo: 2,
-                    preSetDuration: 2,
+                    preSetDuration: 2*1000,
                     contentType: 'media_item',
                     type: 'padding'
                 },
                 {
                     sequenceNo: 3,
-                    preSetDuration: 12,
+                    preSetDuration: 12*1000,
                     contentType: 'file',
                     type: 'UGC'
                 },
                 {
                     sequenceNo: 4,
-                    preSetDuration: 2,
+                    preSetDuration: 2*1000,
                     contentType: 'media_item',
                     type: 'padding'
                 }

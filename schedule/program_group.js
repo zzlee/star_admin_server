@@ -169,8 +169,9 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
 
 ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfGenerateFromSortedUgcList) {
     var _this = this;
-    var DURATION_FOR_NORMAL = 15; //sec
-    var DURATION_FOR_VIP = 120; //sec
+    var DURATION_FOR_NORMAL = 15*1000; //milliseconds
+    var DURATION_FOR_VIP = 120*1000; //milliseconds
+    var DURATION_FOR_LEADING_PADDING = 2*1000; //milliseconds
     
     var programGroupVjson = {
         programs : []    
@@ -196,10 +197,31 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
     
     async.waterfall([
         function(callback){
-            //put the programs into the program group from the candidate list
+            //put the leading padding content (a web page triggnering the camera) into the program group
+            var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
+            aProgramTimeSlot.type = 'padding';
+            aProgramTimeSlot.contentType = 'media_item';
+            aProgramTimeSlot.content = {name: paddingContent.get(contentGenre, 'start') };
+            aProgramTimeSlot.markModified('content');
+            aProgramTimeSlot.timeslot.playDuration = DURATION_FOR_LEADING_PADDING;
+            aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(0, 3);
+            aProgramTimeSlot.save(function(errOfSave, _result){     
+                if (!errOfSave) {
+                    programs[0]._id = _result._id;
+                    callback(null);
+                }
+                else {
+                    callback("Failed to add the programTimeslot of leading padding to DB: "+errOfSave);
+                }
+                
+            });
+            
+        },
+        function(callback){
+            //put the UGC programs into the program group from the candidate list
             var maxAllowableDuration = _this.interval.end - _this.interval.start ;  //millisecond
             var totalDuration = 0; //millisecond
-            var sequenceNo = 0;
+            var sequenceNo = 1;
             var predictedPlayTime = _this.interval.start;
             
             async.whilst(
@@ -210,8 +232,6 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
                 function (cbOfWhilst) {
                     
                     var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
-                    
-                    
                     
                     aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(sequenceNo, 3);
                     
@@ -233,7 +253,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
                         }
                     }
                     
-                    var playDuration; //sec
+                    var playDuration; //millisecond
                     if (selectedUgc.contentClass == "VIP") {
                         playDuration = DURATION_FOR_VIP;  
                     }
@@ -252,8 +272,8 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
                     aProgramTimeSlot.isLoopedAround = isLoopedAround;
                     aProgramTimeSlot.content = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
                     
-                    totalDuration += playDuration*1000;
-                    predictedPlayTime += playDuration*1000;
+                    totalDuration += playDuration;
+                    predictedPlayTime += playDuration;
                     sequenceNo++;
                     aProgramTimeSlot.save(function(errOfSave, _result){     
                         if (!errOfSave) {
