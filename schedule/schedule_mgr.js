@@ -772,28 +772,6 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                 }                             
             });
         },
-        function(programs, callback){
-            //update "doohSubmitTimes" as well as "mustPlay" and "failedToGenliveContentInLastPlay" flag 
-            ugcModel.findOne({"no":contentNo}).exec(function(err, ugcItem){
-                if (ugcItem.mustPlay) {
-                    ugcItem.mustPlay = false;
-                    ugcItem.failedToGenliveContentInLastPlay = false;
-                    ugcItem.doohSubmitTimes++;
-                    ugcItem.save(function(errOfSave){
-                        if (!errOfSave) {
-                            callback(null, fileToPlay, timeslot, contentNo);
-                        }
-                        else {
-                            callback("Failed to update mustPlay flag: "+errOfSave, null);
-                        }
-                    });
-                }
-                else {
-                    callback(null, programs);
-                }
-                
-            });
-        },
 
         function(programs, cb2){
             
@@ -955,13 +933,13 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                                                      logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
                                                      adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
                                                      //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                                     callback(null, fileToPlay);
+                                                     callback(null, fileToPlay, contentNo);
                                                  }
                                                  else{
                                                      logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
                                                      adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
                                                      //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                                     callback('Failed to push content to Scala :'+errScala, null);
+                                                     callback('Failed to push content to Scala :'+errScala, null, null);
                                                  }
                                              });
                                          /*    var option = 
@@ -995,6 +973,24 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                                              
                                              //callback(null, fileToPlay);
                                          },
+                                         function(filePlayed, contentNo, callback){
+                                             //update "doohSubmitTimes" as well as "mustPlay" and "failedToGenliveContentInLastPlay" flag 
+                                             ugcModel.findOne({"no":contentNo}).exec(function(err, ugcItem){
+                                                 ugcItem.mustPlay = false;
+                                                 ugcItem.failedToGenliveContentInLastPlay = false;
+                                                 ugcItem.doohSubmitTimes++;
+                                                 ugcItem.save(function(errOfSave){
+                                                     if (!errOfSave) {
+                                                         callback(null, filePlayed);
+                                                     }
+                                                     else {
+                                                         callback("Failed to update mustPlay flag: "+errOfSave, null);
+                                                     }
+                                                 });
+                                                 
+                                             });
+                                         },
+
                                          function(filePlayed, callback){
                                              //TODO: delete downloaded contents from local drive
                                              callback(null,'done');
