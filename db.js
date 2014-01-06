@@ -216,7 +216,7 @@ FM.DB = (function(){
             liveState: {type: String, enum: liveContentState, default: 'not_checked'},
             isLoopedAround: {type: Boolean, default: false},
             upload: {type: Boolean, default: false},
-            playState: {type: String, default: 'not_check'} // Check content play to DOOH 
+            playState: {type: String, default: 'not_check'}, // Check content play to DOOH 
             playlist: {id: String, name: String},
             playlistItem: { id: Number, name: String, sortOrder: Number }
         }); 
