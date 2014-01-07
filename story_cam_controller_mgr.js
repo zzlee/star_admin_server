@@ -143,7 +143,7 @@ storyCamControllerMgr.startShutter = function( startedShutter_cb ){
             }
             else if(program.type == 'UGC') {
                 waitTimeBuffer += program.preSetDuration / 2;
-                actionSetting.push(waitTimeBuffer);
+                actionSetting.push(waitTimeBuffer / 1000);
                 waitTimeBuffer = program.preSetDuration / 2;
             }
         });
