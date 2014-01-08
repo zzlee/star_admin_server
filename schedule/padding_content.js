@@ -25,7 +25,17 @@ var paddingContent =(function(){
         
     return {
         get: function(contentGenre, paddingType){
-            return PADDING_CONTENT_TABLE[contentGenre][paddingType];
+            if (PADDING_CONTENT_TABLE[contentGenre]) {
+                return PADDING_CONTENT_TABLE[contentGenre][paddingType];
+            }
+            else if (PADDING_CONTENT_TABLE.mood[paddingType]) { //an unknown content genre?
+                logger.error("[paddingContent.get()] Unknown content genre was passed. contentGenre="+contentGenre);
+                return PADDING_CONTENT_TABLE.mood[paddingType];
+            }
+            else { //unknown content genre + unknown padding type
+                logger.error("[paddingContent.get()] Unknown content genre and paddingType was passed. contentGenre="+contentGenre+" paddingType="+paddingType);
+                return PADDING_CONTENT_TABLE.mood.middle;
+            }
         }
     };
 })();
