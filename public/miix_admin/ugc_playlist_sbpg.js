@@ -246,9 +246,10 @@ var UGCPlayListSubPg = {
                             url: url,
                             type: 'PUT',
                             async:false,
-                            data: { type: 'setUgcToProgram', programTimeSlotId: programTimeSlotId, ugcReferenceNo: ugcReferenceNo},
+                            data: { type: 'setUgcToProgram', programTimeSlotId: timeSlotId, ugcReferenceNo: ugcReferenceNo},
                             success: function(response) {
                                 if(response.message){
+//                                    console.log(timeSlotId);
                                     console.log("[Response_Set] message:" + response.message);
                                     conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
                                     if(response.message.substring(0,6) != 'Cannot'){
@@ -261,7 +262,6 @@ var UGCPlayListSubPg = {
                                         type: 'GET',
                                         data: {ugcNo: innerUgcNo},
                                         success: function(response){
-                                            console.log(response);
 //                                            alert('good');
                                             var contentGenre_text;
                                             var genreLabel;
