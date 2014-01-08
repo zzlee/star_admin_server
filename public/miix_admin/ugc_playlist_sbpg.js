@@ -228,7 +228,7 @@ var UGCPlayListSubPg = {
             console.log(checkDate+','+arrayOfSessionId[2]);
             var showDateStart = new Date(Number(arrayOfSessionId[2]));
             var showDateEnd = new Date(Number(arrayOfSessionId[3]));
-            if(false){
+            if(checkDate >= arrayOfSessionId[2]){
 //                alert("播出時間:"+ showDateStart.toDateString()+' '+showDateStart.toLocaleTimeString() +'~'+ showDateEnd.toDateString()+' '+showDateEnd.toLocaleTimeString()+"，此節目已排入節目清單無法異動，有更改之需求請洽工程師!");
                 alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
             }else{
@@ -375,7 +375,7 @@ var UGCPlayListSubPg = {
                 console.log(checkDate+','+arrayOfSessionId[2]);
                 var showDateStart = new Date(Number(arrayOfSessionId[2]));
                 var showDateEnd = new Date(Number(arrayOfSessionId[3]));
-                if(false){
+                if(checkDate >= arrayOfSessionId[2]){
                     alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
                 }else{
                     $.ajax({
