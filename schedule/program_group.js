@@ -94,6 +94,9 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
         function(callback){
             // generate programs: padding 0, UGC 0, padding 1, UGC 1, padding 2, .....
             var indexArrayPrograms = []; for (var i = 0; i < programs.length; i++) { indexArrayPrograms.push(i); }
+            var sequenceNo = 1;
+            var ugcSequenceNo = 1;
+
             
             var iteratorPutUgcAndPaddingProgrames = function(indexOfPrograms, cbOfIteratorPutUgcAndPaddingProgrames){
                 
@@ -115,10 +118,13 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
                 }
                 else { //programs[indexOfPrograms].type == "UGC"
                     aProgramTimeSlot.type = 'UGC';
+                    aProgramTimeSlot.timeslot.ugcSequenceNo = ugcSequenceNo;
+                    ugcSequenceNo++;
                 }
                 
                 aProgramTimeSlot.timeslot.playDuration = programs[indexOfPrograms].preSetDuration;
                 aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(programs[indexOfPrograms].sequenceNo, 3);
+                
                 aProgramTimeSlot.save(function(errOfSave, _result){     
                     if (!errOfSave) {
                         programs[indexOfPrograms]._id = _result._id;
@@ -224,6 +230,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
             var maxAllowableDuration = _this.interval.end - _this.interval.start ;  //millisecond
             var totalDuration = 0; //millisecond
             var sequenceNo = 1;
+            var ugcSequenceNo = 1;
             var predictedPlayTime = _this.interval.start;
             
             async.whilst(
@@ -264,6 +271,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
                     }
                     aProgramTimeSlot.timeslot.playDuration = playDuration;
                     aProgramTimeSlot.timeslot.predictedPlayTime = predictedPlayTime;
+                    aProgramTimeSlot.timeslot.ugcSequenceNo = ugcSequenceNo;
                     programs[sequenceNo] = {};
                     programs[sequenceNo].sequenceNo = sequenceNo;
                     programs[sequenceNo].preSetDuration = playDuration;  
@@ -277,6 +285,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
                     totalDuration += playDuration;
                     predictedPlayTime += playDuration;
                     sequenceNo++;
+                    ugcSequenceNo++;
                     aProgramTimeSlot.save(function(errOfSave, _result){     
                         if (!errOfSave) {
                             programs[sequenceNo-1]._id = _result._id;

@@ -203,7 +203,8 @@ FM.DB = (function(){
                 end: Number, //milliseconds since midnight Jan 1, 1970
                 playDuration: Number,  //milliseconds.  This value is normally used by image or web content
                 predictedPlayTime: Number,  //milliseconds since midnight Jan 1, 1970
-                startHour: Number //0~23
+                startHour: Number, //0~23
+                ugcSequenceNo: Number
                 },
             timeStamp: {type: String},
             //status: {type: String, enum: programTimeSlotStatus}
