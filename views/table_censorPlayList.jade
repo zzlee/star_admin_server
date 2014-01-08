@@ -24,8 +24,13 @@ form#mainform(action='')
                     tr
                       td start : #{PlayList.timeslotStart}
                         br
-                        br
                         label end : #{PlayList.timeslotEnd}
+                        br
+                        # #{PlayList.ugcSequenceNo}
+                        if (PlayList.predictedPlayTime )
+                            br
+                            br
+                            label 預計#{PlayList.predictedPlayTime}播放
                       td 
                         input(class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
                         input#PlayList.ugcCensorNoSetBtn(type='button', class='ugcChange', value='確認', name='#{PlayList.programTimeSlotId}')
@@ -67,8 +72,13 @@ form#mainform(action='')
                     tr.alternate-row
                       td start : #{PlayList.timeslotStart}
                         br
-                        br
                         label end : #{PlayList.timeslotEnd}
+                        br
+                        # #{PlayList.ugcSequenceNo}
+                        if (PlayList.predictedPlayTime )
+                            br
+                            br
+                            label 預計#{PlayList.predictedPlayTime}播放
                       td
                         input(class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
                         input#PlayList.ugcCensorNoSetBtn(type='button', class='ugcChange', value='確認', name='#{PlayList.programTimeSlotId}')
