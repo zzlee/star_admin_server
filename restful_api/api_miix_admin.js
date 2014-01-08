@@ -351,6 +351,7 @@ exports.init = function() {
     
     app.get('/miix_admin/doohs/:doohId/programTimeSlot', routes.censorHandler.checkProgramTimeSlot_get_cb);
     
+    app.get('/miix_admin/getItemOfSlotByNo', routes.censorHandler.getItemOfSlotByNo_cb);
     
     
     

@@ -27,9 +27,9 @@ form#mainform(action='')
                         br
                         label end : #{PlayList.timeslotEnd}
                       td 
-                        input(class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
+                        input(id='#{PlayList.programTimeSlotId}' class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
                         input#PlayList.ugcCensorNoSetBtn(type='button', class='ugcChange', value='確認', name='#{PlayList.programTimeSlotId}')
-                      td #{PlayList.ugcCensorNo}
+                      td(id='#{PlayList.programTimeSlotId}' class='ugcNo') #{PlayList.ugcCensorNo}
                         if (PlayList.isLoopedAround == true)
                             br
                             label.label_special_condition 已從頭循環
@@ -39,7 +39,7 @@ form#mainform(action='')
                         if (PlayList.failedToGenliveContentInLastPlay == true)
                             br
                             label.label_special_condition 上回實拍失敗
-                      td 
+                      td(id='#{PlayList.programTimeSlotId}' class='ugcGenre')
                          if(PlayList.contentGenre == 'miix_it')
                              label.label_video 合成影片
                          if(PlayList.contentGenre == 'cultural_and_creative')
@@ -49,17 +49,17 @@ form#mainform(action='')
                          if(PlayList.contentGenre == 'check_in')
                              label.label_checkin 打卡
                       if(PlayList.contentGenre == 'miix_it')
-                         td
+                         td(id='#{PlayList.programTimeSlotId}' class='ugcImage')
                              img(src='#{PlayList.fbPictureUrl}', alt='', width='120')
                              label       
                              img(src='#{PlayList.userPhotoUrl}', alt='', width='360')
                              br
                              label #{PlayList.fb_userName} 
                       else
-                         td
+                         td(id='#{PlayList.programTimeSlotId}' class='ugcImage')
                              a(href='#{PlayList.url.s3}',target='_blank')
                                  img(src='#{PlayList.url.s3}', alt='', width='700', height='149')
-                      td #{PlayList.rating}
+                      td(id='#{PlayList.programTimeSlotId}' class='ugcRating') #{PlayList.rating}
                       td
                         input#PlayList.ugcCensorNoRemoveBtn(type='button', value='刪除且自動替補', name='#{PlayList.programTimeSlotId}')
 
@@ -70,9 +70,9 @@ form#mainform(action='')
                         br
                         label end : #{PlayList.timeslotEnd}
                       td
-                        input(class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
+                        input(id='#{PlayList.programTimeSlotId}' class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
                         input#PlayList.ugcCensorNoSetBtn(type='button', class='ugcChange', value='確認', name='#{PlayList.programTimeSlotId}')
-                      td #{PlayList.ugcCensorNo}
+                      td(id='#{PlayList.programTimeSlotId}' class='ugcNo') #{PlayList.ugcCensorNo}
                         if (PlayList.isLoopedAround == true)
                             br
                             label.label_special_condition 已從頭循環 
@@ -82,7 +82,7 @@ form#mainform(action='')
                         if (PlayList.failedToGenliveContentInLastPlay == true)
                             br
                             label.label_special_condition 上回實拍失敗
-                      td 
+                      td(id='#{PlayList.programTimeSlotId}' class='ugcGenre')
                          if(PlayList.contentGenre == 'miix_it')
                              label.label_video 合成影片
                          if(PlayList.contentGenre == 'cultural_and_creative')
@@ -92,17 +92,17 @@ form#mainform(action='')
                          if(PlayList.contentGenre == 'check_in')
                              label.label_checkin 打卡
                       if(PlayList.contentGenre == 'miix_it')
-                         td
+                         td(id='#{PlayList.programTimeSlotId}' class='ugcImage')
                              img(src='#{PlayList.fbPictureUrl}', alt='', width='120')
                              label       
                              img(src='#{PlayList.userPhotoUrl}', alt='', width='360')
                              br
                              label #{PlayList.fb_userName} 
                       else
-                         td
+                         td(id='#{PlayList.programTimeSlotId}' class='ugcImage')
                              a(href='#{PlayList.url.s3}',target='_blank')
                                  img(src='#{PlayList.url.s3}', alt='', width='700', height='149')
-                      td #{PlayList.rating}
+                      td(id='#{PlayList.programTimeSlotId}' class='ugcRating') #{PlayList.rating}
                       td
                         input#PlayList.ugcCensorNoRemoveBtn(type='button', value='刪除且自動替補', name='#{PlayList.programTimeSlotId}')
 
