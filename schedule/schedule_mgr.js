@@ -27,7 +27,7 @@ var memberModel = db.getDocModel("member");
 var adminBrowserMgr = require('../admin_browser_mgr.js');
 
 var ProgramGroup = require("./program_group.js");
-var programPlanningPattern = require("./program_planning_pattern.js");
+var ProgramPlanningPattern = require("./program_planning_pattern.js");
 var paddingContent = require("./padding_content.js");
 var periodicalHighPriorityEvents = require("./periodical_high_priority_events.js");
 
@@ -123,6 +123,8 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
     
     var sortedUgcList = null;
     var sessionId = intervalOfSelectingUGC.start.toString() + '-' + intervalOfSelectingUGC.end.toString() + '-' + intervalOfPlanningDoohProgrames.start.toString() + '-' + intervalOfPlanningDoohProgrames.end.toString() + '-' + Number((new Date()).getTime().toString());
+    var programPlanningPattern = new ProgramPlanningPattern(programSequence);
+    
     
     var putUgcIntoTimeSlots = function(cbOfPutUgcIntoTimeSlots){
         
@@ -393,7 +395,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                                 // add time slots of a micro timeslot (of the same content genre) to db
                                 var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
                                 var programGroup = new ProgramGroup(inteval, dooh, planner, sessionId);
-                                programGroup.generateByTemplate('PG_30SEC_3UGC', function(err1){
+                                programGroup.generateByTemplate('PG_30SEC_3UGC', programPlanningPattern, function(err1){
                                 //generateTimeSlotsOfMicroInterval(inteval, function(err1){
                                     timeToAddTimeSlot += programPeriod;
                                     
@@ -447,12 +449,6 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         });
         
     };  //end of generateTimeSlot()
-    
-    programPlanningPattern.resetIndex();
-    if (programSequence){
-        programPlanningPattern.set(programSequence);
-    }
-    
     
     async.waterfall([
         function(callback){
@@ -567,7 +563,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
             }
             else { //mode == "continuous"
                 var programGroup = new ProgramGroup(intervalOfPlanningDoohProgrames, dooh, planner, sessionId);
-                programGroup.generateFromSortedUgcList(sortedUgcList, function(errOfGenerateFromSortedUgcList, resultProgramGroup){
+                programGroup.generateFromSortedUgcList(sortedUgcList, programPlanningPattern, function(errOfGenerateFromSortedUgcList, resultProgramGroup){
                     if (!errOfGenerateFromSortedUgcList) {
                         var result = {numberOfProgramTimeSlots: resultProgramGroup.programs.length, sessionId: resultProgramGroup.programSession };
                         callback(null, result);

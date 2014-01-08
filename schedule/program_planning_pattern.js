@@ -1,40 +1,45 @@
+var DEFAULT_PROGRAM_SEQUENCE = [ "miix_it", "cultural_and_creative", "mood", "check_in" ]; 
 
-var programPlanningPattern =(function(){    
-    var i = -1;
-    var DEFAULT_PROGRAM_SEQUENCE = [ "miix_it", "cultural_and_creative", "mood", "check_in" ]; 
-    var programSequence = DEFAULT_PROGRAM_SEQUENCE;
-    
-    return {
-        getProgramGenreToPlan: function(){
-            i++;
-            if (i >= programSequence.length){
-                i = 0;
-            }
-            return programSequence[i];
-        },
-        
-        resetIndex: function(){
-            i = -1;
-        },
-        
-        set: function(_programSequence){
-            programSequence = _programSequence;
-        },
-        
-        getProgramSequence: function(){
-            return programSequence;    
-        },
-        
-        remove: function(contentGenreToRemove){
-            for (var i=0; i<programSequence.length; i++){
-                if (programSequence[i]==contentGenreToRemove){
-                    programSequence.splice(i, 1);
-                    i--;
-                }
-            }
-            
+var ProgramPlanningPattern = function(programSequence){
+    if (programSequence) {
+        this.programSequence = programSequence;
+    }
+    else {
+        this.programSequence = DEFAULT_PROGRAM_SEQUENCE;
+    }
+    this.index = 0;
+};
+
+ProgramPlanningPattern.prototype = {
+    getProgramGenreToPlan: function(){
+        this.index++;
+        if (this.index >= this.programSequence.length){
+            this.index = 0;
         }
-    };
-})()
+        return this.programSequence[this.index];
+    },
+    
+    resetIndex: function(){
+        this.index = -1;
+    },
+    
+    set: function(_programSequence){
+        this.programSequence = _programSequence;
+    },
+    
+    getProgramSequence: function(){
+        return this.programSequence;    
+    },
+    
+    remove: function(contentGenreToRemove){
+        for (var i=0; i<this.programSequence.length; i++){
+            if (this.programSequence[i]==contentGenreToRemove){
+                this.programSequence.splice(i, 1);
+                i--;
+            }
+        }
+        
+    }
+};
 
-module.exports = programPlanningPattern;
+module.exports = ProgramPlanningPattern;
