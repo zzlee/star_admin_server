@@ -8,7 +8,7 @@
 
 var db = require('../db.js');
 var async = require('async');
-var programPlanningPattern = require("./program_planning_pattern.js");
+//var programPlanningPattern = require("./program_planning_pattern.js");
 var paddingContent = require("./padding_content.js");
 var programGroupTemplate = require("./program_group_template.js");
 var programTimeSlotModel = db.getDocModel("programTimeSlot");
@@ -50,11 +50,11 @@ var ProgramGroup = function(interval, dooh, planner, sessionId, options) {
 //    console.dir(sessionId);
 };
 
-ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
+ProgramGroup.prototype.generateByTemplate = function(templateId, programPlanningPattern, cbOfgenerate) {
     var _this = this;
     
     
-    var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //TODO:make this query only for a specific session  //the genre that will be used in this program group  
+    var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //the genre that will be used in this program group  
     var paddingContents;
     var programGroupVjson;
     var programs;
@@ -94,6 +94,9 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
         function(callback){
             // generate programs: padding 0, UGC 0, padding 1, UGC 1, padding 2, .....
             var indexArrayPrograms = []; for (var i = 0; i < programs.length; i++) { indexArrayPrograms.push(i); }
+            var sequenceNo = 1;
+            var ugcSequenceNo = 1;
+
             
             var iteratorPutUgcAndPaddingProgrames = function(indexOfPrograms, cbOfIteratorPutUgcAndPaddingProgrames){
                 
@@ -115,10 +118,13 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
                 }
                 else { //programs[indexOfPrograms].type == "UGC"
                     aProgramTimeSlot.type = 'UGC';
+                    aProgramTimeSlot.timeslot.ugcSequenceNo = ugcSequenceNo;
+                    ugcSequenceNo++;
                 }
                 
                 aProgramTimeSlot.timeslot.playDuration = programs[indexOfPrograms].preSetDuration;
                 aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(programs[indexOfPrograms].sequenceNo, 3);
+                
                 aProgramTimeSlot.save(function(errOfSave, _result){     
                     if (!errOfSave) {
                         programs[indexOfPrograms]._id = _result._id;
@@ -167,10 +173,12 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, cbOfgenerate) {
 };
 
 
-ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfGenerateFromSortedUgcList) {
+ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, programPlanningPattern, cbOfGenerateFromSortedUgcList) {
     var _this = this;
-    var DURATION_FOR_NORMAL = 15; //sec
-    var DURATION_FOR_VIP = 120; //sec
+    var DURATION_FOR_NORMAL = 15*1000; //milliseconds
+    var DURATION_FOR_VIP = 120*1000; //milliseconds
+    var DURATION_FOR_LEADING_PADDING = 2*1000; //milliseconds
+    var DEFAULT_CONTENT_GENRE_FOR_LEADING_PADDING = "mood";
     
     var programGroupVjson = {
         programs : []    
@@ -193,31 +201,51 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
     var candidateUgcList = sortedUgcList.slice(0); //clone the full array of sortedUgcList
     var isLoopedAround = false;
 
-    
     async.waterfall([
         function(callback){
-            //put the programs into the program group from the candidate list
+            //put the leading padding content (a web page triggnering the camera) into the program group
+            var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
+            aProgramTimeSlot.type = 'padding';
+            aProgramTimeSlot.contentType = 'media_item';
+            aProgramTimeSlot.content = {name: paddingContent.get(DEFAULT_CONTENT_GENRE_FOR_LEADING_PADDING, 'start') };
+            aProgramTimeSlot.markModified('content');
+            aProgramTimeSlot.timeslot.playDuration = DURATION_FOR_LEADING_PADDING;
+            aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(0, 3);
+            aProgramTimeSlot.save(function(errOfSave, _result){     
+                if (!errOfSave) {
+                    programs[0] = {};
+                    programs[0]._id = _result._id;
+                    callback(null);
+                }
+                else {
+                    callback("Failed to add the programTimeslot of leading padding to DB: "+errOfSave);
+                }
+                
+            });
+            
+        },
+        function(callback){
+            //put the UGC programs into the program group from the candidate list
             var maxAllowableDuration = _this.interval.end - _this.interval.start ;  //millisecond
             var totalDuration = 0; //millisecond
-            var sequenceNo = 0;
+            var sequenceNo = 1;
+            var ugcSequenceNo = 1;
             var predictedPlayTime = _this.interval.start;
             
             async.whilst(
                 function () { 
                     //console.log("totalDuration= %d maxAllowableDuration=%d", totalDuration, maxAllowableDuration)
-                    return (totalDuration+DURATION_FOR_NORMAL*1000) <= maxAllowableDuration; 
+                    return (totalDuration+DURATION_FOR_NORMAL) <= maxAllowableDuration; 
                 },
                 function (cbOfWhilst) {
                     
                     var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
                     
-                    
-                    
                     aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(sequenceNo, 3);
                     
                     var selectedUgc = null;
                     
-                    var ProgramGenreToPlan = programPlanningPattern.getProgramGenreToPlan(); //TODO:make this query only for a specific session  //the genre that will be used in this program group  
+                    var ProgramGenreToPlan = programPlanningPattern.getProgramGenreToPlan(); //the genre that will be used in this program group  
                     
                     //pick up one UGC from the sorted list 
                     for (var indexOfcandidateToSelect=0; indexOfcandidateToSelect<=candidateUgcList.length; indexOfcandidateToSelect++){
@@ -233,7 +261,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
                         }
                     }
                     
-                    var playDuration; //sec
+                    var playDuration; //millisecond
                     if (selectedUgc.contentClass == "VIP") {
                         playDuration = DURATION_FOR_VIP;  
                     }
@@ -242,6 +270,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
                     }
                     aProgramTimeSlot.timeslot.playDuration = playDuration;
                     aProgramTimeSlot.timeslot.predictedPlayTime = predictedPlayTime;
+                    aProgramTimeSlot.timeslot.ugcSequenceNo = ugcSequenceNo;
                     programs[sequenceNo] = {};
                     programs[sequenceNo].sequenceNo = sequenceNo;
                     programs[sequenceNo].preSetDuration = playDuration;  
@@ -252,9 +281,10 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, cbOfG
                     aProgramTimeSlot.isLoopedAround = isLoopedAround;
                     aProgramTimeSlot.content = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
                     
-                    totalDuration += playDuration*1000;
-                    predictedPlayTime += playDuration*1000;
+                    totalDuration += playDuration;
+                    predictedPlayTime += playDuration;
                     sequenceNo++;
+                    ugcSequenceNo++;
                     aProgramTimeSlot.save(function(errOfSave, _result){     
                         if (!errOfSave) {
                             programs[sequenceNo-1]._id = _result._id;

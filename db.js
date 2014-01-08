@@ -43,7 +43,7 @@ FM.DB = (function(){
                 //file
                 //web_page
                 //media_item: the media item that has already stored in Media of Scala's Content Manager
-            programTimeSlotState = 'not_confirmed confirmed'.split(' '),
+            programTimeSlotState = 'not_confirmed confirmed playedAndPulled'.split(' '),
             liveContentState = 'not_checked correct source_not_played not_generated incorrect bad_exposure other_fail'.split(' '),
             appGenre = 'ondascreen wowtaipeiarena'.split(' '),
             
@@ -203,7 +203,8 @@ FM.DB = (function(){
                 end: Number, //milliseconds since midnight Jan 1, 1970
                 playDuration: Number,  //milliseconds.  This value is normally used by image or web content
                 predictedPlayTime: Number,  //milliseconds since midnight Jan 1, 1970
-                startHour: Number //0~23
+                startHour: Number, //0~23
+                ugcSequenceNo: Number
                 },
             timeStamp: {type: String},
             //status: {type: String, enum: programTimeSlotStatus}
@@ -216,8 +217,9 @@ FM.DB = (function(){
             liveState: {type: String, enum: liveContentState, default: 'not_checked'},
             isLoopedAround: {type: Boolean, default: false},
             upload: {type: Boolean, default: false},
-            playState: {type: String, default: 'not_check'} // Check content play to DOOH 
-
+            playState: {type: String, default: 'not_check'}, // Check content play to DOOH 
+            playlist: {id: String, name: String},
+            playlistItem: { id: Number, name: String, sortOrder: Number }
         }); 
         
         var CandidateUgcCacheSchema = new Schema({
@@ -422,6 +424,11 @@ FM.DB = (function(){
              }] */
         });
         
+		var VIPSchema = new Schema({
+			code: {type: String},
+			used: {type: Boolean, default: false}
+		});
+        
         /****************** End of DB Schema ******************/
 		
         var Member = connection.model('Member', MemberSchema, 'member'),
@@ -443,7 +450,8 @@ FM.DB = (function(){
             MyMember = connection.model('MyMember', MyMemberSchema, 'myMember'),
 			Message = connection.model('Message', MessageSchema, 'message'),
             PushAllMessage = connection.model('PushAllMessage', PushAllMessageSchema, 'pushAllMessage'),
-            ProgramGroup = connection.model('ProgramGroup', ProgramGroupSchema, 'programGroup');
+            ProgramGroup = connection.model('ProgramGroup', ProgramGroupSchema, 'programGroup'),
+            VIP = connection.model('VIP', VIPSchema, 'vip');
         
            
             
@@ -468,6 +476,7 @@ FM.DB = (function(){
 		dbModels["message"] = Message;
 		dbModels["pushAllMessage"] = PushAllMessage;
 		dbModels["programGroup"] = ProgramGroup;
+		dbModels["vip"] = VIP;
         
         //???? nobody uses it, so this section can be removed? 
         var dbSchemas = [];
@@ -596,6 +605,9 @@ FM.DB = (function(){
 					case 'pushAllMessage':
 					    return PushAllMessage;
 					    break;
+					case 'vip':
+                        return VIP;
+                        break;
                     default:
                         throw new error('DB Cannot find this Collection: ' + collection);
                         break;

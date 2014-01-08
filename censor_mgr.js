@@ -410,7 +410,7 @@ censorMgr.getUGCListLite = function(intervalOfSelectingUGC, filter, cb){
 };
 
 
-
+//DEPRECATED, replayced by censorMgr.getFullPlayList()
 censorMgr.getPlayList = function(programList, updateUGC, cb){
 
     var limit = 0;
@@ -512,10 +512,12 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
                 var ugc = JSON.parse(JSON.stringify( _ugc )); //clone candidateUgc object to prevent from strange error "RangeError: Maximum call stack size exceeded";
                 
                 //timeslot
-                var timeslotStart, timeslotEnd;
+                var timeslotStart, timeslotEnd, predictedPlayTime, ugcSequenceNo;
                 if(programList[anIndex].timeslot){
                     var timeslotDateStart = new Date(programList[anIndex].timeslot.start).toString().substring(0,25);
                     var timeslotDateEnd = new Date(programList[anIndex].timeslot.end).toString().substring(0,25);
+                    var timeslotPredictedPlayTime = (new Date(programList[anIndex].timeslot.predictedPlayTime)).toString().substring(0,25);
+                    
                     var yyyy, mm, dd, time;
                     //timeslotStart date format
                     yyyy = timeslotDateStart.substring(11,15);
@@ -523,12 +525,22 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
                     dd = timeslotDateStart.substring(8,10);
                     time = timeslotDateStart.substring(16,25);
                     timeslotStart = yyyy+'/'+mm+'/'+dd+' '+time;
+                    
                     //timeslotEnd date format
                     yyyy = timeslotDateEnd.substring(11,15);
                     mm = new Date(programList[anIndex].timeslot.end).getMonth()+1;
                     dd = timeslotDateEnd.substring(8,10);
                     time = timeslotDateEnd.substring(16,25);
                     timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
+                    
+                    //predictedPlayTime date format
+                    yyyy = timeslotPredictedPlayTime.substring(11,15);
+                    mm = new Date(programList[anIndex].timeslot.end).getMonth()+1;
+                    dd = timeslotPredictedPlayTime.substring(8,10);
+                    time = timeslotPredictedPlayTime.substring(16,25);
+                    predictedPlayTime = yyyy+'/'+mm+'/'+dd+' '+time;
+
+                    ugcSequenceNo = programList[anIndex].timeslot.ugcSequenceNo;
                 }
                 //userRawContent
                 var description = null;
@@ -566,6 +578,8 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
                         isLoopedAround: programList[anIndex].isLoopedAround,
                         timeslotStart: timeslotStart,
                         timeslotEnd: timeslotEnd,
+                        predictedPlayTime: predictedPlayTime,
+                        ugcSequenceNo: ugcSequenceNo,
                         programTimeSlotId: programList[anIndex]._id,
                         url: ugc.url,
                         createdOn: ugc.createdOn
@@ -628,13 +642,14 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
     }
         var liveContentList = [];
 
-        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, fbUserId, programTimeSlot_id, ownerId_id, canBeFoundInPlayerLog, s3Img, miixSource, contentClass,arr) {
+        var LiveContentListInfo = function(ugcCensorNo, liveContent, start, end, liveState, playState, fbUserId, programTimeSlot_id, ownerId_id, canBeFoundInPlayerLog, s3Img, miixSource, contentClass, arr) {
             arr.push({
                 ugcCensorNo: ugcCensorNo,
                 liveContent: liveContent,
                 start: start,
                 end: end,
                 liveState: liveState,
+                playState: playState,
                 fbUserId: fbUserId,
                 programTimeSlot_id: programTimeSlot_id,
                 ownerId_id: ownerId_id,
@@ -650,7 +665,7 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
 					logger.info('[censor_mgr-mappingLiveContentList] no= '+ data.content.no);
                     UGCs.find({"no": data.content.no}).exec(function(err_2, result_2){
                         if(!err_2) {
-                            LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, result_2[0].userRawContent[0].content, result_2[0].contentClass, liveContentList);
+                            LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.playState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, result_2[0].userRawContent[0].content, result_2[0].contentClass, liveContentList);
                             cbOfMappingLiveContentList(null); 
                         }else {
                             cbOfMappingLiveContentList(err_2);
