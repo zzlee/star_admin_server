@@ -83,7 +83,8 @@ var checkProgramPlayState = function( playday, check_cb ) {
         "timeslot.start": { $gte: playstart },
         "timeslot.end": { $lte: new Date().getTime() },
         "playState": "not_check",
-        "type": "UGC"
+        "type": "UGC",
+        "state": { $ne: "not_confirmed" }
     };
 
     programTimeSlotModel.find(query).sort({timeStamp:1}).exec(function (err, result) {
