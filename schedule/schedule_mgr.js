@@ -527,7 +527,14 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
             }
             logger.info("programSequence="+ JSON.stringify(programPlanningPattern.getProgramSequence()) );
             
-            callback(null);
+            if ( (programPlanningPattern.getProgramSequence()).length > 0 ) {
+                callback(null);
+            }
+            else {
+                callback("在此搜尋條件下，没有任何節目可以排！");
+            }
+            
+            
         },
         function(callback){
             //generate program time slots
