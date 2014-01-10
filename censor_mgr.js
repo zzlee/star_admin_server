@@ -998,6 +998,31 @@ censorMgr.renderLiveVideoMV = function( live_video_project_id, record_time ){
 };
 
 
+censorMgr.getItemOfSlotByNo = function(ugcNo, limit, skip, cb_getItemOfSlotByNo){
+    noInt = parseInt(ugcNo);
+   
+    UGCs.find({"no":noInt}).exec(function(ugc_err, ugc_result){
+        if(!ugc_err){
+            
+            memberModel.find({"fb.userID": ugc_result[0].ownerId.userID}).exec(function(member_err, member_result){
+               if(!member_err){
+                   ugc_result.push({fbName: member_result[0].fb.userName});
+                   cb_getItemOfSlotByNo(null,ugc_result);
+               }else{
+                   cb_getItemOfSlotByNo(member_err,member_result);
+               }
+              
+            });
+            
+//            cb_getItemOfSlotByNo(null,result);
+        }else{
+            cb_getItemOfSlotByNo(ugc_err,ugc_result);
+        }
+    });
+    
+};
+
+
 module.exports = censorMgr;
 
 

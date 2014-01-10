@@ -465,4 +465,15 @@ FM.censorHandler.checkProgramTimeSlot_get_cb = function(req, res){
 
 };
 
+FM.censorHandler.getItemOfSlotByNo_cb = function(req, res){
+    var ugcNo = req.query.ugcNo;
+    censorMgr.getItemOfSlotByNo(ugcNo, null, null, function(err, results){
+        if(!err){
+            res.send(200,{results: results});
+        }else{
+            res.send(400, {error: err});
+        }
+    });
+};
+
 module.exports = FM.censorHandler;
