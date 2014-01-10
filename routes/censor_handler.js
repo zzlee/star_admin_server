@@ -109,15 +109,21 @@ FM.censorHandler.postProgramTimeSlotSession_cb = function(req, res){
     var intervalOfPlanningDoohProgrames = {start: intervalOfPlanningDoohProgramesStart, end: intervalOfPlanningDoohProgramesEnd};
     
     var programSequence = req.body.programSequence;
+    
+    if (req.session.admin_user) {
+        scheduleMgr.createProgramList(doohId, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, req.session.admin_user.hexOfObjectID, req.body.filter, req.body.mode, function(err, result){
+            if (!err){
+                res.send(200, {message: result.sessionId});
+            }
+            else{
+                res.send(400, {error: err});
+            }
+        });
+    }
+    else {
+        res.send(401, {error: "session没有使用者的資料。建議重新登入來解決此問題。"});
+    }
 
-    scheduleMgr.createProgramList(doohId, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, req.session.admin_user.hexOfObjectID, req.body.filter, req.body.mode, function(err, result){
-        if (!err){
-            res.send(200, {message: result.sessionId});
-        }
-        else{
-            res.send(400, {error: err});
-        }
-    });
 
 };
 
