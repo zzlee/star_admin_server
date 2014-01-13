@@ -516,7 +516,6 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
                 if(programList[anIndex].timeslot){
                     var timeslotDateStart = new Date(programList[anIndex].timeslot.start).toString().substring(0,25);
                     var timeslotDateEnd = new Date(programList[anIndex].timeslot.end).toString().substring(0,25);
-                    var timeslotPredictedPlayTime = (new Date(programList[anIndex].timeslot.predictedPlayTime)).toString().substring(0,25);
                     
                     var yyyy, mm, dd, time;
                     //timeslotStart date format
@@ -534,11 +533,17 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
                     timeslotEnd = yyyy+'/'+mm+'/'+dd+' '+time;
                     
                     //predictedPlayTime date format
-                    yyyy = timeslotPredictedPlayTime.substring(11,15);
-                    mm = new Date(programList[anIndex].timeslot.end).getMonth()+1;
-                    dd = timeslotPredictedPlayTime.substring(8,10);
-                    time = timeslotPredictedPlayTime.substring(16,25);
-                    predictedPlayTime = yyyy+'/'+mm+'/'+dd+' '+time;
+                    if (programList[anIndex].timeslot.predictedPlayTime) {
+                        var timeslotPredictedPlayTime = (new Date(programList[anIndex].timeslot.predictedPlayTime)).toString().substring(0,25);
+                        yyyy = timeslotPredictedPlayTime.substring(11,15);
+                        mm = new Date(programList[anIndex].timeslot.end).getMonth()+1;
+                        dd = timeslotPredictedPlayTime.substring(8,10);
+                        time = timeslotPredictedPlayTime.substring(16,25);
+                        predictedPlayTime = yyyy+'/'+mm+'/'+dd+' '+time;
+                    }
+                    else {
+                        predictedPlayTime = null;
+                    }
 
                     ugcSequenceNo = programList[anIndex].timeslot.ugcSequenceNo;
                 }
