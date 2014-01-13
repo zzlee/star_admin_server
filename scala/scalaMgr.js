@@ -723,12 +723,12 @@ function scalaMgr( url, account ){
                 contractor.media.list({search: media.name}, function(err, res){ 
                     if( typeof(res.list) === 'undefined' ) {
                         scalaLogger.action('no media info response, file name is ' + media.name);
-                        info_cb('NO_MEDIA_INFO', null);
+                        info_cb('not_find_media_info_response', null);
                     }
                     else {
                         if( res.list[0].status != 'OK' ) {
                             scalaLogger.action('upload media is failed, file name is ' + media.name + ', please re-upload.');
-                            info_cb('REUPLOAD', null);
+                            info_cb('file_upload_is_failed', null);
                         }
                         else {
                             scalaLogger.action('upload media is successfully, file name is ' + media.name);
@@ -758,8 +758,8 @@ function scalaMgr( url, account ){
             function (callback) {
                 // upload(file, media, function(err, res) {
                 mediaConsole(file, media, function(err, res) {
+                    count++;
                     if( err ) {
-                        count++;
                         if(count != limit)
                             setTimeout(callback, 200);
                         else
@@ -773,12 +773,10 @@ function scalaMgr( url, account ){
             },
             function (report) {
                 //excute
-                if( count < limit ) {
+                if( typeof(report) === 'object' )
                     upload_cb(null, report);
-                }
-                if( count == limit ) {
-                    upload_cb(err, null);
-                }
+                else
+                    upload_cb(report, null);
             }
         );
         
