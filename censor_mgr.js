@@ -582,7 +582,8 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
                         ugcSequenceNo: ugcSequenceNo,
                         programTimeSlotId: programList[anIndex]._id,
                         url: ugc.url,
-                        createdOn: ugc.createdOn
+                        createdOn: ugc.createdOn,
+                        contentClass: ugc.contentClass
                     };
 
                     playList.push(playListItem);
