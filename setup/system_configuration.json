@@ -1,5 +1,6 @@
 {
 	"HOST_STAR_COORDINATOR_URL":"http://localhost:3000",
+	"USE_NODETIME":false, 
 	"HOST_MONGO_DB_SERVER_URL":"mongodb://internal.ondascreen.com:27017",
 	"HOST_MONGO_DB_USER_NAME":"feltmeng",
 	"HOST_MONGO_DB_PASSWORD":"53768608",
