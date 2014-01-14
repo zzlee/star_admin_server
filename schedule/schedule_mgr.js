@@ -400,13 +400,23 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                             if (timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end) {
                                 // add time slots of a micro timeslot (of the same content genre) to db
                                 var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
+                                var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //the genre that will be used in this program group  
+                                
                                 var programGroup = new ProgramGroup(inteval, dooh, planner, sessionId);
-                                programGroup.generateByTemplate('PG_30SEC_3UGC', programPlanningPattern, function(err1){
-                                //generateTimeSlotsOfMicroInterval(inteval, function(err1){
-                                    timeToAddTimeSlot += programPeriod;
-                                    
-                                    cb_whilst(err1);
-                                });
+                                if (contentGenre !== "miix_it") {
+                                    programGroup.generateByTemplate('PG_30SEC_3IMAGEUGC', contentGenre, function(err1){
+                                    //generateTimeSlotsOfMicroInterval(inteval, function(err1){
+                                        timeToAddTimeSlot += programPeriod;
+                                        cb_whilst(err1);
+                                    });
+                                }
+                                else { //contentGenre === "miix_it"
+                                    programGroup.generateByTemplate('PG_30SEC_1VIDEOUGC', contentGenre, function(err1){
+                                    //generateTimeSlotsOfMicroInterval(inteval, function(err1){
+                                        timeToAddTimeSlot += programPeriod;
+                                        cb_whilst(err1);
+                                    });
+                                }
                             }
                             else {
                                 //no time slot to add to db

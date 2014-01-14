@@ -50,11 +50,9 @@ var ProgramGroup = function(interval, dooh, planner, sessionId, options) {
 //    console.dir(sessionId);
 };
 
-ProgramGroup.prototype.generateByTemplate = function(templateId, programPlanningPattern, cbOfgenerate) {
+ProgramGroup.prototype.generateByTemplate = function(templateId, contentGenre, cbOfgenerate) {
     var _this = this;
     
-    
-    var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //the genre that will be used in this program group  
     var paddingContents;
     var programGroupVjson;
     var programs;
