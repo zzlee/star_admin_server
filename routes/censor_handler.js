@@ -223,6 +223,7 @@ FM.censorHandler.updatetimeslots_get_cb = function(req, res){
     var programTimeSlot =  req.body.programTimeSlotId;
     var ugcReferenceNo = req.body.ugcReferenceNo;
     var sessionId = req.params.sessionId;
+    var originalContentClass = req.body.originalContentClass;
 
     if(req.body.type == 'removeUgcfromProgramAndAutoSetNewOne'){
         scheduleMgr.removeUgcfromProgramAndAutoSetNewOne(sessionId, programTimeSlot, function(err, result){
@@ -237,7 +238,7 @@ FM.censorHandler.updatetimeslots_get_cb = function(req, res){
 
     if(req.body.type == 'setUgcToProgram'){
         
-        scheduleMgr.setUgcToProgram(programTimeSlot, ugcReferenceNo, function(err, result){
+        scheduleMgr.setUgcToProgram(programTimeSlot, ugcReferenceNo, originalContentClass, function(err, result){
             if (!err){
                 res.send(200, {message: result});
             }

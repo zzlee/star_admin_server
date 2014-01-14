@@ -1131,22 +1131,28 @@ scheduleMgr.updateProgramList = function(dooh, intervalToUpdate, updated_cb ){
  *     if successful, err returns null; if failed, err returns the error message.
  *     
  */
-scheduleMgr.setUgcToProgram = function( programTimeSlotId, ugcReferenceNo, set_cb ){
-    ugcModel.findOne({ 'no': ugcReferenceNo }, '_id genre contentGenre projectId fileExtension no ownerId mustPlay', function (err1, ugc) {
+scheduleMgr.setUgcToProgram = function( programTimeSlotId, ugcReferenceNo, originalContentClass, set_cb ){
+    ugcModel.findOne({ 'no': ugcReferenceNo }, '_id genre contentGenre projectId fileExtension no ownerId mustPlay contentClass', function (err1, ugc) {
         if (!err1){
-            var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
-            var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded"
-            if(ugc !== null){
-                //TODO: Shall we have some protection here in case the user choose an UGC with different genra (This will normally introduce different paly duration
-                db.updateAdoc(programTimeSlotModel, oidOfprogramTimeSlot, {"content": _ugc }, function(err2, result){
-                    if (set_cb){
-                        set_cb(err2, ugc._id);
-                    }
-                });
+            if(originalContentClass != ugc.contentClass){
+                set_cb(err1, "errContentClass");
             }else{
-                set_cb(err1, "Cannot find the UGC with this referece number: "+ugcReferenceNo);
+                var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
+                var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded"
+                if(ugc !== null){
+                    //TODO: Shall we have some protection here in case the user choose an UGC with different genra (This will normally introduce different paly duration
+                    db.updateAdoc(programTimeSlotModel, oidOfprogramTimeSlot, {"content": _ugc }, function(err2, result){
+                        if (set_cb){
+                            set_cb(err2, ugc._id);
+                        }
+                    });
+                }else{
+                    set_cb(err1, "Cannot find the UGC with this referece number: "+ugcReferenceNo);
+                }
+                //set_cb(err1, ugc);
             }
-            //set_cb(err1, ugc);
+//            console.log(ugc)
+           
         }
         else {
             if (set_cb){

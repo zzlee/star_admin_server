@@ -241,115 +241,134 @@ var UGCPlayListSubPg = {
                         innerUgcNo = ugcReferenceNo;
                         var timeSlotId = $(this).attr('id');
                         $('input[id='+timeSlotId+']').val('');
+                        var originalContentClass = $('#'+timeSlotId+'.ugcNo').attr('original_content_class');
                         
                         $.ajax({
                             url: url,
                             type: 'PUT',
                             async:false,
-                            data: { type: 'setUgcToProgram', programTimeSlotId: timeSlotId, ugcReferenceNo: ugcReferenceNo},
+                            data: { type: 'setUgcToProgram', programTimeSlotId: timeSlotId, ugcReferenceNo: ugcReferenceNo, originalContentClass: originalContentClass},
+                            error: function(jqXHR, textStatus, errorThrown ) {
+                                console.log(errorThrown);
+                                
+                            },
                             success: function(response) {
                                 if(response.message){
-//                                    console.log(timeSlotId);
-                                    console.log("[Response_Set] message:" + response.message);
-                                    conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
-                                    if(response.message.substring(0,6) != 'Cannot'){
-                                    $('#main_menu ul[class="current"]').attr("class", "select");
-                                    $('#UGCPlayList').attr("class", "current");
-                                    
-                                    $.ajax({
-                                        url: DOMAIN + 'getItemOfSlotByNo',
-                                        async: false,
-                                        type: 'GET',
-                                        data: {ugcNo: innerUgcNo},
-                                        success: function(response){
-//                                            alert('good');
-                                            var contentGenre_text;
-                                            var genreLabel;
-                                            var ugcSource;
-                                            if(response.results[0].contentGenre == 'mood'){
-                                                contentGenre_text = 'label_mood';
-                                                genreLabel = $('<label>').attr({
-                                                    class: contentGenre_text
-                                                 }).append('心情');
-                                                
-                                                ugcImg = $('<img>').attr({
-                                                   src: response.results[0].url.s3,
-                                                   width: 700,
-                                                   height: 149
-                                                });
-                                                ugcSource = $('<a>').attr({
-                                                   href: response.results[0].url.s3,
-                                                   target: '_blank'
-                                                }).append(ugcImg);
-                                            }else if(response.results[0].contentGenre == 'checkin'){
-                                                contentGenre_text = 'label_checkin';
-                                                genreLabel = $('<label>').attr({
-                                                    class: contentGenre_text
-                                                 }).append('打卡');
-                                                
-                                                ugcImg = $('<img>').attr({
-                                                    src: response.results[0].url.s3,
-                                                    width: 700,
-                                                    height: 149
-                                                 });
-                                                 ugcSource = $('<a>').attr({
-                                                    href: response.results[0].url.s3,
-                                                    target: '_blank'
-                                                 }).append(ugcImg);
-                                            }else if(response.results[0].contentGenre == 'miix_it'){
-                                                contentGenre_text = 'label_video';
-                                                genreLabel = $('<label>').attr({
-                                                    class: contentGenre_text
-                                                 }).append('影像合成');
-                                                var userFbImg = $('<img>').attr({
-                                                    src: response.results[0].fbProfilePicture,
-                                                    alt: '',
-                                                    width: 120
-                                                });
-                                                var userContentImg = $('<img>').attr({
-                                                    src: response.results[0].userRawContent[0].content,
-                                                    alt: "''",
-                                                    width: 360
-                                                });
-                                                var label = $('<label>').append('      ');
-                                                var label_name = $('<label>').append(response.results[1].fbName);
-                                            }else if(response.results[0].contentGenre == 'cultural_and_creative'){
-                                                contentGenre_text = 'label_design';
-                                                genreLabel = $('<label>').attr({
-                                                    class: contentGenre_text
-                                                 }).append('文創');
-                                                
-                                                ugcImg = $('<img>').attr({
-                                                    src: response.results[0].url.s3,
-                                                    width: 700,
-                                                    height: 149
-                                                 });
-                                                 ugcSource = $('<a>').attr({
-                                                    href: response.results[0].url.s3,
-                                                    target: '_blank'
-                                                 }).append(ugcImg);
-                                            }
-                                            
-                                            $('#'+timeSlotId+'.ugcNo').html(response.results[0].no);
-                                            $('#'+timeSlotId+'.ugcGenre').html('').append(genreLabel);
-                                            if(response.results[0].contentGenre == 'miix_it'){
-                                                $('#'+timeSlotId+'.ugcImage').html('').append(userFbImg).append(label).append(userContentImg).append('<br>').append(label_name);
-                                            }else{
-                                                $('#'+timeSlotId+'.ugcImage').html('').append(ugcSource);
-                                            }
-                                            $('#'+timeSlotId+'.ugcRating').html(response.results[0].rating);
-                                           
-                                        }
-                                    });
-
-//                                    FM.currentContent = FM.UGCPlayList;
-//                                    FM.currentContent.showCurrentPageContent();
+                                    if(response.message == 'errContentClass'){
+                                        console.log("[Response_Set] message:" + response.message);
+                                        alert("您所替換的content等級跟原本的不一樣!\n(原本是VIP就只能換VIP，反之亦然)");
                                     }else{
-                                         if(flag == 0){
-                                             alert(response.message);
-                                             flag = 1;
-                                             }
+//                                      console.log(timeSlotId);
+                                        console.log("[Response_Set] message:" + response.message);
+                                        conditions = { newUGCId :response.message, oldUGCId: programTimeSlotId};
+                                        if(response.message.substring(0,6) != 'Cannot'){
+                                        $('#main_menu ul[class="current"]').attr("class", "select");
+                                        $('#UGCPlayList').attr("class", "current");
+                                        
+                                        $.ajax({
+                                            url: DOMAIN + 'getItemOfSlotByNo',
+                                            async: false,
+                                            type: 'GET',
+                                            data: {ugcNo: innerUgcNo},
+                                            success: function(response){
+//                                                alert('good');
+                                                var contentGenre_text;
+                                                var genreLabel;
+                                                var ugcSource;
+                                                if(response.results[0].contentGenre == 'mood'){
+                                                    contentGenre_text = 'label_mood';
+                                                    genreLabel = $('<label>').attr({
+                                                        class: contentGenre_text
+                                                     }).append('心情');
+                                                    
+                                                    ugcImg = $('<img>').attr({
+                                                       src: response.results[0].url.s3,
+                                                       width: 700,
+                                                       height: 149
+                                                    });
+                                                    ugcSource = $('<a>').attr({
+                                                       href: response.results[0].url.s3,
+                                                       target: '_blank'
+                                                    }).append(ugcImg);
+                                                }else if(response.results[0].contentGenre == 'checkin'){
+                                                    contentGenre_text = 'label_checkin';
+                                                    genreLabel = $('<label>').attr({
+                                                        class: contentGenre_text
+                                                     }).append('打卡');
+                                                    
+                                                    ugcImg = $('<img>').attr({
+                                                        src: response.results[0].url.s3,
+                                                        width: 700,
+                                                        height: 149
+                                                     });
+                                                     ugcSource = $('<a>').attr({
+                                                        href: response.results[0].url.s3,
+                                                        target: '_blank'
+                                                     }).append(ugcImg);
+                                                }else if(response.results[0].contentGenre == 'miix_it'){
+                                                    contentGenre_text = 'label_video';
+                                                    genreLabel = $('<label>').attr({
+                                                        class: contentGenre_text
+                                                     }).append('影像合成');
+                                                    var userFbImg = $('<img>').attr({
+                                                        src: response.results[0].fbProfilePicture,
+                                                        alt: '',
+                                                        width: 120
+                                                    });
+                                                    var userContentImg = $('<img>').attr({
+                                                        src: response.results[0].userRawContent[0].content,
+                                                        alt: "''",
+                                                        width: 360
+                                                    });
+                                                    var label = $('<label>').append('      ');
+                                                    var label_name = $('<label>').append(response.results[1].fbName);
+                                                }else if(response.results[0].contentGenre == 'cultural_and_creative'){
+                                                    contentGenre_text = 'label_design';
+                                                    genreLabel = $('<label>').attr({
+                                                        class: contentGenre_text
+                                                     }).append('文創');
+                                                    
+                                                    ugcImg = $('<img>').attr({
+                                                        src: response.results[0].url.s3,
+                                                        width: 700,
+                                                        height: 149
+                                                     });
+                                                     ugcSource = $('<a>').attr({
+                                                        href: response.results[0].url.s3,
+                                                        target: '_blank'
+                                                     }).append(ugcImg);
+                                                }
+                                                $('#'+timeSlotId+'.ugcNo').attr({"original_content_class":response.results[0].contentClass});
+                                                
+                                                if(response.results[0].contentClass == 'VIP'){
+                                                    $('#'+timeSlotId+'.ugcNo').html(response.results[0].no).append("<br><label class='label_special_condition'>VIP</label>");
+                                                }else{
+                                                    $('#'+timeSlotId+'.ugcNo').html(response.results[0].no);
+                                                }
+                                                
+                                                
+                                                $('#'+timeSlotId+'.ugcGenre').html('').append(genreLabel);
+                                                if(response.results[0].contentGenre == 'miix_it'){
+                                                    $('#'+timeSlotId+'.ugcImage').html('').append(userFbImg).append(label).append(userContentImg).append('<br>').append(label_name);
+                                                }else{
+                                                    $('#'+timeSlotId+'.ugcImage').html('').append(ugcSource);
+                                                }
+                                                $('#'+timeSlotId+'.ugcRating').html(response.results[0].rating);
+                                               
+                                            }
+                                        });
+
+//                                        FM.currentContent = FM.UGCPlayList;
+//                                        FM.currentContent.showCurrentPageContent();
+                                        }else{
+                                             if(flag == 0){
+                                                 alert(response.message);
+                                                 flag = 1;
+                                                 }
+                                        }
+                                        
                                     }
+
                                 }
                             }
                         });
