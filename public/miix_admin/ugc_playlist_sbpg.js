@@ -8,8 +8,22 @@ var UGCPlayListSubPg = {
         $.get('/miix_admin/table_censorPlayList_head.html', function(res){
             $('#table-content-header').html(res);
             $('#table-content').html('');
+            $('#divPlayWithInterruptMode').hide();
             
             $('#createProgramListBtn').click( UGCPlayListSubPg.checkProgramList );
+            
+            
+            $('#checkboxIsContinuousProgramMode').click(function() {
+                if ( $("#checkboxIsContinuousProgramMode").is(":checked") ) {
+                    $('#divPlayWithInterruptMode').show();
+                }
+                else {
+                    $('#divPlayWithInterruptMode').hide();
+                }
+            });
+                
+            
+            
 
         });
 
@@ -147,14 +161,22 @@ var UGCPlayListSubPg = {
                 console.log(inputSearchData.playTimeEnd);
                 console.log("checkDate"+checkDate+",playTimeStart"+playTimeStart+",playTimeEnd"+playTimeEnd);
                 
-                var mode;
+                var schedulingMode;
                 if ( $("#checkboxIsContinuousProgramMode").is(":checked") ) {
-                    mode = "continuous";
+                    schedulingMode = "continuous";
                 }
                 else {
-                    mode = "appended_to_each_playlist_cycle";
+                    schedulingMode = "appended_to_each_playlist_cycle";
                 }
-                
+
+                var playMode;
+                if ( $("#checkboxPlayWithInterruptMode").is(":checked") ) {
+                    playMode = "interrupt";
+                }
+                else {
+                    playMode = "periodic";
+                }
+
                 var filter;
                 if ( $("#checkboxIncludeLiveContentFailed").is(":checked") ) {
                     filter = "not_being_submitted_to_dooh or live_content_failed_in_last_play";
@@ -181,7 +203,8 @@ var UGCPlayListSubPg = {
                             programSequence:programSequenceArr, 
                             originSequence:originSequence,
                             filter: filter,
-                            mode: mode
+                            schedulingMode: schedulingMode,
+                            playMode: playMode
                         },
                         success: function(response) {
                             if(response.message){

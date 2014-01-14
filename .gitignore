@@ -24,3 +24,4 @@ new_member_statistics.csv
 story_mv_list.csv
 story_mv_list.xlsx
 system_configuration__.json
+*.log

@@ -96,10 +96,16 @@ scheduleMgr.init = function(_censorMgr){
  *     <li>"not_being_submitted_to_dooh or live_content_failed_in_last_play"
  *     </ul>
  *     
- * @param {String} mode The mode of generating program list.  It must be one of the following values: <br>
+ * @param {String} schedulingMode The mode of scheduling program list.  It must be one of the following values: <br>
  *     <ul>
  *     <li>"appended_to_each_playlist_cycle"
  *     <li>"continuous"
+ *     </ul>
+ * 
+ * @param {String} playMode The mode of playing programs.  It must be one of the following values: <br>
+ *     <ul>
+ *     <li>"interrupt"
+ *     <li>"periodic"
  *     </ul>
  * 
  * @param {Function} cbOfCreateProgramList The callback function called when the result program list is created.<br>
@@ -116,7 +122,7 @@ scheduleMgr.init = function(_censorMgr){
  *         { numberOfProgramTimeSlots: 33, sessionId: '1367596800000-1367683140000-1373332978201' }     
  *     </ul>
  */
-scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, filter, mode, cbOfCreateProgramList ){
+scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, filter, schedulingMode, playMode, cbOfCreateProgramList ){
     
     logger.info('[scheduleMgr.createProgramList()]: intervalOfSelectingUGC={start:'+(new Date(intervalOfSelectingUGC.start))+' end:'+(new Date(intervalOfSelectingUGC.end))+'} ');
     logger.info('intervalOfPlanningDoohProgrames= {start:'+(new Date(intervalOfPlanningDoohProgrames.start))+' end:'+(new Date(intervalOfPlanningDoohProgrames.end))+'} programSequence='+JSON.stringify(programSequence));
@@ -538,7 +544,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         },
         function(callback){
             //generate program time slots
-            if (mode == "appended_to_each_playlist_cycle") {
+            if (schedulingMode == "appended_to_each_playlist_cycle") {
                 generateTimeSlot( function(err_2){
                     if (!err_2) {
                         //console.log('generateTimeSlot() done! ');
@@ -556,7 +562,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         }, 
         function(callback){
             //put UGCs into programe time slots
-            if (mode == "appended_to_each_playlist_cycle") {
+            if (schedulingMode == "appended_to_each_playlist_cycle") {
                 putUgcIntoTimeSlots(function(err_3, result){
                     if (!err_3) {
                         //console.log('putUgcIntoTimeSlots() done! ');
@@ -568,9 +574,9 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                     
                 });
             }
-            else { //mode == "continuous"
+            else { //schedulingMode == "continuous"
                 var programGroup = new ProgramGroup(intervalOfPlanningDoohProgrames, dooh, planner, sessionId);
-                programGroup.generateFromSortedUgcList(sortedUgcList, programPlanningPattern, function(errOfGenerateFromSortedUgcList, resultProgramGroup){
+                programGroup.generateFromSortedUgcList(sortedUgcList, programPlanningPattern, playMode, function(errOfGenerateFromSortedUgcList, resultProgramGroup){
                     if (!errOfGenerateFromSortedUgcList) {
                         var result = {numberOfProgramTimeSlots: resultProgramGroup.programs.length, sessionId: resultProgramGroup.programSession };
                         callback(null, result);
