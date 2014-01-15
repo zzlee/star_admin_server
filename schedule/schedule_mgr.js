@@ -736,12 +736,128 @@ scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, c
  * <br>
  * @param {String} sessionId The id indicating the session of creating program time slot (This session id is accquired in the callback 
  *     passed to scheduleMgr.createProgramList(). )
+ *     
+ * @param {String} playMode The mode of playing programs.  It must be one of the following values: <br>
+ *     <ul>
+ *     <li>"interrupt"
+ *     <li>"periodic"
+ *     </ul>
+ *     
  * @param {Function} pushed_cb The callback function called when the process is done.<br>
  *     The function signature is updated_cb(err), where err is the error message indicating failure: 
  *     if successful, err returns null; if failed, err returns the error message.
  */
-scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
+scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pushed_cb) {
     
+    var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
+        
+        var access_token, message, link;
+        var fb_name, play_time;
+        
+        async.waterfall([
+            function(ugcSearch){
+                ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ 
+                    if (!err) {
+                        ugcSearch(null, ugc); 
+                    }
+                    else {
+                        ugcSearch("Failed to find corresponding UGC: "+err, null); 
+                    }
+                });
+            },
+            function(ugc, memberSearch){
+                if (ugc[0]) {
+                    memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ 
+                        memberSearch(null, {ugc: ugc, member: member}); 
+                    });
+                } 
+                else {
+                    memberSearch("Failed to have valid ugc[0]", null); 
+                }
+            },
+        ], function(err, res){
+            
+            if (!err) {
+                var ugc = res.ugc[0],
+                member = res.member[0];
+            
+                access_token = member.fb.auth.accessToken;
+                fb_name = member.fb.userName;
+                var start = new Date(aProgram.timeslot.start);
+                var end = new Date(aProgram.timeslot.end);
+                var ugcProjectId = ugc.projectId;
+                var showTime = function( time ){
+                    var show;
+                    if(time < 10)
+                        show = '0' + time;
+                    else
+                        show = time;
+                    
+                    return show;
+                };
+                if(start.getHours()>12)
+                    play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日下午'+showTime(start.getHours()-12)+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours()-12)+':'+showTime(end.getMinutes());
+                else
+                    play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日上午'+showTime(start.getHours())+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours())+':'+showTime(end.getMinutes());
+                
+                // message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                
+                switch(member.app.toLowerCase())
+                {
+                    case 'ondascreen':
+                        message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                        break;
+                    case 'wowtaipeiarena':
+                        message = '你的No.' + ugc.no + '作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧!';
+                        break;
+                    default:
+                        break;
+                } 
+                
+                async.parallel([
+                    function(push_cb){
+                        pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
+                    function(postFB_cb){
+                        
+                        var option = {
+                            accessToken: access_token,
+                            type: member.app,
+                            ugcProjectId: ugcProjectId
+                            // text: '哇！fb_name的作品，即將在play_time在小巨蛋播出，快到現場瞧瞧！'
+                        };
+                        
+                        switch(option.type.toLowerCase())
+                        {
+                            case 'ondascreen':
+                                // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                option.name = fb_name;
+                                option.time = play_time;
+                                break;
+                            case 'wowtaipeiarena':
+                                // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                option.name = fb_name;
+                                option.time = play_time;
+                                break;
+                            default:
+                                break;
+                        }                            
+                        canvasProcessMgr.markTextToPreview(option, postFB_cb);
+                    }
+                ], function(err, res){
+                    //(err)?console.log(err):console.dir(res);
+                    postPreview_cb(err, res);
+                });
+
+            }
+            else {
+                postPreview_cb("Failed to post Preview", null);
+            }
+            
+        
+        });
+
+    };
+
     var timeInfos = sessionId.split('-');
     var intervalStart = new Date( Number(timeInfos[2]) );
     var intervalEnd = new Date( Number(timeInfos[3]) );
@@ -794,94 +910,14 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
 
         function(programs, cb2){
             
-            var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
-                
-                var access_token, message, link;
-                var fb_name, play_time;
-                
-                async.waterfall([
-                    function(ugcSearch){
-                        ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ ugcSearch(null, ugc); });
-                    },
-                    function(ugc, memberSearch){
-                        memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
-                    },
-                ], function(err, res){
-                
-                    var ugc = res.ugc[0],
-                        member = res.member[0];
-                    
-                    access_token = member.fb.auth.accessToken;
-                    fb_name = member.fb.userName;
-                    var start = new Date(aProgram.timeslot.start);
-                    var end = new Date(aProgram.timeslot.end);
-                    var ugcProjectId = ugc.projectId;
-                    var showTime = function( time ){
-                        var show;
-                        if(time < 10)
-                            show = '0' + time;
-                        else
-                            show = time;
-                        
-                        return show;
-                    };
-                    if(start.getHours()>12)
-                        play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日下午'+showTime(start.getHours()-12)+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours()-12)+':'+showTime(end.getMinutes());
-                    else
-                        play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日上午'+showTime(start.getHours())+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours())+':'+showTime(end.getMinutes());
-                    
-                    // message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-                    
-                    switch(member.app.toLowerCase())
-                    {
-                        case 'ondascreen':
-                            message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-                            break;
-                        case 'wowtaipeiarena':
-                            message = '你的No.' + ugc.no + '作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧!';
-                            break;
-                        default:
-                            break;
-                    } 
-                    
-                    async.parallel([
-                        function(push_cb){
-                            pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
-                        function(postFB_cb){
-                            
-                            var option = {
-                                accessToken: access_token,
-                                type: member.app,
-                                ugcProjectId: ugcProjectId
-                                // text: '哇！fb_name的作品，即將在play_time在小巨蛋播出，快到現場瞧瞧！'
-                            };
-                            
-                            switch(option.type.toLowerCase())
-                            {
-                                case 'ondascreen':
-                                    // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
-                                    option.name = fb_name;
-                                    option.time = play_time;
-                                    break;
-                                case 'wowtaipeiarena':
-                                    // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
-                                    option.name = fb_name;
-                                    option.time = play_time;
-                                    break;
-                                default:
-                                    break;
-                            }                            
-                            canvasProcessMgr.markTextToPreview(option, postFB_cb);
-                        }
-                    ], function(err, res){
-                        //(err)?console.log(err):console.dir(res);
-                        postPreview_cb(err, res);
-                    });
-                });
-
-            };
-
             //push each programs to Scala
+            
+            var utility = require('../utility.js');
+            var timeslotStartString = utility.getLocalTimeString(new Date( Number(arrayOfsessionId[2]) ));
+            var timeslotEndString = utility.getLocalTimeString(new Date( Number(arrayOfsessionId[3]) ));
+            var playlistName = 'WTA-' + timeslotStartString + '-' + timeslotEndString;
+
+            
             var iteratorPushAProgram = function(aProgram, callbackIterator){
                 
                 if (aProgram.contentType == "file" ) {
@@ -922,13 +958,6 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                                                      }
                                                      
                                                  });
-                                                 //add fb push
-                                                 postPreview(aProgram, function(err, res){
-                                                     if(err)
-                                                         logger.info('Post FB message is Error: ' + err);
-                                                     else
-                                                         logger.info('Post FB message is Success: ' + res);
-                                                 });
                                              }
                                              else {
                                                  var paddingFilePath = path.join(workingPath, 'public', aProgram.content.dir, aProgram.content.file);
@@ -937,75 +966,85 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                      
                                          }, 
                                          function(fileToPlay, timeslot, contentNo, callback){
-                                             //debugger;
                                              //push content to Scala
-                                             var option = 
-                                             {
+                                             if ( playMode === "periodic" ) {
+                                                 
+                                                 var option = 
+                                                 {
+                                                         file: {
+                                                             name : path.basename(fileToPlay),
+                                                             path : path.dirname(fileToPlay),
+                                                             savepath : ''
+                                                         }
+                                                 };
+                                                 scalaMgr.uploadMediaItem( option, function(errScala, resultScala){
+                                                     if (!errScala){
+                                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                                         adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
+                                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                                         callback(null, fileToPlay, contentNo);
+                                                     }
+                                                     else{
+                                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                                         adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
+                                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                                         callback('Failed to push content to Scala :'+errScala, null, null);
+                                                     }
+                                                 });
+
+                                             }
+                                             else {  //playMode === "interrupt"
+                                                 
+                                                 var option = 
+                                                 {
+                                                     playlist: { name: playlistName},
+                                                     playTime: {
+                                                         start: timeslot.start,
+                                                         end: timeslot.end,
+                                                         duration: timeslot.playDuration/1000  //sec    
+                                                     },
                                                      file: {
                                                          name : path.basename(fileToPlay),
                                                          path : path.dirname(fileToPlay),
                                                          savepath : ''
                                                      }
-                                             };
-                                             scalaMgr.uploadMediaItem( option, function(errScala, resultScala){
-                                                 if (!errScala){
-                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                                     adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
-                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                                     callback(null, fileToPlay, contentNo);
-                                                 }
-                                                 else{
-                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                                     adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
-                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                                     callback('Failed to push content to Scala :'+errScala, null, null);
-                                                 }
-                                             });
-                                         /*    var option = 
-                                             {
-                                                 playlist: { name: 'OnDaScreen'+'-'+arrayOfsessionId[2]+'-'+arrayOfsessionId[3]},
-                                                 playTime: {
-                                                     start: timeslot.start,
-                                                     end: timeslot.end,
-                                                     duration: timeslot.playDuration/1000  //sec    
-                                                 },
-                                                 file: {
-                                                     name : path.basename(fileToPlay),
-                                                     path : path.dirname(fileToPlay),
-                                                     savepath : ''
-                                                 }
-                                             };*/
-                                       /*      scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
-                                                 if (!errScala){
-                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                                     adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
-                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                                     callback(null, fileToPlay);
-                                                 }
-                                                 else{
-                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                                     adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
-                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                                     callback('Failed to push content to Scala :'+errScala, null);
-                                                 }
-                                             });*/
-                                             
-                                             //callback(null, fileToPlay);
+                                                 };
+                                                 scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
+                                                     if (!errScala){
+                                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala with "interrupt" mode: ' + fileToPlay );
+                                                         adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
+                                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala with "interrupt" mode: ' + fileToPlay );
+                                                         callback(null, fileToPlay, contentNo);
+                                                     }
+                                                     else{
+                                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala with "interrupt" mode: ' + fileToPlay );
+                                                         adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
+                                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala with "interrupt" mode: ' + fileToPlay );
+                                                         callback('Failed to push content to Scala :'+errScala, null, null);
+                                                     }
+                                                 });
+
+                                             }
                                          },
                                          function(filePlayed, contentNo, callback){
                                              //update "doohSubmitTimes" as well as "mustPlay" and "failedToGenliveContentInLastPlay" flag 
                                              ugcModel.findOne({"no":contentNo}).exec(function(err, ugcItem){
-                                                 ugcItem.mustPlay = false;
-                                                 ugcItem.failedToGenliveContentInLastPlay = false;
-                                                 ugcItem.doohSubmitTimes++;
-                                                 ugcItem.save(function(errOfSave){
-                                                     if (!errOfSave) {
-                                                         callback(null, filePlayed);
-                                                     }
-                                                     else {
-                                                         callback("Failed to update mustPlay flag: "+errOfSave, null);
-                                                     }
-                                                 });
+                                                 if ( (!err) && ugcItem ) {
+                                                     ugcItem.mustPlay = false;
+                                                     ugcItem.failedToGenliveContentInLastPlay = false;
+                                                     ugcItem.doohSubmitTimes++;
+                                                     ugcItem.save(function(errOfSave){
+                                                         if (!errOfSave) {
+                                                             callback(null, filePlayed);
+                                                         }
+                                                         else {
+                                                             callback("Failed to update mustPlay, failedToGenliveContentInLastPlay flags: "+errOfSave, null);
+                                                         }
+                                                     });
+                                                 }
+                                                 else {
+                                                     callback("Failed to update mustPlay, failedToGenliveContentInLastPlay flags: "+err, null);
+                                                 }
                                                  
                                              });
                                          },
@@ -1032,7 +1071,14 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
         function(programs, cb3){
             // update the state of programTimeslot docs
             var iteratorUpdateAProgramState = function(aProgram, callbackOfIteratorUpdateAProgramState){
-                //var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
+                //post to fb & send push
+                postPreview(aProgram, function(err, res){
+                    if(err)
+                        logger.info('Post FB message is Error: ' + err);
+                    else
+                        logger.info('Post FB message is Success: ' + res);
+                });
+                //update the state of a programTimeslot doc
                 db.updateAdoc(programTimeSlotModel, aProgram._id, {"state": "confirmed" }, function(errOfUpdateAdoc, result){
                     if (!errOfUpdateAdoc){
                         callbackOfIteratorUpdateAProgramState(null);
@@ -1041,7 +1087,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         callbackOfIteratorUpdateAProgramState("Failed to update program "+aProgram._id.toHexString()+": "+errOfUpdateAdoc);
                     }
                 });
-
+                
             };
             async.eachSeries(programs, iteratorUpdateAProgramState, function(errEachSeries){
                 cb3(errEachSeries);

@@ -459,13 +459,31 @@ var UGCPlayListSubPg = {
                     alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
 //                    alert("播出時間:"+ showDateStart.toDateString()+' '+showDateStart.toLocaleTimeString() +'~'+ showDateEnd.toDateString()+' '+showDateEnd.toLocaleTimeString()+"，此節目已排入節目清單無法異動，有更改之需求請洽工程師!");
                 }else{
+                    var schedulingMode;
+                    if ( $("#checkboxIsContinuousProgramMode").is(":checked") ) {
+                        schedulingMode = "continuous";
+                    }
+                    else {
+                        schedulingMode = "appended_to_each_playlist_cycle";
+                    }
+
+                    var playMode;
+                    if ( $("#checkboxPlayWithInterruptMode").is(":checked") ) {
+                        playMode = "interrupt";
+                    }
+                    else {
+                        playMode = "periodic";
+                    }
+                    
                     $.ajax({
                             url: url,
                             type: 'PUT',
                             data: {
                             intervalOfSelectingUGC : intervalOfSelectingUGC,
                             intervalOfPlanningDoohProgrames :intervalOfPlanningDoohProgrames,
-                            originSequence :originSequence
+                            originSequence :originSequence,
+                            schedulingMode: schedulingMode,
+                            playMode: playMode
                             },
                             success: function(response) {
                                 if(response.message){

@@ -183,10 +183,11 @@ FM.censorHandler.pushProgramsTo3rdPartyContentMgr_get_cb = function(req, res){
     var intervalOfPlanningDoohProgrames = {start: intervalOfPlanningDoohProgramesStart, end: intervalOfPlanningDoohProgramesEnd};
     
     var originSequence = req.body.originSequence;
+    var playMode = req.body.playMode;
     
     logger.info('[PUT ' + req.path + '] is called');
 
-    scheduleMgr.pushProgramsTo3rdPartyContentMgr(sessionId, function(err){
+    scheduleMgr.pushProgramsTo3rdPartyContentMgr(sessionId, playMode, function(err){
         if (!err){
             //TODO pushProgramsTo3rdPartyContentMgr
             //res.send(200);
