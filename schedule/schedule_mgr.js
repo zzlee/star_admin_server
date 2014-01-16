@@ -918,7 +918,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
             
             //push each programs to Scala
             
-            debugger;
+            var playlistId = null;
             
             var iteratorPushAProgram = function(aProgram, callbackIterator){
                 
@@ -1071,12 +1071,11 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                             playlist:{ name: playlistName},
                             playTime: { start: aProgram.timeslot.start, end: aProgram.timeslot.end, duration: aProgram.timeslot.playDuration/1000 }
                         };
-                        console.log("setting=");
-                        console.dir(setting);
                         scalaMgr.pushMediaToPlaylist(setting, function(errScala, res){
                             if (!errScala){
                                 logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
                                 //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
+                                playlistId = res.playlist.id;
                                 adminBrowserMgr.showTrace(null, straceStamp+"成功推送"+aProgram.content.name+"至播放系統!");
                                 db.updateAdoc(programTimeSlotModel, aProgram._id, {"upload": true, "playlist.id": res.playlist.id, "playlist.name": res.playlist.name, "playlistItem": res.playlistItem.id}, function(err, res){
                                     callbackIterator(null);
@@ -1098,7 +1097,34 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                     
             };
             async.eachSeries(programs, iteratorPushAProgram, function(errEachSeries){
-                cb2(errEachSeries, programs);
+                if (!errEachSeries) {
+                    if (playMode === "interrupt") {
+                        //make the playlist an "always-on-top" program in schedule
+                        if (playlistId) {
+                            option = {
+                                    id : playlistId,
+                                    priority : 'ALWAYS_ON_TOP',
+                                    playTime: {start: Number(timeInfos[2]), end: Number(timeInfos[3])}
+                                    
+                            };
+                            scalaMgr.createTimeslot( option, function(status){
+                                //TODO: parse the status code
+                                console.log("status=");
+                                console.dir(status);
+                                cb2(null, programs);
+                            }); 
+                        }
+                        else {
+                            cb2("Failed to get playlistId after calling scalaMgr.pushMediaToPlaylist()", null);
+                        }
+                    } 
+                    else {
+                        cb2(null, programs);
+                    } 
+                }
+                else {
+                    cb2("push each programs to Scala: "+errEachSeries, null);
+                }
             });
             
 
