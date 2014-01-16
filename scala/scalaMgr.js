@@ -1205,6 +1205,24 @@ function scalaMgr( url, account ){
         
     };
     
+    /**
+     * create timeslot
+     */
+    var createTimeslot = function(option, createTimeslot_cb){
+
+		var playList_id = option.id;
+		var priority = option.priority;//ALWAYS_ON_TOP, NORMAL, ALWAYS_UNDERNEATH
+		var playTime = option.playTime;
+		var channel_id = 1;
+		
+        contractor.schedule.createTimeslot(playList_id, priority, playTime, channel_id, function(status){
+			if(status.description)
+				createTimeslot_cb(status.description);
+			else
+				createTimeslot_cb("done");
+        });
+    };
+    
     return {
         listTimeslot : listTimeslot,
         listTimetriggers : listTimetriggers,
@@ -1221,6 +1239,7 @@ function scalaMgr( url, account ){
         clearMedia: clearMedia,
         dumpPlaylist: dumpPlaylist,
         contractor: contractor,   //test
+        createTimeslot: createTimeslot,
     };
 }
 
