@@ -1112,7 +1112,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                                     cb2(null, programs);
                                 }
                                 else {  //Something is wrong. 
-                                    cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule', null);
+                                    cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule: '+status, null);
                                 }
 
 

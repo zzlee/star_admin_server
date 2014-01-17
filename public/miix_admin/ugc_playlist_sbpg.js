@@ -46,7 +46,23 @@ var UGCPlayListSubPg = {
             console.log(inputSearchData);
             
             if(inputSearchData.timeStart && inputSearchData.timeEnd && inputSearchData.playTimeStart && inputSearchData.playTimeEnd && inputSearchData.ugcSequenceText){
-                var checkDate = new Date().getTime()+ 30*60*1000;
+                
+                var playMode;
+                if ( $("#checkboxPlayWithInterruptMode").is(":checked") ) {
+                    playMode = "interrupt";
+                }
+                else {
+                    playMode = "periodic";
+                }
+                
+                var checkDate = null;
+                if (playMode !== 'interrupt') {
+                    checkDate = new Date().getTime() + 30*60*1000;
+                }
+                else {
+                    checkDate = new Date().getTime();
+                }
+
                 var playTimeStart = new Date(inputSearchData.playTimeStart).getTime();
                 var playTimeEnd = new Date(inputSearchData.playTimeEnd).getTime();
                 console.log(inputSearchData.playTimeEnd);
@@ -155,7 +171,6 @@ var UGCPlayListSubPg = {
             
             if(inputSearchData.timeStart && inputSearchData.timeEnd && inputSearchData.playTimeStart && inputSearchData.playTimeEnd && inputSearchData.ugcSequenceText && programSequenceArr){
 
-                var checkDate = new Date().getTime() + 30*60*1000;
                 var playTimeStart = new Date(inputSearchData.playTimeStart).getTime();
                 var playTimeEnd = new Date(inputSearchData.playTimeEnd).getTime();
                 console.log(inputSearchData.playTimeEnd);
@@ -175,6 +190,14 @@ var UGCPlayListSubPg = {
                 }
                 else {
                     playMode = "periodic";
+                }
+
+                var checkDate = null;
+                if (playMode !== 'interrupt') {
+                    checkDate = new Date().getTime() + 30*60*1000;
+                }
+                else {
+                    checkDate = new Date().getTime();
                 }
 
                 var filter;
@@ -407,7 +430,7 @@ var UGCPlayListSubPg = {
             var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
             var programTimeSlotId = $(this).attr("name");
 
-            if(sessionId === null && flag == 0){
+            if(sessionId === null && flag === 0){
                 alert('Session Id not exist!!');
                 flag = 1; 
             }
@@ -445,12 +468,35 @@ var UGCPlayListSubPg = {
         $('#pushProgramsBtn').click(function(){
             var flag = 0;
             var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/ProgramsTo3rdPartyContentMgr/"+sessionId;
-            if(sessionId === null && flag == 0){
+            if(sessionId === null && flag === 0){
                 alert('Session Id not exist!!');
                 flag = 1; 
             }
             if(sessionId){
-                var checkDate = new Date().getTime() + 30*60*1000;
+                var schedulingMode;
+                if ( $("#checkboxIsContinuousProgramMode").is(":checked") ) {
+                    schedulingMode = "continuous";
+                }
+                else {
+                    schedulingMode = "appended_to_each_playlist_cycle";
+                }
+
+                var playMode;
+                if ( $("#checkboxPlayWithInterruptMode").is(":checked") ) {
+                    playMode = "interrupt";
+                }
+                else {
+                    playMode = "periodic";
+                }
+                
+                var checkDate = null;
+                if (playMode !== 'interrupt') {
+                    checkDate = new Date().getTime() + 30*60*1000;
+                }
+                else {
+                    checkDate = new Date().getTime();
+                }
+
                 var arrayOfSessionId = sessionId.split('-');
                 console.log(checkDate+','+arrayOfSessionId[2]);
                 var showDateStart = new Date(Number(arrayOfSessionId[2]));
@@ -459,21 +505,6 @@ var UGCPlayListSubPg = {
                     alert("請檢查您輸入的播放時間是否正確，無法排入或更改半小時內要播出之節目，有更改之需求請洽工程師!");
 //                    alert("播出時間:"+ showDateStart.toDateString()+' '+showDateStart.toLocaleTimeString() +'~'+ showDateEnd.toDateString()+' '+showDateEnd.toLocaleTimeString()+"，此節目已排入節目清單無法異動，有更改之需求請洽工程師!");
                 }else{
-                    var schedulingMode;
-                    if ( $("#checkboxIsContinuousProgramMode").is(":checked") ) {
-                        schedulingMode = "continuous";
-                    }
-                    else {
-                        schedulingMode = "appended_to_each_playlist_cycle";
-                    }
-
-                    var playMode;
-                    if ( $("#checkboxPlayWithInterruptMode").is(":checked") ) {
-                        playMode = "interrupt";
-                    }
-                    else {
-                        playMode = "periodic";
-                    }
                     
                     $.ajax({
                             url: url,
