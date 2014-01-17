@@ -1099,7 +1099,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
             async.eachSeries(programs, iteratorPushAProgram, function(errEachSeries){
                 if (!errEachSeries) {
                     if (playMode === "interrupt") {
-                        //make the playlist an "always-on-top" program in schedule
+                        //put the playlist in an "always-on-top" timeslot in schedule
                         if (playlistId) {
                             option = {
                                     id : playlistId,
@@ -1108,10 +1108,15 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                                     
                             };
                             scalaMgr.createTimeslot( option, function(status){
-                                //TODO: parse the status code
-                                console.log("status=");
-                                console.dir(status);
-                                cb2(null, programs);
+                                if ( status === "done" ) {
+                                    cb2(null, programs);
+                                }
+                                else {  //Something is wrong. 
+                                    cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule', null);
+                                }
+
+
+                                
                             }); 
                         }
                         else {
@@ -1175,12 +1180,14 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
     ], function (err, result) {
         if (!err) {
             adminBrowserMgr.showTrace(null, straceStamp+"節目推送完成!");
+            logger.info("Successfully push programs to Scala!");
             if (pushed_cb) {
                 pushed_cb(null);
             }
         }
         else {
             adminBrowserMgr.showTrace(null, straceStamp+"!!!節目推送失敗: "+err);
+            logger.error("Failed to push programs to Scala: "+ err);
             if (pushed_cb) {
                 pushed_cb(err);
             }            
