@@ -4,6 +4,7 @@
 	"HOST_MONGO_DB_SERVER_URL":"mongodb://internal.ondascreen.com:27017",
 	"HOST_MONGO_DB_USER_NAME":"feltmeng",
 	"HOST_MONGO_DB_PASSWORD":"53768608",
+	"HOST_MONGO_DB_SERVER_FORLOG_URL":"mongodb://internal.ondascreen.com:27017",
 	"IS_STAND_ALONE": true,
 	"DEFAULT_AE_SERVER": "AE_Server_250333438_PC",
 	"USE_PRODUCT_PEM": false,

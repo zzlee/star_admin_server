@@ -46,7 +46,7 @@ var app = express();
 
 var workingPath = process.cwd();
 
-var mongoDbServerUrlObj = url.parse(systemConfig.HOST_MONGO_DB_SERVER_URL);
+var mongoDbServerUrlObj = url.parse(systemConfig.HOST_MONGO_DB_SERVER_FORLOG_URL);
 var mongoDbServerPort;
 if ( mongoDbServerUrlObj.port  ){
     mongoDbServerPort = Number(mongoDbServerUrlObj.port);
@@ -100,8 +100,8 @@ app.use(express.methodOverride());
 
 //-- start of session management ? --
 var DefaultDB = 'feltmeng';
-var mongoUrlHead = systemConfig.HOST_MONGO_DB_SERVER_URL.substring(0,10);
-var mongoUrlRoot = systemConfig.HOST_MONGO_DB_SERVER_URL.substring(10, systemConfig.HOST_MONGO_DB_SERVER_URL.length);
+var mongoUrlHead = systemConfig.HOST_MONGO_DB_SERVER_FORLOG_URL.substring(0,10);
+var mongoUrlRoot = systemConfig.HOST_MONGO_DB_SERVER_FORLOG_URL.substring(10, systemConfig.HOST_MONGO_DB_SERVER_FORLOG_URL.length);
 var mongoUrl = mongoUrlHead + systemConfig.HOST_MONGO_DB_USER_NAME +':'+ systemConfig.HOST_MONGO_DB_PASSWORD +'@'+ mongoUrlRoot + '/'+DefaultDB;
 
 app.use(express.query());
