@@ -34,7 +34,10 @@ form#mainform(action='')
                       td 
                         input(id='#{PlayList.programTimeSlotId}' class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
                         input#PlayList.ugcCensorNoSetBtn(type='button', class='ugcChange', value='確認', name='#{PlayList.programTimeSlotId}')
-                      td(id='#{PlayList.programTimeSlotId}' class='ugcNo') #{PlayList.ugcCensorNo}
+                      td(id='#{PlayList.programTimeSlotId}' class='ugcNo' original_content_class='#{PlayList.contentClass}') #{PlayList.ugcCensorNo}
+                        if (PlayList.contentClass == 'VIP')
+                            br
+                            label.label_special_condition VIP
                         if (PlayList.isLoopedAround == true)
                             br
                             label.label_special_condition 已從頭循環
@@ -82,7 +85,10 @@ form#mainform(action='')
                       td
                         input(id='#{PlayList.programTimeSlotId}' class='#PlayList.ugcCensorNoSetBtn', type='text' ,name='ugcChangeText' ,onfocus='this.value=\'\'')
                         input#PlayList.ugcCensorNoSetBtn(type='button', class='ugcChange', value='確認', name='#{PlayList.programTimeSlotId}')
-                      td(id='#{PlayList.programTimeSlotId}' class='ugcNo') #{PlayList.ugcCensorNo}
+                      td(id='#{PlayList.programTimeSlotId}' class='ugcNo' original_content_class='#{PlayList.contentClass}') #{PlayList.ugcCensorNo}
+                        if (PlayList.contentClass == 'VIP')
+                            br
+                            label.label_special_condition VIP
                         if (PlayList.isLoopedAround == true)
                             br
                             label.label_special_condition 已從頭循環 

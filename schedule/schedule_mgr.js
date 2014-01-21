@@ -96,10 +96,16 @@ scheduleMgr.init = function(_censorMgr){
  *     <li>"not_being_submitted_to_dooh or live_content_failed_in_last_play"
  *     </ul>
  *     
- * @param {String} mode The mode of generating program list.  It must be one of the following values: <br>
+ * @param {String} schedulingMode The mode of scheduling program list.  It must be one of the following values: <br>
  *     <ul>
  *     <li>"appended_to_each_playlist_cycle"
  *     <li>"continuous"
+ *     </ul>
+ * 
+ * @param {String} playMode The mode of playing programs.  It must be one of the following values: <br>
+ *     <ul>
+ *     <li>"interrupt"
+ *     <li>"periodic"
  *     </ul>
  * 
  * @param {Function} cbOfCreateProgramList The callback function called when the result program list is created.<br>
@@ -116,7 +122,7 @@ scheduleMgr.init = function(_censorMgr){
  *         { numberOfProgramTimeSlots: 33, sessionId: '1367596800000-1367683140000-1373332978201' }     
  *     </ul>
  */
-scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, filter, mode, cbOfCreateProgramList ){
+scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, planner, filter, schedulingMode, playMode, cbOfCreateProgramList ){
     
     logger.info('[scheduleMgr.createProgramList()]: intervalOfSelectingUGC={start:'+(new Date(intervalOfSelectingUGC.start))+' end:'+(new Date(intervalOfSelectingUGC.end))+'} ');
     logger.info('intervalOfPlanningDoohProgrames= {start:'+(new Date(intervalOfPlanningDoohProgrames.start))+' end:'+(new Date(intervalOfPlanningDoohProgrames.end))+'} programSequence='+JSON.stringify(programSequence));
@@ -394,13 +400,23 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                             if (timeToAddTimeSlot+programPeriod <= anAvailableTimeInterval.interval.end) {
                                 // add time slots of a micro timeslot (of the same content genre) to db
                                 var inteval = { start: timeToAddTimeSlot, end:timeToAddTimeSlot+programPeriod  };
+                                var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //the genre that will be used in this program group  
+                                
                                 var programGroup = new ProgramGroup(inteval, dooh, planner, sessionId);
-                                programGroup.generateByTemplate('PG_30SEC_3UGC', programPlanningPattern, function(err1){
-                                //generateTimeSlotsOfMicroInterval(inteval, function(err1){
-                                    timeToAddTimeSlot += programPeriod;
-                                    
-                                    cb_whilst(err1);
-                                });
+                                if (contentGenre !== "miix_it") {
+                                    programGroup.generateByTemplate('PG_30SEC_3IMAGEUGC', contentGenre, function(err1){
+                                    //generateTimeSlotsOfMicroInterval(inteval, function(err1){
+                                        timeToAddTimeSlot += programPeriod;
+                                        cb_whilst(err1);
+                                    });
+                                }
+                                else { //contentGenre === "miix_it"
+                                    programGroup.generateByTemplate('PG_30SEC_1VIDEOUGC', contentGenre, function(err1){
+                                    //generateTimeSlotsOfMicroInterval(inteval, function(err1){
+                                        timeToAddTimeSlot += programPeriod;
+                                        cb_whilst(err1);
+                                    });
+                                }
                             }
                             else {
                                 //no time slot to add to db
@@ -538,7 +554,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         },
         function(callback){
             //generate program time slots
-            if (mode == "appended_to_each_playlist_cycle") {
+            if (schedulingMode == "appended_to_each_playlist_cycle") {
                 generateTimeSlot( function(err_2){
                     if (!err_2) {
                         //console.log('generateTimeSlot() done! ');
@@ -556,7 +572,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
         }, 
         function(callback){
             //put UGCs into programe time slots
-            if (mode == "appended_to_each_playlist_cycle") {
+            if (schedulingMode == "appended_to_each_playlist_cycle") {
                 putUgcIntoTimeSlots(function(err_3, result){
                     if (!err_3) {
                         //console.log('putUgcIntoTimeSlots() done! ');
@@ -568,9 +584,9 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                     
                 });
             }
-            else { //mode == "continuous"
+            else { //schedulingMode == "continuous"
                 var programGroup = new ProgramGroup(intervalOfPlanningDoohProgrames, dooh, planner, sessionId);
-                programGroup.generateFromSortedUgcList(sortedUgcList, programPlanningPattern, function(errOfGenerateFromSortedUgcList, resultProgramGroup){
+                programGroup.generateFromSortedUgcList(sortedUgcList, programPlanningPattern, playMode, function(errOfGenerateFromSortedUgcList, resultProgramGroup){
                     if (!errOfGenerateFromSortedUgcList) {
                         var result = {numberOfProgramTimeSlots: resultProgramGroup.programs.length, sessionId: resultProgramGroup.programSession };
                         callback(null, result);
@@ -720,21 +736,143 @@ scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, c
  * <br>
  * @param {String} sessionId The id indicating the session of creating program time slot (This session id is accquired in the callback 
  *     passed to scheduleMgr.createProgramList(). )
+ *     
+ * @param {String} playMode The mode of playing programs.  It must be one of the following values: <br>
+ *     <ul>
+ *     <li>"interrupt"
+ *     <li>"periodic"
+ *     </ul>
+ *     
  * @param {Function} pushed_cb The callback function called when the process is done.<br>
  *     The function signature is updated_cb(err), where err is the error message indicating failure: 
  *     if successful, err returns null; if failed, err returns the error message.
  */
-scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
+scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pushed_cb) {
     
+    var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
+        
+        var access_token, message, link;
+        var fb_name, play_time;
+        
+        async.waterfall([
+            function(ugcSearch){
+                ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ 
+                    if (!err) {
+                        ugcSearch(null, ugc); 
+                    }
+                    else {
+                        ugcSearch("Failed to find corresponding UGC: "+err, null); 
+                    }
+                });
+            },
+            function(ugc, memberSearch){
+                if (ugc[0]) {
+                    memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ 
+                        memberSearch(null, {ugc: ugc, member: member}); 
+                    });
+                } 
+                else {
+                    memberSearch("Failed to have valid ugc[0]", null); 
+                }
+            },
+        ], function(err, res){
+            
+            if (!err) {
+                var ugc = res.ugc[0],
+                member = res.member[0];
+            
+                access_token = member.fb.auth.accessToken;
+                fb_name = member.fb.userName;
+                var start = new Date(aProgram.timeslot.start);
+                var end = new Date(aProgram.timeslot.end);
+                var ugcProjectId = ugc.projectId;
+                var showTime = function( time ){
+                    var show;
+                    if(time < 10)
+                        show = '0' + time;
+                    else
+                        show = time;
+                    
+                    return show;
+                };
+                if(start.getHours()>12)
+                    play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日下午'+showTime(start.getHours()-12)+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours()-12)+':'+showTime(end.getMinutes());
+                else
+                    play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日上午'+showTime(start.getHours())+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours())+':'+showTime(end.getMinutes());
+                
+                // message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                
+                switch(member.app.toLowerCase())
+                {
+                    case 'ondascreen':
+                        message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
+                        break;
+                    case 'wowtaipeiarena':
+                        message = '你的No.' + ugc.no + '作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧!';
+                        break;
+                    default:
+                        break;
+                } 
+                
+                async.parallel([
+                    function(push_cb){
+                        pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
+                    function(postFB_cb){
+                        
+                        var option = {
+                            accessToken: access_token,
+                            type: member.app,
+                            ugcProjectId: ugcProjectId
+                            // text: '哇！fb_name的作品，即將在play_time在小巨蛋播出，快到現場瞧瞧！'
+                        };
+                        
+                        switch(option.type.toLowerCase())
+                        {
+                            case 'ondascreen':
+                                // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                option.name = fb_name;
+                                option.time = play_time;
+                                break;
+                            case 'wowtaipeiarena':
+                                // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                option.name = fb_name;
+                                option.time = play_time;
+                                break;
+                            default:
+                                break;
+                        }                            
+                        canvasProcessMgr.markTextToPreview(option, postFB_cb);
+                    }
+                ], function(err, res){
+                    //(err)?console.log(err):console.dir(res);
+                    postPreview_cb(err, res);
+                });
+
+            }
+            else {
+                postPreview_cb("Failed to post Preview", null);
+            }
+            
+        
+        });
+
+    };
+
     var timeInfos = sessionId.split('-');
     var intervalStart = new Date( Number(timeInfos[2]) );
     var intervalEnd = new Date( Number(timeInfos[3]) );
     var straceStamp = '[推送'+intervalStart.toDateString()+' '+intervalStart.toLocaleTimeString()+'~'+intervalEnd.toDateString()+' '+intervalEnd.toLocaleTimeString()+'的節目] ';
-    
+
+    var utility = require('../utility.js');
+    var arrayOfsessionId = sessionId.split('-');
+    var timeslotStartString = utility.getLocalTimeString(new Date( Number(arrayOfsessionId[2]) ));
+    var timeslotEndString = utility.getLocalTimeString(new Date( Number(arrayOfsessionId[3]) ));
+    var playlistName = 'WTA-' + timeslotStartString + '-' + timeslotEndString;
+
     adminBrowserMgr.showTrace(null, straceStamp+"節目推送作業開始....");
     
     logger.info('[scheduleMgr] start to push session '+sessionId+' to 3rd-party Content Manager' );
-    var arrayOfsessionId = sessionId.split('-');
+
     var programGroups = null;
     async.waterfall([
         function(cb1){
@@ -778,237 +916,220 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
 
         function(programs, cb2){
             
-            var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
-                
-                var access_token, message, link;
-                var fb_name, play_time;
-                
-                async.waterfall([
-                    function(ugcSearch){
-                        ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ ugcSearch(null, ugc); });
-                    },
-                    function(ugc, memberSearch){
-                        memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ memberSearch(null, {ugc: ugc, member: member}); });
-                    },
-                ], function(err, res){
-                
-                    var ugc = res.ugc[0],
-                        member = res.member[0];
-                    
-                    access_token = member.fb.auth.accessToken;
-                    fb_name = member.fb.userName;
-                    var start = new Date(aProgram.timeslot.start);
-                    var end = new Date(aProgram.timeslot.end);
-                    var ugcProjectId = ugc.projectId;
-                    var showTime = function( time ){
-                        var show;
-                        if(time < 10)
-                            show = '0' + time;
-                        else
-                            show = time;
-                        
-                        return show;
-                    };
-                    if(start.getHours()>12)
-                        play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日下午'+showTime(start.getHours()-12)+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours()-12)+':'+showTime(end.getMinutes());
-                    else
-                        play_time = start.getFullYear()+'年'+showTime(start.getMonth()+1)+'月'+showTime(start.getDate())+'日上午'+showTime(start.getHours())+':'+showTime(start.getMinutes())+'~'+showTime(end.getHours())+':'+showTime(end.getMinutes());
-                    
-                    // message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-                    
-                    switch(member.app.toLowerCase())
-                    {
-                        case 'ondascreen':
-                            message = fb_name + '即將粉墨登場！\n' + fb_name + '的試鏡編號' + ugc.no + '作品，即將於' + play_time + '之間，登上台北天幕LED，敬請期待！';
-                            break;
-                        case 'wowtaipeiarena':
-                            message = '你的No.' + ugc.no + '作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧!';
-                            break;
-                        default:
-                            break;
-                    } 
-                    
-                    async.parallel([
-                        function(push_cb){
-                            pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
-                        function(postFB_cb){
-                            
-                            var option = {
-                                accessToken: access_token,
-                                type: member.app,
-                                ugcProjectId: ugcProjectId
-                                // text: '哇！fb_name的作品，即將在play_time在小巨蛋播出，快到現場瞧瞧！'
-                            };
-                            
-                            switch(option.type.toLowerCase())
-                            {
-                                case 'ondascreen':
-                                    // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
-                                    option.name = fb_name;
-                                    option.time = play_time;
-                                    break;
-                                case 'wowtaipeiarena':
-                                    // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
-                                    option.name = fb_name;
-                                    option.time = play_time;
-                                    break;
-                                default:
-                                    break;
-                            }                            
-                            canvasProcessMgr.markTextToPreview(option, postFB_cb);
-                        }
-                    ], function(err, res){
-                        //(err)?console.log(err):console.dir(res);
-                        postPreview_cb(err, res);
-                    });
-                });
-
-            };
-
             //push each programs to Scala
+            
+            var playlistId = null;
+            
             var iteratorPushAProgram = function(aProgram, callbackIterator){
                 
                 if (aProgram.contentType == "file" ) {
                 
-                        async.waterfall([
-                                         function(callback){
-                                             //download contents from S3 or get from local
-                                             //var fileName;
-                                             if (aProgram.type == "UGC"){
-                                                if((aProgram.content.fileExtension == 'png')||(aProgram.content.fileExtension == 'jpg')){
-                                                     var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
-                                                     //TODO: make sure that target directory exists
-                                                     var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);
-                                                 }
-                                                 else{
-                                                     var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
-                                                     //TODO: make sure that target directory exists
-                                                     if(typeof(aProgram.content.fileExtension) === 'undefined') {  //TODO: find out the bug, and remove this check
-                                                         //aProgram.content.fileExtension = '.mp4';
-                                                         var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.mp4';
-                                                         var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.mp4');
-                                                     }
-                                                     else {
-                                                         var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension;
-                                                         var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);                                        
-                                                     }
-                                                 }
-                                                 awsS3.downloadFromAwsS3(targetLocalPath, s3Path, function(errS3,resultS3){
-                                                     if (!errS3){
-                                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
-                                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
-                                                         callback(null, targetLocalPath, aProgram.timeslot, aProgram.content.no);
-                                                     }
-                                                     else{
-                                                         logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
-                                                         //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
-                                                         callback('Failed to download from S3 '+s3Path+' :'+errS3, null, null, null);
-                                                     }
-                                                     
-                                                 });
-                                                 //add fb push
-                                                 postPreview(aProgram, function(err, res){
-                                                     if(err)
-                                                         logger.info('Post FB message is Error: ' + err);
-                                                     else
-                                                         logger.info('Post FB message is Success: ' + res);
-                                                 });
-                                             }
-                                             else {
-                                                 var paddingFilePath = path.join(workingPath, 'public', aProgram.content.dir, aProgram.content.file);
-                                                 callback(null, paddingFilePath, aProgram.timeslot, aProgram.content.no);
-                                             }
-                     
-                                         }, 
-                                         function(fileToPlay, timeslot, contentNo, callback){
-                                             //debugger;
-                                             //push content to Scala
-                                             var option = 
-                                             {
-                                                     file: {
-                                                         name : path.basename(fileToPlay),
-                                                         path : path.dirname(fileToPlay),
-                                                         savepath : ''
-                                                     }
-                                             };
-                                             scalaMgr.uploadMediaItem( option, function(errScala, resultScala){
-                                                 if (!errScala){
-                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                                     adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
-                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                                     callback(null, fileToPlay, contentNo);
-                                                 }
-                                                 else{
-                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                                     adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
-                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                                     callback('Failed to push content to Scala :'+errScala, null, null);
-                                                 }
-                                             });
-                                         /*    var option = 
-                                             {
-                                                 playlist: { name: 'OnDaScreen'+'-'+arrayOfsessionId[2]+'-'+arrayOfsessionId[3]},
-                                                 playTime: {
-                                                     start: timeslot.start,
-                                                     end: timeslot.end,
-                                                     duration: timeslot.playDuration/1000  //sec    
-                                                 },
-                                                 file: {
-                                                     name : path.basename(fileToPlay),
-                                                     path : path.dirname(fileToPlay),
-                                                     savepath : ''
-                                                 }
-                                             };*/
-                                       /*      scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
-                                                 if (!errScala){
-                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                                     adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
-                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
-                                                     callback(null, fileToPlay);
-                                                 }
-                                                 else{
-                                                     logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                                     adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
-                                                     //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
-                                                     callback('Failed to push content to Scala :'+errScala, null);
-                                                 }
-                                             });*/
-                                             
-                                             //callback(null, fileToPlay);
-                                         },
-                                         function(filePlayed, contentNo, callback){
-                                             //update "doohSubmitTimes" as well as "mustPlay" and "failedToGenliveContentInLastPlay" flag 
-                                             ugcModel.findOne({"no":contentNo}).exec(function(err, ugcItem){
-                                                 ugcItem.mustPlay = false;
-                                                 ugcItem.failedToGenliveContentInLastPlay = false;
-                                                 ugcItem.doohSubmitTimes++;
-                                                 ugcItem.save(function(errOfSave){
-                                                     if (!errOfSave) {
-                                                         callback(null, filePlayed);
-                                                     }
-                                                     else {
-                                                         callback("Failed to update mustPlay flag: "+errOfSave, null);
-                                                     }
-                                                 });
-                                                 
-                                             });
-                                         },
+                    async.waterfall([
+                        function(callback){
+                            //download contents from S3 or get from local
+                            //var fileName;
+                            if (aProgram.type == "UGC"){
+                               if((aProgram.content.fileExtension == 'png')||(aProgram.content.fileExtension == 'jpg')){
+                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
+                                    //TODO: make sure that target directory exists
+                                    var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);
+                                }
+                                else{
+                                    var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension; 
+                                    //TODO: make sure that target directory exists
+                                    if(typeof(aProgram.content.fileExtension) === 'undefined') {  //TODO: find out the bug, and remove this check
+                                        //aProgram.content.fileExtension = '.mp4';
+                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.mp4';
+                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.mp4');
+                                    }
+                                    else {
+                                        var s3Path = '/user_project/'+aProgram.content.projectId+'/'+aProgram.content.projectId+'.'+aProgram.content.fileExtension;
+                                        var targetLocalPath = path.join(workingPath, 'public/contents/temp', aProgram.content.projectId+'.'+aProgram.content.fileExtension);                                        
+                                    }
+                                }
+                                awsS3.downloadFromAwsS3(targetLocalPath, s3Path, function(errS3,resultS3){
+                                    if (!errS3){
+                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
+                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully download from S3 ' + s3Path );
+                                        callback(null, targetLocalPath, aProgram.timeslot, aProgram.content.no);
+                                    }
+                                    else{
+                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
+                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Failed to download from S3 ' + s3Path);
+                                        callback('Failed to download from S3 '+s3Path+' :'+errS3, null, null, null);
+                                    }
+                                    
+                                });
+                            }
+                            else {
+                                var paddingFilePath = path.join(workingPath, 'public', aProgram.content.dir, aProgram.content.file);
+                                callback(null, paddingFilePath, aProgram.timeslot, aProgram.content.no);
+                            }
+    
+                        }, 
+                        function(fileToPlay, timeslot, contentNo, callback){
+                            //push content to Scala
+                            if ( playMode === "periodic" ) {
+                                
+                                var option = 
+                                {
+                                        file: {
+                                            name : path.basename(fileToPlay),
+                                            path : path.dirname(fileToPlay),
+                                            savepath : ''
+                                        }
+                                };
+                                scalaMgr.uploadMediaItem( option, function(errScala, resultScala){
+                                    if (!errScala){
+                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                        adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
+                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + fileToPlay );
+                                        callback(null, fileToPlay, contentNo);
+                                    }
+                                    else{
+                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
+                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + fileToPlay );
+                                        callback('Failed to push content to Scala :'+errScala, null, null);
+                                    }
+                                });
 
-                                         function(filePlayed, callback){
-                                             //TODO: delete downloaded contents from local drive
-                                             callback(null,'done');
-                                         }, 
-                                     ], function (errWaterfall, resultWaterfall) {
-                                         // result now equals 'done' 
-                                         callbackIterator(errWaterfall);
-                                     });
+                            }
+                            else {  //playMode === "interrupt"
+                                
+                                var option = 
+                                {
+                                    playlist: { name: playlistName},
+                                    playTime: {
+                                        start: timeslot.start,
+                                        end: timeslot.end,
+                                        duration: timeslot.playDuration/1000  //sec    
+                                    },
+                                    file: {
+                                        name : path.basename(fileToPlay),
+                                        path : path.dirname(fileToPlay),
+                                        savepath : ''
+                                    }
+                                };
+                                scalaMgr.setItemToPlaylist( option, function(errScala, resultScala){
+                                    if (!errScala){
+                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala with "interrupt" mode: ' + fileToPlay );
+                                        adminBrowserMgr.showTrace(null, straceStamp+"成功推送編號"+contentNo+"的UGC至播放系統!");
+                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala with "interrupt" mode: ' + fileToPlay );
+                                        db.updateAdoc(programTimeSlotModel, aProgram._id, {"upload": true, "playlist.id": resultScala.playlist.id, "playlist.name": resultScala.playlist.name, "playlistItem": resultScala.playlistItem.id}, function(err, res){
+                                            callback(null, fileToPlay, contentNo);
+                                        });
+                                    }
+                                    else{
+                                        logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala with "interrupt" mode: ' + fileToPlay );
+                                        adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+contentNo+"的UGC至播放系統!");
+                                        //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala with "interrupt" mode: ' + fileToPlay );
+                                        callback('Failed to push content to Scala :'+errScala, null, null);
+                                    }
+                                });
+
+                            }
+                        },
+                        function(filePlayed, contentNo, callback){
+                            //update "doohSubmitTimes" as well as "mustPlay" and "failedToGenliveContentInLastPlay" flag 
+                            ugcModel.findOne({"no":contentNo}).exec(function(err, ugcItem){
+                                if ( (!err) && ugcItem ) {
+                                    ugcItem.mustPlay = false;
+                                    ugcItem.failedToGenliveContentInLastPlay = false;
+                                    ugcItem.doohSubmitTimes++;
+                                    ugcItem.save(function(errOfSave){
+                                        if (!errOfSave) {
+                                            callback(null, filePlayed);
+                                        }
+                                        else {
+                                            callback("Failed to update mustPlay, failedToGenliveContentInLastPlay flags: "+errOfSave, null);
+                                        }
+                                    });
+                                }
+                                else {
+                                    callback("Failed to update mustPlay, failedToGenliveContentInLastPlay flags: "+err, null);
+                                }
+                                
+                            });
+                        },
+
+                        function(filePlayed, callback){
+                            //TODO: delete downloaded contents from local drive
+                            callback(null,'done');
+                        }, 
+                    ], function (errWaterfall, resultWaterfall) {
+                        // result now equals 'done' 
+                        callbackIterator(errWaterfall);
+                    });
                                      
-                    }else
-                        callbackIterator(null);
-                
+                }
+                else if( (playMode === "interrupt") && (aProgram.contentType == "media_item") ) {
+                    //contentType is "media_item" under "interrupt" play mode  --> This is mainly for the leading padding content for continuous programs
+                    if (aProgram.content.name){
+                        var setting = {
+                            media: { name: aProgram.content.name },
+                            playlist:{ name: playlistName},
+                            playTime: { start: aProgram.timeslot.start, end: aProgram.timeslot.end, duration: aProgram.timeslot.playDuration/1000 }
+                        };
+                        scalaMgr.pushMediaToPlaylist(setting, function(errScala, res){
+                            if (!errScala){
+                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
+                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Successfully push to Scala: ' + aProgram.content.name );
+                                playlistId = res.playlist.id;
+                                adminBrowserMgr.showTrace(null, straceStamp+"成功推送"+aProgram.content.name+"至播放系統!");
+                                db.updateAdoc(programTimeSlotModel, aProgram._id, {"upload": true, "playlist.id": res.playlist.id, "playlist.name": res.playlist.name, "playlistItem": res.playlistItem.id}, function(err, res){
+                                    callbackIterator(null);
+                                });
+                            }
+                            else{
+                                logger.info('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
+                                //console.log('[scheduleMgr.pushProgramsTo3rdPartyContentMgr()] Fail to push to Scala: ' + aProgram.content.name );
+                                adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法推送"+aProgram.content.name+"至播放系統!");
+                                callbackIterator('Failed to push content to Scala :'+errScala);
+                            }
+                        });
+                        
+                    }
+                }
+                else {
+                    callbackIterator(null);
+                }
+                    
             };
             async.eachSeries(programs, iteratorPushAProgram, function(errEachSeries){
-                cb2(errEachSeries, programs);
+                if (!errEachSeries) {
+                    if (playMode === "interrupt") {
+                        //put the playlist in an "always-on-top" timeslot in schedule
+                        if (playlistId) {
+                            option = {
+                                    id : playlistId,
+                                    priority : 'ALWAYS_ON_TOP',
+                                    playTime: {start: Number(timeInfos[2]), end: Number(timeInfos[3])}
+                                    
+                            };
+                            scalaMgr.createTimeslot( option, function(status){
+                                if ( status === "done" ) {
+                                    cb2(null, programs);
+                                }
+                                else {  //Something is wrong. 
+                                    cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule: '+status, null);
+                                }
+
+
+                                
+                            }); 
+                        }
+                        else {
+                            cb2("Failed to get playlistId after calling scalaMgr.pushMediaToPlaylist()", null);
+                        }
+                    } 
+                    else {
+                        cb2(null, programs);
+                    } 
+                }
+                else {
+                    cb2("push each programs to Scala: "+errEachSeries, null);
+                }
             });
             
 
@@ -1016,7 +1137,14 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
         function(programs, cb3){
             // update the state of programTimeslot docs
             var iteratorUpdateAProgramState = function(aProgram, callbackOfIteratorUpdateAProgramState){
-                //var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
+                //post to fb & send push
+                postPreview(aProgram, function(err, res){
+                    if(err)
+                        logger.info('Post FB message is Error: ' + err);
+                    else
+                        logger.info('Post FB message is Success: ' + res);
+                });
+                //update the state of a programTimeslot doc
                 db.updateAdoc(programTimeSlotModel, aProgram._id, {"state": "confirmed" }, function(errOfUpdateAdoc, result){
                     if (!errOfUpdateAdoc){
                         callbackOfIteratorUpdateAProgramState(null);
@@ -1025,7 +1153,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
                         callbackOfIteratorUpdateAProgramState("Failed to update program "+aProgram._id.toHexString()+": "+errOfUpdateAdoc);
                     }
                 });
-
+                
             };
             async.eachSeries(programs, iteratorUpdateAProgramState, function(errEachSeries){
                 cb3(errEachSeries);
@@ -1052,12 +1180,14 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, pushed_cb) {
     ], function (err, result) {
         if (!err) {
             adminBrowserMgr.showTrace(null, straceStamp+"節目推送完成!");
+            logger.info("Successfully push programs to Scala!");
             if (pushed_cb) {
                 pushed_cb(null);
             }
         }
         else {
             adminBrowserMgr.showTrace(null, straceStamp+"!!!節目推送失敗: "+err);
+            logger.error("Failed to push programs to Scala: "+ err);
             if (pushed_cb) {
                 pushed_cb(err);
             }            
@@ -1131,22 +1261,28 @@ scheduleMgr.updateProgramList = function(dooh, intervalToUpdate, updated_cb ){
  *     if successful, err returns null; if failed, err returns the error message.
  *     
  */
-scheduleMgr.setUgcToProgram = function( programTimeSlotId, ugcReferenceNo, set_cb ){
-    ugcModel.findOne({ 'no': ugcReferenceNo }, '_id genre contentGenre projectId fileExtension no ownerId mustPlay', function (err1, ugc) {
+scheduleMgr.setUgcToProgram = function( programTimeSlotId, ugcReferenceNo, originalContentClass, set_cb ){
+    ugcModel.findOne({ 'no': ugcReferenceNo }, '_id genre contentGenre projectId fileExtension no ownerId mustPlay contentClass', function (err1, ugc) {
         if (!err1){
-            var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
-            var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded"
-            if(ugc !== null){
-                //TODO: Shall we have some protection here in case the user choose an UGC with different genra (This will normally introduce different paly duration
-                db.updateAdoc(programTimeSlotModel, oidOfprogramTimeSlot, {"content": _ugc }, function(err2, result){
-                    if (set_cb){
-                        set_cb(err2, ugc._id);
-                    }
-                });
+            if(originalContentClass != ugc.contentClass){
+                set_cb(err1, "errContentClass");
             }else{
-                set_cb(err1, "Cannot find the UGC with this referece number: "+ugcReferenceNo);
+                var oidOfprogramTimeSlot = mongoose.Types.ObjectId(programTimeSlotId);
+                var _ugc = JSON.parse(JSON.stringify(ugc)); //clone ugc object due to strange error "RangeError: Maximum call stack size exceeded"
+                if(ugc !== null){
+                    //TODO: Shall we have some protection here in case the user choose an UGC with different genra (This will normally introduce different paly duration
+                    db.updateAdoc(programTimeSlotModel, oidOfprogramTimeSlot, {"content": _ugc }, function(err2, result){
+                        if (set_cb){
+                            set_cb(err2, ugc._id);
+                        }
+                    });
+                }else{
+                    set_cb(err1, "Cannot find the UGC with this referece number: "+ugcReferenceNo);
+                }
+                //set_cb(err1, ugc);
             }
-            //set_cb(err1, ugc);
+//            console.log(ugc)
+           
         }
         else {
             if (set_cb){

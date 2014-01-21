@@ -3,7 +3,7 @@
 var programGroupTemplate =(function(){ 
     
     var PROGRAM_GROUP_TEMPLATE_TABLE = {
-        PG_30SEC_3UGC: {
+        PG_30SEC_3IMAGEUGC: {
             programs : [
                 {
                     sequenceNo: 0,
@@ -50,7 +50,7 @@ var programGroupTemplate =(function(){
             ]
         },
         
-        PG_30SEC_2UGC: {
+        PG_30SEC_2IMAGEUGC: {
             programs : [
                 {
                     sequenceNo: 0,
@@ -83,7 +83,31 @@ var programGroupTemplate =(function(){
                     type: 'padding'
                 }
             ]
+        },
+        
+        PG_30SEC_1VIDEOUGC: {
+            programs : [
+                {
+                    sequenceNo: 0,
+                    preSetDuration: 2*1000,
+                    contentType: 'media_item',
+                    type: 'padding'
+                },
+                {
+                    sequenceNo: 1,
+                    preSetDuration: 26*1000,
+                    contentType: 'file',
+                    type: 'UGC'
+                },
+                {
+                    sequenceNo: 2,
+                    preSetDuration: 2*1000,
+                    contentType: 'media_item',
+                    type: 'padding'
+                }
+            ]
         }
+
             
     };
     

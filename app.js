@@ -5,6 +5,12 @@ if ( (systemConfig.HOST_STAR_COORDINATOR_URL===undefined) || (systemConfig.IS_ST
 }
 global.systemConfig = systemConfig;
 
+if (systemConfig.USE_NODETIME){
+    require('nodetime').profile({
+        accountKey: 'b0693b1dd23d4b8bc52b3ee1c13b3c1b0911ee72', 
+        appName: 'Node.js Application'
+    });
+}
 
 /**
  * Module dependencies.

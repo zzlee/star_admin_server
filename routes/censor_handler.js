@@ -111,7 +111,7 @@ FM.censorHandler.postProgramTimeSlotSession_cb = function(req, res){
     var programSequence = req.body.programSequence;
     
     if (req.session.admin_user) {
-        scheduleMgr.createProgramList(doohId, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, req.session.admin_user.hexOfObjectID, req.body.filter, req.body.mode, function(err, result){
+        scheduleMgr.createProgramList(doohId, intervalOfSelectingUGC, intervalOfPlanningDoohProgrames, programSequence, req.session.admin_user.hexOfObjectID, req.body.filter, req.body.schedulingMode, req.body.playMode, function(err, result){
             if (!err){
                 res.send(200, {message: result.sessionId});
             }
@@ -183,10 +183,11 @@ FM.censorHandler.pushProgramsTo3rdPartyContentMgr_get_cb = function(req, res){
     var intervalOfPlanningDoohProgrames = {start: intervalOfPlanningDoohProgramesStart, end: intervalOfPlanningDoohProgramesEnd};
     
     var originSequence = req.body.originSequence;
+    var playMode = req.body.playMode;
     
     logger.info('[PUT ' + req.path + '] is called');
 
-    scheduleMgr.pushProgramsTo3rdPartyContentMgr(sessionId, function(err){
+    scheduleMgr.pushProgramsTo3rdPartyContentMgr(sessionId, playMode, function(err){
         if (!err){
             //TODO pushProgramsTo3rdPartyContentMgr
             //res.send(200);
@@ -223,6 +224,7 @@ FM.censorHandler.updatetimeslots_get_cb = function(req, res){
     var programTimeSlot =  req.body.programTimeSlotId;
     var ugcReferenceNo = req.body.ugcReferenceNo;
     var sessionId = req.params.sessionId;
+    var originalContentClass = req.body.originalContentClass;
 
     if(req.body.type == 'removeUgcfromProgramAndAutoSetNewOne'){
         scheduleMgr.removeUgcfromProgramAndAutoSetNewOne(sessionId, programTimeSlot, function(err, result){
@@ -237,7 +239,7 @@ FM.censorHandler.updatetimeslots_get_cb = function(req, res){
 
     if(req.body.type == 'setUgcToProgram'){
         
-        scheduleMgr.setUgcToProgram(programTimeSlot, ugcReferenceNo, function(err, result){
+        scheduleMgr.setUgcToProgram(programTimeSlot, ugcReferenceNo, originalContentClass, function(err, result){
             if (!err){
                 res.send(200, {message: result});
             }

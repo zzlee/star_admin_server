@@ -50,11 +50,9 @@ var ProgramGroup = function(interval, dooh, planner, sessionId, options) {
 //    console.dir(sessionId);
 };
 
-ProgramGroup.prototype.generateByTemplate = function(templateId, programPlanningPattern, cbOfgenerate) {
+ProgramGroup.prototype.generateByTemplate = function(templateId, contentGenre, cbOfgenerate) {
     var _this = this;
     
-    
-    var contentGenre = programPlanningPattern.getProgramGenreToPlan(); //the genre that will be used in this program group  
     var paddingContents;
     var programGroupVjson;
     var programs;
@@ -173,12 +171,14 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, programPlanning
 };
 
 
-ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, programPlanningPattern, cbOfGenerateFromSortedUgcList) {
+ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, programPlanningPattern, playMode, cbOfGenerateFromSortedUgcList) {
     var _this = this;
     var DURATION_FOR_NORMAL = 15*1000; //milliseconds
     var DURATION_FOR_VIP = 120*1000; //milliseconds
     var DURATION_FOR_LEADING_PADDING = 2*1000; //milliseconds
+    var DEFAULT_CYCLE_PERIOD = 10*60*1000; //milliseconds
     var DEFAULT_CONTENT_GENRE_FOR_LEADING_PADDING = "mood";
+
     
     var programGroupVjson = {
         programs : []    
@@ -211,6 +211,11 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
             aProgramTimeSlot.markModified('content');
             aProgramTimeSlot.timeslot.playDuration = DURATION_FOR_LEADING_PADDING;
             aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(0, 3);
+            
+            if (playMode !== "interrupt") {
+                aProgramTimeSlot.timeslot.end += DEFAULT_CYCLE_PERIOD;
+            }
+            
             aProgramTimeSlot.save(function(errOfSave, _result){     
                 if (!errOfSave) {
                     programs[0] = {};
@@ -243,6 +248,10 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
                     
                     aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(sequenceNo, 3);
                     
+                    if (playMode !== "interrupt") {
+                        aProgramTimeSlot.timeslot.end += DEFAULT_CYCLE_PERIOD;
+                    }
+                    
                     var selectedUgc = null;
                     
                     var ProgramGenreToPlan = programPlanningPattern.getProgramGenreToPlan(); //the genre that will be used in this program group  
@@ -269,7 +278,13 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
                         playDuration = DURATION_FOR_NORMAL; 
                     }
                     aProgramTimeSlot.timeslot.playDuration = playDuration;
-                    aProgramTimeSlot.timeslot.predictedPlayTime = predictedPlayTime;
+                    if (playMode == "interrupt"){
+                        aProgramTimeSlot.timeslot.predictedPlayTime = predictedPlayTime;
+                    }
+                    else { //playMode == "periodic"
+                        aProgramTimeSlot.timeslot.predictedPlayTime = null;
+                    }
+                    
                     aProgramTimeSlot.timeslot.ugcSequenceNo = ugcSequenceNo;
                     programs[sequenceNo] = {};
                     programs[sequenceNo].sequenceNo = sequenceNo;

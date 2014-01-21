@@ -39,6 +39,80 @@ var schedule = (function() {
             adapter = auth.adapter;
             token = auth.token;
         },
+        createTimeslot : function( playList_id, priority, playTime, channel_id, createTimeslot_cb ){
+            connectMgr.checkCollision('schedule.list', function(status){
+				var playDate;
+				var playTimeStart;
+				var playTimeEnd;
+				var playWeekday;
+				
+				var dateTransfer = function(date, cbOfDateTransfer){
+					var tempDate = new Date(date).toString().substring(0,25);
+					yyyy = tempDate.substring(11,15);
+					mm = new Date(date).getMonth()+1;
+					dd = tempDate.substring(8,10);
+					time = tempDate.substring(16,25);
+					tempDate = yyyy+'-'+mm+'-'+dd+' '+time;
+					cbOfDateTransfer(tempDate);
+				};
+				
+				var weekdayTransfer = function(date, cbOfWeekdayTransfer){
+					var weekdays = [ 'SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY' ];
+					var tempWeekday = new Date(date).getDay();
+					cbOfWeekdayTransfer(weekdays[tempWeekday]);
+				};
+				
+				dateTransfer(playTime.start, function(result){
+					playDate = result.substring(0,10);
+					playTimeStart = result.substring(10,18);
+				});
+				
+				dateTransfer(playTime.end, function(result){
+					playTimeEnd = result.substring(10,18);
+				});
+				
+				weekdayTransfer(playTime.start, function(result){
+					playWeekday = [result];
+				});
+				
+                var timeslots = {
+                        frames : [{
+                            id : 1,
+                            timeslots: 
+                                [{ audioDucking: false,
+//                                    color: '#16f00e',
+                                    controlledByAdManager: false,
+                                    description: 'Created by REST api',
+                                    endTime: playTimeEnd,
+//                                    id: 58,
+                                    locked: false,
+                                    playFullScreen: false,
+                                    playlist: [
+                                    {
+                                        enableSmartPlaylist: false,
+                                        id: playList_id,
+                                        itemCount: 0,
+//                                        name: 'OnDaScreen',
+                                        playlistType: 'MEDIA_PLAYLIST',
+                                        prettifyDuration: '(0)'
+                                    }],
+                                    priorityClass: priority,//ALWAYS_ON_TOP, NORMAL, ALWAYS_UNDERNEATH
+                                    recurrencePattern: 'WEEKLY',
+                                    sortOrder: 1,
+                                    startDate: playDate,
+                                    startTime: playTimeStart,
+                                    weekdays: playWeekday 
+                                }]
+                        }]
+                }
+               
+                adapter.put('/ContentManager/api/rest/channels/'+ channel_id +'/schedules?token=' + token, timeslots, function(err, req, res, obj){
+                   createTimeslot_cb(JSON.parse(res.body));
+                });
+                
+            });
+                    
+        },
         reserved : function() {}
     };
 
@@ -71,6 +145,7 @@ var schedule = (function() {
                 if(i == weekslots.length - 1) check_cb('FAILED');
             }
         },
+        createTimeslot : _private.createTimeslot,
     };
 }());
 
