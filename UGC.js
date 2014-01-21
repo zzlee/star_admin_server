@@ -294,7 +294,7 @@ FM.UGC = (function(){
 			//------ count right page number by Joy---------
 			getUGCCountWithpts: function(cb){ //for live check
 				var condition = { "type": "UGC",
-           			            "state": "confirmed"};
+           			            "state": { $ne: "not_confirmed" }};
 				pts.count(condition, cb);
 			},
 			
