@@ -207,6 +207,9 @@ FM.pushMgr = (function() {
                              if(!deviceTokenCheck){
                                  logger.info("[push_mgr]deviceToken is null" + JSON.stringify(result.deviceToken)+"memberId="+memberId  );
                                  FM_LOG("[push_mgr]deviceToken is null" + JSON.stringify(result.deviceToken)+"memberId="+memberId ); 
+                             }else if(deviceTokenCheck == 'webapp'){
+                                 logger.info("[push_mgr]deviceToken is webapp" + JSON.stringify(result.deviceToken)+"memberId="+memberId );
+                                 FM_LOG("[push_mgr]deviceToken is webapp" + JSON.stringify(result.deviceToken)+"memberId="+memberId ); 
                              }
                              else if(deviceTokenCheck == "undefined"){
                                  logger.info("[push_mgr]deviceToken is undefined" + JSON.stringify(result.deviceToken)+"memberId="+memberId );

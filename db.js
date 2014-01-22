@@ -369,7 +369,8 @@ FM.DB = (function(){
             content: {type: String},
 			ownerId: {_id: ObjectID},
             read: {type: Boolean, default: false},
-            showInCenter: {type: Boolean, default: false}
+            showInCenter: {type: Boolean, default: false},
+            messageTime: {type: String, default: Date.now}
         }); //  MyMember collection
 		
 		var PushAllMessageSchema = new Schema({
