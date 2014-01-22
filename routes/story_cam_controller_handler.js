@@ -117,7 +117,7 @@ FM.storyCamControllerHandler.availableStreetPhotos = function(req, res){
         var file = option.filePath,
             program = option.programInterval;
         
-        async.waterfall([
+        /* async.waterfall([
             function( setting_cb ){ targetSetting( recordTime, program, file, setting_cb ); },
             function( target, categories_cb ){ photoCategoriesByUser( file, target, categories_cb ); },
             function( target, assign_cb){ assignPhotoToProject( program, target, assign_cb ); },
@@ -125,6 +125,62 @@ FM.storyCamControllerHandler.availableStreetPhotos = function(req, res){
         ], function( err, res ){
             // (err)?console.dir(err):console.dir(res);
             livePhoto_cb( err, res );
+        }); */
+        
+        async.series([
+            function( preview_cb ) {
+                async.waterfall([
+                    function( download_cb ) { downloadPhotosFromAwsS3( recordTime, download_cb ); },
+                    function( list, renaming_cb ) { 
+                        thumbnailSetting( recordTime, program, list.s3, function(err, namelist) {
+                            // (err)?console.dir(err):console.dir(namelist);
+                            list.rename = namelist;
+                            renaming_cb(err, list);
+                        } ); 
+                    },
+                    function( list, resizing_cb ) { 
+                        imageResizing(list.rename, list.dl, function(err, result) {
+                            var tbList = [];
+                            for(var i = 0; i < result.length; i++) {
+                                var temp = list.rename[i].split('/');
+                                tbList.push(path.join(__dirname, temp[temp.length - 1]));
+                            }
+                            list.thumbnail = tbList;
+                            resizing_cb(err, list);
+                        }); 
+                    },
+                    function( list, s3upload_cb ) { 
+                        uploadThumbnailToAwsS3(list.thumbnail, list.rename, function(err, s3info) {
+                            // s3upload_cb(err, s3info);
+                            list.url = s3info;
+                            s3upload_cb(err, list);
+                        }); 
+                    },
+                ], preview_cb);
+            },
+            function( content_cb ) {
+                async.waterfall([
+                    function( setting_cb ){ targetSetting( recordTime, program, file, setting_cb ); },
+                    function( target, categories_cb ){ photoCategoriesByUser( file, target, categories_cb ); },
+                    function( target, assign_cb){ assignPhotoToProject( program, target, assign_cb ); },
+                    function( swarm, update_cb ){ updateLivePhotoContent( recordTime, program, swarm, update_cb ); },
+                ], content_cb);
+            }
+        ], function( err, res ) {
+            var thumbnail = res[0];
+            var content = res[1];
+            // clear file
+            for(var i = 0; i < thumbnail.dl.length; i++) {
+                fs.unlinkSync(thumbnail.dl[i]);
+            }
+            for(var i = 0; i < thumbnail.url.length; i++) {
+                var temp = thumbnail.url[i].split('/');
+                var tb_file_name = path.join(__dirname, temp[temp.length - 1]);
+                fs.unlinkSync(tb_file_name);
+            }
+            // callback
+            livePhoto_cb( err, content );
+            // console.dir(res);
         });
         
     };
@@ -208,6 +264,7 @@ var getLivePhoto = function( recordTime, report_cb ){
     var S3List = [];
     
     awsS3.listAwsS3('camera_record/' + recordTime, function(err, res){
+    // awsS3.listAwsS3('1234/' + recordTime, function(err, res){
         // (err)?console.log(err):console.dir(res);
         for(var i=0; i<res.Contents.length; i++) {
             // console.log('Path: ' + '/' + res.Contents[i].Key);
@@ -221,6 +278,7 @@ var getLivePhoto = function( recordTime, report_cb ){
 var targetSetting = function( recordTime, programInterval, sourceList, setting_cb ){
     //[contentGenre]-[ownerId._id]-[time stamp]-[record time]
     var folder_path = 'user_project/';
+    // var folder_path = '1234/';
     var naming = function(program, no, naming_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
             var project_path = program.contentGenre + '-' + 
@@ -479,4 +537,215 @@ var clearVideo = function( filepath, clear_cb ){
     awsS3.deleteMultipleFileAwsS3( fileset, clear_cb );
 };
 
+/*--- live photo thimbnail ---*/
+var downloadPhotosFromAwsS3 = function( recordTime, options, download_cb ) {
+    
+    if( typeof(options) === 'function' ) {
+        download_cb = options;
+    }
+    
+    var S3List = [];
+    var fileList = [];
+    
+    var downloadFileFromAwsS3 = function( sourceList, download_cb ) {
+        
+        var dlList = [];
+        
+        for(var i = 0; i < sourceList.length; i++) {
+            var file = sourceList[i].split('/');
+            var filename = file[file.length - 1];
+            dlList.push( path.join(__dirname, filename) );
+        }
+        
+        var dlConsole = function( target, source, event ) {
+            event.push(function(callback) { awsS3.downloadFromAwsS3( target, source, callback ); });
+        };
+        
+        var execute = [];
+        for(var i = 0; i < sourceList.length; i++) {
+            dlConsole(dlList[i], sourceList[i], execute);
+        }
+        async.parallel(execute, function(err, res){
+            // (err)?console.dir(err):console.dir(res);
+            download_cb(null, dlList);
+        });
+    };
+    
+    awsS3.listAwsS3('camera_record/' + recordTime, function(err, res){
+    // awsS3.listAwsS3('1234/' + recordTime, function(err, res){
+        // (err)?console.log(err):console.dir(res);
+        for(var i=0; i<res.Contents.length; i++) {
+            // console.log('Path: ' + '/' + res.Contents[i].Key);
+            S3List.push('/' + res.Contents[i].Key);
+        }
+        
+        downloadFileFromAwsS3( S3List, function( err, dlList ) {
+            download_cb(err, { s3 : S3List, dl : dlList });
+        } );
+        
+    });
+    
+};
+
+var thumbnailSetting = function( recordTime, programInterval, sourceList, thumbnail_cb ){
+    //[contentGenre]-[ownerId._id]-[time stamp]-[record time]
+    var folder_path = 'user_project/';
+    // var folder_path = '1234/';
+    var naming = function(program, no, naming_cb){
+        ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
+            var project_path = program.contentGenre + '-' + 
+                               result[0].ownerId._id + '-' + 
+                               program.timeStamp + '-' +
+                               recordTime;
+            naming_cb( null, 
+                       folder_path + project_path + '/' + project_path + '-' + no + '_s.jpg' );
+        });
+    };
+    
+    var settingConsole = function(target, no, event){
+        event.push(function(callback){ naming(target, no, callback); });
+    };
+    
+    var execute = [];
+    for(var part=0; part<programInterval.count; part++) {
+        for(var no=0; no<(sourceList.length / programInterval.count); no++) {
+            settingConsole(programInterval.list[part], (part+1) + '-' + no, execute);
+        }
+    }
+    
+    async.parallel(execute, function(err, targetPathList){
+        // (err)?console.dir(err):console.dir(targetPathList);
+        thumbnail_cb(null, targetPathList);
+    });
+};
+
+var imageResizing = function(saveTo, file, resizing_cb) {
+    
+    var resizing = function( save_path, image_path, resizing_cb ) {
+        var readStream = fs.createReadStream( image_path );
+        gm( readStream,  'img.jpg' )
+        .size({bufferStream: true}, function(err, size) {
+            this.resize(size.width / 6, size.height / 6);
+            this.noProfile();
+            this.write(save_path, function (err) {
+                // if (!err) console.log('done');
+                ( err )
+                  ? resizing_cb('resizing_is_failed', null)
+                  : resizing_cb(null, 'resizing_is_successfully');
+            });
+        });
+    };
+    
+    var settingConsole = function(target, source, event){
+        event.push(function(callback){ resizing(target, source, callback); });
+    };
+    
+    var execute = [];
+    for(var i = 0; i < saveTo.length; i++) {
+        var temp = saveTo[i].split('/');
+        var tempName = path.join(__dirname, temp[temp.length - 1]);
+        settingConsole(tempName, file[i], execute);
+    }
+    
+    async.parallel(execute, function(err, res){
+        // (err)?console.dir(err):console.dir(res);
+        resizing_cb(null, saveTo);
+    });
+    
+};
+
+var uploadThumbnailToAwsS3 = function(fileList, s3List, uploadThunbnail_cb) {
+    
+    var upload = function(file, s3, cb) {
+        if(s3[0] != '/') {
+            s3 = '/' + s3;
+        }
+        awsS3.uploadToAwsS3(file, s3, null, function(err,result){
+            if (!err){
+                // console.log('Live content thumbnail image was successfully uploaded to S3 ' + s3);
+                cb(null, s3);
+            }
+            else {
+                // console.log('Live content thumbnail image failed to be uploaded to S3 ' + s3);
+                cb('uplaod_thumbnail_is_failed', null);
+            }
+        });
+    };
+    
+    var settingConsole = function(target, source, event){
+        event.push(function(callback){ upload(target, source, callback); });
+    };
+    
+    var execute = [];
+    for(var i = 0; i < fileList.length; i++) {
+        settingConsole(fileList[i], s3List[i], execute);
+    }
+    
+    async.series(execute, function(err, res){
+        // (err)?console.dir(err):console.dir(res);
+        var s3TbList = [];
+        for(var i = 0; i < res.length; i++) {
+            s3TbList.push('https://s3.amazonaws.com/miix_content' + res[i]);
+        }
+        uploadThunbnail_cb(null, s3TbList);
+    });
+    
+};
+
+
 module.exports = FM.storyCamControllerHandler;
+
+// setTimeout(function() {
+    
+    // var recordTime = 1389598985413;
+    // findMember(recordTime, 'UGC', function(err, program) {
+        // async.waterfall([
+            // function( download_cb ) { downloadPhotosFromAwsS3( recordTime, download_cb ); },
+            // function( list, renaming_cb ) { 
+                // thumbnailSetting( recordTime, program, list.s3, function(err, namelist) {
+                    // list.rename = namelist;
+                    // renaming_cb(err, list);
+                // } ); 
+            // },
+            // function( list, resizing_cb ) { 
+                // imageResizing(list.rename, list.dl, function(err, result) {
+                    // var tbList = [];
+                    // for(var i = 0; i < result.length; i++) {
+                        // var temp = list.rename[i].split('/');
+                        // tbList.push(path.join(__dirname, temp[temp.length - 1]));
+                    // }
+                    // list.thumbnail = tbList;
+                    // resizing_cb(err, list);
+                // }); 
+            // },
+            // function( list, s3upload_cb ) { 
+                // uploadThumbnailToAwsS3(list.thumbnail, list.rename, function(err, s3info) {
+                    // s3upload_cb(err, s3info);
+                // }); 
+            // },
+        // ], function(err, res) {
+            // console.log('err: ');
+            // console.log(err);
+            // console.log('res: ');
+            // console.dir(res);
+        // });
+    // });
+    
+// }, 2000);
+
+// Test Data upload
+/* for(var i=1; i <= 3; i++) {
+    for(var j=0; j<6; j++) {
+        var file = 'D:\\photo_test\\1389598985413\\1389598985413-' + i + '-' + j + '.jpg',
+            s3Path = '/camera_record/1389598985413/1389598985413-' + i + '-' + j + '.jpg';
+            
+        awsS3.uploadToAwsS3(file, s3Path, null, function(err,result){
+            if (!err){
+                console.log('Live content image was successfully uploaded to S3 '+s3Path);
+            }
+            else {
+                console.log('Live content image failed to be uploaded to S3 '+s3Path);
+            }
+        });
+    }
+} */
