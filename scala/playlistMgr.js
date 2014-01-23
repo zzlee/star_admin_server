@@ -264,6 +264,7 @@ var playlist = (function() {
                     if(option.media.name == listInfo.list[0].playlistItems[i].media.name){
                         listInfo.list[0].playlistItems[i].startValidDate = playStartDate;
                         listInfo.list[0].playlistItems[i].endValidDate = playEndDate;
+                        listInfo.list[0].playlistItems[i].auditItem = true;
                         
                         if(!listInfo.list[0].playlistItems[i].timeSchedules){
                             listInfo.list[0].playlistItems[i]['timeSchedules'] = [{

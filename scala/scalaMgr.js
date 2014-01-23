@@ -166,6 +166,82 @@ function scalaMgr( url, account ){
     };
     
     /**
+     * List high priority timeslotfrom server.
+     * 
+     */
+    var listHighPriorityTimeslot = function( oneday, setting, highPriority_cb ) {
+        
+        var options = {
+            channel : { id: 1, frames: 1 }, //hardcode
+            date : null,
+        };
+        
+        if(typeof(oneday) === 'function') {
+            highPriority_cb = oneday;
+            options.channel.id = 1;
+            options.channel.frames = 1;
+            options.date = new Date();
+        }
+        else if((oneday.channel) && (typeof(setting) === 'function')) {
+            highPriority_cb = setting;
+            setting = oneday;
+            options.channel.id = setting.channel.id;
+            options.channel.frames = setting.channel.frames;
+            options.date = new Date();
+        }
+        else if(typeof(setting) === 'function') {
+            highPriority_cb = setting;
+            options.channel.id = 1;
+            options.channel.frames = 1;
+            options.date = new Date(oneday);
+        }
+        else {
+            options.channel.id = setting.channel.id;
+            options.channel.frames = setting.channel.frames;
+            options.date = new Date(oneday);
+        }
+        
+        contractor.schedule.findTimeslots(options, function(list){
+            if( !list.timeslots ) {
+                highPriority_cb('not_find_timeslots', null);
+                return;
+            }
+            var top = [];
+            timeslots = list.timeslots;
+            timeslots.forEach(function(timeslot) {
+                if( timeslot.priorityClass.toUpperCase() == 'ALWAYS_ON_TOP' ) {
+                    var playlist = {
+                        id : timeslot.playlist.id,
+                        name : timeslot.playlist.name
+                    };
+                    var interval = {
+                        start: timeToInt(oneday, timeslot.startTime),
+                        end: timeToInt(oneday, timeslot.endTime)
+                    };
+                    var once = timeslot.playlist.prettifyDuration.replace('(', '').replace(')', '');
+                    if(once.indexOf('-') > 0) {
+                        once  = once.split('-');
+                        once = once[1].split(':');
+                    }
+                    else {
+                        once = once.split(':');
+                    }
+                    var cycleDuration = (once[0] * 60 + parseFloat(once[1])) * 1000;
+                    var priority = timeslot.priorityClass;
+                    top.push({
+                        playlist : playlist,
+                        interval : interval,
+                        cycleDuration : cycleDuration,
+                        priority : priority
+                    });
+                }
+            });
+            highPriority_cb(null, top);
+        });
+        
+    };
+    
+    /**
      * List timetriggers from server.
      * 
      */
@@ -1225,6 +1301,7 @@ function scalaMgr( url, account ){
     
     return {
         listTimeslot : listTimeslot,
+        listHighPriorityTimeslot : listHighPriorityTimeslot,
         listTimetriggers : listTimetriggers,
         setItemToPlaylist : setItemToPlaylist,
         pushEvent : pushEvent,

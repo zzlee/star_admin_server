@@ -268,7 +268,23 @@ var UGCPlayListSubPg = {
             var url = DOMAIN + "doohs/"+DEFAULT_DOOH+"/timeslots/"+sessionId;
             var programTimeSlotId = $(this).attr("name");
             var ugcReferenceNo;
-            var checkDate = new Date().getTime() + 30*60*1000;
+            
+            var playMode;
+            if ( $("#checkboxPlayWithInterruptMode").is(":checked") ) {
+                playMode = "interrupt";
+            }
+            else {
+                playMode = "periodic";
+            }
+            
+            var checkDate = null;
+            if (playMode !== 'interrupt') {
+                checkDate = new Date().getTime() + 30*60*1000;
+            }
+            else {
+                checkDate = new Date().getTime();
+            }
+
             if(sessionId)
                 var arrayOfSessionId = sessionId.split('-');
             console.log(checkDate+','+arrayOfSessionId[2]);
@@ -435,7 +451,22 @@ var UGCPlayListSubPg = {
                 flag = 1; 
             }
             if(programTimeSlotId && sessionId){
-                var checkDate = new Date().getTime() + 30*60*1000;
+                var playMode;
+                if ( $("#checkboxPlayWithInterruptMode").is(":checked") ) {
+                    playMode = "interrupt";
+                }
+                else {
+                    playMode = "periodic";
+                }
+                
+                var checkDate = null;
+                if (playMode !== 'interrupt') {
+                    checkDate = new Date().getTime() + 30*60*1000;
+                }
+                else {
+                    checkDate = new Date().getTime();
+                }
+
                 var arrayOfSessionId = sessionId.split('-');
                 console.log(checkDate+','+arrayOfSessionId[2]);
                 var showDateStart = new Date(Number(arrayOfSessionId[2]));
@@ -457,6 +488,16 @@ var UGCPlayListSubPg = {
 
                                 FM.currentContent = FM.UGCPlayList;
                                 FM.currentContent.showCurrentPageContent();
+
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown ) {
+                            //console.log(errorThrown);
+                            if (jqXHR.responseJSON) {
+                                var errMessage = jqXHR.responseJSON.error;
+                                if (errMessage) {
+                                    console.log("Faile to remove UGC from program and auto set a new one: "+ errMessage);
+                                }
 
                             }
                         }
