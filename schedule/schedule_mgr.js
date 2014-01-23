@@ -756,9 +756,10 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
         
         async.waterfall([
             function(ugcSearch){
-                ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){ 
+                ugcModel.find({'no': aProgram.content.no}).exec(function(err, ugc){
+                	var _ugc = JSON.parse(JSON.stringify(ugc));
                     if (!err) {
-                        ugcSearch(null, ugc); 
+                        ugcSearch(null, _ugc); 
                     }
                     else {
                         ugcSearch("Failed to find corresponding UGC: "+err, null); 
@@ -767,8 +768,9 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
             },
             function(ugc, memberSearch){
                 if (ugc[0]) {
-                    memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){ 
-                        memberSearch(null, {ugc: ugc, member: member}); 
+                    memberModel.find({'_id': ugc[0].ownerId._id}).exec(function(err, member){
+                    	var _member = JSON.parse(JSON.stringify(member));
+                        memberSearch(null, {ugc: ugc, member: _member}); 
                     });
                 } 
                 else {
@@ -776,11 +778,10 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                 }
             },
         ], function(err, res){
-            
             if (!err) {
                 var ugc = res.ugc[0],
                 member = res.member[0];
-            
+                
                 access_token = member.fb.auth.accessToken;
                 fb_name = member.fb.userName;
                 var start = new Date(aProgram.timeslot.start);
@@ -1138,12 +1139,14 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
             // update the state of programTimeslot docs
             var iteratorUpdateAProgramState = function(aProgram, callbackOfIteratorUpdateAProgramState){
                 //post to fb & send push
-                postPreview(aProgram, function(err, res){
-                    if(err)
-                        logger.info('Post FB message is Error: ' + err);
-                    else
-                        logger.info('Post FB message is Success: ' + res);
-                });
+            	if (aProgram.type == "UGC"){
+	                postPreview(aProgram, function(err, res){
+	                    if(err)
+	                        logger.info('Post FB message is Error: ' + err);
+	                    else
+	                        logger.info('Post FB message is Success: ' + res);
+	                });
+            	}
                 //update the state of a programTimeslot doc
                 db.updateAdoc(programTimeSlotModel, aProgram._id, {"state": "confirmed" }, function(errOfUpdateAdoc, result){
                     if (!errOfUpdateAdoc){
