@@ -292,9 +292,10 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
                     programs[sequenceNo].contentType = "file";
                     programs[sequenceNo].type = "UGC";
 
-
+                    var selectedUgcClone = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
                     aProgramTimeSlot.isLoopedAround = isLoopedAround;
-                    aProgramTimeSlot.content = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
+                    aProgramTimeSlot.content = selectedUgcClone; 
+                    aProgramTimeSlot.contentGenre = selectedUgcClone.contentGenre;
                     
                     totalDuration += playDuration;
                     predictedPlayTime += playDuration;
