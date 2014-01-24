@@ -1282,6 +1282,39 @@ function scalaMgr( url, account ){
     };
     
     /**
+     * Generate Plan To Scala Player
+     * 
+     */
+    var generatePlanToPlayer = function( options, generatePlan_cb ) {
+        
+        var playerName;
+        
+        if( typeof(options) === 'function' ) {
+            generatePlan_cb = options;
+        }
+        else if( !options.player ) {
+            playerName = 'feltmeng';
+        }
+        else if( !options.player.name ) {
+            playerName = 'feltmeng';
+        }
+        else {
+            playerName = options.player.name;
+        }
+        contractor.player.findPlayerIdByName(playerName, function(err, playerId){
+            if( err ) {
+                scalaLogger.action('generatePlanToPlayer() : not find player');
+                generatePlan_cb( err, null );
+                return;
+            }
+            contractor.player.pushProgram({"ids": [playerId]}, function(res){
+                scalaLogger.action('generate plan by content manager to player');
+                generatePlan_cb( null, res );
+            });
+        });
+    };
+    
+    /**
      * create timeslot
      */
     var createTimeslot = function(option, createTimeslot_cb){
@@ -1305,6 +1338,7 @@ function scalaMgr( url, account ){
         listTimetriggers : listTimetriggers,
         setItemToPlaylist : setItemToPlaylist,
         pushEvent : pushEvent,
+        generatePlanToPlayer : generatePlanToPlayer,
         setWebpageToPlaylist: setWebpageToPlaylist,
         pushMediaToPlaylist: pushMediaToPlaylist,
         pushProgramGourpsToPlaylist: pushProgramGourpsToPlaylist,

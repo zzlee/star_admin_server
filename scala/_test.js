@@ -254,13 +254,24 @@ setTimeout(function(){
         }
     }); */
 	
-	//ScalaMgr APIs : createTimeslot()
-        /*var option = {
-                id : 112,
-                priority : 'ALWAYS_ON_TOP',
-                playTime: {start: 1389855600000, end: 1389862800000}
-                
-        }
+	// ScalaMgr APIs : generatePlanToPlayer()
+    /* var options = 
+    {
+        player : { name : 'feltmeng' }
+    };
+    scalaMgr.generatePlanToPlayer(options, function(err, res) {
+        if(err)
+            console.dir(err);
+        else
+            console.dir(res);
+    }); */
+    
+	// ScalaMgr APIs : createTimeslot()
+    /*var option = {
+        id : 112,
+        priority : 'ALWAYS_ON_TOP',
+        playTime: {start: 1389855600000, end: 1389862800000}
+    }
     scalaMgr.createTimeslot( option, function(status){
             console.dir(status);
     }); */
