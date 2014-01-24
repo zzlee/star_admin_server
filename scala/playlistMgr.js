@@ -333,6 +333,7 @@ var playlist = (function() {
                     if(option.playlistItem.id == listInfo.list[0].playlistItems[i].id){
                         listInfo.list[0].playlistItems[i].startValidDate = playStartDate;
                         listInfo.list[0].playlistItems[i].endValidDate = playEndDate;
+                        listInfo.list[0].playlistItems[i].auditItem = true;
                         
                         if(!listInfo.list[0].playlistItems[i].timeSchedules){
                             listInfo.list[0].playlistItems[i]['timeSchedules'] = [{

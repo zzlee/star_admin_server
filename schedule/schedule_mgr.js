@@ -404,7 +404,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
                                 
                                 var programGroup = new ProgramGroup(inteval, dooh, planner, sessionId);
                                 if (contentGenre !== "miix_it") {
-                                    programGroup.generateByTemplate('PG_30SEC_3IMAGEUGC', contentGenre, function(err1){
+                                    programGroup.generateByTemplate('PG_30SEC_2IMAGEUGC', contentGenre, function(err1){
                                     //generateTimeSlotsOfMicroInterval(inteval, function(err1){
                                         timeToAddTimeSlot += programPeriod;
                                         cb_whilst(err1);

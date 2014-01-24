@@ -41,7 +41,7 @@
             }
             /*START left side Img (longs3 or miixSource)*/
 
-            if(res[i].s3Img){
+            if((res[i].s3Img) && (res[i].miixSource.search('.jpg') == -1)){
                 var s3img=$("<img>").attr({src:res[i].s3Img,
                                            width:"200",
                                            height:"80"
