@@ -1618,6 +1618,11 @@ a:hover.back-login	{
 	color:#fff;
 	padding:3px;
 	}
+.label_wls{
+	background: rgba(242, 92, 39,1);
+	color : #000;
+	padding:3px;
+	}
 .label_special_condition{
     background: rgba(200,0,104,1);
     color:#fff;

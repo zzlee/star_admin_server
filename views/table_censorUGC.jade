@@ -72,6 +72,8 @@ form#mainform(action='')
                              label.label_mood 心情
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
+                         if(ugcCensor.contentGenre == 'wls')
+                             label.label_wls 國票
                       td #{ugcCensor.contentClass}
                       td #{ugcCensor.ugcCensorNo}
                       td(sensitive='true') #{ugcCensor.createdOn}
@@ -173,6 +175,8 @@ form#mainform(action='')
                              label.label_mood 心情
                          if(ugcCensor.contentGenre == 'check_in')
                              label.label_checkin 打卡
+                         if(ugcCensor.contentGenre == 'wls')
+                             label.label_wls 國票	 
                       td #{ugcCensor.contentClass}
                       td #{ugcCensor.ugcCensorNo}
                       td(sensitive='true') #{ugcCensor.createdOn}
