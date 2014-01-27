@@ -671,8 +671,15 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
 					logger.info('[censor_mgr-mappingLiveContentList] no= '+ data.content.no);
                     UGCs.find({"no": data.content.no}).exec(function(err_2, result_2){
                         if(!err_2) {
-                            LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.playState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, result_2[0].userRawContent[0].content, result_2[0].contentClass, liveContentList);
-                            cbOfMappingLiveContentList(null); 
+                            if(typeof result_2[0].userRawContent[0] === 'undefined'){
+                                var warn = "typeof result_2[0].userRawContent[0] === 'undefined'";
+                                LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.playState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, warn, result_2[0].contentClass, liveContentList);
+                                cbOfMappingLiveContentList(null); 
+                            }else{
+                                LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.playState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, result_2[0].userRawContent[0].content, result_2[0].contentClass, liveContentList);
+                                cbOfMappingLiveContentList(null); 
+                            }
+                             
                         }else {
                             cbOfMappingLiveContentList(err_2);
                         }
@@ -845,7 +852,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                     } 
                     else if ( liveContentGenre == "miix_story" ) {
                         //post the link on FB
-                        memberDB.getFBAccessTokenById(owner_id, function(errOfGetFBAccessTokenById, result){
+                    	member_mgr.getFBAccessTokenById(owner_id, function(errOfGetFBAccessTokenById, result){
                             //debugger;
                             if (!errOfGetFBAccessTokenById){
                                 //var userID = result.fb.userID;

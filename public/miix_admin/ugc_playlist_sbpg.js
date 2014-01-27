@@ -40,7 +40,7 @@ var UGCPlayListSubPg = {
             inputSearchData[$(this).attr("name")] = $(this).val();
             
             if($(this).val() == "" && flag == 0){
-                alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00\n順序請填入類別字首(合成影片填入"合",心情填入"心",etc)\nex:2013/08/01 00:00:00,合心打打文');
+                alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00\n順序請填入類別字首(合成影片填入"合",心情填入"心",etc)\nex:2013/08/01 00:00:00,合心打打文國');
                 flag = 1; 
             }
             console.log(inputSearchData);
@@ -114,6 +114,7 @@ var UGCPlayListSubPg = {
         var miix_it = "%E5%90%88";
         var cultural_and_creative = "%E6%96%87";
         var mood = "%E5%BF%83";
+		var wls = "%E5%9C%8B";
         var programSequenceArr = [];
         var next =0;
         var programSequenceStringToArr = function(string , cb){
@@ -137,6 +138,9 @@ var UGCPlayListSubPg = {
                 case mood:
                     programSequenceArr.push('mood');
                     break;
+				case wls:
+					programSequenceArr.push('wls');
+					break;
                 default:
 
                 }
@@ -165,7 +169,7 @@ var UGCPlayListSubPg = {
             }
             
             if($(this).val() == "" && flag == 0){
-                alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00\n順序請填入類別字首(合成影片填入"合",心情填入"心",etc)\nex:2013/08/01 00:00:00,合心打打文');
+                alert('請輸入完整的條件!!\n時間格式為2013/08/01 00:00:00\n順序請填入類別字首(合成影片填入"合",心情填入"心",etc)\nex:2013/08/01 00:00:00,合心打打文國');
                 flag = 1; 
             }
             
@@ -174,7 +178,7 @@ var UGCPlayListSubPg = {
                 var playTimeStart = new Date(inputSearchData.playTimeStart).getTime();
                 var playTimeEnd = new Date(inputSearchData.playTimeEnd).getTime();
                 console.log(inputSearchData.playTimeEnd);
-                console.log("checkDate"+checkDate+",playTimeStart"+playTimeStart+",playTimeEnd"+playTimeEnd);
+                console.log("checkDate " + checkDate + ",playTimeStart"+playTimeStart+",playTimeEnd"+playTimeEnd);
                 
                 var schedulingMode;
                 if ( $("#checkboxIsContinuousProgramMode").is(":checked") ) {
