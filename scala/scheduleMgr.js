@@ -75,7 +75,7 @@ var schedule = (function() {
 					playWeekday = [result];
 				});
 				
-                var timeslots = {
+                /* var timeslots = {
                         frames : [{
                             id : 1,
                             timeslots: 
@@ -83,7 +83,7 @@ var schedule = (function() {
 //                                    color: '#16f00e',
                                     controlledByAdManager: false,
                                     description: 'Created by REST api',
-                                    endTime: playTimeEnd,
+                                    endTime: playTimeEnd.toString(),
 //                                    id: 58,
                                     locked: false,
                                     playFullScreen: false,
@@ -99,15 +99,62 @@ var schedule = (function() {
                                     priorityClass: priority,//ALWAYS_ON_TOP, NORMAL, ALWAYS_UNDERNEATH
                                     recurrencePattern: 'WEEKLY',
                                     sortOrder: 1,
-                                    startDate: playDate,
-                                    startTime: playTimeStart,
+                                    startDate: playDate.toString(),
+                                    startTime: playTimeStart.toString(),
                                     weekdays: playWeekday 
                                 }]
                         }]
-                }
+                } */
+                
+                var timeslots = 
+                {
+                    // "1" : { silent : true },
+                    id : "",
+                    // eventTriggers : [],
+                    // timeTriggers : [],
+                    frames : 
+                    [{
+                        id : "1",
+                        timeslots : [{
+                            audioDucking: false,
+                            // color: "#CEE986",
+                            startTime: playTimeStart,
+                            endTime: playTimeEnd,
+                            hasPriorityClassChanged: true,
+                            locked : false,
+                            name :"somename",   //
+                            playFullScreen : "false",
+                            playlist: {
+                                id: playList_id,
+                            },
+                            priorityClass : priority,
+                            recurrencePattern  : "WEEKLY",
+                            sortOrder : 1,
+                            startDate : playDate,
+                            endDate : playDate,
+                            tempName: "N0",
+                            // weekdays : [ playWeekday[0] ],
+                            weekdays : [
+                                "SUNDAY",
+                                "MONDAY",
+                                "TUESDAY",
+                                "WEDNESDAY",
+                                "THURSDAY",
+                                "FRIDAY",
+                                "SATURDAY" 
+                            ],
+                            deleteFlag : "false",
+                        }]
+                    }]
+                };
                
                 adapter.put('/ContentManager/api/rest/channels/'+ channel_id +'/schedules?token=' + token, timeslots, function(err, req, res, obj){
-                   createTimeslot_cb(JSON.parse(res.body));
+                    if( err ) {
+                        createTimeslot_cb(err, null);
+                    }
+                    else {
+                        createTimeslot_cb(null, obj);
+                    }
                 });
                 
             });
@@ -141,7 +188,7 @@ var schedule = (function() {
                 else check_cb('FAILED');
             }
             else for(var i=0; i < weekslots.length; i++) {
-                if(check == weekdays[weekslots[i]]) { check_cb('OK'); break; }
+                if(check == weekdays[weekslots[i]]) { check_cb('OK'); return; }
                 if(i == weekslots.length - 1) check_cb('FAILED');
             }
         },
