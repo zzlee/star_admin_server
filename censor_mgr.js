@@ -845,7 +845,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                     } 
                     else if ( liveContentGenre == "miix_story" ) {
                         //post the link on FB
-                        memberDB.getFBAccessTokenById(owner_id, function(errOfGetFBAccessTokenById, result){
+                    	member_mgr.getFBAccessTokenById(owner_id, function(errOfGetFBAccessTokenById, result){
                             //debugger;
                             if (!errOfGetFBAccessTokenById){
                                 //var userID = result.fb.userID;

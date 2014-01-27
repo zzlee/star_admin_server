@@ -281,7 +281,8 @@ var targetSetting = function( recordTime, programInterval, sourceList, setting_c
     // var folder_path = '1234/';
     var naming = function(program, no, naming_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
-            var project_path = program.contentGenre + '-' + 
+            // var project_path = program.contentGenre + '-' + 
+            var project_path = result[0].contentGenre + '-' + 
                                result[0].ownerId._id + '-' + 
                                program.timeStamp + '-' +
                                recordTime;
@@ -593,7 +594,8 @@ var thumbnailSetting = function( recordTime, programInterval, sourceList, thumbn
     // var folder_path = '1234/';
     var naming = function(program, no, naming_cb){
         ugcModel.find({"_id": program.content._id}).exec(function (err, result) {
-            var project_path = program.contentGenre + '-' + 
+            // var project_path = program.contentGenre + '-' + 
+            var project_path = result[0].contentGenre + '-' + 
                                result[0].ownerId._id + '-' + 
                                program.timeStamp + '-' +
                                recordTime;
