@@ -671,7 +671,11 @@ censorMgr.getLiveContentList = function(condition, sort, pageLimit, pageSkip, cb
 					logger.info('[censor_mgr-mappingLiveContentList] no= '+ data.content.no);
                     UGCs.find({"no": data.content.no}).exec(function(err_2, result_2){
                         if(!err_2) {
-                            if(typeof result_2[0].userRawContent[0] === 'undefined'){
+							if(!result_2){
+								cbOfMappingLiveContentList(null); 
+							}else if(!result_2[0]){
+								cbOfMappingLiveContentList(null); 
+							}else if(!result_2[0].userRawContent[0]){
                                 var warn = "typeof result_2[0].userRawContent[0] === 'undefined'";
                                 LiveContentListInfo(data.content.no, result, data.timeslot.start, data.timeslot.end, data.liveState, data.playState, data.content.ownerId.fbUserId, data._id, data.content.ownerId._id, data.canBeFoundInPlayerLog, result_2[0].url.s3, warn, result_2[0].contentClass, liveContentList);
                                 cbOfMappingLiveContentList(null); 
@@ -809,6 +813,22 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                     }
                     break;
                 case 'wowtaipeiarena':
+                    if(type == 'correct') {
+                        message = '你的No.' + ugcCensorNo + '作品，在' + playTime + 
+                                  '，登上小巨蛋天幕，感謝你的精采作品，快到 我的投稿/哇!紀錄 裡瞧瞧實拍照!';
+                    }
+                    else if (type == 'source_not_played') {
+                        message = '很遺憾的，您的No.' + ugcCensorNo + '作品，因故被取消登上小巨蛋。' + 
+                        '查明若非不當內容，將儘快通知您新的播出時間。造成不便請見諒。';
+                    }
+                    else if ( (type != 'other_fail') && (type != 'not_checked') ) {
+                        // message = '很遺憾的，您的試鏡編號'+ ugcCensorNo +'的作品，因故被取消登上大螢幕。\n'+
+                                  // '查明若非不當內容，導播將儘快通知您新的播出時間。造成不便請見諒。\n';
+                        message = '您的No.' + ugcCensorNo + '作品已順利播出，但很遺憾的，實拍照片未能順利拍攝。' + 
+                                  '我們將儘快安排再次播出，希望能為您留下精彩的影像。';
+                    }
+                    break;
+                case 'waterlandsecuries':
                     if(type == 'correct') {
                         message = '你的No.' + ugcCensorNo + '作品，在' + playTime + 
                                   '，登上小巨蛋天幕，感謝你的精采作品，快到 我的投稿/哇!紀錄 裡瞧瞧實拍照!';
