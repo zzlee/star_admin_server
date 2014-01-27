@@ -144,8 +144,9 @@ FM.censorHandler.gettimeslots_get_cb = function(req, res){
 
     logger.info('[FM.censorHandler.gettimeslots_get_cb()] sessionId='+ sessionId);
     scheduleMgr.getProgramListBySession(sessionId, limit, skip, function(err, programList){
-        
+		//console.dir(programList);
         if (!err){
+			
             if (programList.length > 0){
                 //censorMgr.getPlayList(programList , updateUGC, function(errGetPlayList, result){
                 censorMgr.getFullPlayList(programList , updateUGC, function(errGetPlayList, result){
