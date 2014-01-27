@@ -104,6 +104,9 @@ FM.dooh_handler.streamShutterTrigger = function(req, res){
     case 'check_in':
         contentHtmlFile = path.join(workingPath, 'public/contents/padding_content/ondascreen_padding-check_in-start.html');
         break;
+    case 'wls':
+        contentHtmlFile = path.join(workingPath, 'public/contents/padding_content/ondascreen_padding-wls-start.html');
+        break;
     default:
         
     } 

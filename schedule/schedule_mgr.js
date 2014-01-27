@@ -1107,17 +1107,17 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                         //put the playlist in an "always-on-top" timeslot in schedule
                         if (playlistId) {
                             option = {
-                                    id : playlistId,
-                                    priority : 'ALWAYS_ON_TOP',
-                                    playTime: {start: Number(timeInfos[2]), end: Number(timeInfos[3])}
-                                    
+                                id : playlistId,
+                                priority : 'ALWAYS_ON_TOP',
+                                playTime: {start: Number(timeInfos[2]), end: Number(timeInfos[3])}
                             };
-                            scalaMgr.createTimeslot( option, function(status){
-                                if ( status === "done" ) {
+                            scalaMgr.createTimeslot( option, function(err, status){
+                                // if ( status === "done" ) {
+                                if ( !err ) {
                                     cb2(null, programs);
                                 }
                                 else {  //Something is wrong. 
-                                    cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule: '+status, null);
+                                    cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule: ' + JSON.stringify(err), null);
                                 }
 
 

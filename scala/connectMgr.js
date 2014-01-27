@@ -34,10 +34,12 @@ var connect = (function() {
             
             adapter.post('/ContentManager/api/rest/auth/login', { "username" : option.username, "password" : option.password, "rememberMe" : true }, function(err, req, res, obj){
                 adapter.headers.token = obj.token;
+                adapter.headers.apiToken = obj.apiToken; // for 0.10.20
                 adapter.headers.apiLicenseToken = obj.apiLicenseToken;
                 auth = { 
                     adapter : adapter, 
                     token : obj.token, 
+                    apiToken : obj.apiToken,    // for 0.10.20
                     apiLicenseToken : obj.apiLicenseToken 
                 };
                 tokenListener.emit('login', auth);
