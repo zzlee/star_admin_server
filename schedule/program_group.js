@@ -207,7 +207,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
             var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
             aProgramTimeSlot.type = 'padding';
             aProgramTimeSlot.contentType = 'media_item';
-            aProgramTimeSlot.content = {name: paddingContent.get(DEFAULT_CONTENT_GENRE_FOR_LEADING_PADDING, 'start') };
+            aProgramTimeSlot.content = {name: paddingContent.get(programPlanningPattern.getProgramSequence()[0], 'start') };
             aProgramTimeSlot.markModified('content');
             aProgramTimeSlot.timeslot.playDuration = DURATION_FOR_LEADING_PADDING;
             aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(0, 3);
