@@ -176,6 +176,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
     var DURATION_FOR_NORMAL = 15*1000; //milliseconds
     var DURATION_FOR_VIP = 120*1000; //milliseconds
     var DURATION_FOR_LEADING_PADDING = 2*1000; //milliseconds
+    var DURATION_FOR_OTHER_PADDING = 2*1000; //milliseconds
     var DEFAULT_CYCLE_PERIOD = 10*60*1000; //milliseconds
     var DEFAULT_CONTENT_GENRE_FOR_LEADING_PADDING = "mood";
 
@@ -244,75 +245,157 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
                 },
                 function (cbOfWhilst) {
                     
-                    var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
-                    
-                    aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(sequenceNo, 3);
-                    
-                    if (playMode !== "interrupt") {
-                        aProgramTimeSlot.timeslot.end += DEFAULT_CYCLE_PERIOD;
-                    }
-                    
-                    var selectedUgc = null;
-                    
-                    var ProgramGenreToPlan = programPlanningPattern.getProgramGenreToPlan(); //the genre that will be used in this program group  
-                    
-                    //pick up one UGC from the sorted list 
-                    for (var indexOfcandidateToSelect=0; indexOfcandidateToSelect<=candidateUgcList.length; indexOfcandidateToSelect++){
-                        
-                        if (indexOfcandidateToSelect == candidateUgcList.length){
-                            candidateUgcList = candidateUgcList.concat(sortedUgcList);
-                            isLoopedAround = true;
-                        }
-                        
-                        if ( candidateUgcList[indexOfcandidateToSelect].contentGenre == ProgramGenreToPlan){
-                            selectedUgc = candidateUgcList.splice(indexOfcandidateToSelect, 1)[0];
-                            break;
-                        }
-                    }
-                    
-                    var playDuration; //millisecond
-                    if (selectedUgc.contentClass == "VIP") {
-                        playDuration = DURATION_FOR_VIP;  
-                    }
-                    else {
-                        playDuration = DURATION_FOR_NORMAL; 
-                    }
-                    aProgramTimeSlot.timeslot.playDuration = playDuration;
-                    if (playMode == "interrupt"){
-                        aProgramTimeSlot.timeslot.predictedPlayTime = predictedPlayTime;
-                    }
-                    else { //playMode == "periodic"
-                        aProgramTimeSlot.timeslot.predictedPlayTime = null;
-                    }
-                    
-                    aProgramTimeSlot.timeslot.ugcSequenceNo = ugcSequenceNo;
-                    programs[sequenceNo] = {};
-                    programs[sequenceNo].sequenceNo = sequenceNo;
-                    programs[sequenceNo].preSetDuration = playDuration;  
-                    programs[sequenceNo].contentType = "file";
-                    programs[sequenceNo].type = "UGC";
+                    async.waterfall([
+                        function(callback){
+                            //add the UGC program
+                            var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
+                            
+                            aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(sequenceNo, 3);
+                            
+                            if (playMode !== "interrupt") {
+                                aProgramTimeSlot.timeslot.end += DEFAULT_CYCLE_PERIOD;
+                            }
+                            
+                            var selectedUgc = null;
+                            
+                            var programGenreToPlan = programPlanningPattern.getprogramGenreToPlan(); //the genre that will be used in this program group  
+                            
+                            //pick up one UGC from the sorted list 
+                            for (var indexOfcandidateToSelect=0; indexOfcandidateToSelect<=candidateUgcList.length; indexOfcandidateToSelect++){
+                                
+                                if (indexOfcandidateToSelect == candidateUgcList.length){
+                                    candidateUgcList = candidateUgcList.concat(sortedUgcList);
+                                    isLoopedAround = true;
+                                }
+                                
+                                if ( candidateUgcList[indexOfcandidateToSelect].contentGenre == programGenreToPlan){
+                                    selectedUgc = candidateUgcList.splice(indexOfcandidateToSelect, 1)[0];
+                                    break;
+                                }
+                            }
+                            
+                            var playDuration; //millisecond
+                            if (selectedUgc.contentClass == "VIP") {
+                                playDuration = DURATION_FOR_VIP;  
+                            }
+                            else {
+                                playDuration = DURATION_FOR_NORMAL; 
+                            }
+                            aProgramTimeSlot.timeslot.playDuration = playDuration;
+                            if (playMode == "interrupt"){
+                                aProgramTimeSlot.timeslot.predictedPlayTime = predictedPlayTime;
+                            }
+                            else { //playMode == "periodic"
+                                aProgramTimeSlot.timeslot.predictedPlayTime = null;
+                            }
+                            
+                            aProgramTimeSlot.timeslot.ugcSequenceNo = ugcSequenceNo;
+                            programs[sequenceNo] = {};
+                            programs[sequenceNo].sequenceNo = sequenceNo;
+                            programs[sequenceNo].preSetDuration = playDuration;  
+                            programs[sequenceNo].contentType = "file";
+                            programs[sequenceNo].type = "UGC";
 
-                    var selectedUgcClone = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
-                    aProgramTimeSlot.isLoopedAround = isLoopedAround;
-                    aProgramTimeSlot.content = selectedUgcClone; 
-                    aProgramTimeSlot.contentGenre = selectedUgcClone.contentGenre;
-                    
-                    totalDuration += playDuration;
-                    predictedPlayTime += playDuration;
-                    sequenceNo++;
-                    ugcSequenceNo++;
-                    aProgramTimeSlot.save(function(errOfSave, _result){     
-                        if (!errOfSave) {
-                            programs[sequenceNo-1]._id = _result._id;
-                            //console.log("_result");
-                            //console.dir(_result);
-                            cbOfWhilst(null);
-                        }
-                        else {
-                            cbOfWhilst("Failed to add a new programTimeslot to DB: "+errOfSave);
-                        }
-                        
+                            var selectedUgcClone = JSON.parse(JSON.stringify(selectedUgc)); //clone selectedUgc object to prevent from a strange error "RangeError: Maximum call stack size exceeded"
+                            aProgramTimeSlot.isLoopedAround = isLoopedAround;
+                            aProgramTimeSlot.content = selectedUgcClone; 
+                            aProgramTimeSlot.contentGenre = selectedUgcClone.contentGenre;
+                            
+                            totalDuration += playDuration;
+                            predictedPlayTime += playDuration;
+                            sequenceNo++;
+                            ugcSequenceNo++;
+                            aProgramTimeSlot.save(function(errOfSave, _result){     
+                                if (!errOfSave) {
+                                    programs[sequenceNo-1]._id = _result._id;
+                                    //console.log("_result");
+                                    //console.dir(_result);
+                                    callback(null, programGenreToPlan);
+                                }
+                                else {
+                                    callback("Failed to add a new programTimeslot of UGC to DB: "+errOfSave, null);
+                                }
+                                
+                            });
+
+                        },
+                        function(programGenreToPlan, callback){
+                            //add the padding program
+                            var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
+                            
+                            aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(sequenceNo, 3);
+                            
+                            if (playMode !== "interrupt") {
+                                aProgramTimeSlot.timeslot.end += DEFAULT_CYCLE_PERIOD;
+                            }
+                            
+//                            var selectedUgc = null;
+//                            
+//                            
+//                            //pick up one UGC from the sorted list 
+//                            for (var indexOfcandidateToSelect=0; indexOfcandidateToSelect<=candidateUgcList.length; indexOfcandidateToSelect++){
+//                                
+//                                if (indexOfcandidateToSelect == candidateUgcList.length){
+//                                    candidateUgcList = candidateUgcList.concat(sortedUgcList);
+//                                    isLoopedAround = true;
+//                                }
+//                                
+//                                if ( candidateUgcList[indexOfcandidateToSelect].contentGenre == programGenreToPlan){
+//                                    selectedUgc = candidateUgcList.splice(indexOfcandidateToSelect, 1)[0];
+//                                    break;
+//                                }
+//                            }
+//                            
+//                            var playDuration; //millisecond
+//                            if (selectedUgc.contentClass == "VIP") {
+//                                playDuration = DURATION_FOR_VIP;  
+//                            }
+//                            else {
+//                                playDuration = DURATION_FOR_NORMAL; 
+//                            }
+                            aProgramTimeSlot.timeslot.playDuration = DURATION_FOR_OTHER_PADDING;
+                            if (playMode == "interrupt"){
+                                aProgramTimeSlot.timeslot.predictedPlayTime = predictedPlayTime;
+                            }
+                            else { //playMode == "periodic"
+                                aProgramTimeSlot.timeslot.predictedPlayTime = null;
+                            }
+                            
+//                            aProgramTimeSlot.timeslot.ugcSequenceNo = ugcSequenceNo;
+                            programs[sequenceNo] = {};
+                            programs[sequenceNo].sequenceNo = sequenceNo;
+                            programs[sequenceNo].preSetDuration = DURATION_FOR_OTHER_PADDING;  
+                            programs[sequenceNo].contentType = "media_item";
+                            programs[sequenceNo].type = "padding";
+
+//                            aProgramTimeSlot.isLoopedAround = isLoopedAround;
+                            aProgramTimeSlot.content = {name: paddingContent.get(programGenreToPlan, 'middle') }; 
+                            aProgramTimeSlot.contentGenre = programGenreToPlan;
+                            
+                            totalDuration += playDuration;
+                            predictedPlayTime += playDuration;
+                            sequenceNo++;
+                            ugcSequenceNo++;
+                            aProgramTimeSlot.save(function(errOfSave, _result){     
+                                if (!errOfSave) {
+                                    programs[sequenceNo-1]._id = _result._id;
+                                    //console.log("_result");
+                                    //console.dir(_result);
+                                    callback(null);
+                                }
+                                else {
+                                    callback("Failed to add a new programTimeslot of UGC to DB: "+errOfSave);
+                                }
+                                
+                            });
+
+                        },
+                    ],
+                    function(err, resultProgramGroup){
+                        cbOfWhilst(err, resultProgramGroup);
                     });
+                        
+                    
                     
                 },
                 function (errOfWhilst) {
