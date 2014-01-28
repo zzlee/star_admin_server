@@ -19,7 +19,13 @@ var paddingContent =(function(){
                 start:  "ondascreen_padding-check_in-start",    
                 middle: "ondascreen_padding-check_in-middle.jpg",
                 end:    "ondascreen_padding-check_in-end.jpg"
-            }          
+            },
+            // web app - wls
+            wls: { 
+                start:  "ondascreen_padding-wls-start",    
+                middle: "ondascreen_padding-wls-middle.jpg",
+                end:    "ondascreen_padding-wls-end.jpg"
+            }
 
     };
         

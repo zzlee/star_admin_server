@@ -267,12 +267,18 @@ setTimeout(function(){
     }); */
     
 	// ScalaMgr APIs : createTimeslot()
-    /*var option = {
-        id : 112,
+    /* var option = {
+        id : 35,
         priority : 'ALWAYS_ON_TOP',
-        playTime: {start: 1389855600000, end: 1389862800000}
-    }
-    scalaMgr.createTimeslot( option, function(status){
+        playTime: { 
+            start: new Date(2014,0,27,18,20,0).getTime(), 
+            end: new Date(2014,0,27,18,25,0).getTime() 
+        }
+    };
+    scalaMgr.createTimeslot( option, function(err, status){
+        if(err)
+            console.dir(err);
+        else
             console.dir(status);
     }); */
     

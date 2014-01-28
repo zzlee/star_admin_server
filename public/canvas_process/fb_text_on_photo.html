@@ -147,6 +147,17 @@
                         });
                     });
                     break;
+				case 'waterlandsecuries':
+                    img64Loader(mark_bg.wowtaipeiarena, function(icondata){
+                        imageBg.src = icondata;
+                        img64Loader(longPhoto, function(sourcedata){
+                            imagePhoto.src = sourcedata;
+                            img64Loader(source, function(sourcedata){
+                                imageObj.src = sourcedata;
+                            });
+                        });
+                    });
+                    break;
                 default:
                     break;
             }

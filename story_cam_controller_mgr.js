@@ -155,6 +155,7 @@ storyCamControllerMgr.startShutter = function( startedShutter_cb ){
             movieProjectID: '',
             actionSetting: actionSetting
         };
+        logger.info('storyCamControllerMgr.startShutter: find_program_group_ok, ctrl time is [' + actionSetting.toString() + ']');
         
         globalConnectionMgr.sendRequestToRemote( storyCamControllerID, { command: "START_SHUTTER", parameters: commandParameters }, function(responseParameters) {
             //console.dir(responseParameters);

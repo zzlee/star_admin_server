@@ -748,7 +748,6 @@ scheduleMgr.getProgramListBySession = function(sessionId, pageLimit, pageSkip, c
  *     if successful, err returns null; if failed, err returns the error message.
  */
 scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pushed_cb) {
-    
     var postPreview = function(aProgram, postPreview_cb){ //post each users to Facbook
         
         var access_token, message, link;
@@ -835,6 +834,11 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                                 option.time = play_time;
                                 break;
                             case 'wowtaipeiarena':
+								option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                option.name = fb_name;
+                                option.time = play_time;
+                                break;
+							case 'waterlandsecuries':
                                 // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
                                 option.name = fb_name;
                                 option.time = play_time;
@@ -1103,17 +1107,17 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                         //put the playlist in an "always-on-top" timeslot in schedule
                         if (playlistId) {
                             option = {
-                                    id : playlistId,
-                                    priority : 'ALWAYS_ON_TOP',
-                                    playTime: {start: Number(timeInfos[2]), end: Number(timeInfos[3])}
-                                    
+                                id : playlistId,
+                                priority : 'ALWAYS_ON_TOP',
+                                playTime: {start: Number(timeInfos[2]), end: Number(timeInfos[3])}
                             };
-                            scalaMgr.createTimeslot( option, function(status){
-                                if ( status === "done" ) {
+                            scalaMgr.createTimeslot( option, function(err, status){
+                                // if ( status === "done" ) {
+                                if ( !err ) {
                                     cb2(null, programs);
                                 }
                                 else {  //Something is wrong. 
-                                    cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule: '+status, null);
+                                    cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule: ' + JSON.stringify(err), null);
                                 }
 
 

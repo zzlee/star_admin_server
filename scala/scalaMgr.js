@@ -1324,11 +1324,11 @@ function scalaMgr( url, account ){
 		var playTime = option.playTime;
 		var channel_id = 1;
 		
-        contractor.schedule.createTimeslot(playList_id, priority, playTime, channel_id, function(status){
-			if(status.description)
-				createTimeslot_cb(status.description);
+        contractor.schedule.createTimeslot(playList_id, priority, playTime, channel_id, function(err, status){
+			if( err )
+				createTimeslot_cb(err, null);
 			else
-				createTimeslot_cb("done");
+				createTimeslot_cb(null, "done");
         });
     };
     
