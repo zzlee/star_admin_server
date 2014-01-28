@@ -173,7 +173,7 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, contentGenre, c
 
 ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, programPlanningPattern, playMode, cbOfGenerateFromSortedUgcList) {
     var _this = this;
-    var DURATION_FOR_NORMAL = 15*1000; //milliseconds
+    var DURATION_FOR_NORMAL = 13*1000; //milliseconds
     var DURATION_FOR_VIP = 120*1000; //milliseconds
     var DURATION_FOR_LEADING_PADDING = 2*1000; //milliseconds
     var DURATION_FOR_OTHER_PADDING = 2*1000; //milliseconds
@@ -198,6 +198,20 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
         type: 'UGC',
         session: _this.sessionId
     };
+    
+    var vjsonDefaultForPadding = {
+        contentType: "media_item",
+        dooh: _this.dooh,
+        timeslot: {
+            start: _this.interval.start, 
+            end: _this.interval.end,
+            startHour: (new Date(_this.interval.start)).getHours()},
+        planner: _this.planner,
+        state: 'not_confirmed',
+        type: 'padding',
+        session: _this.sessionId
+    };
+
     
     var candidateUgcList = sortedUgcList.slice(0); //clone the full array of sortedUgcList
     var isLoopedAround = false;
@@ -258,7 +272,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
                             
                             var selectedUgc = null;
                             
-                            var programGenreToPlan = programPlanningPattern.getprogramGenreToPlan(); //the genre that will be used in this program group  
+                            var programGenreToPlan = programPlanningPattern.getProgramGenreToPlan(); //the genre that will be used in this program group  
                             
                             //pick up one UGC from the sorted list 
                             for (var indexOfcandidateToSelect=0; indexOfcandidateToSelect<=candidateUgcList.length; indexOfcandidateToSelect++){
@@ -321,7 +335,7 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
                         },
                         function(programGenreToPlan, callback){
                             //add the padding program
-                            var aProgramTimeSlot = new programTimeSlotModel(vjsonDefault);
+                            var aProgramTimeSlot = new programTimeSlotModel(vjsonDefaultForPadding);
                             
                             aProgramTimeSlot.timeStamp = _this.interval.start + '-' + pad(sequenceNo, 3);
                             
@@ -329,31 +343,9 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
                                 aProgramTimeSlot.timeslot.end += DEFAULT_CYCLE_PERIOD;
                             }
                             
-//                            var selectedUgc = null;
-//                            
-//                            
-//                            //pick up one UGC from the sorted list 
-//                            for (var indexOfcandidateToSelect=0; indexOfcandidateToSelect<=candidateUgcList.length; indexOfcandidateToSelect++){
-//                                
-//                                if (indexOfcandidateToSelect == candidateUgcList.length){
-//                                    candidateUgcList = candidateUgcList.concat(sortedUgcList);
-//                                    isLoopedAround = true;
-//                                }
-//                                
-//                                if ( candidateUgcList[indexOfcandidateToSelect].contentGenre == programGenreToPlan){
-//                                    selectedUgc = candidateUgcList.splice(indexOfcandidateToSelect, 1)[0];
-//                                    break;
-//                                }
-//                            }
-//                            
-//                            var playDuration; //millisecond
-//                            if (selectedUgc.contentClass == "VIP") {
-//                                playDuration = DURATION_FOR_VIP;  
-//                            }
-//                            else {
-//                                playDuration = DURATION_FOR_NORMAL; 
-//                            }
-                            aProgramTimeSlot.timeslot.playDuration = DURATION_FOR_OTHER_PADDING;
+                            
+                            var playDuration = DURATION_FOR_OTHER_PADDING; //millisecond
+                            aProgramTimeSlot.timeslot.playDuration = playDuration;
                             if (playMode == "interrupt"){
                                 aProgramTimeSlot.timeslot.predictedPlayTime = predictedPlayTime;
                             }
@@ -361,21 +353,19 @@ ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, progr
                                 aProgramTimeSlot.timeslot.predictedPlayTime = null;
                             }
                             
-//                            aProgramTimeSlot.timeslot.ugcSequenceNo = ugcSequenceNo;
                             programs[sequenceNo] = {};
                             programs[sequenceNo].sequenceNo = sequenceNo;
-                            programs[sequenceNo].preSetDuration = DURATION_FOR_OTHER_PADDING;  
+                            programs[sequenceNo].preSetDuration = playDuration;  
                             programs[sequenceNo].contentType = "media_item";
                             programs[sequenceNo].type = "padding";
 
-//                            aProgramTimeSlot.isLoopedAround = isLoopedAround;
                             aProgramTimeSlot.content = {name: paddingContent.get(programGenreToPlan, 'middle') }; 
                             aProgramTimeSlot.contentGenre = programGenreToPlan;
                             
                             totalDuration += playDuration;
                             predictedPlayTime += playDuration;
                             sequenceNo++;
-                            ugcSequenceNo++;
+
                             aProgramTimeSlot.save(function(errOfSave, _result){     
                                 if (!errOfSave) {
                                     programs[sequenceNo-1]._id = _result._id;
