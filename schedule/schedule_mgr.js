@@ -25,6 +25,7 @@ var facebookMgr = require('../facebook_mgr.js');
 var pushMgr = require('../push_mgr.js');
 var memberModel = db.getDocModel("member");
 var adminBrowserMgr = require('../admin_browser_mgr.js');
+var messageMgr = require('../message_mgr.js');
 
 var ProgramGroup = require("./program_group.js");
 var ProgramPlanningPattern = require("./program_planning_pattern.js");
@@ -817,6 +818,8 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                 async.parallel([
                     function(push_cb){
                         pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
+                    function(createMessage_cb){
+                    	messageMgr.createMessage(res.member[0]._id, message, function(err, res){ createMessage_cb(null, res); });},
                     function(postFB_cb){
                         
                         var option = {

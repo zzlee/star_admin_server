@@ -11,6 +11,7 @@ var pushMgr = require('./push_mgr.js');
 var canvasProcessMgr = require('./canvas_process_mgr.js');
 var storyContentMgr = require('./story_content_mgr.js');
 var fbMgr = require('./facebook_mgr.js');
+var messageMgr = require('./message_mgr.js');
 
 var UGCs = FMDB.getDocModel("ugc");
 var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
@@ -719,6 +720,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
     var owner_id = null;
     var liveContentUrl = null;
     
+    logger.info("postMessageAndPicture",memberId, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id);
     //
     async.waterfall([
        function(callback){
@@ -855,6 +857,20 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                             logger.info('push played notification to user, member id is ' + member._id);
                             push_cb(err, res);
                         });
+                    }else{
+                    	logger.info('message is null, member id is ' + member._id);
+                    	push_cb("message is null", res);
+                    }
+                },
+                function(push_cb, createMessage_cb){
+                    if (message) {
+                    	messageMgr.createMessage(member._id, message, function(err, res){
+                            logger.info('save played notification to db, member id is ' + member._id);
+                            createMessage_cb(err, res);
+                        });
+                    }else{
+                    	logger.info('message is null, member id is ' + member._id);
+                    	createMessage_cb("message is null", res);
                     }
                 }
             ], function(err, res){
