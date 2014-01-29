@@ -58,9 +58,9 @@ var async = require('async');
 var ugcModel = db.getDocModel("ugc");
 var programTimeSlotModel = db.getDocModel("programTimeSlot");
 
-var programStartTime = '2014/1/25 15:20';
-var oldUgcNo = 7699;
-var newUgcNo = 7727;
+var programStartTime = '2014/1/28 17:10';
+var oldUgcNo = 7787;
+var newUgcNo = 7781;
 
 
 async.waterfall([
@@ -115,6 +115,28 @@ async.waterfall([
             }
         });
         
+    },
+    function(callback){
+        //update the doohSubmitTimes of old ugc
+        ugcModel.findOneAndUpdate({no: oldUgcNo}, {$set: {doohSubmitTimes:0}}, function(errOfUpdate){
+            if (!errOfUpdate) {
+                callback(null);
+            }
+            else {
+                callback("Failed to update the doohSubmitTimes of old ugc: "+errOfUpdate);
+            }
+        });
+    },
+    function(callback){
+        //update the doohSubmitTimes of old ugc
+        ugcModel.findOneAndUpdate({no: newUgcNo}, {$set: {doohSubmitTimes:1}}, function(errOfUpdate){
+            if (!errOfUpdate) {
+                callback(null);
+            }
+            else {
+                callback("Failed to update the doohSubmitTimes of new ugc: "+errOfUpdate);
+            }
+        });
     }
 ], function(err){
     if (!err) {
