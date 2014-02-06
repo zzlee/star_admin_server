@@ -19,6 +19,8 @@ exports.init = function() {
     app.get('/internal/dooh/padding_start_html/shutter/:contentGenre', routes.doohHandler.streamShutterTrigger);
     //GET push html to dooh player and trigger story camera recording.
     app.get('/internal/dooh/padding_start_html/recording/:contentGenre', routes.doohHandler.streamRecordingTrigger);
+    //GET Trigger story camera shutter by dooh player.
+    app.get('/internal/dooh/padding_start/shutter', routes.doohHandler.widgetShutterTrigger);
     
     //PUT get play dooh video play time.
     app.put('/available_street_photos/:playTime', routes.storyCamControllerHandler.availableStreetPhotos);

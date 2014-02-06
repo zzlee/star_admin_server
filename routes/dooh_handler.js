@@ -122,6 +122,26 @@ FM.dooh_handler.streamShutterTrigger = function(req, res){
     });
 };
 
+FM.dooh_handler.widgetShutterTrigger = function(req, res){
+    var url = require('url');
+    var url_parts = url.parse(req.url, true);
+    var query = url_parts.query;
+    var triggerTime = null;
+    if(!query.time) {
+        triggerTime = new Date().getTime();
+        logger.info('story cam started shutter, server time is ' + triggerTime);
+    }
+    else {
+        triggerTime = query.time;
+        logger.info('story cam started shutter, player time is ' + triggerTime);
+    }
+    storyCamControllerMgr.startShutter(triggerTime, function(resParametes){
+        // logger.info('res: _commandId='+resParametes._commandId+' err='+resParametes.err);
+        // res.send(200);
+        // resIsSent = true;
+    });
+};
+
 //GET /internal/dooh/padding_start_html/recording
 FM.dooh_handler.streamRecordingTrigger = function(req, res){
     var contentGenre = req.params.contentGenre;
