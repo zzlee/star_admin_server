@@ -173,10 +173,10 @@ ProgramGroup.prototype.generateByTemplate = function(templateId, contentGenre, c
 
 ProgramGroup.prototype.generateFromSortedUgcList = function(sortedUgcList, programPlanningPattern, playMode, cbOfGenerateFromSortedUgcList) {
     var _this = this;
-    var DURATION_FOR_NORMAL = 13*1000; //milliseconds
-    var DURATION_FOR_VIP = 120*1000; //milliseconds
-    var DURATION_FOR_LEADING_PADDING = 2*1000; //milliseconds
-    var DURATION_FOR_OTHER_PADDING = 2*1000; //milliseconds
+    var DURATION_FOR_NORMAL = 25*1000; //milliseconds
+    var DURATION_FOR_VIP = 55*1000; //milliseconds
+    var DURATION_FOR_LEADING_PADDING = 5*1000; //milliseconds
+    var DURATION_FOR_OTHER_PADDING = 5*1000; //milliseconds
     var DEFAULT_CYCLE_PERIOD = 10*60*1000; //milliseconds
     var DEFAULT_CONTENT_GENRE_FOR_LEADING_PADDING = "mood";
 

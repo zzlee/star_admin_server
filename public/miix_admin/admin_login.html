@@ -35,15 +35,11 @@
 		<table border="0" cellpadding="0" cellspacing="0">
 		<tr>
 			<th>帳號</th>
-			<td><input name="id" type="text" value="admin" onfocus="this.value=''"  class="login-inp" /></td>
+			<td><input id="id" name="id" type="text" value="admin" onfocus="this.value=''"  class="login-inp" /></td>
 		</tr>
 		<tr>
 			<th>密碼</th>
-			<td><input name="password" type="password" onfocus="this.value=''" class="login-inp" /></td>
-		</tr>
-		<tr>
-			<th></th>
-			<td valign="top"><input type="checkbox" class="checkbox-size" id="login-check" /><label for="login-check">記住帳號與密碼</label></td>
+			<td><input id="password" name="password" type="password" onfocus="this.value=''" class="login-inp" /></td>
 		</tr>
 		<tr>
 			<th></th>
@@ -51,33 +47,9 @@
 		</tr>
 		</table>
 	</div>
- 	<!--  end login-inner -->
-	<div class="clear"></div>
-	<a href="" class="forgot-pwd">忘記密碼?</a>
-    </div>
-    <!--  end loginbox -->
+
  
-	<!--  start forgotbox ................................................................................... -->
-	<div id="forgotbox">
-		<div id="forgotbox-text">Please send us your email and we'll reset your password.</div>
-		<!--  start forgot-inner -->
-		<div id="forgot-inner">
-		<table border="0" cellpadding="0" cellspacing="0">
-		<tr>
-			<th>Email address:</th>
-			<td><input type="text" value=""   class="login-inp" /></td>
-		</tr>
-		<tr>
-			<th> </th>
-			<td><input type="button" class="submit-login"  /></td>
-		</tr>
-		</table>
-		</div>
-		<!--  end forgot-inner -->
-		<div class="clear"></div>
-		<a href="" class="back-login">Back to login</a>
-	</div>
-	<!--  end forgotbox -->
+
 
 </div>
 <!-- End: login-holder -->

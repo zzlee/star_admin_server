@@ -56,6 +56,8 @@ form#mainform(action='')
                              label.label_mood 心情
                          if(PlayList.contentGenre == 'check_in')
                              label.label_checkin 打卡
+                         if(PlayList.contentGenre == 'wls')
+                             label.label_wls 國票
                       if(PlayList.contentGenre == 'miix_it')
                          td(id='#{PlayList.programTimeSlotId}' class='ugcImage')
                              img(src='#{PlayList.fbPictureUrl}', alt='', width='120')
@@ -107,6 +109,8 @@ form#mainform(action='')
                              label.label_mood 心情
                          if(PlayList.contentGenre == 'check_in')
                              label.label_checkin 打卡
+                         if(PlayList.contentGenre == 'wls')
+                             label.label_wls 國票
                       if(PlayList.contentGenre == 'miix_it')
                          td(id='#{PlayList.programTimeSlotId}' class='ugcImage')
                              img(src='#{PlayList.fbPictureUrl}', alt='', width='120')
