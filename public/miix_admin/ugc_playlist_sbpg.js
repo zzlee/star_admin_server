@@ -341,6 +341,7 @@ var UGCPlayListSubPg = {
                                                 var contentGenre_text;
                                                 var genreLabel;
                                                 var ugcSource;
+                                                
                                                 if(response.results[0].contentGenre == 'mood'){
                                                     contentGenre_text = 'label_mood';
                                                     genreLabel = $('<label>').attr({
@@ -403,7 +404,24 @@ var UGCPlayListSubPg = {
                                                         href: response.results[0].url.s3,
                                                         target: '_blank'
                                                      }).append(ugcImg);
+                                                }else if(response.results[0].contentGenre == 'wls'){
+                                                    contentGenre_text = 'label_wls';
+                                                    genreLabel = $('<label>').attr({
+                                                        class: contentGenre_text
+                                                     }).append('國票');
+                                                    
+                                                    ugcImg = $('<img>').attr({
+                                                       src: response.results[0].url.s3,
+                                                       width: 700,
+                                                       height: 149
+                                                    });
+                                                    ugcSource = $('<a>').attr({
+                                                       href: response.results[0].url.s3,
+                                                       target: '_blank'
+                                                    }).append(ugcImg);
                                                 }
+                                                
+                                                
                                                 $('#'+timeSlotId+'.ugcNo').attr({"original_content_class":response.results[0].contentClass});
                                                 
                                                 if(response.results[0].contentClass == 'VIP'){
