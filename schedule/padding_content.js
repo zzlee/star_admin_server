@@ -22,7 +22,8 @@ var paddingContent =(function(){
             },
             // web app - wls
             wls: { 
-                start:  "ondascreen_padding-wls-start",    
+                // start:  "ondascreen_padding-wls-start",    
+                start:  "ondascreen-wls-start",    
                 middle: "ondascreen_padding-wls-middle.jpg",
                 end:    "ondascreen_padding-wls-end.jpg"
             }
