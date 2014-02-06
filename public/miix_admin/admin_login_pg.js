@@ -23,17 +23,27 @@ $(document).ready(function(){
 				$('#login-inner input[class="login-inp"]').each(function(){
 					inputData[$(this).attr("name")] = $(this).val();
 				});
-				console.log("Input: " + JSON.stringify(inputData) );
+				//console.log("Input: " + JSON.stringify(inputData) );
 				if(inputData.id && inputData.password){
-					$.get(url, inputData, function(res, textStatus){
-						if(res.token && res.role){
-							localStorage.token = res.token;
-							localStorage.role = res.role;
-							location.reload();
-						}else{
-							console.log("[Response of Login] message:" + res.message);
+					$.ajax({
+						url : url,
+						data : inputData,
+						type : "GET",
+						success: function(res){
+									if(res.token && res.role){
+										localStorage.token = res.token;
+										localStorage.role = res.role;
+										location.reload();
+									}else{
+										console.log("[Response of Login] message:" + res.message);
+									}
+								},
+						statusCode : {
+							401 : function(){
+								alert("密碼或帳號有錯，請重新輸入");
+							}
 						}
-					});
+					});//End of ajax
 				}//end of if(inputData.id && inputData.password)
 
 		}//end of event.keyCode
