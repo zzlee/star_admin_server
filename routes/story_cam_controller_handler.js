@@ -736,10 +736,19 @@ module.exports = FM.storyCamControllerHandler;
 // }, 2000);
 
 // Test Data upload
-/* for(var i=1; i <= 3; i++) {
+/* for(var i=1; i <= 12; i++) {
     for(var j=0; j<6; j++) {
-        var file = 'D:\\photo_test\\1389598985413\\1389598985413-' + i + '-' + j + '.jpg',
-            s3Path = '/camera_record/1389598985413/1389598985413-' + i + '-' + j + '.jpg';
+        
+        var file, s3Path;
+        
+        if( i < 10 ) {
+            file = 'D:\\photo_test\\1390967159916\\1390967159916-00' + i + '-' + j + '.jpg';
+            s3Path = '/camera_record/1390967159916/1390967159916-00' + i + '-' + j + '.jpg';
+        }
+        else if( i < 100 ) {
+            file = 'D:\\photo_test\\1390967159916\\1390967159916-0' + i + '-' + j + '.jpg';
+            s3Path = '/camera_record/1390967159916/1390967159916-0' + i + '-' + j + '.jpg';
+        }
             
         awsS3.uploadToAwsS3(file, s3Path, null, function(err,result){
             if (!err){

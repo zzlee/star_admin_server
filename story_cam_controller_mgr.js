@@ -149,7 +149,13 @@ storyCamControllerMgr.startShutter = function( startedShutter_cb ){
         });
         query_end = new Date().getTime();
         actionSetting[0] -= (query_end - query_start) / 1000;
-        if(actionSetting[0] < 0) { actionSetting[0] = 0.0; }
+        if(actionSetting[0] < 0) { 
+            actionSetting[0] = 0.0; 
+        }
+        if(actionSetting[0] > 0) {
+            var size = Math.pow(10, 2);
+            actionSetting[0] = Math.round(actionSetting[0] * size) / size;
+        }
         
         var commandParameters = {
             movieProjectID: '',
