@@ -46,7 +46,7 @@ var schedule = (function() {
 				var playTimeEnd;
 				var playWeekday;
 				
-				var dateTransfer = function(date, cbOfDateTransfer){
+				/* var dateTransfer = function(date, cbOfDateTransfer){
 					var tempDate = new Date(date).toString().substring(0,25);
 					yyyy = tempDate.substring(11,15);
 					mm = new Date(date).getMonth()+1;
@@ -73,40 +73,48 @@ var schedule = (function() {
 				
 				weekdayTransfer(playTime.start, function(result){
 					playWeekday = [result];
-				});
-				
-                /* var timeslots = {
-                        frames : [{
-                            id : 1,
-                            timeslots: 
-                                [{ audioDucking: false,
-//                                    color: '#16f00e',
-                                    controlledByAdManager: false,
-                                    description: 'Created by REST api',
-                                    endTime: playTimeEnd.toString(),
-//                                    id: 58,
-                                    locked: false,
-                                    playFullScreen: false,
-                                    playlist: [
-                                    {
-                                        enableSmartPlaylist: false,
-                                        id: playList_id,
-                                        itemCount: 0,
-//                                        name: 'OnDaScreen',
-                                        playlistType: 'MEDIA_PLAYLIST',
-                                        prettifyDuration: '(0)'
-                                    }],
-                                    priorityClass: priority,//ALWAYS_ON_TOP, NORMAL, ALWAYS_UNDERNEATH
-                                    recurrencePattern: 'WEEKLY',
-                                    sortOrder: 1,
-                                    startDate: playDate.toString(),
-                                    startTime: playTimeStart.toString(),
-                                    weekdays: playWeekday 
-                                }]
-                        }]
-                } */
+				}); */
                 
-                var timeslots = 
+                var fillNumber = function( number ) {
+                    if( number < 10 ) {
+                        return '0' + number;
+                    }
+                    else {
+                        return number;
+                    }
+                };
+                
+                var playStart = new Date(playTime.start)
+                    playEnd = new Date(playTime.end);
+				var playStartDate, playEndDate, 
+                    playStartTime, playEndTime;
+                
+                playStartDate = playStart.getFullYear() + '-' + 
+                                fillNumber(playStart.getMonth() + 1) + '-' + 
+                                fillNumber(playStart.getDate());
+                playStartTime = fillNumber(playStart.getHours()) + ':' + 
+                                fillNumber(playStart.getMinutes()) + ':' + 
+                                fillNumber(playStart.getSeconds());
+                playEndDate = playEnd.getFullYear() + '-' + 
+                              fillNumber(playEnd.getMonth() + 1) + '-' + 
+                              fillNumber(playEnd.getDate());
+                playEndTime = fillNumber(playEnd.getHours()) + ':' + 
+                              fillNumber(playEnd.getMinutes()) + ':' + 
+                              fillNumber(playEnd.getSeconds());
+                
+                var colorRender = function() {
+                    var code = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 
+                                'A', 'B', 'C', 'D', 'E', 'F'];
+                    return '#' + 
+                           code[Math.floor(Math.random()*15)] + 
+                           code[Math.floor(Math.random()*15)] + 
+                           code[Math.floor(Math.random()*15)] + 
+                           code[Math.floor(Math.random()*15)] + 
+                           code[Math.floor(Math.random()*15)] + 
+                           code[Math.floor(Math.random()*15)];
+                };
+                
+                /* var timeslots = 
                 {
                     // "1" : { silent : true },
                     id : "",
@@ -118,36 +126,63 @@ var schedule = (function() {
                         timeslots : [{
                             audioDucking: false,
                             // color: "#CEE986",
-                            startTime: playTimeStart,
-                            endTime: playTimeEnd,
+                            description: 'Created by Feltmeng',
+                            startTime: playStartTime,
+                            endTime: playEndTime,
                             hasPriorityClassChanged: true,
                             locked : false,
-                            name :"somename",   //
+                            // name :"somename",   //
                             playFullScreen : "false",
                             playlist: {
                                 id: playList_id,
                             },
                             priorityClass : priority,
                             recurrencePattern  : "WEEKLY",
-                            sortOrder : 1,
-                            startDate : playDate,
-                            endDate : playDate,
+                            // sortOrder : 1,
+                            startDate : playStartDate,
+                            endDate : playEndDate,
                             tempName: "N0",
                             // weekdays : [ playWeekday[0] ],
-                            weekdays : [
-                                "SUNDAY",
-                                "MONDAY",
-                                "TUESDAY",
-                                "WEDNESDAY",
-                                "THURSDAY",
-                                "FRIDAY",
-                                "SATURDAY" 
-                            ],
+                            weekdays : [ "SUNDAY","MONDAY","TUESDAY","WEDNESDAY"
+                                        ,"THURSDAY","FRIDAY","SATURDAY" ],
                             deleteFlag : "false",
                         }]
                     }]
+                }; */
+                
+                var timeslots = {
+                    "1":{"silent":true},
+                    "frames":[{
+                        "eventTriggers":[],
+                        "timeTriggers":[],
+                        "timeslots":[
+                            {
+                                "playlist":{
+                                    "id":playList_id,
+                                    // "name":"WTA-20140129t104500-20140129t104800"
+                                },
+                                "audioDucking":false,
+                                "playFullScreen":false,
+                                "startDate":playStartDate.toString(),
+                                "endDate":playEndDate.toString(),
+                                "startTime":playStartTime.toString(),
+                                "endTime":playEndTime.toString(),
+                                "recurrencePattern":"WEEKLY",
+                                "weekdays":["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"],
+                                "locked":"false",
+                                "color":colorRender(),
+                                // "sortOrder":1,
+                                "priorityClass":priority,
+                                "hasPriorityClassChanged":true,
+                                // "name":"WTA-20140129t104500-20140129t104800",
+                                "tempName":"N0"
+                            }
+                        ],
+                        "id":1
+                    }],
+                    "id":""
                 };
-               
+                
                 adapter.put('/ContentManager/api/rest/channels/'+ channel_id +'/schedules?token=' + token, timeslots, function(err, req, res, obj){
                     if( err ) {
                         createTimeslot_cb(err, null);
