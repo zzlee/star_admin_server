@@ -472,7 +472,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
             
             censorMgr.getUGCListLite(intervalOfSelectingUGC, filter, function(err_1, _sortedUgcList ){
                 if (!err_1){
-                    sortedUgcList = _sortedUgcList;
+                    sortedUgcList = JSON.parse(JSON.stringify(_sortedUgcList));
                     //console.log('sortedUgcList=');
                     //console.dir(sortedUgcList);
                     logger.info('[scheduleMgr] censorMgr.getUGCListLite() returns: sortedUgcList=');
