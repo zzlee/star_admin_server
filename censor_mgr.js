@@ -397,7 +397,7 @@ censorMgr.getUGCListLite = function(intervalOfSelectingUGC, filter, cb){
     //console.dir(condition);
 
     
-    FMDB.listOfdocModels( UGCs, condition,'_id genre contentGenre projectId fileExtension no ownerId url mustPlay', {sort: sort}, function(err, result){
+    FMDB.listOfdocModels( UGCs, condition,'_id genre contentClass contentGenre projectId fileExtension no ownerId url mustPlay', {sort: sort}, function(err, result){
         if(err) {
             logger.error('[censorMgr.getUGCListLite]', err);
             cb(err, null);

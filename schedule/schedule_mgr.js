@@ -472,7 +472,7 @@ scheduleMgr.createProgramList = function(dooh, intervalOfSelectingUGC, intervalO
             
             censorMgr.getUGCListLite(intervalOfSelectingUGC, filter, function(err_1, _sortedUgcList ){
                 if (!err_1){
-                    sortedUgcList = _sortedUgcList;
+                    sortedUgcList = JSON.parse(JSON.stringify(_sortedUgcList));
                     //console.log('sortedUgcList=');
                     //console.dir(sortedUgcList);
                     logger.info('[scheduleMgr] censorMgr.getUGCListLite() returns: sortedUgcList=');
@@ -1115,18 +1115,25 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                                 // if ( status === "done" ) {
                                 if ( !err ) {
                                     cb2(null, programs);
+                                    adminBrowserMgr.showTrace(null, straceStamp+"成功地將此播放清單以插播型式('always-on-top' timeslot)放上schedule!");
                                 }
                                 else {  //Something is wrong. 
-                                    cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule: ' + JSON.stringify(err), null);
+                                    //TODO: switch back when scalaMgr.createTimeslot() is more stable
+                                    cb2(null, programs);
+                                    //cb2('Failed to put the playlist in an "always-on-top" timeslot in the schedule: ' + JSON.stringify(err), null);
+                                    adminBrowserMgr.showTrace(null, straceStamp+"!!!!!無法把插播的playlist推成'always-on-top'的timeslot,請通知RD手動把playlist放上schedule. 錯誤訊息： "+JSON.stringify(err));
                                 }
-
-
                                 
                             }); 
                         }
                         else {
-                            cb2("Failed to get playlistId after calling scalaMgr.pushMediaToPlaylist()", null);
+                            //TODO: switch back when scalaMgr.createTimeslot() is more stable
+                            cb2(null, programs);
+                            //cb2("Failed to get playlistId after calling scalaMgr.pushMediaToPlaylist()", null);
+                            adminBrowserMgr.showTrace(null, straceStamp+"!!!!!因無法取得playlistId以致於無法把插播的playlist推成'always-on-top'的timeslot");
                         }
+                        
+                        
                     } 
                     else {
                         cb2(null, programs);
