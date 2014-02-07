@@ -130,7 +130,16 @@ FM.storyCamControllerHandler.availableStreetPhotos = function(req, res){
         async.series([
             function( preview_cb ) {
                 async.waterfall([
-                    function( download_cb ) { downloadPhotosFromAwsS3( recordTime, download_cb ); },
+                    function( download_cb ) { 
+                        downloadPhotosFromAwsS3( recordTime, function(err, dlList) {
+                            if( err.length ) {
+                                download_cb(err, null);
+                            }
+                            else {
+                                download_cb(null, dlList);
+                            }
+                        } ); 
+                    },
                     function( list, renaming_cb ) { 
                         thumbnailSetting( recordTime, program, list.s3, function(err, namelist) {
                             // (err)?console.dir(err):console.dir(namelist);
@@ -152,8 +161,13 @@ FM.storyCamControllerHandler.availableStreetPhotos = function(req, res){
                     function( list, s3upload_cb ) { 
                         uploadThumbnailToAwsS3(list.thumbnail, list.rename, function(err, s3info) {
                             // s3upload_cb(err, s3info);
-                            list.url = s3info;
-                            s3upload_cb(err, list);
+                            if( err.length ) {
+                                s3upload_cb(err, null);
+                            }
+                            else {
+                                list.url = s3info;
+                                s3upload_cb(null, list);
+                            }
                         }); 
                     },
                 ], preview_cb);
@@ -167,6 +181,7 @@ FM.storyCamControllerHandler.availableStreetPhotos = function(req, res){
                 ], content_cb);
             }
         ], function( err, res ) {
+        
             var thumbnail = res[0];
             var content = res[1];
             // clear file
@@ -539,10 +554,10 @@ var clearVideo = function( filepath, clear_cb ){
 };
 
 /*--- live photo thimbnail ---*/
-var downloadPhotosFromAwsS3 = function( recordTime, options, download_cb ) {
+var downloadPhotosFromAwsS3 = function( recordTime, options, downloadPhotos_cb ) {
     
     if( typeof(options) === 'function' ) {
-        download_cb = options;
+        downloadPhotos_cb = options;
     }
     
     var S3List = [];
@@ -550,7 +565,7 @@ var downloadPhotosFromAwsS3 = function( recordTime, options, download_cb ) {
     
     var downloadFileFromAwsS3 = function( sourceList, download_cb ) {
         
-        var dlList = [];
+        /* var dlList = [];
         
         for(var i = 0; i < sourceList.length; i++) {
             var file = sourceList[i].split('/');
@@ -569,7 +584,42 @@ var downloadPhotosFromAwsS3 = function( recordTime, options, download_cb ) {
         async.parallel(execute, function(err, res){
             // (err)?console.dir(err):console.dir(res);
             download_cb(null, dlList);
-        });
+        }); */
+        var dlList = [],
+            errorLog = [],
+            task = [];
+        
+        for(var i = 0, max = sourceList.length; i < max; i++) {
+            var temp = sourceList[i].split('/');
+            var filename = temp[temp.length - 1];
+            dlList.push( path.join(__dirname, filename) );
+        }
+        
+        for(var i = 0, max = sourceList.length; i < max; i++) {
+            var oneTask = 
+            {
+                target : dlList[i],
+                source : sourceList[i]
+            };
+            task.push(oneTask);
+        }
+        
+        var q = async.queue(function (task, callback) {
+            // console.log('hello ' + task.name);
+            awsS3.downloadFromAwsS3(task.target, task.source, function(err, res) {
+                if( err ) {
+                    logger.info( 'download is failed. s3: ' + task.source + ', local: ' + task.target );
+                    callback( 'download is failed. s3: ' + task.source + ', local: ' + task.target );
+                }
+                else {
+                    logger.info( 'download is successfully. s3: ' + task.source + ', local: ' + task.target );
+                    callback();
+                }
+            });
+        }, 10);
+        
+        q.drain = function() {  download_cb(errorLog, dlList); };
+        q.push(task, function(err) { if( err ) errorLog.push( err ); });
     };
     
     awsS3.listAwsS3('camera_record/' + recordTime, function(err, res){
@@ -581,7 +631,7 @@ var downloadPhotosFromAwsS3 = function( recordTime, options, download_cb ) {
         }
         
         downloadFileFromAwsS3( S3List, function( err, dlList ) {
-            download_cb(err, { s3 : S3List, dl : dlList });
+            downloadPhotos_cb(err, { s3 : S3List, dl : dlList });
         } );
         
     });
@@ -658,7 +708,7 @@ var imageResizing = function(saveTo, file, resizing_cb) {
 
 var uploadThumbnailToAwsS3 = function(fileList, s3List, uploadThunbnail_cb) {
     
-    var upload = function(file, s3, cb) {
+    /* var upload = function(file, s3, cb) {
         if(s3[0] != '/') {
             s3 = '/' + s3;
         }
@@ -690,7 +740,59 @@ var uploadThumbnailToAwsS3 = function(fileList, s3List, uploadThunbnail_cb) {
             s3TbList.push('https://s3.amazonaws.com/miix_content' + res[i]);
         }
         uploadThunbnail_cb(null, s3TbList);
+    }); */
+    
+    var error = [],
+        listResult = [];
+    
+    var q = async.queue(function (task, callback) {
+        if(task.s3[0] != '/') {
+            task.s3 = '/' + task.s3;
+        }
+        awsS3.uploadToAwsS3(task.file, task.s3, null, function(err,result){
+            if (!err){
+                // console.log('Live content thumbnail image was successfully uploaded to S3 ' + s3);
+                logger.info('Live content thumbnail image was successfully uploaded to S3 ' + task.s3);
+                callback();
+            }
+            else {
+                // console.log('Live content thumbnail image failed to be uploaded to S3 ' + s3);
+                logger.info('Live content thumbnail image failed to be uploaded to S3 ' + task.s3);
+                callback('uplaod_thumbnail_is_failed. file: ' + task.file);
+                // console.log('uplaod_thumbnail_is_failed. file: ' + task.file);
+                // callback();
+            }
+        });
+        
+    }, 10);
+    
+    var task = [];
+    for(var i = 0, max = fileList.length; i < max; i++) {
+        var oneTask = 
+        {
+            // projectId : searchList[i]
+            file : fileList[i],
+            s3 : s3List[i]
+        };
+        task.push(oneTask);
+    }
+    
+    q.push(task, function(err) {
+        // log('t2 executed');
+        // console.log(err);
+        if( err )
+            error.push(err);
     });
+    
+    q.drain = function() { 
+        // console.log(‘all tasks have been processed’); 
+        // uploadThunbnail_cb(error, 'done');
+        var s3TbList = [];
+        for(var i = 0, max = s3List.length; i < max; i++) {
+            s3TbList.push('https://s3.amazonaws.com/miix_content' + s3List[i]);
+        }
+        uploadThunbnail_cb(error, s3TbList);
+    }
     
 };
 
@@ -760,3 +862,13 @@ module.exports = FM.storyCamControllerHandler;
         });
     }
 } */
+
+/* 
+awsS3.listAwsS3('camera_record/' + 1391592910196, function(err, res){
+// awsS3.listAwsS3('1234/' + recordTime, function(err, res){
+    // (err)?console.log(err):console.dir(res);
+    for(var i = 0, max = res.Contents.length; i < max; i++) {
+        console.log(res.Contents[i].Key);
+    }
+    process.exit(0);
+}); */
