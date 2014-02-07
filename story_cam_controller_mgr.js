@@ -86,7 +86,7 @@ storyCamControllerMgr.uploadStoryMovieToS3 = function(movieProjectID, uploadMovi
 };
 
 // long-polling shutter control : start
-storyCamControllerMgr.startShutter = function( startedShutter_cb ){
+storyCamControllerMgr.startShutter = function( triggerTime, startedShutter_cb ){
     
     //console.log('start recod.');
 
@@ -108,7 +108,12 @@ storyCamControllerMgr.startShutter = function( startedShutter_cb ){
 		}
 	}); */
     
-    var triggerTime = new Date().getTime();
+    if( typeof(triggerTime) === 'function' ) {
+        startedShutter_cb = triggerTime;
+        triggerTime = new Date().getTime();
+    }
+    
+    // var triggerTime = new Date().getTime();
     // var triggerTime = 1388479200000 + 60000; // test for lab
     logger.info('Camera start shutter: ' + triggerTime);
     
@@ -165,7 +170,7 @@ storyCamControllerMgr.startShutter = function( startedShutter_cb ){
         
         globalConnectionMgr.sendRequestToRemote( storyCamControllerID, { command: "START_SHUTTER", parameters: commandParameters }, function(responseParameters) {
             //console.dir(responseParameters);
-            if (startedShutter_cb )  {
+            if (startedShutter_cb) {
                 startedShutter_cb(responseParameters);
             }
         });
