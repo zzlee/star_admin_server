@@ -67,8 +67,8 @@ form#mainform(action='')
                              label #{PlayList.fb_userName} 
                       else
                          td(id='#{PlayList.programTimeSlotId}' class='ugcImage')
-                             a(href='#{PlayList.url.s3}',target='_blank')
-                                 img(src='#{PlayList.url.s3}', alt='', width='700', height='149')
+                             a(href='#{PlayList.url}',target='_blank')
+                                 img(src='#{PlayList.url}', alt='', width='700', height='149')
                       td(id='#{PlayList.programTimeSlotId}' class='ugcRating') #{PlayList.rating}
                       td
                         input#PlayList.ugcCensorNoRemoveBtn(type='button', value='刪除且自動替補', name='#{PlayList.programTimeSlotId}')
@@ -120,8 +120,8 @@ form#mainform(action='')
                              label #{PlayList.fb_userName} 
                       else
                          td(id='#{PlayList.programTimeSlotId}' class='ugcImage')
-                             a(href='#{PlayList.url.s3}',target='_blank')
-                                 img(src='#{PlayList.url.s3}', alt='', width='700', height='149')
+                             a(href='#{PlayList.url}',target='_blank')
+                                 img(src='#{PlayList.url}', alt='', width='700', height='149')
                       td(id='#{PlayList.programTimeSlotId}' class='ugcRating') #{PlayList.rating}
                       td
                         input#PlayList.ugcCensorNoRemoveBtn(type='button', value='刪除且自動替補', name='#{PlayList.programTimeSlotId}')
