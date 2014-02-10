@@ -201,14 +201,25 @@ var mappingUGCList = function(data, type, set_cb){
         }
         //UGCListInfo
         if(next == limit - 1) {
-            UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass, data[next].url.s3.replace('.png','_s.jpg'), UGCList);
+            if(data[next].url.s3){
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass, data[next].url.s3.replace('.png','_s.jpg'), UGCList);
+
+            }else{
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass, data[next].url, UGCList);
+
+            }
             set_cb(null, 'ok'); 
             next = 0;
             UGCList = [];
         }
         else{
-            UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState,result[3], result[4],data[next].forMRTReview,data[next].createdOn, data[next].contentClass, data[next].url.s3.replace('.png','_s.jpg'), UGCList);
-            next += 1;
+            if(data[next].url.s3){
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass, data[next].url.s3.replace('.png','_s.jpg'), UGCList);
+
+            }else{
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass, data[next].url, UGCList);
+
+            }            next += 1;
             mappingUGCList(data, type, set_cb);
         }
 
