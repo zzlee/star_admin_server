@@ -587,7 +587,7 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
                         predictedPlayTime: predictedPlayTime,
                         ugcSequenceNo: ugcSequenceNo,
                         programTimeSlotId: programList[anIndex]._id,
-                        url: ugc.url,
+                        url: ugc.url.s3.replace('.png','_s.jpg'),
                         createdOn: ugc.createdOn,
                         contentClass: ugc.contentClass
                     };
