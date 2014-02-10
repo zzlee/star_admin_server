@@ -41,12 +41,12 @@ var schedule = (function() {
         },
         createTimeslot : function( playList_id, priority, playTime, channel_id, createTimeslot_cb ){
             connectMgr.checkCollision('schedule.list', function(status){
-				var playDate;
+				/* var playDate;
 				var playTimeStart;
 				var playTimeEnd;
 				var playWeekday;
 				
-				/* var dateTransfer = function(date, cbOfDateTransfer){
+				var dateTransfer = function(date, cbOfDateTransfer){
 					var tempDate = new Date(date).toString().substring(0,25);
 					yyyy = tempDate.substring(11,15);
 					mm = new Date(date).getMonth()+1;
@@ -103,15 +103,15 @@ var schedule = (function() {
                               fillNumber(playEnd.getSeconds());
                 
                 var colorRender = function() {
-                    var code = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 
+                    var code = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 
                                 'A', 'B', 'C', 'D', 'E', 'F'];
                     return '#' + 
-                           code[Math.floor(Math.random()*15)] + 
-                           code[Math.floor(Math.random()*15)] + 
-                           code[Math.floor(Math.random()*15)] + 
-                           code[Math.floor(Math.random()*15)] + 
-                           code[Math.floor(Math.random()*15)] + 
-                           code[Math.floor(Math.random()*15)];
+                           code[Math.floor(Math.random()*16)] + 
+                           code[Math.floor(Math.random()*16)] + 
+                           code[Math.floor(Math.random()*16)] + 
+                           code[Math.floor(Math.random()*16)] + 
+                           code[Math.floor(Math.random()*16)] + 
+                           code[Math.floor(Math.random()*16)];
                 };
                 
                 /* var timeslots = 
