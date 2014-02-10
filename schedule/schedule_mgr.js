@@ -25,6 +25,7 @@ var facebookMgr = require('../facebook_mgr.js');
 var pushMgr = require('../push_mgr.js');
 var memberModel = db.getDocModel("member");
 var adminBrowserMgr = require('../admin_browser_mgr.js');
+var messageMgr = require('../message_mgr.js');
 
 var ProgramGroup = require("./program_group.js");
 var ProgramPlanningPattern = require("./program_planning_pattern.js");
@@ -816,7 +817,19 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                 
                 async.parallel([
                     function(push_cb){
-                        pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });},
+	                    	if(message){
+	                    		pushMgr.sendMessageToDeviceByMemberId(res.member[0]._id, message, function(err, res){ push_cb(null, res); });
+	                    	}else{
+	                    		push_cb(null, "no message");
+	                    	}
+                    	},
+                    function(createMessage_cb){
+	                    	if(message){
+	                    		messageMgr.createMessage(res.member[0]._id, message, function(err, res){ createMessage_cb(null, res); });
+	                    	}else{
+	                    		createMessage_cb(null, "no message");
+	                    	}
+                    	},
                     function(postFB_cb){
                         
                         var option = {
@@ -839,7 +852,7 @@ scheduleMgr.pushProgramsTo3rdPartyContentMgr = function(sessionId, playMode, pus
                                 option.time = play_time;
                                 break;
 							case 'waterlandsecuries':
-                                // option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
+                                option.text = '哇！' + fb_name + '的作品，即將在' + play_time + '在小巨蛋播出，快到現場瞧瞧！';
                                 option.name = fb_name;
                                 option.time = play_time;
                                 break;

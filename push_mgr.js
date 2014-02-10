@@ -7,7 +7,6 @@ var DEBUG = true, FM_LOG = (DEBUG) ? function(str) {
 FM.pushMgr = (function() {
 	var uInstance = null;
 	var db = require('./db.js');
-	var messageModel = db.getDocModel("message");
 
 	function constructor() {
 	    var async = require('async');
@@ -198,8 +197,6 @@ FM.pushMgr = (function() {
                          FM_LOG('[pus_mgr.sendMessageToDeviceByMemberId] error = result is null'+err);
                          cbOfSendMessageToDeviceByMemberId(err, result);
                      }else if(result.deviceToken){
-                         //createMessage for message center
-                         FM.pushMgr.getInstance().createMessage(memberId, message, function(err, res){});
                          
                          FM_LOG("deviceToken Array: " + JSON.stringify(result.deviceToken) );
                          for( var devicePlatform in result.deviceToken){
@@ -235,42 +232,6 @@ FM.pushMgr = (function() {
                  });
 
             },
-
-			createMessage : function(memberId,  message, cbOfCreateMessage){
-				var jsonOfNewMessage = {
-					content: message,
-					ownerId: {_id: memberId},
-					showInCenter: true
-				}
-				
-				var newMessage = new messageModel(jsonOfNewMessage);
-				newMessage.save(function(err, res){
-					if(!err) {
-						logger.info('[createMessage] done ,memberId: ', memberId);
-						cbOfCreateMessage(null, "done");
-					}
-					else{
-						logger.error('[createMessage] error', err);
-						cbOfCreateMessage("new message save to db error: "+err, null);
-					}
-				});
-			
-			},
-			
-			updateMessage : function(messageId,  vjson, cbOfUpdateMessage){
-				
-				db.updateAdoc(messageModel, messageId, vjson, function(err, result){
-					if(!err) {
-						logger.info('[updateMessage_updateAdoc] done ,messageId: ', messageId);
-						cbOfUpdateMessage(null,'done');
-					}
-					else{
-						logger.error('[updateMessage_updateAdoc] error: ', err);
-						cbOfUpdateMessage(err,null);
-					}
-				});
-			
-			},
 			
             sendMessageToAllMemberByApp : function(message, app, cbOfSendMessageToDeviceByMemberId){
                 var memberModel = db.getDocModel("member");
