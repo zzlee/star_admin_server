@@ -43,7 +43,7 @@
             
             /* 顯示出來的圖片*/
             if((res[i].s3Img) && (res[i].miixSource.search('miix_it') == -1)){ //非影片合成
-                var s3img=$("<img>").attr({src:res[i].s3Img,
+                var s3img=$("<img>").attr({src:res[i].s3Img.replace('.png','_s.jpg'), 
                                            width:"200",
                                            height:"80"
                                            });
@@ -193,21 +193,23 @@
                     
                 if(res[i].liveContent[j].url.livePhotos){        //determine livePhotos or not (choose 1/5)
                     for(var k=0;k<res[i].liveContent[j].url.livePhotos.length;k++){
-        
+                        
+                        /*---------------- ugc實拍圖 (右側) -----------------------*/
                         var span_img = $("<span>").attr({                                                                   
                                             });
                                           
                         var linkS3=$("<a>").attr({href:res[i].liveContent[j].url.livePhotos[k],
-                                          target:"_blank"});                                      
-                        var inner_img = $("<img>").attr({src:res[i].liveContent[j].url.livePhotos[k],
-                                                           width:350,
+                                          target:"_blank"});   
+                        
+                        var inner_img = $("<img>").attr({src:res[i].liveContent[j].url.livePhotos[k].replace('.jpg','_s.jpg'),
+                                                           width:320,
                                                            height:200,
                                                            id:"testMove",
                                                            class:"ho",
                                                            style:"margin-bottom:10px"
                                                        
                                                       });   
-													  
+                        /*---------------END ugc實拍圖 (右側) -----------------------*/
 													  
 						  /* START get time string, and number for after clcik*/
 								var post_live_time=new Date(parseInt(res[i].liveContent[j].liveTime));
