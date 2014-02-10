@@ -39,20 +39,22 @@
             }else{
                 var tr=$("<tr>").attr({class:""});
             }
-            /*START left side Img (longs3 or miixSource)*/
-
-            if((res[i].s3Img) && (res[i].miixSource.search('.jpg') == -1)){
+            /* -------------START left side Img (longs3 or miixSource) 原始   UGC----------------------*/
+            
+            /* 顯示出來的圖片*/
+            if((res[i].s3Img) && (res[i].miixSource.search('miix_it') == -1)){ //非影片合成
                 var s3img=$("<img>").attr({src:res[i].s3Img,
                                            width:"200",
                                            height:"80"
                                            });
-            }else if(res[i].miixSource){
+            }else if(res[i].miixSource){ //影片合成
                 var s3img=$("<img>").attr({src:res[i].miixSource,
                     width:"200",
                     height:"100"
                     });
             }           
-
+            
+            /* 點下去連結的圖*/
             if(res[i].s3Img){
                 var s3imgLink=$("<a>").attr({href:res[i].s3Img,
                                              target:"_blank"
@@ -62,7 +64,8 @@
                     target:"_blank"
                     }).append(s3img);
             }
-            /*END left side Img (longs3 or miixSource)*/
+            
+            /*-----------------------END left side Img (longs3 or miixSource)--------------------*/
 
             var post_live_time_start=new Date(parseInt(res[i].start));
             var post_year_start=post_live_time_start.getFullYear();
