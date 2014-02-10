@@ -8,7 +8,7 @@ var logger = new(winston.Logger)({
 	transports: [ 
 		new winston.transports.File({ filename: './log/winston.log'})	
 	],
-	exceptionHandlers: [new winston.transports.File({filename: './log/exceptions.log'})]	
+	// exceptionHandlers: [new winston.transports.File({filename: './log/exceptions.log'})]	
 });  
 
 global.logger = logger; 
@@ -282,5 +282,9 @@ setTimeout(function(){
             console.dir(status);
     }); */
     
+    var settingFile = require('./setting.json');
+    var setting = settingFile.default;
+    console.log(setting);
+    // console.log(setting.channel);
         
 }, 2000);

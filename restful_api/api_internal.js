@@ -22,11 +22,17 @@ exports.init = function() {
     //GET Trigger story camera shutter by dooh player.
     app.get('/internal/dooh/padding_start/shutter', routes.doohHandler.widgetShutterTrigger);
     
-    //PUT get play dooh video play time.
+    //PUT get play dooh photo play time.
     app.put('/available_street_photos/:playTime', routes.storyCamControllerHandler.availableStreetPhotos);
     //PUT get play dooh video play time.
     app.put('/available_street_movies/:playTime', routes.storyCamControllerHandler.availableStreetMovies);
 
+    //GET get play dooh photo play time. (test)
+    app.get('/available_street_photos/:playTime', routes.storyCamControllerHandler.availableStreetPhotos);
+    
+    //GET Check player logs (test)
+    app.get('/internal/dooh/check_player_logs', routes.doohHandler.checkPlayerLogs);
+    
     app.post('/internal/story_cam_controller/available_story_movie', routes.storyCamControllerHandler.availableStoryMovie_post_cb);
 
     //POST upload base64 image to facebook
