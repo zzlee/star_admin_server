@@ -283,7 +283,8 @@ var getLivePhoto = function( recordTime, report_cb ){
         // (err)?console.log(err):console.dir(res);
         for(var i=0; i<res.Contents.length; i++) {
             // console.log('Path: ' + '/' + res.Contents[i].Key);
-            S3List.push('/' + res.Contents[i].Key);
+            if( res.Contents[i].Key.toString().indexOf('.jpg') != -1 )
+                S3List.push('/' + res.Contents[i].Key);
         }
         report_cb(err, S3List);
     });
@@ -627,7 +628,8 @@ var downloadPhotosFromAwsS3 = function( recordTime, options, downloadPhotos_cb )
         // (err)?console.log(err):console.dir(res);
         for(var i=0; i<res.Contents.length; i++) {
             // console.log('Path: ' + '/' + res.Contents[i].Key);
-            S3List.push('/' + res.Contents[i].Key);
+            if( res.Contents[i].Key.toString().indexOf('.jpg') != -1 )
+                S3List.push('/' + res.Contents[i].Key);
         }
         
         downloadFileFromAwsS3( S3List, function( err, dlList ) {
@@ -872,3 +874,8 @@ awsS3.listAwsS3('camera_record/' + 1391592910196, function(err, res){
     }
     process.exit(0);
 }); */
+
+/* setTimeout(function() {
+    // request.put('http://210.61.8.38/available_street_photos/1392014488036');
+    request.put('http://127.0.0.1/available_street_photos/1392014488036');
+}, 2000); */

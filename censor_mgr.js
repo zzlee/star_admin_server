@@ -11,6 +11,7 @@ var pushMgr = require('./push_mgr.js');
 var canvasProcessMgr = require('./canvas_process_mgr.js');
 var storyContentMgr = require('./story_content_mgr.js');
 var fbMgr = require('./facebook_mgr.js');
+var messageMgr = require('./message_mgr.js');
 
 var UGCs = FMDB.getDocModel("ugc");
 var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
@@ -120,7 +121,7 @@ var timeslotStart;
 var timeslotEnd;
 
 
-var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, tsLiveStateCount,tsUGCCount, forMRTReview, createdOn, contentClass, arr) {
+var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent, fb_userName, fbPictureUrl, title, description, doohPlayedTimes, rating, contentGenre, mustPlay, timeslotStart, timeslotEnd, timeStamp, programTimeSlotId, highlight, url, liveContentUrl, processingState, tsLiveStateCount,tsUGCCount, forMRTReview, createdOn, contentClass, url_small, arr) {
     arr.push({
         ugcProjectId: ugcProjectId,
         userPhotoUrl: userPhotoUrl,
@@ -146,7 +147,8 @@ var UGCListInfo = function(ugcProjectId, userPhotoUrl, ugcCensorNo, userContent,
         tsUGCCount:tsUGCCount,
 		forMRTReview:forMRTReview,
         createdOn: createdOn,
-        contentClass: contentClass
+        contentClass: contentClass,
+        url_small: url_small
     });
 };
 var mappingUGCList = function(data, type, set_cb){
@@ -200,14 +202,25 @@ var mappingUGCList = function(data, type, set_cb){
         }
         //UGCListInfo
         if(next == limit - 1) {
-            UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass,UGCList);
+            if(data[next].url.s3){
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass, data[next].url.s3.replace('.png','_s.jpg'), UGCList);
+
+            }else{
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass, data[next].url, UGCList);
+
+            }
             set_cb(null, 'ok'); 
             next = 0;
             UGCList = [];
         }
         else{
-            UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState,result[3], result[4],data[next].forMRTReview,data[next].createdOn, data[next].contentClass, UGCList);
-            next += 1;
+            if(data[next].url.s3){
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass, data[next].url.s3.replace('.png','_s.jpg'), UGCList);
+
+            }else{
+                UGCListInfo(data[next].projectId, userPhotoUrl, data[next].no, description, result[1], data[next].fbProfilePicture, data[next].title, data[next].description, data[next].doohPlayedTimes, data[next].rating, data[next].contentGenre, data[next].mustPlay, timeslotStart, timeslotEnd, data[next].timeStamp, data[next].programTimeSlotId, data[next].highlight, data[next].url, result[2], data[next].processingState, result[3],result[4],data[next].forMRTReview, data[next].createdOn, data[next].contentClass, data[next].url, UGCList);
+
+            }            next += 1;
             mappingUGCList(data, type, set_cb);
         }
 
@@ -586,7 +599,7 @@ censorMgr.getFullPlayList = function(programList, updateUGC, cbOfGetFullPlayList
                         predictedPlayTime: predictedPlayTime,
                         ugcSequenceNo: ugcSequenceNo,
                         programTimeSlotId: programList[anIndex]._id,
-                        url: ugc.url,
+                        url: ugc.url.s3.replace('.png','_s.jpg'),
                         createdOn: ugc.createdOn,
                         contentClass: ugc.contentClass
                     };
@@ -719,6 +732,7 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
     var owner_id = null;
     var liveContentUrl = null;
     
+    logger.info("postMessageAndPicture",memberId, photoUrl, type, liveTime, ugcCensorNo, liveContent_Id);
     //
     async.waterfall([
        function(callback){
@@ -855,6 +869,20 @@ censorMgr.postMessageAndPicture = function(memberId, photoUrl, type, liveTime, u
                             logger.info('push played notification to user, member id is ' + member._id);
                             push_cb(err, res);
                         });
+                    }else{
+                    	logger.info('message is null, member id is ' + member._id);
+                    	push_cb("message is null", res);
+                    }
+                },
+                function(push_cb, createMessage_cb){
+                    if (message) {
+                    	messageMgr.createMessage(member._id, message, function(err, res){
+                            logger.info('save played notification to db, member id is ' + member._id);
+                            createMessage_cb(err, res);
+                        });
+                    }else{
+                    	logger.info('message is null, member id is ' + member._id);
+                    	createMessage_cb("message is null", res);
                     }
                 }
             ], function(err, res){

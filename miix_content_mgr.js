@@ -18,6 +18,7 @@ var fmapi = require(workingPath+'/routes/api.js');   //TODO:: find a better name
 var db = require('./db.js');
 //var fbMgr = require('./facebook_mgr.js');
 var pushMgr = require('./push_mgr.js');
+var messageMgr = require('./message_mgr.js');
 
 
 /**
@@ -1089,6 +1090,15 @@ miixContentMgr.pushRandomMessage = function(memberId, ugcProjectID, cbOfPushRand
                                  callback(null, result);
                              else{
                                  callback("Fail to send message to device by memberId: "+err, null);
+                             }
+                     });
+                     },
+                     function(randomMessage, callback){
+                    	 messageMgr.createMessage( memberId, randomMessage, function(err, result){
+                             if (!err)
+                                 callback(null, result);
+                             else{
+                                 callback("Fail to save message to db by memberId: "+err, null);
                              }
                      });
                      }

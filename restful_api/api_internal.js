@@ -27,9 +27,6 @@ exports.init = function() {
     //PUT get play dooh video play time.
     app.put('/available_street_movies/:playTime', routes.storyCamControllerHandler.availableStreetMovies);
 
-    //GET get play dooh photo play time. (test)
-    app.get('/available_street_photos/:playTime', routes.storyCamControllerHandler.availableStreetPhotos);
-    
     //GET Check player logs (test)
     app.get('/internal/dooh/check_player_logs', routes.doohHandler.checkPlayerLogs);
     
