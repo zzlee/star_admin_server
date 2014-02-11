@@ -96,8 +96,14 @@ storyCamControllerMgr.startShutter = function( triggerTime, startedShutter_cb ){
     // camera time trigger setting
     /* var actionSetting = [5.5, 9, 9];
     
+    if( typeof(triggerTime) === 'function' ) {
+        startedShutter_cb = triggerTime;
+        triggerTime = new Date().getTime();
+    }
+    
 	var commandParameters = {
 		movieProjectID: '',
+        playTime: triggerTime,
         actionSetting: actionSetting
 	};
 	
@@ -164,6 +170,7 @@ storyCamControllerMgr.startShutter = function( triggerTime, startedShutter_cb ){
         
         var commandParameters = {
             movieProjectID: '',
+            playTime: triggerTime,
             actionSetting: actionSetting
         };
         logger.info('storyCamControllerMgr.startShutter: find_program_group_ok, ctrl time is [' + actionSetting.toString() + ']');
