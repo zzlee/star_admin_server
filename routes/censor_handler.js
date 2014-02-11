@@ -326,8 +326,7 @@ FM.censorHandler.getLiveContentList_get_cb = function(req, res){
             "state": { $ne: "not_confirmed" }
     };
     sort = {
-            "timeslot.start":-1,
-            "content.no":-1
+            "timeStamp":-1
     };
     if(req.query.condition)   
         condition = {
