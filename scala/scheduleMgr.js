@@ -39,7 +39,7 @@ var schedule = (function() {
             adapter = auth.adapter;
             token = auth.token;
         },
-        createTimeslot : function( playList_id, priority, playTime, channel_id, createTimeslot_cb ){
+        createTimeslot : function( playList_id, priority, playTime, channel_id, frames_id, createTimeslot_cb ){
             connectMgr.checkCollision('schedule.list', function(status){
 				/* var playDate;
 				var playTimeStart;
@@ -151,7 +151,7 @@ var schedule = (function() {
                 }; */
                 
                 var timeslots = {
-                    "1":{"silent":true},
+                    // "1":{"silent":true},
                     "frames":[{
                         "eventTriggers":[],
                         "timeTriggers":[],
@@ -178,10 +178,12 @@ var schedule = (function() {
                                 "tempName":"N0"
                             }
                         ],
-                        "id":1
+                        "id":frames_id
                     }],
                     "id":""
                 };
+                
+                timeslots[channel_id] = {"silent":true};
                 
                 adapter.put('/ContentManager/api/rest/channels/'+ channel_id +'/schedules?token=' + token, timeslots, function(err, req, res, obj){
                     if( err ) {
