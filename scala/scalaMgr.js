@@ -15,6 +15,15 @@
  */
 function scalaMgr( url, account ){
     
+    var config = require('./setting.json').default;
+    if( typeof(config) !== 'object' ) {
+        config = {
+            "channel" : { "id" : 1, "frames" : { "id" : 1 } },
+            "playlist" : { "id" : "", "name" : "OnDaScreen" },
+            "player" : { "id" : "", "name" : "feltmeng" }
+        };
+    }
+    
     var assert = require('assert');
     var async = require('async');
     var restify = require('restify').createJsonClient({url: url});
@@ -122,7 +131,8 @@ function scalaMgr( url, account ){
         var result = [];
     
         var option = {
-            channel : { id: 1, frames: 1 }, //hardcode
+            // channel : { id: 1, frames: 1 }, //hardcode
+            channel : { id: config.channel.id, frames: config.channel.frames.id },
             date : new Date(oneday),
         };
         contractor.schedule.findTimeslots(option, function(list){
@@ -172,14 +182,17 @@ function scalaMgr( url, account ){
     var listHighPriorityTimeslot = function( oneday, setting, highPriority_cb ) {
         
         var options = {
-            channel : { id: 1, frames: 1 }, //hardcode
+            // channel : { id: 1, frames: 1 }, //hardcode
+            channel : { id: config.channel.id, frames: config.channel.frames.id },
             date : null,
         };
         
         if(typeof(oneday) === 'function') {
             highPriority_cb = oneday;
-            options.channel.id = 1;
-            options.channel.frames = 1;
+            // options.channel.id = 1;
+            // options.channel.frames = 1;
+            options.channel.id = config.channel.id;
+            options.channel.frames = config.channel.frames.id;
             options.date = new Date();
         }
         else if((oneday.channel) && (typeof(setting) === 'function')) {
@@ -191,8 +204,10 @@ function scalaMgr( url, account ){
         }
         else if(typeof(setting) === 'function') {
             highPriority_cb = setting;
-            options.channel.id = 1;
-            options.channel.frames = 1;
+            // options.channel.id = 1;
+            // options.channel.frames = 1;
+            options.channel.id = config.channel.id;
+            options.channel.frames = config.channel.frames.id;
             options.date = new Date(oneday);
         }
         else {
@@ -248,14 +263,17 @@ function scalaMgr( url, account ){
     var listTimetriggers = function( oneday, setting, timetriggers_cb ) {
         
         var options = {
-            channel : { id: 1, frames: 1 }, //hardcode
+            // channel : { id: 1, frames: 1 }, //hardcode
+            channel : { id: config.channel.id, frames: config.channel.frames.id },
             date : null,
         };
         
         if(typeof(oneday) === 'function') {
             timetriggers_cb = oneday;
-            options.channel.id = 1;
-            options.channel.frames = 1;
+            // options.channel.id = 1;
+            // options.channel.frames = 1;
+            options.channel.id = config.channel.id;
+            options.channel.frames = config.channel.frames.id;
             options.date = new Date();
         }
         else if((oneday.channel) && (typeof(setting) === 'function')) {
@@ -267,8 +285,10 @@ function scalaMgr( url, account ){
         }
         else if(typeof(setting) === 'function') {
             timetriggers_cb = setting;
-            options.channel.id = 1;
-            options.channel.frames = 1;
+            // options.channel.id = 1;
+            // options.channel.frames = 1;
+            options.channel.id = config.channel.id;
+            options.channel.frames = config.channel.frames.id;
             options.date = new Date(oneday);
         }
         else {
@@ -381,9 +401,9 @@ function scalaMgr( url, account ){
             playTime = option.playTime;
         var playlistName = '';
         if(typeof(option.playlist) === 'undefined')
-            playlistName = 'OnDaScreen';
+            playlistName = config.playlist.name;
         else
-            (typeof(option.playlist.name) === 'undefined')?playlistName = 'OnDaScreen':playlistName = option.playlist.name;
+            (typeof(option.playlist.name) === 'undefined')?playlistName = config.playlist.name:playlistName = option.playlist.name;
         
         var setting = {
             media: { name: file.name },
@@ -439,9 +459,9 @@ function scalaMgr( url, account ){
             playTime = option.playTime;
         var playlistName = '';
         if(typeof(option.playlist) === 'undefined')
-            playlistName = 'OnDaScreen';
+            playlistName = config.playlist.name;
         else
-            (typeof(option.playlist.name) === 'undefined')?playlistName = 'OnDaScreen':playlistName = option.playlist.name;
+            (typeof(option.playlist.name) === 'undefined')?playlistName = config.playlist.name:playlistName = option.playlist.name;
         
         var setting = {
             media: { name: webpage.name },
@@ -493,9 +513,9 @@ function scalaMgr( url, account ){
         
         var playlistName = '';
         if(typeof(option.playlist) === 'undefined')
-            playlistName = 'OnDaScreen';
+            playlistName = config.playlist.name;
         else
-            (typeof(option.playlist.name) === 'undefined')?playlistName = 'OnDaScreen':playlistName = option.playlist.name;
+            (typeof(option.playlist.name) === 'undefined')?playlistName = config.playlist.name:playlistName = option.playlist.name;
         
         var setting = {
             media: { id: '', name: option.media.name },
@@ -872,11 +892,11 @@ function scalaMgr( url, account ){
         }
         
         if(typeof(option.playlist) === 'undefined') {
-            playlistName = 'OnDaScreen';
+            playlistName = config.playlist.name;
         }
         else {
             if(typeof(option.playlist.name) === 'undefined') { 
-                playlistName = 'OnDaScreen'; 
+                playlistName = config.playlist.name; 
             }
             else {
                 playlistName = option.playlist.name;
@@ -937,7 +957,7 @@ function scalaMgr( url, account ){
     var clearPlaylistItems = function(option, clear_cb){
         if(typeof(option) === 'function'){
             clear_cb = option;
-            option = { playlist: { name: 'OnDaScreen' } }
+            option = { playlist: { name: config.playlist.name } }
         }
         contractor.playlist.list({ search: option.playlist.name }, function(err, res){
             if(err) {
@@ -970,12 +990,12 @@ function scalaMgr( url, account ){
         if(typeof(option) === 'function')
         {
             validExpired_cb = option;
-            target = { search: 'OnDaScreen' };
+            target = { search: config.playlist.name };
             expired = new Date().getTime();
         }
         else
         {
-            (typeof(option.search) === 'undefined')?target = { search: 'OnDaScreen' }:target = { search: option.search };
+            (typeof(option.search) === 'undefined')?target = { search: config.playlist.name }:target = { search: option.search };
             (typeof(option.expired) === 'undefined')?expired = new Date().getTime():expired = new Date(option.expired).getTime();
         }
         
@@ -1217,8 +1237,19 @@ function scalaMgr( url, account ){
                     }
                     
                     if(i == result[0].count-1) {
-                        if(!option.player) playerName = 'feltmeng';
-                        else playerName = option.player.name;
+                        // if(!option.player) playerName = 'feltmeng';
+                        // else playerName = option.player.name;
+                        if( !option.player ) {
+                            // playerName = 'feltmeng';
+                            playerName = config.player.name;
+                        }
+                        else if( !option.player.name ) {
+                            // playerName = 'feltmeng';
+                            playerName = config.player.name;
+                        }
+                        else {
+                            playerName = option.player.name;
+                        }
                         contractor.player.findPlayerIdByName(playerName, function(err, playerId){
                             contractor.player.pushProgram({"ids": [playerId]}, function(res){
                                 scalaLogger.action('push event by content manager to player');
@@ -1293,10 +1324,12 @@ function scalaMgr( url, account ){
             generatePlan_cb = options;
         }
         else if( !options.player ) {
-            playerName = 'feltmeng';
+            // playerName = 'feltmeng';
+            playerName = config.player.name;
         }
         else if( !options.player.name ) {
-            playerName = 'feltmeng';
+            // playerName = 'feltmeng';
+            playerName = config.player.name;
         }
         else {
             playerName = options.player.name;
@@ -1322,8 +1355,10 @@ function scalaMgr( url, account ){
 		var playList_id = option.id;
 		var priority = option.priority;//ALWAYS_ON_TOP, NORMAL, ALWAYS_UNDERNEATH
 		var playTime = option.playTime;
-		var channel_id = 1;
-        var frames_id = 1;
+		// var channel_id = 1;
+        // var frames_id = 1;
+        var channel_id = config.channel.id;
+        var frames_id = config.channel.frames.id;
 		
         contractor.schedule.createTimeslot(playList_id, priority, playTime, channel_id, frames_id, function(err, status){
 			if( err )

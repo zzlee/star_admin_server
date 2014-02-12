@@ -1,0 +1,8 @@
+{
+    "default" : 
+    {
+        "channel" : { "id" : 1, "frames" : { "id" : 1 } },
+        "playlist" : { "id" : "", "name" : "OnDaScreen" },
+        "player" : { "id" : "", "name" : "feltmeng" }
+    }
+}
