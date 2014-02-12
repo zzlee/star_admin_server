@@ -12,6 +12,7 @@ var canvasProcessMgr = require('./canvas_process_mgr.js');
 var storyContentMgr = require('./story_content_mgr.js');
 var fbMgr = require('./facebook_mgr.js');
 var messageMgr = require('./message_mgr.js');
+var thumbnail_tool_ugc = require('./thumbnail_tool_ugc.js');
 
 var UGCs = FMDB.getDocModel("ugc");
 var programTimeSlotModel = FMDB.getDocModel("programTimeSlot");
@@ -19,9 +20,7 @@ var userLiveContentModel = FMDB.getDocModel("userLiveContent");
 var memberModel = FMDB.getDocModel("member");
 
 sheculeMgr.init(censorMgr);
-
-
-
+getBrokenImgAndFix();
 /**
  * @param  request  {json}condition
  *                  (json}sort
