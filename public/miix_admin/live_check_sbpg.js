@@ -45,12 +45,16 @@
             if((res[i].s3Img) && (res[i].miixSource.search('miix_it') == -1)){ //非影片合成
                 var s3img=$("<img>").attr({src:res[i].s3Img.replace('.png','_s.jpg'), 
                                            width:"200",
-                                           height:"80"
+                                           height:"80",
+                                           class: "sourceUgc",
+                                           id: "ugc"+i
                                            });
             }else if(res[i].miixSource){ //影片合成
                 var s3img=$("<img>").attr({src:res[i].miixSource,
                     width:"200",
-                    height:"100"
+                    height:"100",
+                    class: "sourceUgc",
+                    id: "ugc"+i
                     });
             }           
             
@@ -1017,6 +1021,61 @@
             });
         });
         
+        /* 偵測圖片有沒有壞掉，並將之修復重現*/
+        var chechImgValid = function(id,imgUrl, cb){
+            var checkImg = document.createElement("img");
+            checkImg.src = imgUrl;
+            
+            checkImg.onerror = function () {
+                var brokenArray = [];
+              
+                imgUrl = imgUrl.replace('_s.jpg','.png');
+                imgUrl = imgUrl.replace('https://s3.amazonaws.com/miix_content','');
+                brokenArray.push(imgUrl);
+                console.log( brokenArray);
+                
+                
+                $.ajax({
+                    url: DOMAIN+"getBrokenImgAndFix",
+                    cache:false,
+                    //async:false,
+                    type: 'POST',
+                    data: {
+                        time: new Date().getTime(),
+                        brokenArray:brokenArray
+                    },
+                    success: function(response) {
+                        var smallOne = imgUrl.replace('.png','_s.jpg');
+                        smallOne = smallOne.replace('/user_project/','https://s3.amazonaws.com/miix_content/user_project/');
+                        var appendImg = $('<img>').attr({
+                            width:200,
+                            height:80,
+                            src:smallOne
+                        });
+                        $('#'+id).parent().append(appendImg);
+                        $('#'+id).hide();
+                        cb(null);
+                    },
+                    error:function(){
+                        
+                    }
+                });    
+                
+             };
+             checkImg.onload = function(){
+               cb(null)  
+             };
+        };
+        
+        $(".sourceUgc").each(function(i){
+            var ugcId = $(this).attr('id');
+            var imgUrl = $(this).attr('src');
+            chechImgValid(ugcId,imgUrl, function(){
+                
+            });
+            
+        });
+         /* end偵測圖片有沒有壞掉，並將之修復重現*/
         
         
     

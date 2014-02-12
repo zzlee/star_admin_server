@@ -6,6 +6,8 @@ var FM = { censorHandler: {} };
 var censorMgr = require("../censor_mgr.js");
 var apis = require("../routes/api.js");
 var scheduleMgr = require("../schedule").scheduleMgr;
+var thumbnail_tool_ugc = require('../thumbnail_tool_ugc.js');
+
 var db = require('../db.js');
 var async = require('async');
 var sessionItemModel = db.getDocModel("sessionItem");
@@ -482,6 +484,26 @@ FM.censorHandler.getItemOfSlotByNo_cb = function(req, res){
             res.send(400, {error: err});
         }
     });
+};
+
+
+
+FM.censorHandler.getBrokenImgAndFix_cb = function(req, res){
+//    console.log(req.body.brokenArray);
+    
+    getBrokenImgAndFix(req.body.brokenArray,function(){
+//        console.log(res);
+        res.send(200);
+    });
+    
+//    var ugcNo = req.query.ugcNo;
+//    censorMgr.getItemOfSlotByNo(ugcNo, null, null, function(err, results){
+//        if(!err){
+//            res.send(200,{results: results});
+//        }else{
+//            res.send(400, {error: err});
+//        }
+//    });
 };
 
 module.exports = FM.censorHandler;
