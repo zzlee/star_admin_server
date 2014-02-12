@@ -1323,8 +1323,9 @@ function scalaMgr( url, account ){
 		var priority = option.priority;//ALWAYS_ON_TOP, NORMAL, ALWAYS_UNDERNEATH
 		var playTime = option.playTime;
 		var channel_id = 1;
+        var frames_id = 1;
 		
-        contractor.schedule.createTimeslot(playList_id, priority, playTime, channel_id, function(err, status){
+        contractor.schedule.createTimeslot(playList_id, priority, playTime, channel_id, frames_id, function(err, status){
 			if( err )
 				createTimeslot_cb(err, null);
 			else
