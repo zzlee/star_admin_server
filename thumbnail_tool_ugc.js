@@ -358,12 +358,13 @@ var uploadThumbnailToAwsS3 = function(fileList, s3List, upload_cb) {
     
 };
 
-global.getBrokenImgAndFix = function() {
+global.getBrokenImgAndFix = function(ugcList,cb) {
+   
     
-    var ugcList = [];
+//    var ugcList = [];
     var tbS3List = [];
     
-    ugcList.push("/user_project/wls_pic_text-52f1ff7da4afcde417000106-20140211T091357432Z/wls_pic_text-52f1ff7da4afcde417000106-20140211T091357432Z.png");
+//    ugcList.push("/user_project/wls_pic_text-52f1ff7da4afcde417000106-20140211T091357432Z/wls_pic_text-52f1ff7da4afcde417000106-20140211T091357432Z.png");
 
     downloadPhotosFromAwsS3(ugcList, function(err, dlList) {
         if( err.length ) {
@@ -401,7 +402,8 @@ global.getBrokenImgAndFix = function() {
                 
                 logger.info('global.getBrokenImgAndFix :'+res);   
 
-                console.log(res);
+               // console.log(res);
+                //cb('done');
 //                process.exit(1);
             });
         });

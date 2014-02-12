@@ -353,6 +353,8 @@ exports.init = function() {
     
     app.get('/miix_admin/getItemOfSlotByNo', routes.censorHandler.getItemOfSlotByNo_cb);
     
+    app.post('/miix_admin/getBrokenImgAndFix', routes.censorHandler.getBrokenImgAndFix_cb);
+    
     
     
 
