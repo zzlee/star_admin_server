@@ -45,16 +45,39 @@ PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
                     callback("Failed to get list's HTML content: "+res.message);
                     
                 }else{
-                    if (!_this.drawPageFunction){
+                    
+                    
+                    if(_this.listType == "ugcCensorMovieList") {
+                    
+                        if (!_this.drawPageFunction){
+                            _this.currentPage = Page;
+                            $('#table-content').html(res);
+                        }
+                        else { //drawPageFunction exists
+                            _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
+                        }
+                        $('#pageNoInput').val(_this.currentPage);
+                        $('input#rowsPerPage').val( _this.rowsPerPage);
+                    
+                        //alert(_this.listType);
+                        findErrorImgAndFix(function(){
+                             callback(null);
+                        });
+                        //$('#table-content').html('test');
+                    }else {
+                        if (!_this.drawPageFunction){
                         _this.currentPage = Page;
                         $('#table-content').html(res);
+                        }
+                        else { //drawPageFunction exists
+                            _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
+                        }
+                        $('#pageNoInput').val(_this.currentPage);
+                        $('input#rowsPerPage').val( _this.rowsPerPage);
+                        
+                         callback(null);
                     }
-                    else { //drawPageFunction exists
-                        _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
-                    }
-                    $('#pageNoInput').val(_this.currentPage);
-                    $('input#rowsPerPage').val( _this.rowsPerPage);
-                    callback(null);
+                   
                 }
             }).fail(function() {
                 callback("Failed to get list's HTML content");
@@ -120,5 +143,72 @@ PageList.prototype.setRowsPerPage = function(newRowsPerPage ){
     var newPage = Math.ceil(keyRow/newRowsPerPage); 
     this.rowsPerPage = newRowsPerPage;
     this.showPageContent(newPage);
+};
+
+var findErrorImgAndFix = function(findErrorImgAndFix_cb) {
+
+     var chechImgValid = function(id,imgUrl, cb){
+            var checkImg = document.createElement("img");
+            checkImg.src = imgUrl;
+            
+            checkImg.onerror = function () {
+            
+                
+                var brokenArray = [];
+              
+                imgUrl = imgUrl.replace('_s.jpg','.png');
+                imgUrl = imgUrl.replace('https://s3.amazonaws.com/miix_content','');
+                brokenArray.push(imgUrl);
+                console.log( brokenArray);
+                
+                $('#'+id).parent().append("<div class='hint' style='font-size:40pt'>圖片載入中，請稍後!</div>");
+                $('#'+id).hide();
+                
+                $.ajax({
+                    url: DOMAIN+"getBrokenImgAndFix",
+                    cache:false,
+                    //async:false,
+                    type: 'POST',
+                    data: {
+                        time: new Date().getTime(),
+                        brokenArray:brokenArray
+                    },
+                    success: function(response) {
+                        var smallOne = imgUrl.replace('.png','_s.jpg');
+                        smallOne = smallOne.replace('/user_project/','https://s3.amazonaws.com/miix_content/user_project/');
+                        var appendImg = $('<img>').attr({
+                            width:700,
+                            height:149,
+                            src:smallOne
+                        });
+                        $('#'+id).parent().append(appendImg);
+                        $('.hint').hide();
+                        cb(null);
+                    },
+                    error:function(){
+                    }
+                });    
+                
+             };
+             checkImg.onload = function(){
+               cb(null)  
+             };
+        };
+        
+        var selectorCount = 0;
+        
+        $(".sourceUgc").each(function(i){
+            var selector =  $(".sourceUgc").length;
+            var ugcId = $(this).attr('id');
+            var imgUrl = $(this).attr('src');
+            
+            chechImgValid(ugcId,imgUrl, function(){
+                selectorCount++;
+                if(selectorCount == selector) {
+                    findErrorImgAndFix_cb(null);
+                }
+            });
+            
+        });
 };
 

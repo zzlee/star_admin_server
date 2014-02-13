@@ -97,7 +97,7 @@ form#mainform(action='')
                       else
                          td
                              a(href='#{ugcCensor.url.s3}',target='_blank')  
-                                 img(src='#{ugcCensor.url_small}', alt='', width='700', height='149') 
+                                 img(id='#{ugcCensor.ugcCensorNo}_img' class='sourceUgc' src='#{ugcCensor.url_small}', alt='', width='700', height='149') 
                      
                       td(sensitive='true') #{ugcCensor.tsUGCCount}
                       td(sensitive='true') #{ugcCensor.tsLiveStateCount}
@@ -200,7 +200,7 @@ form#mainform(action='')
                       else
                          td
                              a(href='#{ugcCensor.url.s3}',target='_blank')  
-                                 img(src='#{ugcCensor.url_small}', alt='', width='700', height='149')
+                                 img(id='#{ugcCensor.ugcCensorNo}_img' class='sourceUgc' src='#{ugcCensor.url_small}', alt='', width='700', height='149')
                       
                       td(sensitive='true') #{ugcCensor.tsUGCCount}
                       td(sensitive='true') #{ugcCensor.tsLiveStateCount}

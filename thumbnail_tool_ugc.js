@@ -402,8 +402,8 @@ global.getBrokenImgAndFix = function(ugcList,cb) {
                 
                 logger.info('global.getBrokenImgAndFix :'+res);   
 
-               // console.log(res);
-                //cb('done');
+                //console.log(res);
+                cb('done');
 //                process.exit(1);
             });
         });

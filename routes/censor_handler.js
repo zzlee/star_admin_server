@@ -489,6 +489,7 @@ FM.censorHandler.getItemOfSlotByNo_cb = function(req, res){
 
 
 FM.censorHandler.getBrokenImgAndFix_cb = function(req, res){
+  //console.log('FM.censorHandler.getBrokenImgAndFix_cb');
 //    console.log(req.body.brokenArray);
     
     getBrokenImgAndFix(req.body.brokenArray,function(){
