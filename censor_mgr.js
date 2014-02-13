@@ -20,8 +20,6 @@ var memberModel = FMDB.getDocModel("member");
 
 sheculeMgr.init(censorMgr);
 
-
-
 /**
  * @param  request  {json}condition
  *                  (json}sort
