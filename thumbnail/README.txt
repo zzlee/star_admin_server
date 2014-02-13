@@ -1,5 +1,5 @@
-�p���a�ɡA�|�����Ϧb�����W���n�p�ϦA�^�ǡA���|�O�o�Ӹ�Ƨ��C
+﻿小圖壞時，會先抓原圖在機器上做好小圖再回傳，路徑是這個資料夾。
 
-��Ƨ��̦�FILE�~�|�QGIT���ASO, DO NOT DELETE THIS FOLDER AND FILE, THX!!!
+資料夾裡有FILE才會被GIT抓到，SO, DO NOT DELETE THIS FOLDER AND FILE, THX!!!
 
 -JOY
