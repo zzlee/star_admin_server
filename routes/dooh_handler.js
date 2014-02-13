@@ -13,6 +13,8 @@ var storyCamControllerMgr = require("../story_cam_controller_mgr.js");
 var fs = require('fs');
 var path = require('path');
 
+var popMgr = require('../pop_mgr.js');
+
 FM.dooh_handler.lastMoviePlayed = null;
 FM.dooh_handler.lastMovieStopped = null;
 
@@ -163,6 +165,22 @@ FM.dooh_handler.streamRecordingTrigger = function(req, res){
             res.send(200);
             resIsSent = true;
         });
+    });
+};
+
+// GET /internal/dooh/check_player_logs
+FM.dooh_handler.checkPlayerLogs = function(req, res) {
+    var check;
+    popMgr.execute(function(pop_err, pop_res) {
+        if(pop_err) {
+            // res.send(200, 'check_player logs is error.');
+            res.send(200, pop_err);
+        }
+        else {
+            // res.send(200, 'check_player logs is OK.');
+            res.send(200, pop_res);
+        }
+        res.end();
     });
 };
 

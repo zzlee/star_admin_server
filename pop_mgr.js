@@ -18,6 +18,8 @@ var ftpMgr = ftp.init({ host: systemConfig.FTP_SCALA_PLAYER_HOST,
                         username: systemConfig.FTP_SCALA_PLAYER_USERNAME, 
                         password: systemConfig.FTP_SCALA_PLAYER_PASSWORD });
 
+var popMgr = {};
+
 var day = new Date();
 var filename_month = ((day.getMonth() + 1) < 10) ? '0' + (day.getMonth() + 1).toString() : (day.getMonth() + 1).toString();
 var filename_date = ((day.getDate() + 1) < 10) ? '0' + day.getDate().toString() : day.getDate().toString();
@@ -140,7 +142,7 @@ var checkPlayProgram = function( programs, logs, check_cb ) {
 };
 
 
-var execute = function() {
+var execute = function( callback ) {
     
     day = new Date();
     filename_month = ((day.getMonth() + 1) < 10) ? '0' + (day.getMonth() + 1).toString() : (day.getMonth() + 1).toString();
@@ -150,13 +152,15 @@ var execute = function() {
     
     checkProgramPlayState(today, function(err, programs) {
         if(err) {
-            console.log(err);
+            // console.log(err);
             logger.info('checkProgramPlayState : query error');
+            if( callback ) callback('checkProgramPlayState : query error', null);
             return;
         }
         else if(programs.length == 0) {
             // console.log('not_find_program');
             logger.info('checkProgramPlayState : not_find_program');
+            if( callback ) callback('checkProgramPlayState : not_find_program', null);
             return;
         }
         
@@ -168,11 +172,15 @@ var execute = function() {
         ], function( err, res ) {
             if(err) {
                 logger.info('checkProgramPlayState : please check execute step process');
+                if( callback ) callback('checkProgramPlayState : please check execute step process', null);
                 return;
             }
             
             var logs = res[0].programs;
             checkPlayProgram(programs, logs, function(err, status) {
+                if( callback ) {
+                    callback(err, status);
+                }
                 if(err) {
                     logger.info('checkProgramPlayState : checkPlayProgram() is error');
                     return;
@@ -185,7 +193,27 @@ var execute = function() {
     });
 };
 
-var cycle = 1000;
+var regularUpdates = function( time ) {
+    var cycle = 1000;
+
+    setTimeout(function(){
+        if(cycle == 1000) { cycle = time * 1000; };
+        
+        execute();
+        
+        setInterval(function(){
+            execute();
+        }, cycle);
+        
+    }, cycle);
+};
+
+popMgr.execute = execute;
+popMgr.regularUpdates = regularUpdates;
+
+module.exports = popMgr;
+
+/* var cycle = 1000;
 
 setTimeout(function(){
     if(cycle == 1000) { cycle = 3600 * 1000; };
@@ -196,4 +224,4 @@ setTimeout(function(){
         execute();
     }, cycle);
     
-}, cycle);
+}, cycle); */
