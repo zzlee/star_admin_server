@@ -152,13 +152,15 @@ var execute = function( callback ) {
     
     checkProgramPlayState(today, function(err, programs) {
         if(err) {
-            console.log(err);
+            // console.log(err);
             logger.info('checkProgramPlayState : query error');
+            if( callback ) callback('checkProgramPlayState : query error', null);
             return;
         }
         else if(programs.length == 0) {
             // console.log('not_find_program');
             logger.info('checkProgramPlayState : not_find_program');
+            if( callback ) callback('checkProgramPlayState : not_find_program', null);
             return;
         }
         
@@ -170,6 +172,7 @@ var execute = function( callback ) {
         ], function( err, res ) {
             if(err) {
                 logger.info('checkProgramPlayState : please check execute step process');
+                if( callback ) callback('checkProgramPlayState : please check execute step process', null);
                 return;
             }
             

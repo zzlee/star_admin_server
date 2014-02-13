@@ -171,16 +171,20 @@ FM.dooh_handler.streamRecordingTrigger = function(req, res){
 // GET /internal/dooh/check_player_logs
 FM.dooh_handler.checkPlayerLogs = function(req, res) {
     var check;
-    popMgr.execute(function(err, res) {
-        console.log('execute ok');
-        if(err) {
+    popMgr.execute(function(pop_err, pop_res) {
+        // console.log('execute ok');
+        console.log('err:');
+        console.log(pop_err);
+        console.log('res:');
+        console.log(pop_res);
+        /* if(err) {
             // res.send(200, 'check_player logs is error.');
             res.send(403, err);
         }
         else {
             // res.send(200, 'check_player logs is OK.');
             res.send(200, res);
-        }
+        } */
         res.end();
     });
 };
