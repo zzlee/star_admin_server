@@ -46,7 +46,7 @@ PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
                     
                 }else{
                     
-                    
+                    console.log(_this.listType);
                     if(_this.listType == "ugcCensorMovieList") {
                     
                         if (!_this.drawPageFunction){
@@ -64,6 +64,21 @@ PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
                              callback(null);
                         });
                         //$('#table-content').html('test');
+                    }else if(_this.listType == "ugcCensorPlayList") {
+                        if (!_this.drawPageFunction){
+                            _this.currentPage = Page;
+                            $('#table-content').html(res);
+                        }
+                        else { //drawPageFunction exists
+                            _this.drawPageFunction(res, _this.currentPage, _this.rowsPerPage);
+                        }
+                        $('#pageNoInput').val(_this.currentPage);
+                        $('input#rowsPerPage').val( _this.rowsPerPage);
+                    
+                        //alert(_this.listType);
+                        findErrorImgAndFix(function(){
+                             callback(null);
+                        });
                     }else {
                         if (!_this.drawPageFunction){
                         _this.currentPage = Page;
