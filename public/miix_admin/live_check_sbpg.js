@@ -1019,6 +1019,28 @@
                 FM.currentContent.showCurrentPageContent();   
           
             });
+            
+            // Jeff - check logs
+            $("#checkPlayedLogs").click(function(){
+                // var url = DOMAIN;
+                // alert(url);
+                $.ajax({
+                    url: "/internal/dooh/check_player_logs",
+                    type: "GET",
+                    success: function(response) {
+                        if( typeof(response) === 'string' ) {
+                            alert("目前沒有已播出的節目，請稍後在試。");
+                        }
+                        else {
+                            alert("檢查成功，請重新整理頁面。");
+                        }
+                    },
+                    error: function() {
+                        alert("檢查失敗，請再試一次。");
+                    }
+                });
+            });
+            
         });
         
         /* 偵測圖片有沒有壞掉，並將之修復重現*/

@@ -181,7 +181,7 @@ var execute = function( callback ) {
                 if( callback ) {
                     callback(err, status);
                 }
-                else if(err) {
+                if(err) {
                     logger.info('checkProgramPlayState : checkPlayProgram() is error');
                     return;
                 }
