@@ -60,7 +60,12 @@ PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
                         $('input#rowsPerPage').val( _this.rowsPerPage);
                     
                         //alert(_this.listType);
+                        alert('@@');
+                    	var totalPageNumber = $('.totalPageNum').attr('name');
+                    	 $('#totalPage').html(totalPageNumber);
                         findErrorImgAndFix(function(){
+                        	
+
                              callback(null);
                         });
                         //$('#table-content').html('test');
@@ -101,6 +106,7 @@ PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
         function(callback){
             //get list's size
             //TODO: have a cleaner way to get the list size
+        	/*
             $.get('/miix_admin/list_size', {listType: _this.listType, token: localStorage.token}, function(res){
                 if (!res.err){
                 //console.log(res);
@@ -115,7 +121,8 @@ PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
             }).fail(function() {
                 callback("Failed to get list's size");
             });
-
+            */
+        	callback(null);
         }
     ],
     function(err){
@@ -131,7 +138,7 @@ PageList.prototype.showCurrentPageContent = function(){
 
 
 PageList.prototype.showNextPageContent = function(){
-    if (this.currentPage < this.totalPageNumber){
+    if (this.currentPage < $('#totalPage').val){
         this.currentPage++;
         this.showCurrentPageContent();
     }

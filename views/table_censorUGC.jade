@@ -75,7 +75,7 @@ form#mainform(action='')
                          if(ugcCensor.contentGenre == 'wls')
                              label.label_wls 國票
                       td #{ugcCensor.contentClass}
-                      td #{ugcCensor.ugcCensorNo}
+                      td(class='totalPageNum' name=totalPageNum) #{ugcCensor.ugcCensorNo}
                       td(sensitive='true') #{ugcCensor.createdOn}
                       if(ugcCensor.contentGenre == 'miix_it')
                          td
@@ -178,7 +178,7 @@ form#mainform(action='')
                          if(ugcCensor.contentGenre == 'wls')
                              label.label_wls 國票	 
                       td #{ugcCensor.contentClass}
-                      td #{ugcCensor.ugcCensorNo}
+                      td(class='totalPageNum' name=totalPageNum) #{ugcCensor.ugcCensorNo}
                       td(sensitive='true') #{ugcCensor.createdOn}
                       if(ugcCensor.contentGenre == 'miix_it')
                          td

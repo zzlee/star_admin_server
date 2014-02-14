@@ -63,9 +63,10 @@ FM.censorHandler.getUGCList_get_cb = function(req,res){ //審查名單
     limit = req.query.limit;
     skip = req.query.skip;
 
-    censorMgr.getUGCList(condition, sort, limit, skip, "UGC", function(err, UGCList){
+    censorMgr.getUGCList(condition, sort, limit, skip, "UGC", function(err, UGCList, totalPageNum){
+    	
         if (!err){
-            res.render( 'table_censorUGC', {ugcCensorMovieList: UGCList} );
+            res.render( 'table_censorUGC', {ugcCensorMovieList: UGCList, totalPageNum: totalPageNum} );
         }
         else{
             res.send(400, {error: err});

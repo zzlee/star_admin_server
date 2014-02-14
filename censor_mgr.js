@@ -86,20 +86,25 @@ censorMgr.getUGCList = function(condition, sort, pageLimit, pageSkip, pageType, 
                 cb(err, null);
             }
             if(result){
+                UGCs.count(condition).exec(function(err_count,result_count){
+                                    
+                                    if(pageSkip < result.length && pageLimit < result.length)
+                                        limit = pageLimit;
+                                    else 
+                                        limit = result.length;
 
-                if(pageSkip < result.length && pageLimit < result.length)
-                    limit = pageLimit;
-                else 
-                    limit = result.length;
-
-                if(limit > 0){ 
-                    mappingUGCList(result, pageType, function(err,docs){
-                        if (cb){
-                            cb(err, UGCList);
-                        }
-                    });
-                }else
-                    cb(err, UGCList);
+                                    if(limit > 0){ 
+                                        mappingUGCList(result, pageType, function(err,docs){
+                                            if (cb){
+                                                var totalPage = Math.ceil(result_count/pageLimit);
+                                                console.log('共' + result_count + '筆，' + totalPage + '頁。  每頁' + pageLimit + '筆。 此頁' + limit+'筆。' );
+                                                cb(err, UGCList, totalPage);
+                                            }
+                                        });
+                                    }else{
+                                        cb(err, UGCList);
+                                    }
+                                });
             }
         });
 
