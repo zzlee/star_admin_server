@@ -105,23 +105,27 @@ PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
         function(callback){
             //get list's size
             //TODO: have a cleaner way to get the list size
-        	/*
-            $.get('/miix_admin/list_size', {listType: _this.listType, token: localStorage.token}, function(res){
-                if (!res.err){
-                //console.log(res);
-                    var listSize = res.size;
-                    _this.totalPageNumber = Math.ceil(res.size/_this.rowsPerPage); 
-                    $('#totalPage').html(FM.currentContent.totalPageNumber);
-                    callback(null);
-                }
-                else {
-                    callback("Failed to get list's size: "+ res.err);
-                }
-            }).fail(function() {
-                callback("Failed to get list's size");
-            });
-            */
-        	callback(null);
+        	
+        	if(_this.listType != "ugcCensorMovieList") {
+        		$.get('/miix_admin/list_size', {listType: _this.listType, token: localStorage.token}, function(res){
+                    if (!res.err){
+                    //console.log(res);
+                        var listSize = res.size;
+                        _this.totalPageNumber = Math.ceil(res.size/_this.rowsPerPage); 
+                        $('#totalPage').html(FM.currentContent.totalPageNumber);
+                        callback(null);
+                    }
+                    else {
+                        callback("Failed to get list's size: "+ res.err);
+                    }
+                }).fail(function() {
+                    callback("Failed to get list's size");
+                });
+                
+            	callback(null);
+        	}
+        	
+            
         }
     ],
     function(err){
