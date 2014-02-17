@@ -60,7 +60,6 @@ PageList.prototype.showPageContent = function(Page, cbOfShowPageContent){
                         $('input#rowsPerPage').val( _this.rowsPerPage);
                     
                         //alert(_this.listType);
-                        alert('@@');
                     	var totalPageNumber = $('.totalPageNum').attr('name');
                     	 $('#totalPage').html(totalPageNumber);
                         findErrorImgAndFix(function(){
@@ -138,7 +137,7 @@ PageList.prototype.showCurrentPageContent = function(){
 
 
 PageList.prototype.showNextPageContent = function(){
-    if (this.currentPage < $('#totalPage').val){
+    if (this.currentPage < $('#totalPage').html()){
         this.currentPage++;
         this.showCurrentPageContent();
     }

@@ -701,12 +701,13 @@ $(document).ready(function(){
 
     $('#pageNoInput').change(function(){
         var pageNo = parseInt($("#pageNoInput").val());
+        console.log(pageNo);
         if (pageNo){
             if ( pageNo < 1) {
                 pageNo = 1;
             }
-            else if ( pageNo > FM.currentContent.totalPageNumber ){
-                pageNo = FM.currentContent.totalPageNumber;
+            else if ( pageNo > $('#totalPage').html() ){
+                pageNo = $('#totalPage').html();
             }
             FM.currentContent.showPageContent(pageNo);
             FM.currentContent.currentPage=pageNo;
